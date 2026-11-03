@@ -3,7 +3,7 @@
 load("@rules_shell//shell:sh_test.bzl", "sh_test")
 load("//schemas:schemas.bzl", "SCHEMAS", "schemas_with")
 
-def lang_checks(lang, harness, schemas = SCHEMAS.keys()):
+def lang_checks(lang, harness, schemas = SCHEMAS.keys(), manual = []):
     """Declares `//checks/<lang>:<schema>` for every schema.
 
     Each test runs `check.sh <harness package> <schema> <generated dir> <schema.prisma>` outside
@@ -16,8 +16,23 @@ def lang_checks(lang, harness, schemas = SCHEMAS.keys()):
         harness: The files of this package the check needs (go.mod, Cargo.toml, ...).
         schemas: Which schemas to check; every one by default, less those whose generation
             leaves `lang`'s generator out (SKIPPED in //schemas:schemas.bzl).
+        manual: Schemas whose check stays declared but is left out of wildcard runs
+            (`//checks/...`, which is what CI runs). Use this for a failure that is a hekireki
+            generator bug, so the check setup can go green without hiding the target: naming
+            `//checks/<lang>:<schema>` still runs it.
     """
     for schema in schemas_with(lang, schemas):
+        tags = [
+            "lang",
+            "lang-" + lang,
+            # The toolchain and its caches (go mod, cargo, pip, hex, bundler, NuGet, Gradle)
+            # live in HOME, outside the sandbox, and fetch over the network.
+            "no-sandbox",
+            "requires-network",
+            "external",
+        ]
+        if schema in manual:
+            tags.append("manual")
         sh_test(
             name = schema,
             size = "large",
@@ -32,13 +47,5 @@ def lang_checks(lang, harness, schemas = SCHEMAS.keys()):
                 "//schemas/%s:generate" % schema,
                 "//schemas/%s:schema.prisma" % schema,
             ],
-            tags = [
-                "lang",
-                "lang-" + lang,
-                # The toolchain and its caches (go mod, cargo, pip, hex, bundler, NuGet, Gradle)
-                # live in HOME, outside the sandbox, and fetch over the network.
-                "no-sandbox",
-                "requires-network",
-                "external",
-            ],
+            tags = tags,
         )

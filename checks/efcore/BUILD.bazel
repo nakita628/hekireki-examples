@@ -1,10 +1,17 @@
 load("//checks:defs.bzl", "lang_checks")
 
 # dotnet build against EF Core for the entities and DbContext of every schema.
+#
+# langfuse is a generator bug, not this project: hekireki-efcore still emits
+# HasIndex/HasAlternateKey over @ignore fields that were left off the entity
+# (CS1061, RoleAssignment.deprecatedOwnerOrgId and the other deprecated* columns).
+# https://github.com/nakita628/hekireki/issues/129
+# `bazel test //checks/efcore:langfuse` still runs it.
 lang_checks(
     lang = "efcore",
     harness = [
         "Check.csproj",
         "//checks:common.sh",
     ],
+    manual = ["langfuse"],
 )

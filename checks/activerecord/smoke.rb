@@ -10,11 +10,23 @@ require "active_record"
 ActiveRecord::Base.establish_connection(adapter: "sqlite3", database: ":memory:")
 
 models_dir = File.expand_path(ARGV.fetch(0, "models"))
-base = File.join(models_dir, "application_record.rb")
-raise "application_record.rb expected in #{models_dir}" unless File.exist?(base)
 
-require base
-model_files = (Dir[File.join(models_dir, "*.rb")] - [base]).sort
+# hekireki-activerecord writes application_record.rb only when the output directory is named
+# `models` (a Rails app/models that is generated whole). These schemas emit to
+# generated/activerecord, so the base class is the application's, the same class `rails new`
+# writes. The models still subclass it. Require the generated file when the output included
+# one; otherwise define that class here before the models load.
+base = File.join(models_dir, "application_record.rb")
+if File.exist?(base)
+  require base
+else
+  class ApplicationRecord < ActiveRecord::Base
+    primary_abstract_class
+  end
+end
+
+model_files = Dir[File.join(models_dir, "*.rb")].sort
+model_files.delete(File.expand_path(base))
 raise "no generated models found in #{models_dir}" if model_files.empty?
 
 model_files.each { |file| require file }

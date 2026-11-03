@@ -8,5 +8,7 @@ cp -RL "$generated/efcore" "$work/Models"
 cd "$work"
 export NUGET_PACKAGES="$cache/nuget" DOTNET_CLI_TELEMETRY_OPTOUT=1 DOTNET_NOLOGO=1 DOTNET_CLI_HOME="$cache/home"
 
-step "dotnet build"
-dotnet build --nologo -warnaserror
+step "dotnet build ($provider)"
+# One provider per restore: see Check.csproj. An unknown provider would restore with none of
+# them and then fail in the compiler, which is the right signal.
+dotnet build --nologo -warnaserror -p:HekirekiProvider="$provider"

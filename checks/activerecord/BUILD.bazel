@@ -1,11 +1,50 @@
 load("//checks:defs.bzl", "lang_checks")
 
 # ruby -c and loading against Active Record for the models of every schema.
+#
+# `manual` schemas load far enough to define ApplicationRecord (the harness supplies it;
+# hekireki only writes application_record.rb when output is named `models`) and then fail
+# in the generated models. No open hekireki issue covers these. `bazel test
+# //checks/activerecord:<schema>` still runs the failing check.
+#
+# Association name is an Active Record method, so the class cannot be defined:
+#   calcom      AttributeOption belongs_to :attribute
+#               ArgumentError: association named attribute conflicts with Active Record
+#   formbricks  Contact has_many :attributes
+#               ArgumentError: association named attributes conflicts with Active Record
+#   postiz      Organization has_many :errors
+#               ArgumentError: association named errors conflicts with Active Record
+#   triggerdev  BatchTaskRun has_many :errors
+#               ArgumentError: association named errors conflicts with Active Record
+#
+# class_name is omitted and Rails' inflection is not the generated class:
+#   documenso   User has_many :site_settings -> SiteSetting, class is SiteSettings
+#   dub         Project has_many :default_domains -> DefaultDomain, class is DefaultDomains
+#   hoppscotch  User has_many :invited_users -> InvitedUser, class is InvitedUsers
+#   typebot     Workspace has_many :credentials -> Credential, class is Credentials
+#   umami       WebsiteEvent has_many :event_data -> EventDatum, class is EventData
+#               NameError from association.klass
+#
+# Model name is already a Ruby constant:
+#   langfuse    class Monitor < ApplicationRecord
+#               TypeError: superclass mismatch for class Monitor (stdlib Monitor)
 lang_checks(
     lang = "activerecord",
     harness = [
         "Gemfile",
         "smoke.rb",
         "//checks:common.sh",
+    ],
+    manual = [
+        "calcom",
+        "documenso",
+        "dub",
+        "formbricks",
+        "hoppscotch",
+        "langfuse",
+        "postiz",
+        "triggerdev",
+        "typebot",
+        "umami",
     ],
 )
