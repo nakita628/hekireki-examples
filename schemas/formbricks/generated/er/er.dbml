@@ -1,0 +1,2233 @@
+Enum CreativeType {
+  feedbackButton
+  banner
+}
+
+Enum CreativeStatus {
+  draft
+  inProgress
+  paused
+  completed
+}
+
+Enum CreativeShowOn {
+  pageView
+  action
+}
+
+Enum CreativeDeviceType {
+  phone
+  tablet
+  desktop
+}
+
+Enum PipelineTriggers {
+  responseCreated
+  responseUpdated
+  responseFinished
+}
+
+Enum WebhookSource {
+  user
+  zapier
+  make
+  n8n
+  activepieces
+}
+
+Enum ContactAttributeType {
+  default
+  custom
+}
+
+Enum ContactAttributeDataType {
+  string
+  number
+  date
+}
+
+Enum SurveyStatus {
+  draft
+  inProgress
+  paused
+  completed
+}
+
+Enum SurveyAttributeFilterCondition {
+  equals
+  notEquals
+}
+
+Enum SurveyQuotaAction {
+  endSurvey
+  continueSurvey
+}
+
+Enum ResponseQuotaLinkStatus {
+  screenedIn
+  screenedOut
+}
+
+Enum SurveyType {
+  link
+  app
+}
+
+Enum displayOptions {
+  displayOnce
+  displayMultiple
+  displaySome
+  respondMultiple
+}
+
+Enum SurveyVisibility {
+  restricted
+  workspace
+}
+
+Enum SurveyScriptMode {
+  add
+  replace
+}
+
+Enum ActionType {
+  code
+  noCode
+}
+
+Enum IntegrationType {
+  googleSheets
+  notion
+  airtable
+  slack
+}
+
+Enum DataMigrationStatus {
+  pending
+  applied
+  failed
+}
+
+Enum WidgetPlacement {
+  bottomLeft
+  bottomRight
+  topLeft
+  topRight
+  center
+}
+
+Enum SurveyOverlay {
+  none
+  light
+  dark
+}
+
+Enum BootstrapAdminMarker {
+  bootstrapAdmin
+}
+
+Enum OrganizationRole {
+  owner
+  manager
+  member
+  billing
+}
+
+Enum ApiKeyPermission {
+  read
+  write
+  manage
+}
+
+Enum IdentityProvider {
+  email
+  github
+  google
+  azuread
+  openid
+  saml
+}
+
+Enum EmbeddedDataSource {
+  computed
+  ingested
+  reserved
+}
+
+Enum EmbeddedDataType {
+  string
+  number
+  boolean
+  date
+}
+
+Enum TeamUserRole {
+  admin
+  contributor
+}
+
+Enum WorkspaceTeamPermission {
+  read
+  readWrite
+  manage
+}
+
+Enum ChartType {
+  area
+  bar
+  pie
+  big_number
+  matrix
+}
+
+Enum FeedbackSourceType {
+  formbricks_survey
+  csv
+}
+
+Enum FeedbackSourceStatus {
+  active
+  paused
+  error
+}
+
+Enum FeedbackSourceImportMode {
+  completedOnly
+  all
+}
+
+Enum FeedbackSourceElementScope {
+  all
+  specific
+}
+
+Enum HubFieldType {
+  text
+  categorical
+  nps
+  csat
+  ces
+  rating
+  number
+  boolean
+  date
+}
+
+Enum DeletionCleanupKind {
+  hubSurvey
+  hubResponses
+  storageFiles
+  storageSurveyFolder
+}
+
+Enum RetentionEntity {
+  responses
+  surveys
+  members
+}
+
+Enum RetentionSurveyCondition {
+  noResponse
+  noChange
+  createdBefore
+}
+
+Enum RetentionRunKind {
+  sweep
+  purge
+}
+
+Enum RetentionExemptionSource {
+  manual
+  restore
+}
+
+Enum RetentionTargetType {
+  survey
+  user
+}
+
+Enum RetentionRunItemAction {
+  notified
+  archived
+  deactivated
+  deleted
+  skipped
+}
+
+Enum RetentionSkipReason {
+  exempt
+  lastOwner
+  otherOrganization
+  noRecipient
+}
+
+Enum WorkflowStatus {
+  draft
+  enabled
+  disabled
+  archived
+}
+
+Enum WorkflowRunStatus {
+  queued
+  running
+  completed
+  failed
+  canceled
+}
+
+Enum WorkflowRunLogStatus {
+  pending
+  running
+  succeeded
+  failed
+  skipped
+}
+
+Table Creative {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  name String [not null]
+  type CreativeType [not null]
+  status CreativeStatus [default: 'draft', not null]
+  publishedAt DateTime
+  archivedAt DateTime
+  workspaceId String [not null]
+  createdBy String
+  content Json [not null]
+  styling Json [not null]
+  surveyId String
+  linkUrl String
+  showOn CreativeShowOn [default: 'pageView', not null]
+  showConditions Json
+  displayPercentage Float
+  startAt DateTime
+  endAt DateTime
+  autoSelectLanguage Boolean
+
+  Note: '''A feedback button or a banner. Opens at most one Destination: a survey (`surveyId`) or a link
+(`linkUrl`), never both.
+
+@property type - Fixed at creation.
+@property content - Per-type JSON (`FeedbackButtonContent` / `BannerContent` in the v3 spec), texts keyed by locale code.
+@property styling - Per-type JSON (`FeedbackButtonStyling` / `BannerStyling` in the v3 spec).
+@property survey - The Destination survey, in the same workspace by construction of the composite key.
+@property showConditions - Show when (`ZShowConditions`, shared with surveys); null always shows.
+@property autoSelectLanguage - The browser\'s language picks the texts\' language when the site sets none; null (never chosen, as on Survey) is off.'''
+}
+
+Table CreativeDailyStat {
+  creativeId String [not null]
+  date DateTime [not null, note: 'UTC day.']
+  deviceType CreativeDeviceType [not null]
+  impressions Int [default: 0, not null]
+  clicks Int [default: 0, not null]
+
+  indexes {
+    (creativeId, date, deviceType) [pk]
+  }
+
+  Note: '''A creative\'s Impressions and Clicks on one UTC day on one device type (ENG-4000). Written
+only by the counter flush job as `GREATEST(stored, counted)`, from Redis counters that hold the day\'s
+running totals, so a repeated flush changes nothing. At most 3 rows per creative per day. Deleting
+the creative deletes its counts.'''
+}
+
+Table CreativeDailyPageStat {
+  creativeId String [not null]
+  date DateTime [not null, note: 'UTC day.']
+  page String [not null, note: 'Host + path, without query string or hash, or `(other)`.']
+  impressions Int [default: 0, not null]
+  clicks Int [default: 0, not null]
+
+  indexes {
+    (creativeId, date, page) [pk]
+  }
+
+  Note: '''A creative\'s Impressions and Clicks on one UTC day on one page (host + path), written like
+`CreativeDailyStat`. At most 1000 pages per creative per day; the rest are counted under `(other)`.'''
+}
+
+Table CreativeTrigger {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  creativeId String [not null]
+  actionClassId String [not null]
+
+  indexes {
+    (creativeId, actionClassId) [unique]
+  }
+
+  Note: 'Links a creative to the actions that show it (`showOn: action`). Mirrors `SurveyTrigger`.'
+}
+
+Table CreativeLanguage {
+  languageId String [not null]
+  creativeId String [not null]
+  default Boolean [default: false, not null]
+  enabled Boolean [default: true, not null]
+
+  indexes {
+    (languageId, creativeId) [pk]
+  }
+
+  Note: 'The languages a creative\'s texts are written in. Mirrors `SurveyLanguage`; exactly one is the default.'
+}
+
+Table Webhook {
+  id String [pk]
+  name String
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+  url String [not null]
+  source WebhookSource [default: 'user', not null]
+  workspaceId String [not null]
+  triggers PipelineTriggers[] [not null]
+  surveyIds String[] [not null]
+  secret String
+
+  Note: '''Represents a webhook endpoint for receiving survey-related events.
+Webhooks can be configured to receive notifications about response creation, updates, and completion.
+
+@property id - Unique identifier for the webhook
+@property name - Optional display name for the webhook
+@property url - The endpoint URL where events will be sent
+@property source - Origin of the webhook (user, zapier, make, etc.)
+@property workspace - Associated workspace
+@property triggers - Types of events that trigger this webhook
+@property surveyIds - List of surveys this webhook is monitoring'''
+}
+
+Table ContactAttribute {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  attributeKeyId String [not null]
+  contactId String [not null]
+  value String [not null]
+  valueNumber Float
+  valueDate DateTime
+
+  indexes {
+    (contactId, attributeKeyId) [unique]
+  }
+
+  Note: '''Represents an attribute value associated with a contact.
+Used to store custom properties and characteristics of contacts.
+
+@property id - Unique identifier for the attribute
+@property attributeKey - Reference to the attribute definition
+@property contact - The contact this attribute belongs to
+@property value - The string value of the attribute (used for string type + backwards compatibility)
+@property valueNumber - Native numeric storage for number type attributes
+@property valueDate - Native date storage for date type attributes'''
+}
+
+Table ContactAttributeKey {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  isUnique Boolean [default: false, not null]
+  key String [not null]
+  name String
+  description String
+  type ContactAttributeType [default: 'custom', not null]
+  dataType ContactAttributeDataType [default: 'string', not null]
+  workspaceId String [not null]
+
+  indexes {
+    (key, workspaceId) [unique]
+  }
+
+  Note: '''Defines the possible attributes that can be assigned to contacts.
+Acts as a schema for contact attributes within a workspace.
+
+@property id - Unique identifier for the attribute key
+@property isUnique - Whether the attribute must have unique values across contacts
+@property key - The attribute identifier used in the system
+@property name - Display name for the attribute
+@property type - Whether this is a default or custom attribute
+@property dataType - The data type of the attribute (string, number, date)
+@property workspace - The workspace this attribute belongs to'''
+}
+
+Table Contact {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  workspaceId String [not null]
+
+  Note: '''Represents a person or user who can receive and respond to surveys.
+Contacts are workspace-specific and can have multiple attributes and responses.
+
+@property id - Unique identifier for the contact
+@property workspace - The workspace this contact belongs to
+@property responses - Survey responses from this contact
+@property attributes - Custom attributes associated with this contact
+@property displays - Record of surveys shown to this contact'''
+}
+
+Table Response {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+  finished Boolean [default: false, not null]
+  surveyId String [not null]
+  contactId String
+  endingId String
+  data Json [default: '{}', not null, note: '[ResponseData]']
+  variables Json [default: '{}', not null, note: '[ResponseVariables]']
+  ttc Json [default: '{}', not null, note: '[ResponseTtc]']
+  meta Json [default: '{}', not null, note: '[ResponseMeta]']
+  ingest_flags Json [note: '''Why a value in `data` will not read back as its declared Embedded Data type — a failed coercion
+or a truncated oversize value (ENG-1845). Server-computed on every ingest and never accepted
+from the client. Null means no ingest boundary has written it, which is not the same claim as
+an empty list: without this column a wrong-typed value is indistinguishable from an absent one,
+and surfacing that in the UI (v2) would have nothing to read.
+[ResponseIngestFlags]''']
+  contactAttributes Json [note: '[ResponseContactAttributes]']
+  singleUseId String
+  language String
+  displayId String [unique]
+
+  indexes {
+    (surveyId, singleUseId) [unique]
+  }
+
+  Note: '''Stores a user\'s response to a survey, including their answers and metadata.
+Each response is linked to a specific survey and optionally to a contact.
+
+@property id - Unique identifier for the response
+@property finished - Whether the survey was completed
+@property survey - The associated survey
+@property contact - The optional contact who provided the response
+@property data - JSON object containing the actual response data
+@property variables - Custom variables used in the response
+@property ttc - Time to completion metrics
+@property meta - Additional metadata about the response'''
+}
+
+Table Tag {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  name String [not null]
+  workspaceId String [not null]
+
+  indexes {
+    (workspaceId, name) [unique]
+  }
+
+  Note: '''Represents a label that can be applied to survey responses.
+Used for categorizing and organizing responses within a workspace.
+
+@property id - Unique identifier for the tag
+@property name - Display name of the tag
+@property responses - Survey responses tagged with this label
+@property workspace - The workspace this tag belongs to'''
+}
+
+Table TagsOnResponses {
+  responseId String [not null]
+  tagId String [not null]
+
+  indexes {
+    (responseId, tagId) [pk]
+  }
+
+  Note: '''Junction table linking tags to responses.
+Enables many-to-many relationship between tags and responses.
+
+@property response - The tagged response
+@property tag - The tag applied to the response'''
+}
+
+Table Display {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  surveyId String [not null]
+  contactId String
+  creativeId String
+
+  Note: '''Records when a survey is shown to a user.
+Tracks survey display history and response status.
+
+@property id - Unique identifier for the display event
+@property survey - The survey that was displayed
+@property contact - The contact who saw the survey
+@property response - The associated response if one exists
+@property creativeId - The creative that opened the survey. No foreign key, so the record survives the creative\'s deletion.'''
+}
+
+Table SurveyTrigger {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  surveyId String [not null]
+  actionClassId String [not null]
+
+  indexes {
+    (surveyId, actionClassId) [unique]
+  }
+
+  Note: '''Links surveys to specific trigger actions.
+Defines which user actions should cause a survey to be displayed.
+This is the connection table between Surveys and ActionClasses that determines
+when and under what conditions a survey should be triggered.
+
+@property id - Unique identifier for the trigger
+@property survey - The survey to be triggered
+@property actionClass - The action that triggers the survey
+@property createdAt - When the trigger was created
+@property updatedAt - When the trigger was last modified'''
+}
+
+Table SurveyAttributeFilter {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  attributeKeyId String [not null]
+  surveyId String [not null]
+  condition SurveyAttributeFilterCondition [not null]
+  value String [not null]
+
+  indexes {
+    (surveyId, attributeKeyId) [unique]
+  }
+
+  Note: '''Defines targeting rules for surveys based on contact attributes.
+Used to show surveys only to contacts matching specific criteria.
+
+@property id - Unique identifier for the filter
+@property attributeKey - The contact attribute to filter on
+@property survey - The survey being filtered
+@property condition - The comparison operator to use
+@property value - The value to compare against'''
+}
+
+Table Survey {
+  hiddenFields Json [default: '{"enabled": false}', not null, note: '[SurveyHiddenFields]']
+  variables Json [default: '[]', not null, note: '[SurveyVariables]']
+  ownershipInitialized Boolean [default: false, not null]
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  name String [not null]
+  redirectUrl String
+  type SurveyType [default: 'app', not null]
+  workspaceId String [not null]
+  createdBy String
+  visibility SurveyVisibility [default: 'workspace', not null, note: '''ENG-3282: authorization facts, projected into SpiceDB by the survey outbox trigger. `ownerId` is
+the durable ownership source; `createdBy` stays pure attribution and is never rewritten.''']
+  ownerId String
+  visibilityVersion Int [default: 0, not null, note: '''Incremented by every accepted visibility change; fences projection work. An INSERT starts at 0
+with `visibilityProjectedVersion` -1 (the `survey_visibility_pending` trigger): the initial
+projection, decided from PostgreSQL facts until the projector acknowledges it.''']
+  visibilityProjectedVersion Int [default: 0, not null, note: 'The `visibilityVersion` SpiceDB last acknowledged; -1 while none ever was.']
+  visibilityPending Boolean [default: false, not null, note: '''"visibilityVersion" <> "visibilityProjectedVersion", kept by the `survey_visibility_pending`
+trigger (a BEFORE trigger overrides whatever an INSERT or UPDATE supplies). Read-only: never put it
+in create/update data.''']
+  visibilityChangedAt DateTime
+  visibilityChangedById String
+  status SurveyStatus [default: 'draft', not null]
+  welcomeCard Json [default: '{"enabled": false}', not null, note: '[SurveyWelcomeCard]']
+  questions Json [default: '[]', not null, note: '[SurveyQuestions]']
+  blocks Json[] [not null, note: '[SurveyBlocks]']
+  endings Json[] [not null, note: '[SurveyEnding]']
+  displayOption displayOptions [default: 'displayOnce', not null]
+  recontactDays Int
+  displayLimit Int
+  inlineTriggers Json [note: '[SurveyInlineTriggers]']
+  autoClose Int
+  keepEndingCardOpen Boolean [default: false, not null]
+  autoComplete Int
+  delay Int [default: 0, not null]
+  publishOn DateTime
+  closeOn DateTime
+  archivedAt DateTime
+  surveyClosedMessage Json [note: '[SurveyClosedMessage]']
+  segmentId String
+  workspaceOverwrites Json [note: '[SurveyWorkspaceOverwrites]']
+  styling Json [note: '[SurveyStyling]']
+  singleUse Json [default: '{"enabled": false, "isEncrypted": true}', note: '[SurveySingleUse]']
+  isVerifyEmailEnabled Boolean [default: false, not null]
+  isBackButtonHidden Boolean [default: false, not null]
+  isAutoProgressingEnabled Boolean [default: false, not null]
+  isCaptureIpEnabled Boolean [default: false, not null]
+  is_anonymize_responses_enabled Boolean [default: false, not null]
+  pin String
+  displayPercentage Decimal
+  showLanguageSwitch Boolean
+  autoSelectLanguage Boolean [note: '''Open the survey in the respondent\'s browser language when it matches an enabled survey
+language. Null on surveys that predate the setting, which reads as off.''']
+  recaptcha Json [default: '{"enabled": false, "threshold":0.1}', note: '[SurveyRecaptcha]']
+  metadata Json [default: '{}', not null, note: '[SurveyLinkMetadata]']
+  slug String [unique]
+  customHeadScripts String
+  customHeadScriptsMode SurveyScriptMode [default: 'add']
+  customCss Json [note: '''[CustomCssStored] Survey custom CSS (ENG-2949): source plus trusted compiled output, written only
+by the shared custom CSS save service. null = no survey CSS. Kept outside `styling` (M2.07).''']
+  showConditions Json [note: '''[SurveyShowConditions] App surveys: conditions checked in the browser when a trigger fires
+(ENG-3873). null = no conditions, which is what every existing survey keeps.''']
+
+  indexes {
+    (id, workspaceId) [unique]
+  }
+
+  Note: '''Represents a complete survey configuration including questions, styling, and display rules.
+Core model for the survey functionality in Formbricks.
+
+@property id - Unique identifier for the survey
+@property name - Display name of the survey
+@property type - Survey delivery method (link, web, website, app)
+@property status - Current state of the survey (draft, active, completed, etc)
+@property workspace - The workspace this survey belongs to
+@property questions - JSON array containing survey questions configuration
+@property displayOption - Rules for how often the survey can be shown
+@property triggers - Actions that can trigger this survey
+@property attributeFilters - Rules for targeting specific contacts
+@property customHeadScripts - Survey-specific custom HTML scripts (self-hosted only)
+@property customHeadScriptsMode - "add" (merge with workspace) or "replace" (override workspace)'''
+}
+
+Table SurveyQuota {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  surveyId String [not null]
+  name String [not null]
+  limit Int [not null]
+  logic Json [default: '{}', not null, note: '[SurveyQuotaLogic]']
+  action SurveyQuotaAction [not null]
+  endingCardId String
+  countPartialSubmissions Boolean [default: false, not null]
+
+  indexes {
+    (surveyId, name) [unique]
+  }
+
+  Note: '''Represents a quota configuration for a survey.
+Defines response limits and conditions for quota management.
+
+@property id - Unique identifier for the quota
+@property survey - The survey this quota belongs to
+@property name - Display name for the quota
+@property limit - Maximum number of responses allowed
+@property conditions - JSON object containing quota conditions
+@property action - Action to take when quota is reached
+@property endingCardId - Optional ending card to show when quota is reached'''
+}
+
+Table ResponseQuotaLink {
+  responseId String [not null]
+  quotaId String [not null]
+  status ResponseQuotaLinkStatus [not null]
+
+  indexes {
+    (responseId, quotaId) [pk]
+  }
+
+  Note: '''Junction table linking responses to quotas.
+Tracks which responses counted towards specific quotas and their status.
+
+@property response - The response that counted towards the quota
+@property quota - The quota this response counted towards
+@property status - Whether the response was screened in or out'''
+}
+
+Table SurveyFollowUp {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  surveyId String [not null]
+  name String [not null]
+  trigger Json [not null, note: '[SurveyFollowUpTrigger]']
+  action Json [not null, note: '[SurveyFollowUpAction]']
+
+  Note: '''Defines follow-up actions for survey responses.
+Enables automated actions based on specific survey response conditions.
+
+@property id - Unique identifier for the follow-up
+@property survey - The associated survey
+@property name - Display name for the follow-up
+@property trigger - Conditions that activate the follow-up
+@property action - Actions to take when triggered'''
+}
+
+Table ActionClass {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  name String [not null]
+  description String
+  type ActionType [not null]
+  key String
+  noCodeConfig Json [note: '[ActionClassNoCodeConfig]']
+  workspaceId String [not null]
+
+  indexes {
+    (key, workspaceId) [unique]
+    (name, workspaceId) [unique]
+  }
+
+  Note: '''Represents a user action that can trigger surveys.
+Used to define points in the user journey where surveys can be shown.
+
+@property id - Unique identifier for the action
+@property name - Display name of the action
+@property type - Whether this is a code or no-code action
+@property key - Unique identifier used in code implementation
+@property noCodeConfig - Configuration for no-code setup
+@property workspace - The workspace this action belongs to'''
+}
+
+Table Integration {
+  id String [pk]
+  type IntegrationType [not null]
+  config Json [not null, note: '[IntegrationConfig]']
+  workspaceId String [not null]
+
+  indexes {
+    (type, workspaceId) [unique]
+  }
+
+  Note: '''Represents third-party service integrations.
+Enables data flow between Formbricks and external services.
+
+@property id - Unique identifier for the integration
+@property type - The service being integrated (Google Sheets, Notion, etc.)
+@property workspace - The workspace this integration belongs to
+@property config - Service-specific configuration details'''
+}
+
+Table DataMigration {
+  id String [pk]
+  started_at DateTime [default: `now()`, not null]
+  finished_at DateTime
+  name String [unique, not null]
+  status DataMigrationStatus [not null]
+
+  Note: '''Tracks database schema migrations.
+Used to manage and track the state of data structure changes.
+
+@property id - Unique identifier for the migration
+@property name - Name of the migration
+@property status - Current state of the migration (pending, applied, failed)
+@property startedAt - When the migration began
+@property finishedAt - When the migration completed'''
+}
+
+Table Workspace {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  name String [not null]
+  legacyEnvironmentId String [unique]
+  organizationId String [not null]
+  styling Json [default: '{"allowStyleOverwrite":true}', not null, note: '[Styling]']
+  config Json [default: '{}', not null, note: '[WorkspaceConfig]']
+  recontactDays Int [default: 7, not null]
+  linkSurveyBranding Boolean [default: true, not null]
+  inAppSurveyBranding Boolean [default: true, not null]
+  placement WidgetPlacement [default: 'bottomRight', not null]
+  clickOutsideClose Boolean [default: true, not null]
+  overlay SurveyOverlay [default: 'none', not null]
+  overlayColor String [note: 'Custom overlay colour (hex, no alpha) and opacity (10-100%). null = the preset for `overlay`.']
+  overlayOpacity Int
+  logo Json [note: '[Logo]']
+  appSetupCompleted Boolean [default: false, not null]
+  customHeadScripts String
+  customCss Json [note: '[CustomCssStored] Workspace custom CSS (ENG-2949), written only by the shared save service.']
+  customCssPrevious Json [note: '''[CustomCssStored] The one recoverable previous workspace CSS revision, source included. Restored by
+submitting its source again through the current processor and authorization checks.''']
+
+  indexes {
+    (organizationId, name) [unique]
+  }
+
+  Note: '''Main grouping mechanism for resources in Formbricks.
+Each organization can have multiple workspaces to separate different applications or products.
+
+@property id - Unique identifier for the workspace
+@property name - Display name of the workspace
+@property organization - Reference to parent organization
+@property surveys - Collection of surveys in this workspace
+@property styling - Workspace-wide styling configuration
+@property config - Workspace-specific configuration
+@property recontactDays - Default recontact delay for surveys
+@property placement - Default widget placement for in-app surveys'''
+}
+
+Table Organization {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  name String [not null]
+  whitelabel Json [default: '{}', not null, note: '[OrganizationWhitelabel]']
+  isAISmartToolsEnabled Boolean [default: false, not null]
+  displayTimeZone String
+
+  Note: '''Represents the top-level organizational hierarchy in Formbricks.
+Self-hosting instances typically have a single organization, while Formbricks Cloud
+supports multiple organizations with multi-tenancy.
+
+@property id - Unique identifier for the organization
+@property name - Display name of the organization
+@property memberships - User memberships within the organization
+@property workspaces - Collection of workspaces owned by the organization
+@property billing - JSON field containing billing information
+@property whitelabel - Whitelabel configuration for the organization
+@property isAISmartToolsEnabled - Controls access to AI smart tools (e.g. translations) that never touch collected data
+@property displayTimeZone - Optional IANA time zone used for human-facing response timestamps (exports, integrations) and for the calendar days behind the analytics date filters (survey summary, charts, dashboards); null means UTC'''
+}
+
+Table OrganizationBilling {
+  organization_id String [pk]
+  stripe_customer_id String [unique]
+  limits Json [not null, note: '[OrganizationBillingPlanLimits]']
+  usage_cycle_anchor DateTime
+  stripe Json [note: '[OrganizationStripeBilling]']
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+
+  Note: '''Stores billing and Stripe synchronization data for an organization.
+
+@property organizationId - Reference to the organization
+@property stripeCustomerId - Stripe customer ID for cloud billing
+@property limits - Plan limits used by feature and quota checks
+@property usageCycleAnchor - Stable anchor used to derive the current monthly usage cycle
+@property stripe - Stripe synchronization snapshot data'''
+}
+
+Table Membership {
+  organizationId String [not null]
+  userId String [not null]
+  accepted Boolean [default: false, not null]
+  role OrganizationRole [default: 'member', not null]
+
+  indexes {
+    (userId, organizationId) [pk]
+  }
+
+  Note: '''Links users to organizations with specific roles.
+Manages organization membership and permissions.
+Core model for managing user access within organizations.
+
+@property organization - The organization the user belongs to
+@property user - The member user
+@property accepted - Whether the user has accepted the membership
+@property role - User\'s role within the organization (owner, manager, member, billing)'''
+}
+
+Table Invite {
+  id String [pk]
+  email String [not null]
+  name String
+  organizationId String [not null]
+  creatorId String [not null]
+  acceptorId String
+  createdAt DateTime [default: `now()`, not null]
+  expiresAt DateTime [not null]
+  role OrganizationRole [default: 'member', not null]
+  teamIds String[] [not null]
+
+  Note: '''Represents pending invitations to join an organization.
+Used to manage the process of adding new users to an organization.
+Once accepted, invites are converted into memberships.
+
+@property id - Unique identifier for the invite
+@property email - Email address of the invited user
+@property name - Optional display name for the invited user
+@property organization - The organization sending the invite
+@property creator - The user who created the invite
+@property acceptor - The user who accepted the invite (if accepted)
+@property expiresAt - When the invite becomes invalid
+@property role - Intended role for the invited user
+@property teamIds - Teams the user will be added to upon acceptance'''
+}
+
+Table ApiKey {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  createdBy String
+  lastUsedAt DateTime
+  label String [not null]
+  hashedKey String [not null]
+  lookupHash String [unique]
+  organizationId String [not null]
+  organizationAccess Json [default: '{}', not null, note: '[OrganizationAccess]']
+
+  Note: '''Represents enhanced API authentication keys with organization-level ownership.
+Used for authenticating API requests to Formbricks with more granular permissions.
+
+@property id - Unique identifier for the API key
+@property label - Optional descriptive name for the key
+@property hashedKey - Securely stored API key
+@property organization - The organization this key belongs to
+@property createdBy - User ID who created this key
+@property lastUsedAt - Timestamp of last usage
+@property apiKeyWorkspaces - Workspaces this key has access to'''
+}
+
+Table ApiKeyWorkspace {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  apiKeyId String [not null]
+  workspaceId String [not null]
+  permission ApiKeyPermission [not null]
+
+  indexes {
+    (apiKeyId, workspaceId) [unique]
+  }
+
+  Note: '''Links API keys to workspaces with specific permissions.
+Enables granular access control for API keys across workspaces.
+
+@property id - Unique identifier for the workspace access entry
+@property apiKey - The associated API key
+@property workspace - The workspace being accessed
+@property permission - Level of access granted'''
+}
+
+Table Account {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  userId String [not null]
+  type String
+  provider String [not null]
+  providerAccountId String [not null]
+  access_token String
+  refresh_token String
+  expires_at Int
+  ext_expires_in Int
+  token_type String
+  scope String
+  id_token String
+  session_state String
+  password String
+  accessTokenExpiresAt DateTime
+  refreshTokenExpiresAt DateTime
+  issuer String [note: '''Better Auth 1.7.0 (ENG-2343): the account\'s identity namespace. 1.7.0 keyed accounts on
+(issuer, accountId) and filtered every lookup on it — findAccountByKey, findAccountOwnerByKey,
+findCredentialAccount and updatePassword — so on 1.7.0 a null here locks the user out.
+1.7.3 dropped the field and 1.7.7 keys accounts on (provider, providerAccountId) again
+(ENG-3880). We keep writing it (see `account.create.before` in better-auth-hooks.ts) so a
+rollback to 1.7.0 still finds every row; drop it once that rollback is off the table.
+
+NULLABLE on purpose. A NOT NULL column would fail every INSERT from a 1.6 pod still serving
+during a rolling deploy. The migration backfills every existing row; see the migration SQL for
+the value derivation.''']
+
+  indexes {
+    (provider, providerAccountId) [unique]
+    (issuer, providerAccountId) [unique]
+  }
+
+  Note: '''Stores third-party authentication account information.
+Enables OAuth and other external authentication methods.
+
+@property id - Unique identifier for the account
+@property user - The Formbricks user who owns this account
+@property provider - The authentication provider (GitHub, Google, etc.)
+@property providerAccountId - User ID from the provider
+@property access_token - OAuth access token
+@property refresh_token - OAuth refresh token'''
+}
+
+Table Session {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  sessionToken String [unique, not null]
+  userId String [not null]
+  expires DateTime [not null]
+  ipAddress String
+  userAgent String
+
+  Note: '''Stores active authentication sessions for revocable server-side login state.
+
+@property sessionToken - Opaque token stored in the browser cookie
+@property user - The Formbricks user who owns this session
+@property expires - Hard expiry for the session'''
+}
+
+Table VerificationToken {
+  identifier String [not null]
+  token String [not null]
+  expires DateTime [not null]
+
+  indexes {
+    (identifier, token) [unique]
+  }
+
+  Note: 'Stores one-time verification tokens used by Auth.js adapter flows.'
+}
+
+Table TwoFactor {
+  id String [pk]
+  secret String [not null]
+  backupCodes String [not null]
+  userId String [unique, not null]
+  verified Boolean [default: true, not null]
+  failedVerificationCount Int [default: 0, not null, note: 'Better Auth 1.6.23+ two-factor brute-force lockout: consecutive failed verification attempts.']
+  lockedUntil DateTime [note: 'Better Auth 1.6.23+ two-factor brute-force lockout: set once failedVerificationCount trips the limit.']
+
+  Note: '''Better Auth (ENG-1054) two-factor secrets. Supersedes the legacy User.twoFactorSecret /
+User.backupCodes columns (kept until cutover). `secret` and `backupCodes` are encrypted
+at rest by Better Auth using BETTER_AUTH_SECRET.'''
+}
+
+Table jwks {
+  id String [pk]
+  publicKey String [not null]
+  privateKey String [not null]
+  createdAt DateTime [not null]
+  expiresAt DateTime
+  alg String [note: '''Better Auth 1.7 (ENG-2343): the JWS algorithm this key signs with, so a keyring can hold more
+than one alg and `getLatestKeyByAlg` can pick the right key per resource.
+
+NOT optional upstream in practice, despite being declared `required: false`: `createJwk` always
+puts `alg` in the row it writes (defaulting to EdDSA), so without this column every key mint is
+rejected by Prisma as an unknown argument — which breaks JWT signing, and with it the whole MCP
+OAuth flow, on any deployment that has yet to mint a key. Nullable because rows written before
+1.7 have no value; upstream reads treat `alg: null` as the configured default alg, so existing
+keys keep working untouched.''']
+  crv String [note: '''Better Auth 1.7 (ENG-2343): the curve for EC/OKP keys. Written whenever it can be derived from
+the generated key, which it can for the default EdDSA/Ed25519 config we run, so it is on the
+same always-written path as `alg` above.''']
+
+  Note: 'Better Auth JWT signing keys for OAuth/OIDC access and ID tokens.'
+}
+
+Table oauthClient {
+  id String [pk]
+  clientId String [unique, not null]
+  clientSecret String
+  disabled Boolean [default: false]
+  skipConsent Boolean
+  enableEndSession Boolean
+  subjectType String
+  scopes String[] [not null]
+  userId String
+  createdAt DateTime
+  updatedAt DateTime
+  name String
+  uri String
+  icon String
+  contacts String[] [not null]
+  tos String
+  policy String
+  softwareId String
+  softwareVersion String
+  softwareStatement String
+  redirectUris String[] [not null]
+  postLogoutRedirectUris String[] [not null]
+  tokenEndpointAuthMethod String
+  grantTypes String[] [not null]
+  responseTypes String[] [not null]
+  public Boolean [note: '''Unwritten by Better Auth 1.7 (it dropped both from its schema), kept deliberately: they are
+nullable, so keeping them makes the 1.7 migration purely additive and a rollback to 1.6 needs no
+down-migration. Drop them in a separate cleanup after a bake period.''']
+  type String
+  requirePKCE Boolean
+  referenceId String
+  metadata Json
+  clientDiscoveryId String [note: 'Better Auth 1.7 (ENG-2343).']
+  clientCredentialsScopes String[] [not null]
+  backchannelLogoutUri String
+  backchannelLogoutSessionRequired Boolean
+  applicationType String
+  jwks String
+  jwksUri String
+  dpopBoundAccessTokens Boolean [default: false]
+
+  Note: 'Better Auth OAuth 2.1 client registrations for MCP and future OAuth clients.'
+}
+
+Table oauthAccessToken {
+  id String [pk]
+  token String [unique, not null]
+  clientId String [not null]
+  sessionId String
+  userId String
+  referenceId String
+  refreshId String
+  expiresAt DateTime [not null]
+  createdAt DateTime [not null]
+  scopes String[] [not null]
+  authorizationCodeId String [note: '''Better Auth 1.7 (ENG-2343). `resources` is the RFC 8707 resource set the grant approved — the
+binding this whole upgrade exists to get (GHSA-p2fr-6hmx-4528).''']
+  resources String[] [not null]
+  requestedUserInfoClaims String[] [not null]
+  revoked DateTime
+  confirmation Json
+
+  Note: '''Better Auth opaque access token records. The token column stores Better Auth\'s hashed lookup value.
+JWT access tokens are verified through JWKS and bounded by the configured short lifetime.'''
+}
+
+Table oauthRefreshToken {
+  id String [pk]
+  token String [unique, not null]
+  clientId String [not null]
+  sessionId String
+  userId String [not null]
+  referenceId String
+  expiresAt DateTime [not null]
+  createdAt DateTime [not null]
+  revoked DateTime
+  authTime DateTime
+  scopes String[] [not null]
+  authorizationCodeId String [note: '''Better Auth 1.7 (ENG-2343). `resources` carries the full original grant so a refresh can narrow
+the resource set but never widen it.''']
+  resources String[] [not null]
+  requestedUserInfoClaims String[] [not null]
+  rotatedAt DateTime
+  rotationReplayResponse String
+  rotationReplayExpiresAt DateTime
+  confirmation Json
+
+  Note: 'Better Auth OAuth refresh tokens used by delegated MCP clients. The token column stores a hashed lookup value.'
+}
+
+Table oauthConsent {
+  id String [pk]
+  clientId String [not null]
+  userId String
+  referenceId String
+  scopes String[] [not null]
+  createdAt DateTime [not null]
+  updatedAt DateTime [not null]
+  resources String[] [not null, note: '''Better Auth 1.7 (ENG-2343). /authorize compares the requested resources against these; without
+them every pre-existing connection is forced back through the consent screen.''']
+  requestedUserInfoClaims String[] [not null]
+
+  Note: 'Better Auth OAuth user consent grants for delegated clients.'
+}
+
+Table oauthResource {
+  id String [pk]
+  identifier String [unique, not null]
+  name String [not null]
+  accessTokenTtl Int
+  refreshTokenTtl Int
+  signingAlgorithm String
+  signingKeyId String
+  allowedScopes String[] [not null]
+  customClaims Json
+  dpopBoundAccessTokensRequired Boolean [default: false]
+  disabled Boolean [default: false]
+  createdAt DateTime
+  updatedAt DateTime
+  policyVersion Int [default: 1]
+  metadata Json
+
+  Note: '''Better Auth 1.7 (ENG-2343): a protected resource the authorization server issues tokens for, with
+its own token lifetimes, scope allow-list and claims. Replaces the flat `validAudiences` option —
+a token is now bound to the resource it was approved for instead of to a static allow-list.
+`identifier` is the RFC 8707 `resource` value and is the natural key other rows point at.'''
+}
+
+Table oauthClientResource {
+  id String [pk]
+  clientId String [not null]
+  resourceId String [not null]
+  metadata Json
+  createdAt DateTime
+
+  indexes {
+    (clientId, resourceId) [unique]
+  }
+
+  Note: '''Better Auth 1.7 (ENG-2343): links a client to the resources it may request tokens for. With
+`enforcePerClientResources` (the default) a missing row means `invalid_target` at the token
+endpoint, which is why the migration backfills one row per existing client.
+Both sides reference natural keys, matching the other oauth child tables.'''
+}
+
+Table oauthClientAssertion {
+  id String [pk]
+  expiresAt DateTime [not null]
+
+  Note: '''Better Auth 1.7 (ENG-2343): replay store for `private_key_jwt` client assertions (the row id is the
+assertion jti). We use no private_key_jwt client authentication today, but the plugin declares the
+table, so omitting it risks an adapter error on a code path we do not control.'''
+}
+
+Table PasswordResetToken {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  token_hash String [unique, not null]
+  expires_at DateTime [not null]
+  userId String [unique, not null]
+
+  Note: '''Stores the active password reset token for a user.
+Tokens are opaque, hashed at rest, revocable, and single-use.'''
+}
+
+Table User {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  name String [not null]
+  email String [unique, not null]
+  email_verified Boolean [default: false, not null]
+  twoFactorSecret String
+  twoFactorEnabled Boolean [default: false, not null]
+  backupCodes String
+  password String
+  identityProvider IdentityProvider [default: 'email', not null]
+  identityProviderAccountId String
+  groupId String
+  notificationSettings Json [default: '{}', not null, note: '[UserNotificationSettings]']
+  locale String [default: 'en-US', not null, note: '[Locale]']
+  lastLoginAt DateTime
+  isActive Boolean [default: true, not null]
+  reactivatedAt DateTime [note: '''When an admin last reactivated this user. Restarts the members retention clock (ENG-3713)
+without touching `lastLoginAt`, which the member list, usage counts and APIs report as a real
+sign-in.''']
+  lastActiveAt DateTime [note: '''When the user last completed a sign-in (`lastActivePlugin`, after any second factor) or renewed a
+session (Better Auth `databaseHooks.session.update`), on the database clock and never moved
+backwards. The members retention clock reads it: sessions are
+deleted on sign-out and expiry, so their own timestamps can\'t serve as a record of activity.''']
+  isBootstrapAdmin BootstrapAdminMarker [unique]
+
+  Note: '''Represents a user in the Formbricks system.
+Central model for user authentication and profile management.
+
+@property id - Unique identifier for the user
+@property name - Display name of the user
+@property email - User\'s email address
+@property twoFactorEnabled - Whether 2FA is active
+@property memberships - Organizations the user belongs to
+@property notificationSettings - User\'s notification preferences'''
+}
+
+Table Segment {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  title String [not null]
+  description String
+  isPrivate Boolean [default: true, not null]
+  filters Json [default: '[]', not null, note: '[SegmentFilter]']
+  workspaceId String [not null]
+
+  indexes {
+    (workspaceId, title) [unique]
+  }
+
+  Note: '''Defines a segment of contacts based on attributes.
+Used for targeting surveys to specific user groups.
+
+@property id - Unique identifier for the segment
+@property title - Display name of the segment
+@property filters - Rules defining the segment
+@property isPrivate - Whether the segment is private
+@property workspace - The workspace this segment belongs to'''
+}
+
+Table Language {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  code String [not null]
+  alias String
+  workspaceId String [not null]
+
+  indexes {
+    (workspaceId, code) [unique]
+  }
+
+  Note: '''Represents a supported language in the system.
+Used for multilingual survey support.
+
+@property id - Unique identifier for the language
+@property code - Language code (e.g., \'en-US\')
+@property alias - Optional friendly name
+@property workspace - The workspace this language is enabled for'''
+}
+
+Table SurveyLanguage {
+  languageId String [not null]
+  surveyId String [not null]
+  default Boolean [default: false, not null]
+  enabled Boolean [default: true, not null]
+
+  indexes {
+    (languageId, surveyId) [pk]
+  }
+
+  Note: '''Links surveys to their supported languages.
+Manages which languages are available for each survey.
+
+@property language - The supported language
+@property survey - The associated survey
+@property default - Whether this is the default language
+@property enabled - Whether this language is currently active'''
+}
+
+Table EmbeddedData {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  key String
+  name String [not null]
+  description String
+  source EmbeddedDataSource [not null]
+  dataType EmbeddedDataType [default: 'string', not null]
+  defaultValue Json [note: '[EmbeddedDataDefaultValue]']
+  locked Boolean [default: false, not null]
+  surveyId String
+  workspaceId String [not null]
+
+  indexes {
+    (workspaceId, key) [unique]
+    (id, workspaceId) [unique]
+  }
+
+  Note: '''Defines one Embedded Data field: the extra context stored on a response that isn\'t an
+answer to a question (brand, plan, page type, a computed score, ...).
+
+A field is either **local** — used by a single survey, which is how existing variables and
+hidden fields are migrated — or **shared**, meaning it is part of the workspace library and can
+be linked by many surveys. There is no stored flag for that: `surveyId` is the owner and `key`
+is the library name, so a local field has `surveyId` set and `key` null, and a shared field the
+other way round. Deriving it rather than storing a boolean removes a column that could drift
+out of step with the two fields it stands for.
+
+@property key - Library name, unique per workspace and immutable. Null for local fields
+@property name - Human-readable display label
+@property source - Where the value comes from (computed | ingested). `reserved` is part of the
+shared enum but never stored as a row: those fields are a static catalog in code
+@property dataType - Declared value type, used for coercion at ingest
+@property defaultValue - Initial value (computed) or fallback when nothing arrives (ingested)
+@property locked - Ingested only: ignore external writes and use the default instead
+@property survey - The owning survey for a local field; cascades so nothing is orphaned'''
+}
+
+Table SurveyEmbeddedData {
+  id String [pk]
+  workspaceId String [not null]
+  surveyId String [not null]
+  embeddedDataId String [not null]
+  storageKey String [not null]
+  order Int [not null]
+
+  indexes {
+    (surveyId, embeddedDataId) [unique]
+    (surveyId, storageKey) [unique]
+  }
+
+  Note: '''Links a survey to an Embedded Data field and records the key that field\'s value is stored
+under inside that survey.
+
+`workspaceId` is part of both foreign keys on purpose: `surveyId` and `embeddedDataId` alone are
+independent, so nothing would stop a survey in one workspace linking a field defined in another.
+Referencing `(id, workspaceId)` on both sides makes a cross-workspace pair unrepresentable, and
+puts the workspace scope every query needs on the row instead of behind a join through Survey.
+
+@property storageKey - The key the value lives under: a cuid for computed fields, the field
+name for ingested ones. Migrated fields keep their original key, which is what lets existing
+recall tokens, logic conditions and stored responses keep resolving untouched.
+
+@property order - Position within this survey\'s field list, dense from 0. Lives on the link
+rather than on `EmbeddedData` because a shared definition sits at a different position in each
+survey that links it. Deliberately has no default: every writer knows the position it is writing,
+so a missing one should be a type error rather than a row that silently sorts to the front.'''
+}
+
+Table Team {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  name String [not null]
+  organizationId String [not null]
+
+  indexes {
+    (organizationId, name) [unique]
+  }
+
+  Note: '''Represents a team within an organization.
+Enables group-based access control and collaboration.
+
+@property id - Unique identifier for the team
+@property name - Display name of the team
+@property organization - The parent organization
+@property teamUsers - Users who are part of this team
+@property workspaceTeams - Workspaces this team has access to'''
+}
+
+Table TeamUser {
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  teamId String [not null]
+  userId String [not null]
+  role TeamUserRole [not null]
+
+  indexes {
+    (teamId, userId) [pk]
+  }
+
+  Note: '''Links users to teams with specific roles.
+Manages team membership and permissions.
+
+@property team - The associated team
+@property user - The team member
+@property role - User\'s role within the team'''
+}
+
+Table WorkspaceTeam {
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  workspaceId String [not null]
+  teamId String [not null]
+  permission WorkspaceTeamPermission [default: 'read', not null]
+
+  indexes {
+    (workspaceId, teamId) [pk]
+  }
+
+  Note: '''Defines team access to specific workspaces.
+Manages workspace-level permissions for teams.
+
+@property workspace - The accessed workspace
+@property team - The team receiving access
+@property permission - Level of access granted'''
+}
+
+Table Chart {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  name String [not null]
+  type ChartType [not null]
+  workspaceId String [not null]
+  query Json [default: '{}', not null, note: '[ChartQuery] - Cube.js query configuration']
+  config Json [default: '{}', not null, note: '[ChartConfig] - Visualization configuration (colors, labels, formatting)']
+  createdBy String
+  feedbackDirectoryId String [not null]
+
+  indexes {
+    (workspaceId, name) [unique]
+  }
+
+  Note: '''Represents a chart/visualization that can be used in multiple dashboards.
+Charts are reusable components that query analytics data.
+
+@property id - Unique identifier for the chart
+@property name - Display name of the chart
+@property type - Type of visualization (bar, line, pie, etc.)
+@property workspace - The workspace this chart belongs to
+@property query - Cube.js query configuration (JSON)
+@property config - Chart-specific configuration (colors, labels, etc.)
+@property createdBy - User who created the chart
+@property dashboards - Dashboards that use this chart'''
+}
+
+Table Dashboard {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  name String [not null]
+  workspaceId String [not null]
+  createdBy String
+
+  indexes {
+    (workspaceId, name) [unique]
+  }
+
+  Note: '''Represents a dashboard containing multiple charts.
+Dashboards aggregate analytics insights at the workspace level.
+
+@property id - Unique identifier for the dashboard
+@property name - Display name of the dashboard
+@property workspace - The workspace this dashboard belongs to
+@property widgets - Charts on this dashboard
+@property createdBy - User who created the dashboard'''
+}
+
+Table DashboardWidget {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  dashboardId String [not null]
+  chartId String [not null]
+  layout Json [default: '{"x":0,"y":0,"w":4,"h":3}', not null, note: '[WidgetLayout] - Grid layout: { x, y, w, h }']
+  order Int [default: 0, not null]
+
+  indexes {
+    (dashboardId, chartId) [unique]
+  }
+
+  Note: '''Represents a chart widget on a dashboard.
+Widgets are positioned using a grid layout system.
+
+@property id - Unique identifier for the widget
+@property dashboard - The dashboard this widget belongs to
+@property chart - The chart displayed in this widget (chart name is used for display)
+@property layout - Grid layout configuration (x, y, width, height)
+@property order - Display order within the dashboard'''
+}
+
+Table DeletionCleanup {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  kind DeletionCleanupKind [not null]
+  organizationId String [not null, note: 'Scoping and logs. Not foreign keys: the rows they name are usually gone already.']
+  workspaceId String [not null]
+  surveyId String [not null]
+  tenantIds String[] [not null, note: 'Hub kinds: the organisation\'s feedback directories, read inside the delete\'s transaction.']
+  responseIds String[] [not null, note: '`hubResponses`: the deleted responses whose records go.']
+  fileKeys String[] [not null, note: '`storageFiles`: the object keys or URLs to delete.']
+  attempts Int [default: 0, not null]
+  nextAttemptAt DateTime [default: `now()`, not null, note: 'Not drained before this, so a late pipeline write can\'t slip in behind a survey\'s cleanup.']
+  lastError String [note: 'The last failure: a short code and message, never record or file content.']
+
+  Note: '''Work left over after a delete commits (ENG-3612, ENG-3614: deleted means deleted): Hub records and
+storage files that can\'t be removed inside the database transaction. A row is written in the same
+transaction as the delete, so a delete that commits always gets its cleanup and one that rolls back
+queues nothing. A worker drains it with retries, never giving up, and deletes each row once done.'''
+}
+
+Table FeedbackSource {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  name String [not null]
+  type FeedbackSourceType [not null]
+  status FeedbackSourceStatus [default: 'active', not null]
+  import_mode FeedbackSourceImportMode [default: 'completedOnly', not null, note: '''Defaults to completedOnly so a new source agrees with the live ingestion path, which only
+fires on responseFinished. Existing rows take the default; nothing is re-imported.''']
+  elementScope FeedbackSourceElementScope [default: 'specific', not null]
+  workspaceId String [not null]
+  feedbackDirectoryId String [not null]
+  last_sync_at DateTime
+  created_by String
+
+  indexes {
+    (id, workspaceId) [unique]
+    (workspaceId, name) [unique]
+  }
+
+  Note: '''A feedback source — connects external data into Unify Feedback for record creation.
+Naming note: "FeedbackSource" is the Unify Feedback domain term; the word "Connector"
+is reserved for the Workflows domain (see docs/development/standards/practices/naming-conventions.mdx).
+
+@property id - Unique identifier for the feedback source
+@property name - Display name for the feedback source
+@property type - Type of feedback source (formbricks_survey, csv, …)
+@property status - Current state of the feedback source (active, paused, error)
+@property workspace - The workspace this feedback source belongs to
+@property feedbackDirectory - Hub directory the feedback source writes into
+@property formbricksMappings - Element mappings for Formbricks feedback sources
+@property fieldMappings - Field mappings for other feedback source types'''
+}
+
+Table FeedbackSourceFormbricksMapping {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  feedback_source_id String [not null]
+  workspaceId String [not null]
+  surveyId String [not null]
+  elementId String [not null]
+  hubFieldType HubFieldType [not null]
+  custom_field_label String
+
+  indexes {
+    (workspaceId, feedback_source_id, surveyId, elementId) [unique]
+  }
+
+  Note: '''Maps survey elements to Hub FeedbackRecords for Formbricks feedback sources.
+Each row represents one element that will create FeedbackRecords when answered.
+
+@property id - Unique identifier for the mapping
+@property feedbackSource - The parent feedback source
+@property survey - The survey containing the element
+@property elementId - The element ID within the survey (from blocks[].elements[].id)
+@property hubFieldType - The field_type to use in Hub (text, nps, rating, etc.)
+@property customFieldLabel - Optional override for the element headline as field_label in Hub'''
+}
+
+Table FeedbackSourceFieldMapping {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  feedback_source_id String [not null]
+  workspaceId String [not null]
+  source_field_id String [not null]
+  target_field_id String [not null]
+  static_value String
+
+  indexes {
+    (workspaceId, feedback_source_id, source_field_id, target_field_id) [unique]
+  }
+
+  Note: '''Generic field mapping for non-Formbricks feedback sources (CSV today; webhook/email/slack later).
+Maps source fields to Hub FeedbackRecord fields.
+
+@property id - Unique identifier for the mapping
+@property feedbackSource - The parent feedback source
+@property sourceFieldId - Field path for webhook (e.g., "user.id"), column name for CSV
+@property targetFieldId - Hub field (collected_at, field_id, value_text, etc.)
+@property staticValue - If set, use this value instead of reading from sourceFieldId'''
+}
+
+Table FeedbackDirectory {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  name String [not null]
+  isArchived Boolean [default: false, not null]
+  organizationId String [not null]
+
+  indexes {
+    (organizationId, name) [unique]
+  }
+
+  Note: '''Represents a feedback directory (Hub tenant) owned by an organization.
+Directories group feedback data and are assigned to workspaces for access control.
+
+@property id - Unique identifier for the directory
+@property name - Display name of the directory
+@property isArchived - Soft delete flag
+@property organization - The parent organization
+@property workspaces - Workspaces assigned to this directory'''
+}
+
+Table FeedbackDirectoryWorkspace {
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  feedbackDirectoryId String [not null]
+  workspaceId String [not null]
+
+  indexes {
+    (feedbackDirectoryId, workspaceId) [pk]
+  }
+
+  Note: '''Links feedback directories to workspaces (workspaces).
+Manages which workspaces can access a given directory.
+
+@property feedbackDirectory - The directory being accessed
+@property workspace - The workspace receiving access'''
+}
+
+Table AuthzedProjectionScopeState {
+  scope String [pk]
+  readyAt DateTime
+  readyBy String
+  updatedAt DateTime [not null]
+
+  Note: '''ENG-3282: per-scope readiness of a SpiceDB projection. A row with `readyAt` set means the scope was
+backfilled and audited clean, so the evaluator may enforce it. Written only by the backfill CLI.'''
+}
+
+Table AuthzedProjectionOutbox {
+  id String [pk]
+  targetType String [not null]
+  primaryId String [not null]
+  secondaryId String
+  isRevocation Boolean [default: false, not null]
+  attempts Int [default: 0, not null, note: 'Total delivery attempts. Drives the retry backoff and reports how hard delivery was tried.']
+  permanentFailures Int [default: 0, not null, note: '''Non-retryable failures attributable to this event alone. The only input to dead-lettering, so
+that a SpiceDB outage of any duration cannot dead-letter events that were never the problem.''']
+  availableAt DateTime [default: `now()`, not null]
+  leasedAt DateTime
+  leaseExpiresAt DateTime
+  leaseOwner String
+  processedAt DateTime
+  deadLetteredAt DateTime
+  lastAttemptAt DateTime
+  lastErrorCode String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  Note: '''Durable PostgreSQL queue for rebuilding SpiceDB relationships after an authorization source changes.
+Source-table triggers insert these rows in the same transaction as the mutation. Identifiers are
+operationally sensitive and must never be included in logs, metrics, or CLI output.
+
+This model declares NO indexes on purpose. All three live in
+`migration/20260818120000_add_authzed_projection_outbox/migration.sql`, because each one is
+partial (`WHERE "processedAt" IS NULL AND ...`) and Prisma\'s `@@index` has no `where`. Declaring
+approximate non-partial copies here would be worse than declaring none: `prisma db push` would
+see a name match with a different definition, drop and recreate them without the predicate, and
+the migration\'s `CREATE INDEX IF NOT EXISTS` would then skip them — leaving a silently wrong
+shape that carries a week of delivered rows on every hot-path lookup. Deployments are unaffected
+either way (`prisma migrate deploy` never reads this file); a dev who runs `db push` restores
+them by rerunning the migration, which is the same contract its triggers already live under.'''
+}
+
+Table OnlineUpgradeState {
+  release String [pk]
+  targetImage String [not null]
+  phase String [not null]
+  completedPhases String[] [not null]
+  surveyCursor String
+  surveyCount BigInt [default: 0, not null]
+  baselineCompletedAt DateTime
+  forwardOnlyAt DateTime
+  queuePausedAt DateTime
+  queuePauseDeadlineAt DateTime
+  queueResumedAt DateTime
+  activatedAt DateTime
+  updatedAt DateTime [default: `now()`, not null]
+}
+
+Table RetentionPolicy {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  organizationId String [not null]
+  entity RetentionEntity [not null]
+  enabled Boolean [default: false, not null]
+  enabledAt DateTime [note: '''When the current configuration took effect: the policy was switched on or unpaused, or changed
+in a way that could bring an action earlier (a shorter period or warning, different
+conditions). Lengthening does not move it. The warning always runs in full from here, so no
+change can delete data on the night it is made (ENG-3614). Also the clock for members with no
+recorded sign-in.''']
+  warnDays Int [default: 60, not null, note: '''How long before the action the notice goes out. The action never runs before the notice has
+been out for this long, so the warning always runs in full.''']
+  periodDays Int [not null, note: '''The period, counted from the target\'s clock, after which the policy acts: responses are
+deleted, surveys archived (the archive purge deletes them 30 days later), members deactivated.''']
+  conditions RetentionSurveyCondition[] [not null, note: 'Surveys policy only.']
+  deferredAt DateTime [note: '''The last night the sweep\'s time ran out before it reached this policy\'s organisation, licensed.
+The organisation was due and the sweep was running, so it counts as reached for the gap that
+restarts the warning (`RETENTION_SWEEP_GAP_MS`): a backlog of organisations never restarts warnings.''']
+  updatedById String
+
+  indexes {
+    (organizationId, entity) [unique]
+  }
+
+  Note: '''One policy per organisation and kind of data: a notice `warnDays` before the action, and the action
+`periodDays` after the target\'s clock. The action follows from the kind of data: responses are
+deleted, surveys archived (the archive purge deletes them 30 days later, as it does every archived
+survey), members deactivated. The dates themselves are never stored; they are computed by the shared
+helper in `apps/web/modules/ee/data-retention/lib/schedule.ts`, so the UI, the emails and the sweep
+always agree.
+
+The allowed ranges are validated by the API. The migration repeats the ones that guard against
+acting early or re-notifying (a notice of at least 14 days and shorter than the period, an enabled
+policy always has `enabledAt`) and the structural ones (conditions on the surveys policy only) as
+CHECK constraints, which Prisma cannot express.'''
+}
+
+Table RetentionExemption {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  organizationId String [not null]
+  entity RetentionEntity [not null]
+  surveyId String
+  until DateTime [not null]
+  source RetentionExemptionSource [default: 'manual', not null]
+  reason String [note: 'Required for `manual`, absent for `restore` (`RetentionExemption_reason_check`).']
+  createdById String
+  revokedAt DateTime
+  revokedById String
+
+  Note: '''Holds one survey back from one policy until `until`. Keyed by organisation + entity rather than a
+policy id, so removing and re-adding a policy doesn\'t orphan its exemptions.
+
+Active means `revokedAt IS NULL AND until > now()`, so expiry needs no job. "One active exemption
+per survey and policy" is the partial unique index `RetentionExemption_surveyId_entity_active_key`
+(`WHERE "revokedAt" IS NULL`) in
+`migration/20261007120000_add_data_retention_tables/migration.sql`; Prisma\'s `@@unique` has no
+`where`, so it is deliberately not declared here (see "Indexes Prisma cannot express" in the
+README). An expired row still holds that slot until it is revoked, so creating a new exemption
+must close an expired one in the same transaction.
+
+`surveyId` is nullable and a CHECK requires exactly one target, so a later `workflowId` is one more
+column in that CHECK. The survey\'s organisation can\'t be tied to `organizationId` in the database
+(a survey carries its workspace, not its organisation): writers derive it from the survey.'''
+}
+
+Table RetentionRun {
+  id String [pk]
+  organizationId String [not null]
+  entity RetentionEntity [not null]
+  kind RetentionRunKind [default: 'sweep', not null]
+  startedAt DateTime [default: `now()`, not null]
+  finishedAt DateTime
+  notifiedCount Int [default: 0, not null]
+  archivedCount Int [default: 0, not null, note: 'Archived surveys, or deactivated members.']
+  deletedCount Int [default: 0, not null, note: 'Deleted responses, or, on a purge run, deleted surveys.']
+  skippedCount Int [default: 0, not null]
+  hasChanges Boolean [default: false, not null, note: 'False when the run changed nothing. History hides those by default.']
+  scanCursor String [note: '''Where the run\'s scan of candidates stopped for want of time, so the next run resumes there instead
+of rescanning the same first targets every night. Null when the scan reached the end.''']
+
+  Note: '''One sweep of one policy for one organisation: the History tab\'s rows. `finishedAt` stays null
+while the run is in progress, or if it never finished.'''
+}
+
+Table RetentionRunItem {
+  id String [pk]
+  runId String [not null]
+  targetType RetentionTargetType [not null]
+  targetId String [not null]
+  targetName String
+  action RetentionRunItemAction [not null]
+  count Int [default: 1, not null, note: '1, except for grouped response deletions, where it is the number of responses deleted.']
+  recipient String [note: 'Who was emailed, for `notified` rows.']
+  skipReason RetentionSkipReason
+
+  Note: '''What a run did, one row per target: the History CSV. Ids, counts, names and the recipient\'s email,
+never response content. `targetId` is not a foreign key on purpose: the target is often gone, and
+`targetName` is a snapshot taken when the row is written so the CSV still says what it was.'''
+}
+
+Table RetentionNotice {
+  id String [pk]
+  organizationId String [not null]
+  entity RetentionEntity [not null]
+  surveyId String
+  userId String
+  sentAt DateTime [default: `now()`, not null, note: 'When the notice was claimed for sending. A claim that never got delivered can be taken over.']
+  deliveredAt DateTime [note: '''When the notice was handed to the mail transport, or recorded without one (no SMTP). The
+warning only counts from a delivered notice, so a crash between claim and send can\'t let the
+action run without it.''']
+  emailSent Boolean [default: false, not null, note: 'Whether an email actually went out. False when SMTP isn\'t configured.']
+  claimToken String [note: '''Set by each claim; delivery is recorded only for the claim that sent the email, so a slow sender
+can\'t mark a newer claim delivered.''']
+  clockAt DateTime [note: '''The target\'s clock the notice was computed for (surveys and members). A notice counts only while
+the target\'s clock is still this one, so activity between the sweep\'s read and its claim voids
+it. Null for the responses reminder, which is sent once per survey and follows no one clock, and
+for a survey notice voided for good: a person deleted or moved one of its responses, or the
+responses policy\'s deletion left it computed for another clock (see `NOTICE_FOLLOWS_CLOCK`).''']
+
+  indexes {
+    (surveyId, entity) [unique]
+    (userId, organizationId, entity) [unique]
+  }
+
+  Note: '''The notice for one target under one policy, so each notice goes out once: a survey or a member, or
+the one-time responses reminder for a survey. It counts only once delivered, and is void if it was
+claimed before the policy\'s `enabledAt`, before the target\'s latest exemption ended or (surveys and
+members) before the target\'s clock: then a later cycle claims it again and sends a new one.
+
+A CHECK in the migration ties each entity to its target: `surveys` and `responses` → `surveyId`,
+`members` → `userId`; another makes a sent email imply a delivery time. The survey notices that still
+hold a clock are the partial index `RetentionNotice_surveys_clock_pending_idx` (`WHERE "entity" =
+\'surveys\' AND "clockAt" IS NOT NULL`) in
+`migration/20261012120000_retention_notice_void_on_response_delete/migration.sql`, with the triggers
+that clear `clockAt`; Prisma\'s `@@index` has no `where`, so it is deliberately not declared here (see
+"Indexes Prisma cannot express" in the README).'''
+}
+
+Table RetentionSurveyRestore {
+  surveyId String [pk]
+  restoredAt DateTime [not null]
+
+  Note: '''When a survey was last restored from the archive. A restore starts the surveys policy\'s "no response"
+and "no change" periods over (`getSurveyRetentionClock`); only ever moves forward. A table of its own
+so retention adds nothing to the survey row.'''
+}
+
+Table Workflow {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  name String [not null]
+  description String
+  status WorkflowStatus [default: 'draft', not null]
+  workspaceId String [not null]
+  createdBy String
+  definition Json [not null, note: '[WorkflowDefinition]']
+
+  indexes {
+    (id, workspaceId) [unique]
+  }
+}
+
+Table WorkflowVersion {
+  id String [pk]
+  workflowId String [not null]
+  workspaceId String [not null]
+  version Int [not null]
+  definition Json [not null, note: '[WorkflowExecutableDefinition]']
+  publishedAt DateTime [default: `now()`, not null]
+  publishedBy String
+
+  indexes {
+    (workflowId, version) [unique]
+  }
+}
+
+Table WorkflowRun {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  workflowId String [not null]
+  workspaceId String [not null]
+  workflowVersionId String
+  responseId String
+  status WorkflowRunStatus [default: 'queued', not null]
+  triggerType String [not null]
+  surveyId String
+  isDryRun Boolean [default: false, not null]
+  idempotencyKey String
+  attempt Int [default: 0, not null]
+  nextAttemptAt DateTime
+  lastErrorAt DateTime
+  triggerPayload Json [not null, note: '[WorkflowTriggerRunPayload]']
+  data Json [default: '{}', not null, note: '[WorkflowRunData]']
+  error String
+  dispatchedAt DateTime
+  startedAt DateTime
+  finishedAt DateTime
+
+  indexes {
+    (workflowId, idempotencyKey) [unique]
+  }
+}
+
+Table WorkflowRunLog {
+  id String [pk]
+  runId String [not null]
+  sequence Int [not null]
+  stepId String [not null]
+  stepType String [not null]
+  status WorkflowRunLogStatus [default: 'pending', not null]
+  input Json [default: '{}', not null, note: '[WorkflowRunLogInput]']
+  output Json [default: '{}', not null, note: '[WorkflowRunLogOutput]']
+  error String
+  startedAt DateTime
+  finishedAt DateTime
+
+  indexes {
+    (runId, stepId) [unique]
+  }
+}
+
+Ref Creative_workspaceId_fk: Creative.workspaceId > Workspace.id [delete: cascade]
+
+Ref Creative_createdBy_fk: Creative.createdBy > User.id [delete: set null]
+
+Ref Creative_(surveyId, workspaceId)_fk: Creative.(surveyId, workspaceId) > Survey.(id, workspaceId) [delete: no action, update: no action]
+
+Ref CreativeDailyStat_creativeId_fk: CreativeDailyStat.creativeId > Creative.id [delete: cascade]
+
+Ref CreativeDailyPageStat_creativeId_fk: CreativeDailyPageStat.creativeId > Creative.id [delete: cascade]
+
+Ref CreativeTrigger_creativeId_fk: CreativeTrigger.creativeId > Creative.id [delete: cascade]
+
+Ref CreativeTrigger_actionClassId_fk: CreativeTrigger.actionClassId > ActionClass.id [delete: cascade]
+
+Ref CreativeLanguage_languageId_fk: CreativeLanguage.languageId > Language.id [delete: cascade]
+
+Ref CreativeLanguage_creativeId_fk: CreativeLanguage.creativeId > Creative.id [delete: cascade]
+
+Ref Webhook_workspaceId_fk: Webhook.workspaceId > Workspace.id [delete: cascade]
+
+Ref ContactAttribute_attributeKeyId_fk: ContactAttribute.attributeKeyId > ContactAttributeKey.id [delete: cascade]
+
+Ref ContactAttribute_contactId_fk: ContactAttribute.contactId > Contact.id [delete: cascade]
+
+Ref ContactAttributeKey_workspaceId_fk: ContactAttributeKey.workspaceId > Workspace.id [delete: cascade]
+
+Ref Contact_workspaceId_fk: Contact.workspaceId > Workspace.id [delete: cascade]
+
+Ref Response_surveyId_fk: Response.surveyId > Survey.id [delete: cascade]
+
+Ref Response_contactId_fk: Response.contactId > Contact.id [delete: cascade]
+
+Ref Response_displayId_fk: Response.displayId - Display.id
+
+Ref Tag_workspaceId_fk: Tag.workspaceId > Workspace.id [delete: cascade]
+
+Ref TagsOnResponses_responseId_fk: TagsOnResponses.responseId > Response.id [delete: cascade]
+
+Ref TagsOnResponses_tagId_fk: TagsOnResponses.tagId > Tag.id [delete: cascade]
+
+Ref Display_surveyId_fk: Display.surveyId > Survey.id [delete: cascade]
+
+Ref Display_contactId_fk: Display.contactId > Contact.id [delete: cascade]
+
+Ref SurveyTrigger_surveyId_fk: SurveyTrigger.surveyId > Survey.id [delete: cascade]
+
+Ref SurveyTrigger_actionClassId_fk: SurveyTrigger.actionClassId > ActionClass.id [delete: cascade]
+
+Ref SurveyAttributeFilter_attributeKeyId_fk: SurveyAttributeFilter.attributeKeyId > ContactAttributeKey.id [delete: cascade]
+
+Ref SurveyAttributeFilter_surveyId_fk: SurveyAttributeFilter.surveyId > Survey.id [delete: cascade]
+
+Ref Survey_workspaceId_fk: Survey.workspaceId > Workspace.id [delete: cascade]
+
+Ref Survey_createdBy_fk: Survey.createdBy > User.id
+
+Ref Survey_ownerId_fk: Survey.ownerId > User.id [delete: set null]
+
+Ref Survey_segmentId_fk: Survey.segmentId > Segment.id
+
+Ref SurveyQuota_surveyId_fk: SurveyQuota.surveyId > Survey.id [delete: cascade]
+
+Ref ResponseQuotaLink_responseId_fk: ResponseQuotaLink.responseId > Response.id [delete: cascade]
+
+Ref ResponseQuotaLink_quotaId_fk: ResponseQuotaLink.quotaId > SurveyQuota.id [delete: cascade]
+
+Ref SurveyFollowUp_surveyId_fk: SurveyFollowUp.surveyId > Survey.id [delete: cascade]
+
+Ref ActionClass_workspaceId_fk: ActionClass.workspaceId > Workspace.id [delete: cascade]
+
+Ref Integration_workspaceId_fk: Integration.workspaceId > Workspace.id [delete: cascade]
+
+Ref Workspace_organizationId_fk: Workspace.organizationId > Organization.id [delete: cascade]
+
+Ref OrganizationBilling_organization_id_fk: OrganizationBilling.organization_id - Organization.id [delete: cascade]
+
+Ref Membership_organizationId_fk: Membership.organizationId > Organization.id [delete: cascade]
+
+Ref Membership_userId_fk: Membership.userId > User.id [delete: cascade]
+
+Ref Invite_organizationId_fk: Invite.organizationId > Organization.id [delete: cascade]
+
+Ref Invite_creatorId_fk: Invite.creatorId > User.id
+
+Ref Invite_acceptorId_fk: Invite.acceptorId > User.id [delete: cascade]
+
+Ref ApiKey_organizationId_fk: ApiKey.organizationId > Organization.id [delete: cascade]
+
+Ref ApiKeyWorkspace_apiKeyId_fk: ApiKeyWorkspace.apiKeyId > ApiKey.id [delete: cascade]
+
+Ref ApiKeyWorkspace_workspaceId_fk: ApiKeyWorkspace.workspaceId > Workspace.id [delete: cascade]
+
+Ref Account_userId_fk: Account.userId > User.id [delete: cascade]
+
+Ref Session_userId_fk: Session.userId > User.id [delete: cascade]
+
+Ref TwoFactor_userId_fk: TwoFactor.userId - User.id [delete: cascade]
+
+Ref oauthClient_userId_fk: oauthClient.userId > User.id [delete: cascade]
+
+Ref oauthAccessToken_clientId_fk: oauthAccessToken.clientId > oauthClient.clientId [delete: cascade]
+
+Ref oauthAccessToken_sessionId_fk: oauthAccessToken.sessionId > Session.id [delete: set null]
+
+Ref oauthAccessToken_userId_fk: oauthAccessToken.userId > User.id [delete: cascade]
+
+Ref oauthAccessToken_refreshId_fk: oauthAccessToken.refreshId > oauthRefreshToken.id [delete: cascade]
+
+Ref oauthRefreshToken_clientId_fk: oauthRefreshToken.clientId > oauthClient.clientId [delete: cascade]
+
+Ref oauthRefreshToken_sessionId_fk: oauthRefreshToken.sessionId > Session.id [delete: set null]
+
+Ref oauthRefreshToken_userId_fk: oauthRefreshToken.userId > User.id [delete: cascade]
+
+Ref oauthConsent_clientId_fk: oauthConsent.clientId > oauthClient.clientId [delete: cascade]
+
+Ref oauthConsent_userId_fk: oauthConsent.userId > User.id [delete: cascade]
+
+Ref oauthClientResource_clientId_fk: oauthClientResource.clientId > oauthClient.clientId [delete: cascade]
+
+Ref oauthClientResource_resourceId_fk: oauthClientResource.resourceId > oauthResource.identifier [delete: cascade]
+
+Ref PasswordResetToken_userId_fk: PasswordResetToken.userId - User.id [delete: cascade]
+
+Ref Segment_workspaceId_fk: Segment.workspaceId > Workspace.id [delete: cascade]
+
+Ref Language_workspaceId_fk: Language.workspaceId > Workspace.id [delete: cascade]
+
+Ref SurveyLanguage_languageId_fk: SurveyLanguage.languageId > Language.id [delete: cascade]
+
+Ref SurveyLanguage_surveyId_fk: SurveyLanguage.surveyId > Survey.id [delete: cascade]
+
+Ref EmbeddedData_(surveyId, workspaceId)_fk: EmbeddedData.(surveyId, workspaceId) > Survey.(id, workspaceId) [delete: cascade]
+
+Ref EmbeddedData_workspaceId_fk: EmbeddedData.workspaceId > Workspace.id [delete: cascade]
+
+Ref SurveyEmbeddedData_(surveyId, workspaceId)_fk: SurveyEmbeddedData.(surveyId, workspaceId) > Survey.(id, workspaceId) [delete: cascade]
+
+Ref SurveyEmbeddedData_(embeddedDataId, workspaceId)_fk: SurveyEmbeddedData.(embeddedDataId, workspaceId) > EmbeddedData.(id, workspaceId) [delete: cascade]
+
+Ref Team_organizationId_fk: Team.organizationId > Organization.id [delete: cascade]
+
+Ref TeamUser_teamId_fk: TeamUser.teamId > Team.id [delete: cascade]
+
+Ref TeamUser_userId_fk: TeamUser.userId > User.id [delete: cascade]
+
+Ref WorkspaceTeam_workspaceId_fk: WorkspaceTeam.workspaceId > Workspace.id [delete: cascade]
+
+Ref WorkspaceTeam_teamId_fk: WorkspaceTeam.teamId > Team.id [delete: cascade]
+
+Ref Chart_workspaceId_fk: Chart.workspaceId > Workspace.id [delete: cascade]
+
+Ref Chart_createdBy_fk: Chart.createdBy > User.id [delete: set null]
+
+Ref Chart_feedbackDirectoryId_fk: Chart.feedbackDirectoryId > FeedbackDirectory.id
+
+Ref Dashboard_workspaceId_fk: Dashboard.workspaceId > Workspace.id [delete: cascade]
+
+Ref Dashboard_createdBy_fk: Dashboard.createdBy > User.id [delete: set null]
+
+Ref DashboardWidget_dashboardId_fk: DashboardWidget.dashboardId > Dashboard.id [delete: cascade]
+
+Ref DashboardWidget_chartId_fk: DashboardWidget.chartId > Chart.id [delete: cascade]
+
+Ref FeedbackSource_workspaceId_fk: FeedbackSource.workspaceId > Workspace.id [delete: cascade]
+
+Ref FeedbackSource_feedbackDirectoryId_fk: FeedbackSource.feedbackDirectoryId > FeedbackDirectory.id [delete: cascade]
+
+Ref FeedbackSource_created_by_fk: FeedbackSource.created_by > User.id [delete: set null]
+
+Ref FeedbackSource_(feedbackDirectoryId, workspaceId)_fk: FeedbackSource.(feedbackDirectoryId, workspaceId) > FeedbackDirectoryWorkspace.(feedbackDirectoryId, workspaceId) [delete: no action, update: cascade]
+
+Ref FeedbackSourceFormbricksMapping_(feedback_source_id, workspaceId)_fk: FeedbackSourceFormbricksMapping.(feedback_source_id, workspaceId) > FeedbackSource.(id, workspaceId) [delete: cascade]
+
+Ref FeedbackSourceFormbricksMapping_(surveyId, workspaceId)_fk: FeedbackSourceFormbricksMapping.(surveyId, workspaceId) > Survey.(id, workspaceId) [delete: cascade]
+
+Ref FeedbackSourceFieldMapping_(feedback_source_id, workspaceId)_fk: FeedbackSourceFieldMapping.(feedback_source_id, workspaceId) > FeedbackSource.(id, workspaceId) [delete: cascade]
+
+Ref FeedbackDirectory_organizationId_fk: FeedbackDirectory.organizationId > Organization.id [delete: cascade]
+
+Ref FeedbackDirectoryWorkspace_feedbackDirectoryId_fk: FeedbackDirectoryWorkspace.feedbackDirectoryId > FeedbackDirectory.id [delete: cascade]
+
+Ref FeedbackDirectoryWorkspace_workspaceId_fk: FeedbackDirectoryWorkspace.workspaceId > Workspace.id [delete: cascade]
+
+Ref RetentionPolicy_organizationId_fk: RetentionPolicy.organizationId > Organization.id [delete: cascade]
+
+Ref RetentionPolicy_updatedById_fk: RetentionPolicy.updatedById > User.id [delete: set null]
+
+Ref RetentionExemption_organizationId_fk: RetentionExemption.organizationId > Organization.id [delete: cascade]
+
+Ref RetentionExemption_surveyId_fk: RetentionExemption.surveyId > Survey.id [delete: cascade]
+
+Ref RetentionExemption_createdById_fk: RetentionExemption.createdById > User.id [delete: set null]
+
+Ref RetentionExemption_revokedById_fk: RetentionExemption.revokedById > User.id [delete: set null]
+
+Ref RetentionRun_organizationId_fk: RetentionRun.organizationId > Organization.id [delete: cascade]
+
+Ref RetentionRunItem_runId_fk: RetentionRunItem.runId > RetentionRun.id [delete: cascade]
+
+Ref RetentionNotice_organizationId_fk: RetentionNotice.organizationId > Organization.id [delete: cascade]
+
+Ref RetentionNotice_surveyId_fk: RetentionNotice.surveyId > Survey.id [delete: cascade]
+
+Ref RetentionNotice_userId_fk: RetentionNotice.userId > User.id [delete: cascade]
+
+Ref RetentionSurveyRestore_surveyId_fk: RetentionSurveyRestore.surveyId - Survey.id [delete: cascade]
+
+Ref Workflow_workspaceId_fk: Workflow.workspaceId > Workspace.id [delete: cascade]
+
+Ref Workflow_createdBy_fk: Workflow.createdBy > User.id [delete: set null]
+
+Ref WorkflowVersion_(workflowId, workspaceId)_fk: WorkflowVersion.(workflowId, workspaceId) > Workflow.(id, workspaceId) [delete: cascade]
+
+Ref WorkflowVersion_publishedBy_fk: WorkflowVersion.publishedBy > User.id [delete: set null]
+
+Ref WorkflowRun_(workflowId, workspaceId)_fk: WorkflowRun.(workflowId, workspaceId) > Workflow.(id, workspaceId) [delete: cascade]
+
+Ref WorkflowRun_workspaceId_fk: WorkflowRun.workspaceId > Workspace.id [delete: cascade]
+
+Ref WorkflowRun_workflowVersionId_fk: WorkflowRun.workflowVersionId > WorkflowVersion.id [delete: set null]
+
+Ref WorkflowRun_responseId_fk: WorkflowRun.responseId > Response.id [delete: cascade]
+
+Ref WorkflowRunLog_runId_fk: WorkflowRunLog.runId > WorkflowRun.id [delete: cascade]

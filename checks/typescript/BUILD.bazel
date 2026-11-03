@@ -1,0 +1,16 @@
+load("//checks:defs.bzl", "lang_checks")
+
+# tsc --strict against the real drizzle-orm and kysely for the schema and the DB interface of
+# every schema. The packages come from the lockfile through rules_js rather than from a toolchain
+# on PATH, so this check also runs under `bazel test //...` on a machine with nothing but node.
+lang_checks(
+    lang = "typescript",
+    harness = [
+        "tsconfig.json",
+        "//checks:common.sh",
+        "//:node_modules/@types/node",
+        "//:node_modules/drizzle-orm",
+        "//:node_modules/kysely",
+        "//:node_modules/typescript",
+    ],
+)

@@ -1,0 +1,101 @@
+name: Lang Check
+
+# Compiles what hekireki generated for every schema under schemas/ with the real toolchain of
+# each ORM: gofmt and go vet against GORM, cargo check against SeaORM, mypy --strict against
+# SQLAlchemy and Django, mix compile against Ecto, Active Record loading every model, php -l on
+# the Eloquent models, dotnet build against EF Core, Gradle against Exposed, and tsc against
+# drizzle and kysely. Each leg installs only its own toolchain and then runs the Bazel tests
+# tagged for it; the tests read the toolchain from PATH (see .bazelrc).
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lang-check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lang:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        lang:
+          - typescript
+          - gorm
+          - sea-orm
+          - sqlalchemy
+          - django
+          - ecto
+          - activerecord
+          - eloquent
+          - efcore
+          - exposed
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: bazel-contrib/setup-bazel@104e3eea9447cdaa4b00d0fb46191a3985d26ab3 # 0.19.1
+        with:
+          bazelisk-cache: true
+          disk-cache: ${{ github.workflow }}-${{ matrix.lang }}
+          repository-cache: true
+
+      - if: matrix.lang == 'gorm'
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: '1.25'
+          cache-dependency-path: checks/gorm/go.sum
+      - if: matrix.lang == 'sea-orm'
+        uses: actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30 # v2.0.1
+        with:
+          toolchain: stable
+          components: rustfmt
+          cache-workspaces: checks/sea-orm
+      - if: matrix.lang == 'sqlalchemy' || matrix.lang == 'django'
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: '3.13'
+          cache: pip
+          cache-dependency-path: checks/${{ matrix.lang }}/requirements.txt
+      - if: matrix.lang == 'ecto'
+        uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1.24.1
+        with:
+          otp-version: '27.2'
+          elixir-version: '1.18.1'
+          rebar3-version: '3.24.0'
+      - if: matrix.lang == 'activerecord'
+        uses: ruby/setup-ruby@de492cf36cbab201753d720ce4f4e336cd688c94 # v1.336.0
+        with:
+          ruby-version: '3.4'
+          bundler-cache: true
+          working-directory: checks/activerecord
+      - if: matrix.lang == 'eloquent'
+        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          php-version: '8.3'
+      - if: matrix.lang == 'efcore'
+        uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6.1.0
+        with:
+          dotnet-version: '10.0.x'
+      - if: matrix.lang == 'exposed'
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          distribution: temurin
+          java-version: '21'
+      - if: matrix.lang == 'exposed'
+        uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
+        with:
+          gradle-version: '9.8.0'
+
+      # The tests are tagged `lang-<name>`; the .bazelrc default of leaving every `lang` test out
+      # is overridden here for this leg's own.
+      - name: Check the generated ${{ matrix.lang }} code
+        run: bazel test --config=ci --test_tag_filters=lang-${{ matrix.lang }} //checks/...

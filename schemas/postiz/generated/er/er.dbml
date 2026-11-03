@@ -1,0 +1,1572 @@
+Enum OrderStatus {
+  PENDING
+  ACCEPTED
+  CANCELED
+  COMPLETED
+}
+
+Enum From {
+  BUYER
+  SELLER
+}
+
+Enum State {
+  QUEUE
+  PUBLISHED
+  ERROR
+  DRAFT
+}
+
+Enum SubscriptionTier {
+  STANDARD
+  PRO
+  TEAM
+  ULTIMATE
+}
+
+Enum Period {
+  MONTHLY
+  YEARLY
+}
+
+Enum Provider {
+  LOCAL
+  GITHUB
+  GOOGLE
+  APPLE
+  FARCASTER
+  WALLET
+  GENERIC
+}
+
+Enum Role {
+  SUPERADMIN
+  ADMIN
+  USER
+}
+
+Enum APPROVED_SUBMIT_FOR_ORDER {
+  NO
+  WAITING_CONFIRMATION
+  YES
+}
+
+Enum CreationMethod {
+  UNKNOWN
+  WEB
+  MCP
+  API
+  AUTOPOST
+  CLI
+}
+
+Enum ShortLinkPreference {
+  ASK
+  YES
+  NO
+}
+
+Enum AnnouncementColor {
+  INFO
+  WARNING
+  ERROR
+}
+
+Table Organization {
+  id String [pk]
+  name String [not null]
+  description String
+  apiKey String
+  paymentId String
+  streakSince DateTime
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  deletedAt DateTime
+  allowTrial Boolean [default: false, not null]
+  isTrailing Boolean [default: false, not null]
+  shortlink ShortLinkPreference [default: 'ASK', not null]
+}
+
+Table Tags {
+  id String [pk]
+  name String [not null]
+  color String [not null]
+  orgId String [not null]
+  deletedAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table TagsPosts {
+  postId String [not null]
+  tagId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (postId, tagId) [pk]
+    (postId, tagId) [unique]
+  }
+}
+
+Table User {
+  id String [pk]
+  email String [not null]
+  password String
+  providerName Provider [not null]
+  name String
+  lastName String
+  isSuperAdmin Boolean [default: false, not null]
+  bio String
+  audience Int [default: 0, not null]
+  pictureId String
+  providerId String
+  timezone Int [not null]
+  timezoneName String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  lastReadNotifications DateTime [default: `now()`, not null]
+  inviteId String
+  activated Boolean [default: true, not null]
+  account String
+  connectedAccount Boolean [default: false, not null]
+  lastOnline DateTime [default: `now()`, not null]
+  ip String
+  agent String
+  deletedAt DateTime
+  sendSuccessEmails Boolean [default: true, not null]
+  sendFailureEmails Boolean [default: true, not null]
+  sendStreakEmails Boolean [default: true, not null]
+
+  indexes {
+    (email, providerName) [unique]
+  }
+}
+
+Table UsedCodes {
+  id String [pk]
+  code String [not null]
+  orgId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table UserOrganization {
+  id String [pk]
+  userId String [not null]
+  organizationId String [not null]
+  disabled Boolean [default: false, not null]
+  role Role [default: 'USER', not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (userId, organizationId) [unique]
+  }
+}
+
+Table GitHub {
+  id String [pk]
+  login String
+  name String
+  token String [not null]
+  jobId String
+  organizationId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table Trending {
+  id String [pk]
+  trendingList String [not null]
+  language String [unique]
+  hash String [not null]
+  date DateTime [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table TrendingLog {
+  id String [pk]
+  language String
+  date DateTime [not null]
+}
+
+Table ItemUser {
+  id String [pk]
+  userId String [not null]
+  key String [not null]
+
+  indexes {
+    (userId, key) [unique]
+  }
+}
+
+Table Star {
+  id String [pk]
+  stars Int [not null]
+  totalStars Int [not null]
+  forks Int [not null]
+  totalForks Int [not null]
+  login String [not null]
+  date DateTime [default: `now()`, not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (login, date) [unique]
+  }
+}
+
+Table Media {
+  id String [pk]
+  name String [not null]
+  originalName String
+  path String [not null]
+  organizationId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  deletedAt DateTime
+  fileSize Int [default: 0, not null]
+  type String [default: 'image', not null]
+  thumbnail String
+  alt String
+  thumbnailTimestamp Int
+  status String [default: 'ready', not null]
+  processingError String
+}
+
+Table SocialMediaAgency {
+  id String [pk]
+  userId String [unique, not null]
+  name String [not null]
+  logoId String
+  website String
+  slug String
+  facebook String
+  instagram String
+  twitter String
+  linkedIn String
+  youtube String
+  tiktok String
+  otherSocialMedia String
+  shortDescription String [not null]
+  description String [not null]
+  approved Boolean [default: false, not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  deletedAt DateTime
+}
+
+Table SocialMediaAgencyNiche {
+  agencyId String [not null]
+  niche String [not null]
+
+  indexes {
+    (agencyId, niche) [pk]
+  }
+}
+
+Table Credits {
+  id String [pk]
+  organizationId String [not null]
+  credits Int [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  type String [default: 'ai_images', not null]
+}
+
+Table Clipping {
+  id String [pk]
+  organizationId String [not null]
+  url String [not null]
+  status String [default: 'analysing', not null]
+  error String
+  title String
+  thumbnail String
+  duration Int
+  maxClips Int [default: 5, not null]
+  fit String [default: 'blur', not null]
+  integrations String [not null]
+  creditsId String
+  deletedAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table ClippingClip {
+  id String [pk]
+  clippingId String [not null]
+  title String [not null]
+  content String [not null]
+  start Float [not null]
+  end Float [not null]
+  trimStart Int
+  status String [default: 'pending', not null]
+  error String
+  mediaId String
+  path String
+  thumbnail String
+  draftedAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table Subscription {
+  id String [pk]
+  organizationId String [unique, not null]
+  subscriptionTier SubscriptionTier [not null]
+  provider String [default: 'stripe', not null]
+  identifier String
+  cancelAt DateTime
+  period Period [not null]
+  totalChannels Int [not null]
+  isLifetime Boolean [default: false, not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  deletedAt DateTime
+}
+
+Table Customer {
+  id String [pk]
+  name String [not null]
+  orgId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  deletedAt DateTime
+
+  indexes {
+    (orgId, name, deletedAt) [unique]
+  }
+}
+
+Table Integration {
+  id String [pk]
+  internalId String [not null]
+  organizationId String [not null]
+  name String [not null]
+  customName String
+  picture String
+  providerIdentifier String [not null]
+  type String [not null]
+  token String [not null]
+  disabled Boolean [default: false, not null]
+  tokenExpiration DateTime
+  refreshToken String
+  profile String
+  deletedAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime
+  inBetweenSteps Boolean [default: false, not null]
+  refreshNeeded Boolean [default: false, not null]
+  postingTimes String [default: '[{"time":120}, {"time":400}, {"time":700}]', not null]
+  customInstanceDetails String
+  customerId String
+  rootInternalId String
+  additionalSettings String [default: '[]']
+
+  indexes {
+    (organizationId, internalId) [unique]
+  }
+}
+
+Table Signatures {
+  id String [pk]
+  organizationId String [not null]
+  content String [not null]
+  autoAdd Boolean [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  deletedAt DateTime
+}
+
+Table Comments {
+  id String [pk]
+  content String [not null]
+  organizationId String [not null]
+  postId String [not null]
+  userId String
+  displayName String
+  parentId String
+  anchorStart Int
+  anchorEnd Int
+  anchorQuote String
+  resolvedAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  deletedAt DateTime
+}
+
+Table Post {
+  id String [pk]
+  state State [default: 'QUEUE', not null]
+  publishDate DateTime [not null]
+  organizationId String [not null]
+  integrationId String [not null]
+  content String [not null]
+  delay Int [default: 0, not null]
+  group String [not null]
+  batchId String
+  title String
+  description String
+  parentPostId String
+  releaseId String
+  releaseURL String
+  settings String
+  image String
+  submittedForOrderId String
+  submittedForOrganizationId String
+  approvedSubmitForOrder APPROVED_SUBMIT_FOR_ORDER [default: 'NO', not null]
+  creationMethod CreationMethod [default: 'UNKNOWN', not null]
+  lastMessageId String
+  intervalInDays Int
+  error String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  deletedAt DateTime
+}
+
+Table Notifications {
+  id String [pk]
+  organizationId String [not null]
+  content String [not null]
+  link String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  deletedAt DateTime
+}
+
+Table MessagesGroup {
+  id String [pk]
+  buyerOrganizationId String [not null]
+  buyerId String [not null]
+  sellerId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (buyerId, sellerId) [unique]
+  }
+}
+
+Table PayoutProblems {
+  id String [pk]
+  status String [not null]
+  orderId String [not null]
+  userId String [not null]
+  postId String
+  amount Int [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table Orders {
+  id String [pk]
+  buyerId String [not null]
+  sellerId String [not null]
+  status OrderStatus [not null]
+  messageGroupId String [not null]
+  captureId String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table OrderItems {
+  id String [pk]
+  orderId String [not null]
+  integrationId String [not null]
+  quantity Int [not null]
+  price Int [not null]
+}
+
+Table Messages {
+  id String [pk]
+  from From [not null]
+  content String
+  groupId String [not null]
+  special String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  deletedAt DateTime
+}
+
+Table Plugs {
+  id String [pk]
+  organizationId String [not null]
+  plugFunction String [not null]
+  data String [not null]
+  integrationId String [not null]
+  activated Boolean [default: true, not null]
+
+  indexes {
+    (plugFunction, integrationId) [unique]
+  }
+}
+
+Table ExisingPlugData {
+  id String [pk]
+  integrationId String [not null]
+  methodName String [not null]
+  value String [not null]
+
+  indexes {
+    (integrationId, methodName, value) [unique]
+  }
+}
+
+Table PopularPosts {
+  id String [pk]
+  category String [not null]
+  topic String [not null]
+  content String [not null]
+  hook String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table IntegrationsWebhooks {
+  integrationId String [not null]
+  webhookId String [not null]
+
+  indexes {
+    (integrationId, webhookId) [pk]
+    (integrationId, webhookId) [unique]
+  }
+}
+
+Table Webhooks {
+  id String [pk]
+  name String [not null]
+  organizationId String [not null]
+  url String [not null]
+  deletedAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table AutoPost {
+  id String [pk]
+  organizationId String [not null]
+  title String [not null]
+  content String
+  onSlot Boolean [not null]
+  syncLast Boolean [not null]
+  url String [not null]
+  lastUrl String [not null]
+  active Boolean [not null]
+  addPicture Boolean [not null]
+  generateContent Boolean [not null]
+  integrations String [not null]
+  deletedAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table Sets {
+  id String [pk]
+  organizationId String [not null]
+  name String [not null]
+  content String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table ThirdParty {
+  id String [pk]
+  organizationId String [not null]
+  identifier String [not null]
+  name String [not null]
+  internalId String [not null]
+  apiKey String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  deletedAt DateTime
+
+  indexes {
+    (organizationId, internalId) [unique]
+  }
+}
+
+Table Errors {
+  id String [pk]
+  message String [not null]
+  platform String [not null]
+  organizationId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  postId String [not null]
+  body String [default: '{}', not null]
+}
+
+Table Mentions {
+  name String [not null]
+  username String [not null]
+  platform String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  image String [not null]
+
+  indexes {
+    (name, username, platform, image) [pk]
+  }
+}
+
+Table mastra_messages {
+  id String [pk]
+  thread_id String [not null]
+  content String [not null]
+  role String [not null]
+  type String [not null]
+  createdAt DateTime [not null]
+  resourceId String
+  createdAtZ DateTime [default: `now()`]
+}
+
+Table mastra_resources {
+  id String [pk]
+  workingMemory String
+  metadata Json
+  createdAt DateTime [not null]
+  updatedAt DateTime [not null]
+  createdAtZ DateTime [default: `now()`]
+  updatedAtZ DateTime [default: `now()`]
+}
+
+Table mastra_scorers {
+  id String [pk]
+  scorerId String [not null]
+  traceId String
+  runId String [not null]
+  scorer Json [not null]
+  preprocessStepResult Json
+  extractStepResult Json
+  analyzeStepResult Json
+  score Float [not null]
+  reason String
+  metadata Json
+  preprocessPrompt String
+  extractPrompt String
+  generateScorePrompt String
+  generateReasonPrompt String
+  analyzePrompt String
+  reasonPrompt String
+  input Json [not null]
+  output Json [not null]
+  additionalContext Json
+  runtimeContext Json
+  entityType String
+  entity Json
+  entityId String
+  source String [not null]
+  resourceId String
+  threadId String
+  createdAt DateTime [not null]
+  updatedAt DateTime [not null]
+  createdAtZ DateTime [default: `now()`]
+  updatedAtZ DateTime [default: `now()`]
+  spanId String
+  requestContext Json
+  organizationId String
+  projectId String
+  batchId String
+  datasetId String
+  datasetItemId String
+}
+
+Table mastra_threads {
+  id String [pk]
+  resourceId String [not null]
+  title String [not null]
+  metadata String
+  createdAt DateTime [not null]
+  updatedAt DateTime [not null]
+  createdAtZ DateTime [default: `now()`]
+  updatedAtZ DateTime [default: `now()`]
+}
+
+Table mastra_traces {
+  id String [pk]
+  parentSpanId String
+  name String [not null]
+  traceId String [not null]
+  scope String [not null]
+  kind Int [not null]
+  attributes Json
+  status Json
+  events Json
+  links Json
+  other String
+  startTime BigInt [not null]
+  endTime BigInt [not null]
+  createdAt DateTime [not null]
+  createdAtZ DateTime [default: `now()`]
+}
+
+Table mastra_workflow_snapshot {
+  workflow_name String [not null]
+  run_id String [not null]
+  resourceId String
+  snapshot String [not null]
+  createdAt DateTime [not null]
+  updatedAt DateTime [not null]
+  createdAtZ DateTime [default: `now()`]
+  updatedAtZ DateTime [default: `now()`]
+
+  indexes {
+    (workflow_name, run_id) [unique]
+  }
+}
+
+Table mastra_agent_versions {
+  id String [pk]
+  agentId String [not null]
+  versionNumber Int [not null]
+  name String [not null]
+  description String
+  instructions String [not null]
+  model Json [not null]
+  tools Json
+  defaultOptions Json
+  workflows Json
+  agents Json
+  integrationTools Json
+  inputProcessors Json
+  outputProcessors Json
+  memory Json
+  scorers Json
+  mcpClients Json
+  requestContextSchema Json
+  workspace Json
+  skills Json
+  skillsFormat String
+  changedFields Json
+  changeMessage String
+  createdAt DateTime [not null]
+  createdAtZ DateTime [default: `now()`]
+  durable Json
+  browser Json
+  toolProviders Json
+}
+
+Table mastra_agents {
+  id String [pk]
+  status String [not null]
+  activeVersionId String
+  authorId String
+  metadata Json
+  createdAt DateTime [not null]
+  updatedAt DateTime [not null]
+  createdAtZ DateTime [default: `now()`]
+  updatedAtZ DateTime [default: `now()`]
+  visibility String
+  favoriteCount Int
+}
+
+Table mastra_background_tasks {
+  id String [pk]
+  tool_call_id String [not null]
+  tool_name String [not null]
+  agent_id String [not null]
+  run_id String [not null]
+  thread_id String
+  resource_id String
+  status String [not null]
+  args Json [not null]
+  result Json
+  error Json
+  suspend_payload Json
+  retry_count Int [not null]
+  max_retries Int [not null]
+  timeout_ms Int [not null]
+  createdAt DateTime [not null]
+  startedAt DateTime
+  suspendedAt DateTime
+  completedAt DateTime
+  createdAtZ DateTime [default: `now()`]
+  startedAtZ DateTime [default: `now()`]
+  suspendedAtZ DateTime [default: `now()`]
+  completedAtZ DateTime [default: `now()`]
+}
+
+Table mastra_channel_config {
+  platform String [pk]
+  data Json [not null]
+  updatedAt DateTime [not null]
+  updatedAtZ DateTime [default: `now()`]
+}
+
+Table mastra_channel_installations {
+  id String [pk]
+  platform String [not null]
+  agentId String [not null]
+  status String [not null]
+  webhookId String [unique]
+  data Json [not null]
+  configHash String
+  error String
+  createdAt DateTime [not null]
+  updatedAt DateTime [not null]
+  createdAtZ DateTime [default: `now()`]
+  updatedAtZ DateTime [default: `now()`]
+}
+
+Table mastra_dataset_items {
+  id String [not null]
+  datasetId String [not null]
+  datasetVersion Int [not null]
+  validTo Int
+  isDeleted Boolean [not null]
+  input Json [not null]
+  groundTruth Json
+  requestContext Json
+  metadata Json
+  source Json
+  createdAt DateTime [not null]
+  updatedAt DateTime [not null]
+  createdAtZ DateTime [default: `now()`]
+  updatedAtZ DateTime [default: `now()`]
+  expectedTrajectory Json
+  organizationId String
+  projectId String
+  toolMocks Json
+  unmockedToolPolicy String
+  scorerIds Json
+  externalId String
+
+  indexes {
+    (id, datasetVersion) [pk]
+  }
+}
+
+Table mastra_dataset_versions {
+  id String [pk]
+  datasetId String [not null]
+  version Int [not null]
+  createdAt DateTime [not null]
+  createdAtZ DateTime [default: `now()`]
+
+  indexes {
+    (datasetId, version) [unique]
+  }
+}
+
+Table mastra_datasets {
+  id String [pk]
+  name String [not null]
+  description String
+  metadata Json
+  inputSchema Json
+  groundTruthSchema Json
+  requestContextSchema Json
+  tags Json
+  targetType String
+  targetIds Json
+  scorerIds Json
+  version Int [not null]
+  createdAt DateTime [not null]
+  updatedAt DateTime [not null]
+  createdAtZ DateTime [default: `now()`]
+  updatedAtZ DateTime [default: `now()`]
+  organizationId String
+  projectId String
+  candidateKey String
+  candidateId String
+}
+
+Table mastra_experiment_results {
+  id String [pk]
+  experimentId String [not null]
+  itemId String [not null]
+  itemDatasetVersion Int
+  input Json [not null]
+  output Json
+  groundTruth Json
+  error Json
+  startedAt DateTime [not null]
+  completedAt DateTime [not null]
+  retryCount Int [not null]
+  traceId String
+  status String
+  tags Json
+  createdAt DateTime [not null]
+  startedAtZ DateTime [default: `now()`]
+  completedAtZ DateTime [default: `now()`]
+  createdAtZ DateTime [default: `now()`]
+  comment String
+  toolMockReport Json
+  metadata Json
+  organizationId String
+  projectId String
+  attempt Int
+
+  indexes {
+    (experimentId, itemId, attempt) [unique]
+  }
+}
+
+Table mastra_experiments {
+  id String [pk]
+  name String
+  description String
+  metadata Json
+  datasetId String
+  datasetVersion Int
+  targetType String [not null]
+  targetId String [not null]
+  status String [not null]
+  totalItems Int [not null]
+  succeededCount Int [not null]
+  failedCount Int [not null]
+  skippedCount Int [not null]
+  startedAt DateTime
+  completedAt DateTime
+  agentVersion String
+  createdAt DateTime [not null]
+  updatedAt DateTime [not null]
+  startedAtZ DateTime [default: `now()`]
+  completedAtZ DateTime [default: `now()`]
+  createdAtZ DateTime [default: `now()`]
+  updatedAtZ DateTime [default: `now()`]
+  organizationId String
+  projectId String
+  provenance Json
+  runnerAttestation Json
+  experimentSetId String
+  comparisonId String
+  variantId String
+  trialIndex Int
+  scorerIds Json
+}
+
+Table mastra_favorites {
+  userId String [not null]
+  entityType String [not null]
+  entityId String [not null]
+  createdAt DateTime [not null]
+  createdAtZ DateTime [default: `now()`]
+
+  indexes {
+    (userId, entityType, entityId) [pk]
+  }
+}
+
+Table mastra_knowledge_activity {
+  id String [pk]
+  action String [not null]
+  recordType String [not null]
+  recordId String [not null]
+  scope Json [not null]
+  scopeKey String [not null]
+  sourceThreadId String
+  createdAt DateTime [not null]
+  createdAtZ DateTime [default: `now()`]
+}
+
+Table mastra_knowledge_cursors {
+  sourceThreadId String [not null]
+  agent String [not null]
+  lastKnowledgeId String [not null]
+  updatedAt DateTime [not null]
+  updatedAtZ DateTime [default: `now()`]
+
+  indexes {
+    (sourceThreadId, agent) [pk]
+  }
+}
+
+Table mastra_knowledge_mentions {
+  sourceType String [not null]
+  sourceId String [not null]
+  recordId String [not null]
+
+  indexes {
+    (sourceType, sourceId, recordId) [pk]
+  }
+}
+
+Table mastra_knowledge_nodes {
+  id String [pk]
+  type String [not null]
+  name String [not null]
+  canonicalName String [not null]
+  kind String
+  content String
+  description String
+  scope Json [not null]
+  scopeKey String [not null]
+  version Int [not null]
+  mergedInto String
+  createdAt DateTime [not null]
+  updatedAt DateTime [not null]
+  createdAtZ DateTime [default: `now()`]
+  updatedAtZ DateTime [default: `now()`]
+
+  indexes {
+    (type, scopeKey, canonicalName) [unique]
+  }
+}
+
+Table mastra_knowledge_records {
+  id String [pk]
+  node String [not null]
+  text String [not null]
+  scope Json [not null]
+  scopeKey String [not null]
+  sourceThreadId String [not null]
+  capturedAt DateTime [not null]
+  when DateTime
+  maxScope String
+  metadata Json
+  deletedAt DateTime
+  deletedBy String
+  capturedAtZ DateTime [default: `now()`]
+  whenZ DateTime [default: `now()`]
+  deletedAtZ DateTime [default: `now()`]
+}
+
+Table mastra_knowledge_semantic_outbox {
+  id String [pk]
+  idempotencyKey String [unique, not null]
+  documentId String [not null]
+  documentType String [not null]
+  operation String [not null]
+  scope Json [not null]
+  scopeKey String [not null]
+  status String [not null]
+  attempts Int [not null]
+  availableAt DateTime [not null]
+  claimedAt DateTime
+  claimedBy String
+  createdAt DateTime [not null]
+  completedAt DateTime
+  availableAtZ DateTime [default: `now()`]
+  claimedAtZ DateTime [default: `now()`]
+  createdAtZ DateTime [default: `now()`]
+  completedAtZ DateTime [default: `now()`]
+}
+
+Table mastra_mcp_client_versions {
+  id String [pk]
+  mcpClientId String [not null]
+  versionNumber Int [not null]
+  name String [not null]
+  description String
+  servers Json [not null]
+  changedFields Json
+  changeMessage String
+  createdAt DateTime [not null]
+  createdAtZ DateTime [default: `now()`]
+
+  indexes {
+    (mcpClientId, versionNumber) [unique]
+  }
+}
+
+Table mastra_mcp_clients {
+  id String [pk]
+  status String [not null]
+  activeVersionId String
+  authorId String
+  metadata Json
+  createdAt DateTime [not null]
+  updatedAt DateTime [not null]
+  createdAtZ DateTime [default: `now()`]
+  updatedAtZ DateTime [default: `now()`]
+}
+
+Table mastra_mcp_server_versions {
+  id String [pk]
+  mcpServerId String [not null]
+  versionNumber Int [not null]
+  name String [not null]
+  version String [not null]
+  description String
+  instructions String
+  repository Json
+  releaseDate String
+  isLatest Boolean
+  packageCanonical String
+  tools Json
+  agents Json
+  workflows Json
+  changedFields Json
+  changeMessage String
+  createdAt DateTime [not null]
+  createdAtZ DateTime [default: `now()`]
+
+  indexes {
+    (mcpServerId, versionNumber) [unique]
+  }
+}
+
+Table mastra_mcp_servers {
+  id String [pk]
+  status String [not null]
+  activeVersionId String
+  authorId String
+  metadata Json
+  createdAt DateTime [not null]
+  updatedAt DateTime [not null]
+  createdAtZ DateTime [default: `now()`]
+  updatedAtZ DateTime [default: `now()`]
+}
+
+Table mastra_observational_memory {
+  id String [pk]
+  lookupKey String [not null]
+  scope String [not null]
+  resourceId String
+  threadId String
+  activeObservations String [not null]
+  activeObservationsPendingUpdate String
+  originType String [not null]
+  config String [not null]
+  generationCount Int [not null]
+  lastObservedAt DateTime
+  lastReflectionAt DateTime
+  pendingMessageTokens Int [not null]
+  totalTokensObserved Int [not null]
+  observationTokenCount Int [not null]
+  isObserving Boolean [not null]
+  isReflecting Boolean [not null]
+  observedMessageIds Json
+  observedTimezone String
+  bufferedObservations String
+  bufferedObservationTokens Int
+  bufferedMessageIds Json
+  bufferedReflection String
+  bufferedReflectionTokens Int
+  bufferedReflectionInputTokens Int
+  reflectedObservationLineCount Int
+  bufferedObservationChunks Json
+  isBufferingObservation Boolean [not null]
+  isBufferingReflection Boolean [not null]
+  lastBufferedAtTokens Int [not null]
+  lastBufferedAtTime DateTime
+  metadata Json
+  createdAt DateTime [not null]
+  updatedAt DateTime [not null]
+  lastObservedAtZ DateTime [default: `now()`]
+  lastReflectionAtZ DateTime [default: `now()`]
+  lastBufferedAtTimeZ DateTime [default: `now()`]
+  createdAtZ DateTime [default: `now()`]
+  updatedAtZ DateTime [default: `now()`]
+}
+
+Table mastra_prompt_block_versions {
+  id String [pk]
+  blockId String [not null]
+  versionNumber Int [not null]
+  name String [not null]
+  description String
+  content String [not null]
+  rules Json
+  requestContextSchema Json
+  changedFields Json
+  changeMessage String
+  createdAt DateTime [not null]
+  createdAtZ DateTime [default: `now()`]
+
+  indexes {
+    (blockId, versionNumber) [unique]
+  }
+}
+
+Table mastra_prompt_blocks {
+  id String [pk]
+  status String [not null]
+  activeVersionId String
+  authorId String
+  metadata Json
+  createdAt DateTime [not null]
+  updatedAt DateTime [not null]
+  createdAtZ DateTime [default: `now()`]
+  updatedAtZ DateTime [default: `now()`]
+}
+
+Table mastra_schedule_triggers {
+  id String [pk]
+  schedule_id String [not null]
+  run_id String
+  scheduled_fire_at BigInt [not null]
+  actual_fire_at BigInt [not null]
+  outcome String [not null]
+  error String
+  trigger_kind String [not null]
+  parent_trigger_id String
+  metadata Json
+}
+
+Table mastra_schedules {
+  id String [pk]
+  target Json [not null]
+  cron String [not null]
+  timezone String
+  status String [not null]
+  next_fire_at BigInt [not null]
+  last_fire_at BigInt
+  last_run_id String
+  created_at BigInt [not null]
+  updated_at BigInt [not null]
+  metadata Json
+  owner_type String
+  owner_id String
+}
+
+Table mastra_scorer_definition_versions {
+  id String [pk]
+  scorerDefinitionId String [not null]
+  versionNumber Int [not null]
+  name String [not null]
+  description String
+  type String [not null]
+  model Json
+  instructions String
+  scoreRange Json
+  presetConfig Json
+  defaultSampling Json
+  changedFields Json
+  changeMessage String
+  createdAt DateTime [not null]
+  createdAtZ DateTime [default: `now()`]
+
+  indexes {
+    (scorerDefinitionId, versionNumber) [unique]
+  }
+}
+
+Table mastra_scorer_definitions {
+  id String [pk]
+  status String [not null]
+  activeVersionId String
+  authorId String
+  metadata Json
+  createdAt DateTime [not null]
+  updatedAt DateTime [not null]
+  createdAtZ DateTime [default: `now()`]
+  updatedAtZ DateTime [default: `now()`]
+  organizationId String
+  projectId String
+}
+
+Table mastra_skill_blobs {
+  hash String [pk]
+  content String [not null]
+  size Int [not null]
+  mimeType String
+  createdAt DateTime [not null]
+  createdAtZ DateTime [default: `now()`]
+}
+
+Table mastra_skill_versions {
+  id String [pk]
+  skillId String [not null]
+  versionNumber Int [not null]
+  name String [not null]
+  description String [not null]
+  instructions String [not null]
+  license String
+  compatibility Json
+  source Json
+  references Json
+  scripts Json
+  assets Json
+  metadata Json
+  tree Json
+  changedFields Json
+  changeMessage String
+  createdAt DateTime [not null]
+  createdAtZ DateTime [default: `now()`]
+  files Json
+
+  indexes {
+    (skillId, versionNumber) [unique]
+  }
+}
+
+Table mastra_skills {
+  id String [pk]
+  status String [not null]
+  activeVersionId String
+  authorId String
+  createdAt DateTime [not null]
+  updatedAt DateTime [not null]
+  createdAtZ DateTime [default: `now()`]
+  updatedAtZ DateTime [default: `now()`]
+  visibility String
+  favoriteCount Int
+}
+
+Table mastra_thread_state {
+  threadId String [not null]
+  type String [not null]
+  value Json [not null]
+  createdAt DateTime [not null]
+  updatedAt DateTime [not null]
+  createdAtZ DateTime [default: `now()`]
+  updatedAtZ DateTime [default: `now()`]
+
+  indexes {
+    (threadId, type) [pk]
+  }
+}
+
+Table mastra_tool_provider_connections {
+  authorId String [not null]
+  providerId String [not null]
+  connectionId String [not null]
+  toolkit String [not null]
+  label String
+  scope String [not null]
+  createdAt DateTime [not null]
+  updatedAt DateTime [not null]
+  createdAtZ DateTime [default: `now()`]
+  updatedAtZ DateTime [default: `now()`]
+
+  indexes {
+    (authorId, providerId, connectionId) [pk]
+  }
+}
+
+Table mastra_workflow_definitions {
+  id String [pk]
+  description String
+  metadata Json
+  inputSchema Json [not null]
+  outputSchema Json [not null]
+  stateSchema Json
+  requestContextSchema Json
+  graph Json [not null]
+  schedule Json
+  status String [not null]
+  source String [not null]
+  authorId String
+  createdAt DateTime [not null]
+  updatedAt DateTime [not null]
+  createdAtZ DateTime [default: `now()`]
+  updatedAtZ DateTime [default: `now()`]
+}
+
+Table mastra_workspace_versions {
+  id String [pk]
+  workspaceId String [not null]
+  versionNumber Int [not null]
+  name String [not null]
+  description String
+  filesystem Json
+  sandbox Json
+  mounts Json
+  search Json
+  skills Json
+  tools Json
+  autoSync Boolean
+  operationTimeout Int
+  changedFields Json
+  changeMessage String
+  createdAt DateTime [not null]
+  createdAtZ DateTime [default: `now()`]
+
+  indexes {
+    (workspaceId, versionNumber) [unique]
+  }
+}
+
+Table mastra_workspaces {
+  id String [pk]
+  status String [not null]
+  activeVersionId String
+  authorId String
+  metadata Json
+  createdAt DateTime [not null]
+  updatedAt DateTime [not null]
+  createdAtZ DateTime [default: `now()`]
+  updatedAtZ DateTime [default: `now()`]
+}
+
+Table OAuthApp {
+  id String [pk]
+  organizationId String
+  name String [not null]
+  description String
+  pictureId String
+  redirectUrl String [not null]
+  redirectUris String
+  clientId String [unique, not null]
+  clientSecret String
+  dynamic Boolean [default: false, not null]
+  tokenEndpointAuthMethod String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  deletedAt DateTime
+
+  indexes {
+    (organizationId, deletedAt) [unique]
+  }
+}
+
+Table OAuthAuthorization {
+  id String [pk]
+  oauthAppId String [not null]
+  userId String [not null]
+  organizationId String [not null]
+  accessToken String
+  authorizationCode String
+  codeExpiresAt DateTime
+  codeChallenge String
+  codeChallengeMethod String
+  redirectUri String
+  revokedAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (oauthAppId, userId, organizationId) [unique]
+  }
+}
+
+Table OAuthSelfHostedAuthorization {
+  id String [pk]
+  oauthAppId String [not null]
+  mcpUrl String [not null]
+  apiKey String [not null]
+  email String
+  accessToken String
+  authorizationCode String
+  codeExpiresAt DateTime
+  codeChallenge String
+  codeChallengeMethod String
+  redirectUri String
+  revokedAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table Announcement {
+  id String [pk]
+  title String [not null]
+  description String [not null]
+  color AnnouncementColor [default: 'INFO', not null]
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Ref Tags_orgId_fk: Tags.orgId > Organization.id
+
+Ref TagsPosts_postId_fk: TagsPosts.postId > Post.id
+
+Ref TagsPosts_tagId_fk: TagsPosts.tagId > Tags.id
+
+Ref User_pictureId_fk: User.pictureId > Media.id
+
+Ref UsedCodes_orgId_fk: UsedCodes.orgId > Organization.id
+
+Ref UserOrganization_organizationId_fk: UserOrganization.organizationId > Organization.id
+
+Ref UserOrganization_userId_fk: UserOrganization.userId > User.id
+
+Ref GitHub_organizationId_fk: GitHub.organizationId > Organization.id
+
+Ref ItemUser_userId_fk: ItemUser.userId > User.id
+
+Ref Media_organizationId_fk: Media.organizationId > Organization.id
+
+Ref SocialMediaAgency_logoId_fk: SocialMediaAgency.logoId > Media.id
+
+Ref SocialMediaAgency_userId_fk: SocialMediaAgency.userId - User.id
+
+Ref SocialMediaAgencyNiche_agencyId_fk: SocialMediaAgencyNiche.agencyId > SocialMediaAgency.id
+
+Ref Credits_organizationId_fk: Credits.organizationId > Organization.id
+
+Ref Clipping_organizationId_fk: Clipping.organizationId > Organization.id
+
+Ref ClippingClip_clippingId_fk: ClippingClip.clippingId > Clipping.id
+
+Ref Subscription_organizationId_fk: Subscription.organizationId - Organization.id
+
+Ref Customer_orgId_fk: Customer.orgId > Organization.id
+
+Ref Integration_customerId_fk: Integration.customerId > Customer.id
+
+Ref Integration_organizationId_fk: Integration.organizationId > Organization.id
+
+Ref Signatures_organizationId_fk: Signatures.organizationId > Organization.id
+
+Ref Comments_organizationId_fk: Comments.organizationId > Organization.id
+
+Ref Comments_postId_fk: Comments.postId > Post.id
+
+Ref Comments_userId_fk: Comments.userId > User.id
+
+Ref Comments_parentId_fk: Comments.parentId > Comments.id
+
+Ref Post_integrationId_fk: Post.integrationId > Integration.id
+
+Ref Post_lastMessageId_fk: Post.lastMessageId > Messages.id
+
+Ref Post_organizationId_fk: Post.organizationId > Organization.id
+
+Ref Post_parentPostId_fk: Post.parentPostId > Post.id
+
+Ref Post_submittedForOrderId_fk: Post.submittedForOrderId > Orders.id
+
+Ref Post_submittedForOrganizationId_fk: Post.submittedForOrganizationId > Organization.id
+
+Ref Notifications_organizationId_fk: Notifications.organizationId > Organization.id
+
+Ref MessagesGroup_buyerId_fk: MessagesGroup.buyerId > User.id
+
+Ref MessagesGroup_buyerOrganizationId_fk: MessagesGroup.buyerOrganizationId > Organization.id
+
+Ref MessagesGroup_sellerId_fk: MessagesGroup.sellerId > User.id
+
+Ref PayoutProblems_orderId_fk: PayoutProblems.orderId > Orders.id
+
+Ref PayoutProblems_postId_fk: PayoutProblems.postId > Post.id
+
+Ref PayoutProblems_userId_fk: PayoutProblems.userId > User.id
+
+Ref Orders_buyerId_fk: Orders.buyerId > User.id
+
+Ref Orders_messageGroupId_fk: Orders.messageGroupId > MessagesGroup.id
+
+Ref Orders_sellerId_fk: Orders.sellerId > User.id
+
+Ref OrderItems_integrationId_fk: OrderItems.integrationId > Integration.id
+
+Ref OrderItems_orderId_fk: OrderItems.orderId > Orders.id
+
+Ref Messages_groupId_fk: Messages.groupId > MessagesGroup.id
+
+Ref Plugs_integrationId_fk: Plugs.integrationId > Integration.id
+
+Ref Plugs_organizationId_fk: Plugs.organizationId > Organization.id
+
+Ref ExisingPlugData_integrationId_fk: ExisingPlugData.integrationId > Integration.id
+
+Ref IntegrationsWebhooks_integrationId_fk: IntegrationsWebhooks.integrationId > Integration.id
+
+Ref IntegrationsWebhooks_webhookId_fk: IntegrationsWebhooks.webhookId > Webhooks.id
+
+Ref Webhooks_organizationId_fk: Webhooks.organizationId > Organization.id
+
+Ref AutoPost_organizationId_fk: AutoPost.organizationId > Organization.id
+
+Ref Sets_organizationId_fk: Sets.organizationId > Organization.id
+
+Ref ThirdParty_organizationId_fk: ThirdParty.organizationId > Organization.id
+
+Ref Errors_organizationId_fk: Errors.organizationId > Organization.id
+
+Ref Errors_postId_fk: Errors.postId > Post.id
+
+Ref OAuthApp_organizationId_fk: OAuthApp.organizationId > Organization.id
+
+Ref OAuthApp_pictureId_fk: OAuthApp.pictureId > Media.id
+
+Ref OAuthAuthorization_oauthAppId_fk: OAuthAuthorization.oauthAppId > OAuthApp.id
+
+Ref OAuthAuthorization_userId_fk: OAuthAuthorization.userId > User.id
+
+Ref OAuthAuthorization_organizationId_fk: OAuthAuthorization.organizationId > Organization.id
+
+Ref OAuthSelfHostedAuthorization_oauthAppId_fk: OAuthSelfHostedAuthorization.oauthAppId > OAuthApp.id

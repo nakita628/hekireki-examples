@@ -1,0 +1,8 @@
+packages: []
+
+# No dependency runs a lifecycle script: prisma's and @prisma/engines' postinstall only download
+# engine binaries that the generators do not use. rules_js reads this to know which packages get
+# a lifecycle action.
+allowBuilds:
+  prisma: false
+  '@prisma/engines': false

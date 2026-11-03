@@ -1,0 +1,25 @@
+# Bazel settings shared by every developer and CI.
+common --enable_bzlmod
+common --lockfile_mode=update
+
+# Keep the output tree readable: generated outputs are inspected by eye.
+build --show_result=0
+
+# A generation runs a dozen node processes at once (one per generator); the actions declare
+# `resources:memory` so that only as many schemas generate at a time as the memory takes.
+build --local_resources=memory=HOST_RAM*.6
+
+# The language checks under //checks run the language's own toolchain (go, cargo, mix, ...),
+# which lives outside Bazel; those tests are tagged `no-sandbox` and `requires-network`
+# and read the toolchain from the invoking shell.
+test --test_env=HOME --test_env=PATH
+test --test_output=errors
+
+# A CI run adds `--config=ci`.
+build:ci --announce_rc
+build:ci --curses=no --color=yes
+test:ci --test_output=errors
+
+# The language checks (tests tagged `lang`) are left out of `bazel test //...`: each needs its
+# toolchain installed. Run one with `bazel test --test_tag_filters=lang-gorm //checks/...`.
+test --test_tag_filters=-lang

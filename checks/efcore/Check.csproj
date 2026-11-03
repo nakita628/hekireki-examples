@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Compiles the C# hekireki-efcore wrote (copied to Models/ by check.sh) against the real EF Core
+    and the provider of the schema's datasource, with every warning an error.
+  -->
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="9.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.3" />
+    <!-- ulid() and cuid() / cuid(2) defaults are generated with these. -->
+    <PackageReference Include="Ulid" Version="1.4.1" />
+    <PackageReference Include="cuid.net" Version="7.1.0" />
+  </ItemGroup>
+
+</Project>

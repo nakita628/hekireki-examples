@@ -1,0 +1,11 @@
+load("//checks:defs.bzl", "lang_checks")
+
+# py_compile, import and mypy --strict against SQLAlchemy for the models of every schema.
+lang_checks(
+    lang = "sqlalchemy",
+    harness = [
+        "mypy.ini",
+        "requirements.txt",
+        "//checks:common.sh",
+    ],
+)

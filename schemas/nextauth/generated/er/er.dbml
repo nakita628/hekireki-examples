@@ -1,0 +1,62 @@
+Table User {
+  id String [pk]
+  name String
+  email String [unique, not null]
+  emailVerified DateTime
+  image String
+}
+
+Table Account {
+  userId String [not null]
+  type String [not null]
+  provider String [not null]
+  providerAccountId String [not null]
+  refresh_token String
+  access_token String
+  expires_at Int
+  token_type String
+  scope String
+  id_token String
+  session_state String
+
+  indexes {
+    (provider, providerAccountId) [pk]
+  }
+}
+
+Table Session {
+  sessionToken String [unique, not null]
+  userId String [not null]
+  expires DateTime [not null]
+}
+
+Table VerificationToken {
+  identifier String [not null]
+  token String [unique, not null]
+  expires DateTime [not null]
+
+  indexes {
+    (identifier, token) [pk]
+  }
+}
+
+Table Authenticator {
+  credentialID String [unique, not null]
+  userId String [not null]
+  providerAccountId String [not null]
+  credentialPublicKey String [not null]
+  counter Int [not null]
+  credentialDeviceType String [not null]
+  credentialBackedUp Boolean [not null]
+  transports String
+
+  indexes {
+    (userId, credentialID) [pk]
+  }
+}
+
+Ref Account_userId_fk: Account.userId > User.id [delete: cascade]
+
+Ref Session_userId_fk: Session.userId > User.id [delete: cascade]
+
+Ref Authenticator_userId_fk: Authenticator.userId > User.id [delete: cascade]

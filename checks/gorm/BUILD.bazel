@@ -1,0 +1,10 @@
+load("//checks:defs.bzl", "lang_checks")
+
+# gofmt, go vet and go build against GORM for the structs of every schema.
+lang_checks(
+    lang = "gorm",
+    harness = [
+        "go.mod",
+        "//checks:common.sh",
+    ],
+)

@@ -1,0 +1,373 @@
+Enum AccessType {
+  MCP
+  PRIVATE
+  PUBLIC
+}
+
+Enum AssetClass {
+  ALTERNATIVE_INVESTMENT
+  COMMODITY
+  EQUITY
+  FIXED_INCOME
+  LIQUIDITY
+  REAL_ESTATE
+}
+
+Enum AssetSubClass {
+  BOND
+  CASH
+  COLLECTIBLE
+  COMMODITY
+  CRYPTOCURRENCY
+  ETF
+  LOAN
+  MUTUALFUND
+  PRECIOUS_METAL
+  PRIVATE_EQUITY
+  STOCK
+}
+
+Enum DataGatheringFrequency {
+  DAILY
+  HOURLY
+}
+
+Enum DataSource {
+  ALPHA_VANTAGE
+  COINGECKO
+  EOD_HISTORICAL_DATA
+  FINANCIAL_MODELING_PREP
+  GHOSTFOLIO
+  GOOGLE_SHEETS
+  MANUAL
+  RAPID_API
+  YAHOO
+}
+
+Enum MarketDataState {
+  CLOSE
+  INTRADAY
+}
+
+Enum Provider {
+  ANONYMOUS
+  GOOGLE
+  INTERNET_IDENTITY
+  OIDC
+}
+
+Enum RequestClient {
+  API
+  MCP
+  SELF_HOSTING
+  WEB
+}
+
+Enum Role {
+  ADMIN
+  DEMO
+  INACTIVE
+  USER
+}
+
+Enum Type {
+  BUY
+  DIVIDEND
+  FEE
+  INTEREST
+  LIABILITY
+  SELL
+}
+
+Enum ViewMode {
+  DEFAULT
+  ZEN
+}
+
+Table Access {
+  alias String
+  createdAt DateTime [default: `now()`, not null]
+  expiresAt DateTime [not null]
+  granteeUserId String
+  id String [pk]
+  lastUsedAt DateTime
+  scopes String[] [not null]
+  settings Json [default: '{}', not null]
+  type AccessType [default: 'PRIVATE', not null]
+  updatedAt DateTime [not null]
+  userId String [not null]
+}
+
+Table Account {
+  comment String
+  createdAt DateTime [default: `now()`, not null]
+  currency String
+  id String [not null]
+  name String
+  platformId String
+  updatedAt DateTime [not null]
+  userId String [not null]
+
+  indexes {
+    (id, userId) [pk]
+  }
+}
+
+Table AccountBalance {
+  accountId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  date DateTime [default: `now()`, not null]
+  id String [pk]
+  updatedAt DateTime [not null]
+  userId String [not null]
+  value Float [not null]
+
+  indexes {
+    (accountId, userId, date) [unique]
+  }
+}
+
+Table Analytics {
+  activityCount Int [default: 0, not null]
+  country String
+  dataProviderGhostfolioDailyRequests Int [default: 0, not null]
+  lastRequestAt DateTime [default: `now()`, not null]
+  lastRequestClient RequestClient
+  updatedAt DateTime [not null]
+  userId String [pk]
+}
+
+Table ApiKey {
+  createdAt DateTime [default: `now()`, not null]
+  hashedKey String [unique, not null]
+  id String [pk]
+  updatedAt DateTime [not null]
+  userId String [not null]
+}
+
+Table SymbolProfileOverrides {
+  assetClass AssetClass
+  assetSubClass AssetSubClass
+  countries Json [default: '[]']
+  holdings Json [default: '[]']
+  name String
+  sectors Json [default: '[]']
+  symbolProfileId String [pk]
+  updatedAt DateTime [not null]
+  url String
+}
+
+Table AssetProfileResolution {
+  createdAt DateTime [default: `now()`, not null]
+  currency String [not null]
+  dataSourceOrigin DataSource [not null]
+  dataSourceTarget DataSource [not null]
+  id String [pk]
+  requestCount Int [default: 1, not null]
+  symbolOrigin String [not null]
+  symbolTarget String [not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (dataSourceOrigin, symbolOrigin) [unique]
+  }
+}
+
+Table AssetProfileSplit {
+  createdAt DateTime [default: `now()`, not null]
+  date DateTime [not null]
+  denominator Int [not null]
+  id String [pk]
+  numerator Int [not null]
+  symbolProfileId String [not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (symbolProfileId, date) [unique]
+  }
+
+  Note: '''A stock split of an asset profile. The numerator is the number of shares
+held after the split, the denominator the number of shares held before, for
+example 4 and 1 for a 4:1 split or 1 and 10 for a 1:10 reverse split.
+
+The ratio is stored as two integers instead of the resulting factor, so that
+it stays exact, for example 1/3 for a 1:3 reverse split.
+
+Activities before the date are adjusted by the ratio: the quantity is
+multiplied by it and the unit price divided by it, so that the total value
+of an activity stays the same.
+
+Market data is already split-adjusted by the data providers and must not be
+adjusted again.'''
+}
+
+Table AuthDevice {
+  createdAt DateTime [default: `now()`, not null]
+  credentialId Bytes [not null]
+  credentialPublicKey Bytes [not null]
+  counter Int [not null]
+  id String [pk]
+  updatedAt DateTime [not null]
+  userId String [not null]
+}
+
+Table MarketData {
+  createdAt DateTime [default: `now()`, not null]
+  dataSource DataSource [not null]
+  date DateTime [not null]
+  id String [pk]
+  isCarriedForward Boolean [default: false, not null]
+  marketPrice Float [not null]
+  state MarketDataState [default: 'CLOSE', not null]
+  symbol String [not null]
+
+  indexes {
+    (dataSource, symbol, date) [unique]
+  }
+}
+
+Table Order {
+  accountId String
+  accountUserId String
+  comment String
+  createdAt DateTime [default: `now()`, not null]
+  currency String
+  date DateTime [not null]
+  fee Float [not null]
+  id String [pk]
+  quantity Float [not null]
+  symbolProfileId String [not null]
+  type Type [not null]
+  unitPrice Float [not null]
+  updatedAt DateTime [not null]
+  userId String [not null]
+}
+
+Table Platform {
+  id String [pk]
+  name String
+  url String [unique, not null]
+}
+
+Table Property {
+  key String [pk]
+  value String [not null]
+}
+
+Table Settings {
+  settings Json
+  updatedAt DateTime [not null]
+  userId String [pk]
+}
+
+Table SymbolProfile {
+  assetClass AssetClass
+  assetSubClass AssetSubClass
+  comment String
+  countries Json
+  createdAt DateTime [default: `now()`, not null]
+  currency String [not null]
+  cusip String
+  dataGatheringFrequency DataGatheringFrequency [default: 'DAILY', not null]
+  dataSource DataSource [not null]
+  figi String
+  figiComposite String
+  figiShareClass String
+  holdings Json [default: '[]']
+  id String [pk]
+  isActive Boolean [default: true, not null]
+  isin String
+  name String
+  scraperConfiguration Json
+  sectors Json
+  symbol String [not null]
+  symbolMapping Json
+  updatedAt DateTime [not null]
+  url String
+  userId String
+
+  indexes {
+    (dataSource, symbol) [unique]
+  }
+}
+
+Table Subscription {
+  createdAt DateTime [default: `now()`, not null]
+  expiresAt DateTime [not null]
+  id String [pk]
+  price Float
+  stripeCheckoutSessionId String [unique]
+  updatedAt DateTime [not null]
+  userId String [not null]
+}
+
+Table Tag {
+  id String [pk]
+  name String [not null]
+  userId String
+
+  indexes {
+    (name, userId) [unique]
+  }
+}
+
+Table TagsOnAccounts {
+  accountId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  tagId String [not null]
+  updatedAt DateTime [not null]
+  userId String [not null]
+
+  indexes {
+    (accountId, tagId, userId) [pk]
+  }
+}
+
+Table User {
+  accessToken String
+  authChallenge String
+  createdAt DateTime [default: `now()`, not null]
+  id String [pk]
+  provider Provider [default: 'ANONYMOUS', not null]
+  role Role [default: 'USER', not null]
+  thirdPartyId String
+  updatedAt DateTime [not null]
+}
+
+Ref Access_granteeUserId_fk: Access.granteeUserId > User.id [delete: cascade]
+
+Ref Access_userId_fk: Access.userId > User.id [delete: cascade]
+
+Ref Account_platformId_fk: Account.platformId > Platform.id
+
+Ref Account_userId_fk: Account.userId > User.id [delete: cascade]
+
+Ref AccountBalance_(accountId, userId)_fk: AccountBalance.(accountId, userId) > Account.(id, userId) [delete: cascade]
+
+Ref Analytics_userId_fk: Analytics.userId - User.id [delete: cascade]
+
+Ref ApiKey_userId_fk: ApiKey.userId > User.id [delete: cascade]
+
+Ref SymbolProfileOverrides_symbolProfileId_fk: SymbolProfileOverrides.symbolProfileId - SymbolProfile.id [delete: cascade]
+
+Ref AssetProfileSplit_symbolProfileId_fk: AssetProfileSplit.symbolProfileId > SymbolProfile.id [delete: cascade]
+
+Ref AuthDevice_userId_fk: AuthDevice.userId > User.id [delete: cascade]
+
+Ref Order_(accountId, accountUserId)_fk: Order.(accountId, accountUserId) > Account.(id, userId)
+
+Ref Order_userId_fk: Order.userId > User.id [delete: cascade]
+
+Ref Order_symbolProfileId_fk: Order.symbolProfileId > SymbolProfile.id
+
+Ref Settings_userId_fk: Settings.userId - User.id [delete: cascade]
+
+Ref SymbolProfile_userId_fk: SymbolProfile.userId > User.id [delete: cascade]
+
+Ref Subscription_userId_fk: Subscription.userId > User.id [delete: cascade]
+
+Ref Tag_userId_fk: Tag.userId > User.id [delete: cascade]
+
+Ref TagsOnAccounts_(accountId, userId)_fk: TagsOnAccounts.(accountId, userId) > Account.(id, userId) [delete: cascade]
+
+Ref TagsOnAccounts_tagId_fk: TagsOnAccounts.tagId > Tag.id [delete: cascade]

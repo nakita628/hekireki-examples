@@ -1,0 +1,48 @@
+#nullable enable
+
+using System;
+
+namespace Formbricks.Models;
+
+public partial class Account
+{
+    public string Id { get; set; } = null!;
+
+    public DateTime CreatedAt { get; set; }
+
+    public DateTime UpdatedAt { get; set; }
+
+    public virtual User? User { get; set; }
+
+    public string UserId { get; set; } = null!;
+
+    public string? Type { get; set; }
+
+    public string Provider { get; set; } = null!;
+
+    public string ProviderAccountId { get; set; } = null!;
+
+    public string? AccessToken { get; set; }
+
+    public string? RefreshToken { get; set; }
+
+    public int? ExpiresAt { get; set; }
+
+    public int? ExtExpiresIn { get; set; }
+
+    public string? TokenType { get; set; }
+
+    public string? Scope { get; set; }
+
+    public string? IdToken { get; set; }
+
+    public string? SessionState { get; set; }
+
+    public string? Password { get; set; }
+
+    public DateTime? AccessTokenExpiresAt { get; set; }
+
+    public DateTime? RefreshTokenExpiresAt { get; set; }
+
+    public string? Issuer { get; set; }
+}

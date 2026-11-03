@@ -1,0 +1,15 @@
+load("//checks:defs.bzl", "lang_checks")
+load("//schemas:schemas.bzl", "POSTGRESQL_SCHEMAS")
+
+# Kotlin compiled with every warning an error against the real Exposed for the tables and DAO
+# entities of every PostgreSQL schema (hekireki-exposed writes for no other provider).
+lang_checks(
+    lang = "exposed",
+    harness = [
+        "build.gradle.kts",
+        "gradle.properties",
+        "settings.gradle.kts",
+        "//checks:common.sh",
+    ],
+    schemas = POSTGRESQL_SCHEMAS,
+)

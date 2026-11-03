@@ -1,0 +1,382 @@
+Table user {
+  user_id String [pk]
+  username String [unique, not null]
+  password String [not null]
+  role String [not null]
+  logo_url String
+  display_name String
+  two_factor_required Boolean [default: false, not null]
+  created_at DateTime [default: `now()`]
+  updated_at DateTime
+  deleted_at DateTime
+}
+
+Table api_key {
+  api_key_id String [pk]
+  user_id String [not null]
+  name String [not null]
+  key_hash String [unique, not null]
+  key_prefix String [not null]
+  last_used_at DateTime
+  created_at DateTime [default: `now()`]
+}
+
+Table session {
+  session_id String [pk]
+  website_id String [not null]
+  browser String
+  os String
+  device String
+  screen String
+  language String
+  country String
+  region String
+  city String
+  distinct_id String
+  created_at DateTime [default: `now()`]
+}
+
+Table session_link {
+  website_id String [not null]
+  session_id String [not null]
+  distinct_id String [not null]
+  created_at DateTime [default: `now()`]
+
+  indexes {
+    (website_id, distinct_id, session_id) [pk]
+  }
+}
+
+Table website {
+  website_id String [pk]
+  name String [not null]
+  domain String
+  reset_at DateTime
+  user_id String
+  team_id String
+  created_by String
+  created_at DateTime [default: `now()`]
+  updated_at DateTime
+  deleted_at DateTime
+  recorder_enabled Boolean [default: false, not null]
+  replay_config Json
+}
+
+Table website_event {
+  event_id String [pk]
+  website_id String [not null]
+  session_id String [not null]
+  visit_id String [not null]
+  created_at DateTime [default: `now()`]
+  url_path String [not null]
+  url_query String
+  utm_source String
+  utm_medium String
+  utm_campaign String
+  utm_content String
+  utm_term String
+  referrer_path String
+  referrer_query String
+  referrer_domain String
+  page_title String
+  gclid String
+  fbclid String
+  msclkid String
+  ttclid String
+  li_fat_id String
+  twclid String
+  event_type Int [default: 1, not null]
+  event_name String
+  tag String
+  hostname String
+  lcp Decimal
+  inp Decimal
+  cls Decimal
+  fcp Decimal
+  ttfb Decimal
+}
+
+Table event_data {
+  event_data_id String [pk]
+  website_id String [not null]
+  website_event_id String [not null]
+  data_key String [not null]
+  string_value String
+  number_value Decimal
+  date_value DateTime
+  data_type Int [not null]
+  created_at DateTime [default: `now()`]
+}
+
+Table session_data {
+  session_data_id String [pk]
+  website_id String [not null]
+  session_id String [not null]
+  data_key String [not null]
+  string_value String
+  number_value Decimal
+  date_value DateTime
+  data_type Int [not null]
+  distinct_id String
+  created_at DateTime [default: `now()`]
+
+  indexes {
+    (session_id, data_key) [unique]
+  }
+}
+
+Table team {
+  team_id String [pk]
+  name String [not null]
+  access_code String [unique]
+  logo_url String
+  two_factor_required Boolean [default: false, not null]
+  created_at DateTime [default: `now()`]
+  updated_at DateTime
+  deleted_at DateTime
+}
+
+Table team_user {
+  team_user_id String [pk]
+  team_id String [not null]
+  user_id String [not null]
+  role String [not null]
+  created_at DateTime [default: `now()`]
+  updated_at DateTime
+}
+
+Table report {
+  report_id String [pk]
+  user_id String [not null]
+  website_id String [not null]
+  type String [not null]
+  name String [not null]
+  description String [not null]
+  parameters Json [not null]
+  created_at DateTime [default: `now()`]
+  updated_at DateTime
+}
+
+Table annotation {
+  annotation_id String [pk]
+  website_id String [not null]
+  user_id String
+  date DateTime [not null]
+  all_day Boolean [default: true, not null]
+  note String [not null]
+  created_at DateTime [default: `now()`]
+  updated_at DateTime
+}
+
+Table segment {
+  segment_id String [pk]
+  website_id String [not null]
+  type String [not null]
+  name String [not null]
+  parameters Json [not null]
+  created_at DateTime [default: `now()`]
+  updated_at DateTime
+}
+
+Table revenue {
+  revenue_id String [pk]
+  website_id String [not null]
+  session_id String [not null]
+  event_id String [not null]
+  event_name String [not null]
+  currency String [not null]
+  revenue Decimal
+  created_at DateTime [default: `now()`]
+}
+
+Table link {
+  link_id String [pk]
+  name String [not null]
+  url String [not null]
+  slug String [unique, not null]
+  user_id String
+  team_id String
+  created_at DateTime [default: `now()`]
+  updated_at DateTime
+  deleted_at DateTime
+}
+
+Table pixel {
+  pixel_id String [pk]
+  name String [not null]
+  slug String [unique, not null]
+  user_id String
+  team_id String
+  created_at DateTime [default: `now()`]
+  updated_at DateTime
+  deleted_at DateTime
+}
+
+Table board {
+  board_id String [pk]
+  type String [not null]
+  name String [not null]
+  description String [not null]
+  parameters Json [not null]
+  user_id String
+  team_id String
+  created_at DateTime [default: `now()`]
+  updated_at DateTime
+}
+
+Table share {
+  share_id String [pk]
+  entity_id String [not null]
+  name String [not null]
+  share_type Int [not null]
+  slug String [unique, not null]
+  parameters Json [not null]
+  created_at DateTime [default: `now()`]
+  updated_at DateTime
+}
+
+Table session_replay {
+  replay_id String [pk]
+  website_id String [not null]
+  session_id String [not null]
+  visit_id String [not null]
+  chunk_index Int [not null]
+  events Bytes [not null]
+  event_count Int [not null]
+  started_at DateTime [not null]
+  ended_at DateTime [not null]
+  created_at DateTime [default: `now()`]
+}
+
+Table session_replay_saved {
+  saved_replay_id String [pk]
+  name String [not null]
+  website_id String [not null]
+  visit_id String [not null]
+  created_at DateTime [default: `now()`]
+  updated_at DateTime
+
+  indexes {
+    (website_id, visit_id) [unique]
+  }
+}
+
+Table heatmap_event {
+  heatmap_event_id String [pk]
+  website_id String [not null]
+  session_id String [not null]
+  visit_id String [not null]
+  url_path String [not null]
+  event_type Int [not null]
+  x Int
+  y Int
+  page_x Int
+  page_y Int
+  page_w Int
+  viewport_w Int
+  viewport_h Int
+  page_h Int
+  scroll_pct Int
+  created_at DateTime [default: `now()`, not null]
+}
+
+Table two_factor_auth {
+  id String [pk]
+  user_id String [unique, not null]
+  secret String [not null]
+  is_enabled Boolean [default: false, not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+}
+
+Table two_factor_backup_code {
+  id String [pk]
+  user_id String [not null]
+  code_hash String [not null]
+  used Boolean [default: false, not null]
+  created_at DateTime [default: `now()`, not null]
+}
+
+Table two_factor_otp_used {
+  id String [pk]
+  user_id String [not null]
+  otp String [not null]
+  expires_at DateTime [not null]
+
+  indexes {
+    (user_id, otp) [unique]
+  }
+}
+
+Table two_factor_rate_limit {
+  id String [pk]
+  user_id String [unique, not null]
+  attempts Int [default: 0, not null]
+  locked_until DateTime
+  updated_at DateTime [not null]
+}
+
+Table app_setting {
+  key String [pk]
+  value String [not null]
+}
+
+Ref api_key_user_id_fk: api_key.user_id > user.user_id [delete: cascade]
+
+Ref website_user_id_fk: website.user_id > user.user_id
+
+Ref website_created_by_fk: website.created_by > user.user_id
+
+Ref website_team_id_fk: website.team_id > team.team_id
+
+Ref website_event_session_id_fk: website_event.session_id > session.session_id
+
+Ref event_data_website_id_fk: event_data.website_id > website.website_id
+
+Ref event_data_website_event_id_fk: event_data.website_event_id > website_event.event_id
+
+Ref session_data_website_id_fk: session_data.website_id > website.website_id
+
+Ref session_data_session_id_fk: session_data.session_id > session.session_id
+
+Ref team_user_team_id_fk: team_user.team_id > team.team_id
+
+Ref team_user_user_id_fk: team_user.user_id > user.user_id
+
+Ref report_user_id_fk: report.user_id > user.user_id
+
+Ref report_website_id_fk: report.website_id > website.website_id
+
+Ref annotation_website_id_fk: annotation.website_id > website.website_id
+
+Ref segment_website_id_fk: segment.website_id > website.website_id
+
+Ref revenue_website_id_fk: revenue.website_id > website.website_id
+
+Ref revenue_session_id_fk: revenue.session_id > session.session_id
+
+Ref link_user_id_fk: link.user_id > user.user_id
+
+Ref link_team_id_fk: link.team_id > team.team_id
+
+Ref pixel_user_id_fk: pixel.user_id > user.user_id
+
+Ref pixel_team_id_fk: pixel.team_id > team.team_id
+
+Ref board_user_id_fk: board.user_id > user.user_id
+
+Ref board_team_id_fk: board.team_id > team.team_id
+
+Ref session_replay_website_id_fk: session_replay.website_id > website.website_id
+
+Ref session_replay_saved_website_id_fk: session_replay_saved.website_id > website.website_id
+
+Ref heatmap_event_website_id_fk: heatmap_event.website_id > website.website_id
+
+Ref two_factor_auth_user_id_fk: two_factor_auth.user_id - user.user_id [delete: cascade]
+
+Ref two_factor_backup_code_user_id_fk: two_factor_backup_code.user_id > user.user_id [delete: cascade]
+
+Ref two_factor_otp_used_user_id_fk: two_factor_otp_used.user_id > user.user_id [delete: cascade]
+
+Ref two_factor_rate_limit_user_id_fk: two_factor_rate_limit.user_id - user.user_id [delete: cascade]

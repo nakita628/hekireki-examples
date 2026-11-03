@@ -1,0 +1,15 @@
+use sea_orm::entity::prelude::*;
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
+#[sea_orm(
+    rs_type = "String",
+    db_type = "Enum",
+    enum_name = "SecretStoreProvider"
+)]
+pub enum SecretStoreProvider {
+    #[sea_orm(string_value = "DATABASE")]
+    Database,
+    #[sea_orm(string_value = "AWS_PARAM_STORE")]
+    AwsParamStore,
+}

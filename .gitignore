@@ -1,0 +1,4 @@
+bazel-*
+node_modules/
+/MODULE.bazel.lock
+.DS_Store

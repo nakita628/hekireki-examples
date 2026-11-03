@@ -1,0 +1,472 @@
+Enum ChatProvider {
+  WHATSAPP
+  DIALOG360
+}
+
+Enum WorkspaceRole {
+  ADMIN
+  MEMBER
+  GUEST
+}
+
+Enum GraphNavigation {
+  MOUSE
+  TRACKPAD
+}
+
+Enum Plan {
+  FREE
+  STARTER
+  PRO
+  LIFETIME
+  OFFERED
+  CUSTOM
+  UNLIMITED
+  ENTERPRISE
+}
+
+Enum CollaborationType {
+  READ
+  WRITE
+  FULL_ACCESS
+}
+
+Table Account {
+  id String [pk]
+  userId String [not null]
+  type String [not null]
+  provider String [not null]
+  providerAccountId String [not null]
+  refresh_token String
+  access_token String
+  expires_at Int
+  token_type String
+  scope String
+  id_token String
+  session_state String
+  oauth_token_secret String
+  oauth_token String
+  refresh_token_expires_in Int
+
+  indexes {
+    (provider, providerAccountId) [unique]
+  }
+}
+
+Table Session {
+  id String [pk]
+  sessionToken String [unique, not null]
+  userId String [not null]
+  expires DateTime [not null]
+}
+
+Table User {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+  lastActivityAt DateTime [default: `now()`, not null]
+  name String
+  email String [unique]
+  emailVerified DateTime
+  image String
+  company String
+  onboardingCategories Json [not null]
+  referral String
+  graphNavigation GraphNavigation
+  preferredAppAppearance String
+  displayedInAppNotifications Json
+  groupTitlesAutoGeneration Json
+  preferredLanguage String
+  termsAcceptedAt DateTime
+}
+
+Table ApiToken {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  token String [unique, not null]
+  name String [not null]
+  ownerId String [not null]
+}
+
+Table Workspace {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+  name String [not null]
+  icon String
+  plan Plan [default: 'FREE', not null]
+  stripeId String [unique]
+  additionalChatsIndex Int [default: 0, not null]
+  additionalStorageIndex Int [default: 0, not null]
+  chatsLimitFirstEmailSentAt DateTime
+  storageLimitFirstEmailSentAt DateTime
+  chatsLimitSecondEmailSentAt DateTime
+  storageLimitSecondEmailSentAt DateTime
+  customChatsLimit Int
+  customStorageLimit Int
+  customSeatsLimit Int
+  isQuarantined Boolean [default: false, not null]
+  isSuspended Boolean [default: false, not null]
+  isPastDue Boolean [default: false, not null]
+  isVerified Boolean
+  chatsHardLimit Int
+  settings Json
+  lastActivityAt DateTime
+}
+
+Table Space {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+  name String [not null]
+  icon String
+  workspaceId String [not null]
+
+  indexes {
+    (id, workspaceId) [unique]
+  }
+}
+
+Table MemberInWorkspace {
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+  userId String [not null]
+  workspaceId String [not null]
+  role WorkspaceRole [not null]
+
+  indexes {
+    (userId, workspaceId) [unique]
+  }
+}
+
+Table WorkspaceInvitation {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+  email String [not null]
+  workspaceId String [not null]
+  type WorkspaceRole [not null]
+}
+
+Table CustomDomain {
+  name String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  workspaceId String [not null]
+}
+
+Table Credentials {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  workspaceId String [not null]
+  data String [not null]
+  name String [not null]
+  type String [not null]
+  iv String [not null]
+}
+
+Table UserCredentials {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  userId String [not null]
+  data String [not null]
+  name String [not null]
+  type String [not null]
+  iv String [not null]
+}
+
+Table VerificationToken {
+  identifier String [not null]
+  token String [unique, not null]
+  value String
+  failedAttempts Int [default: 0, not null]
+  expires DateTime [not null]
+
+  indexes {
+    (identifier, token) [unique]
+  }
+}
+
+Table DashboardFolder {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+  name String [not null]
+  parentFolderId String
+  workspaceId String [not null]
+}
+
+Table Typebot {
+  id String [pk]
+  version String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+  icon String
+  name String [not null]
+  folderId String
+  groups Json [not null]
+  events Json
+  variables Json [not null]
+  edges Json [not null]
+  theme Json [not null]
+  selectedThemeTemplateId String
+  settings Json [not null]
+  publicId String [unique]
+  customDomain String [unique]
+  workspaceId String [not null]
+  resultsTablePreferences Json
+  isArchived Boolean [default: false, not null]
+  isClosed Boolean [default: false, not null]
+  whatsAppCredentialsId String
+  riskLevel Int
+  spaceId String
+}
+
+Table Invitation {
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+  email String [not null]
+  typebotId String [not null]
+  type CollaborationType [not null]
+
+  indexes {
+    (email, typebotId) [unique]
+  }
+}
+
+Table CollaboratorsOnTypebots {
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+  userId String [not null]
+  typebotId String [not null]
+  type CollaborationType [not null]
+
+  indexes {
+    (userId, typebotId) [unique]
+  }
+}
+
+Table PublicTypebot {
+  id String [pk]
+  version String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+  lastActivityAt DateTime
+  typebotId String [unique, not null]
+  groups Json [not null]
+  events Json
+  variables Json [not null]
+  edges Json [not null]
+  theme Json [not null]
+  settings Json [not null]
+}
+
+Table RuntimeMediaIdCache {
+  provider ChatProvider [not null]
+  url String [not null]
+  mediaId String [not null]
+  expiresAt DateTime
+  publicTypebotId String [not null]
+
+  indexes {
+    (publicTypebotId, provider, url) [unique]
+  }
+}
+
+Table Result {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  typebotId String [not null]
+  variables Json [not null]
+  isCompleted Boolean [not null]
+  hasStarted Boolean
+  isArchived Boolean [default: false]
+  lastChatSessionId String
+}
+
+Table SetVariableHistoryItem {
+  resultId String [not null]
+  index Int [not null]
+  variableId String [not null]
+  blockId String [not null]
+  blockIndex Int
+  value Json [not null]
+
+  indexes {
+    (resultId, index) [unique]
+  }
+}
+
+Table VisitedEdge {
+  resultId String [not null]
+  edgeId String [not null]
+  index Int [not null]
+
+  indexes {
+    (resultId, index) [unique]
+  }
+}
+
+Table Log {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  resultId String [not null]
+  status String [not null]
+  context String
+  description String [not null]
+  details String
+}
+
+Table Answer {
+  createdAt DateTime [default: `now()`, not null]
+  resultId String [not null]
+  blockId String [not null]
+  groupId String [not null]
+  variableId String
+  content String [not null]
+
+  indexes {
+    (resultId, blockId, groupId) [unique]
+  }
+}
+
+Table AnswerV2 {
+  id Int [pk, increment]
+  createdAt DateTime [default: `now()`, not null]
+  blockId String [not null]
+  content String [not null]
+  attachedFileUrls Json
+  resultId String [not null]
+}
+
+Table Coupon {
+  userPropertiesToUpdate Json [not null]
+  code String [pk]
+  dateRedeemed DateTime
+}
+
+Table Webhook {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+  url String
+  method String [not null]
+  queryParams Json [not null]
+  headers Json [not null]
+  body String
+  typebotId String [not null]
+}
+
+Table ClaimableCustomPlan {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  claimedAt DateTime
+  name String [not null]
+  description String
+  price Int [not null]
+  currency String [not null]
+  workspaceId String [unique, not null]
+  chatsLimit Int [not null]
+  storageLimit Int [not null]
+  seatsLimit Int [not null]
+  isYearly Boolean [default: false, not null]
+  companyName String
+  vatType String
+  vatValue String
+}
+
+Table ChatSession {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+  state Json [not null]
+  isReplying Boolean
+}
+
+Table ThemeTemplate {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+  name String [not null]
+  theme Json [not null]
+  workspaceId String [not null]
+}
+
+Table BannedIp {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  ip String [unique, not null]
+  responsibleTypebotId String [not null]
+  userId String [not null]
+}
+
+Table SuppressedEmail {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+  email String [unique, not null]
+  transientGeneralBounceCount Int [default: 0, not null]
+  suppressedAt DateTime
+  lastWebhookId String
+}
+
+Ref Account_userId_fk: Account.userId > User.id [delete: cascade]
+
+Ref Session_userId_fk: Session.userId > User.id [delete: cascade]
+
+Ref ApiToken_ownerId_fk: ApiToken.ownerId > User.id [delete: cascade]
+
+Ref Space_workspaceId_fk: Space.workspaceId > Workspace.id [delete: cascade]
+
+Ref MemberInWorkspace_userId_fk: MemberInWorkspace.userId > User.id [delete: cascade]
+
+Ref MemberInWorkspace_workspaceId_fk: MemberInWorkspace.workspaceId > Workspace.id [delete: cascade]
+
+Ref WorkspaceInvitation_workspaceId_fk: WorkspaceInvitation.workspaceId > Workspace.id [delete: cascade]
+
+Ref CustomDomain_workspaceId_fk: CustomDomain.workspaceId > Workspace.id [delete: cascade]
+
+Ref Credentials_workspaceId_fk: Credentials.workspaceId > Workspace.id [delete: cascade]
+
+Ref UserCredentials_userId_fk: UserCredentials.userId > User.id [delete: cascade]
+
+Ref DashboardFolder_parentFolderId_fk: DashboardFolder.parentFolderId > DashboardFolder.id
+
+Ref DashboardFolder_workspaceId_fk: DashboardFolder.workspaceId > Workspace.id [delete: cascade]
+
+Ref Typebot_folderId_fk: Typebot.folderId > DashboardFolder.id
+
+Ref Typebot_workspaceId_fk: Typebot.workspaceId > Workspace.id [delete: cascade]
+
+Ref Typebot_spaceId_fk: Typebot.spaceId > Space.id [delete: set null]
+
+Ref Invitation_typebotId_fk: Invitation.typebotId > Typebot.id [delete: cascade]
+
+Ref CollaboratorsOnTypebots_typebotId_fk: CollaboratorsOnTypebots.typebotId > Typebot.id [delete: cascade]
+
+Ref CollaboratorsOnTypebots_userId_fk: CollaboratorsOnTypebots.userId > User.id [delete: cascade]
+
+Ref PublicTypebot_typebotId_fk: PublicTypebot.typebotId - Typebot.id [delete: cascade]
+
+Ref RuntimeMediaIdCache_publicTypebotId_fk: RuntimeMediaIdCache.publicTypebotId > PublicTypebot.id [delete: cascade]
+
+Ref Result_typebotId_fk: Result.typebotId > Typebot.id [delete: cascade]
+
+Ref SetVariableHistoryItem_resultId_fk: SetVariableHistoryItem.resultId > Result.id [delete: cascade]
+
+Ref VisitedEdge_resultId_fk: VisitedEdge.resultId > Result.id [delete: cascade]
+
+Ref Log_resultId_fk: Log.resultId > Result.id [delete: cascade]
+
+Ref Answer_resultId_fk: Answer.resultId > Result.id [delete: cascade]
+
+Ref AnswerV2_resultId_fk: AnswerV2.resultId > Result.id [delete: cascade]
+
+Ref Webhook_typebotId_fk: Webhook.typebotId > Typebot.id [delete: cascade]
+
+Ref ClaimableCustomPlan_workspaceId_fk: ClaimableCustomPlan.workspaceId - Workspace.id [delete: cascade]
+
+Ref ThemeTemplate_workspaceId_fk: ThemeTemplate.workspaceId > Workspace.id [delete: cascade]
+
+Ref BannedIp_responsibleTypebotId_fk: BannedIp.responsibleTypebotId > Typebot.id [delete: restrict]
+
+Ref BannedIp_userId_fk: BannedIp.userId > User.id [delete: restrict]

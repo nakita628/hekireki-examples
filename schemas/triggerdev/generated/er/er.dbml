@@ -1,0 +1,2468 @@
+Enum AuthenticationMethod {
+  GITHUB
+  MAGIC_LINK
+  GOOGLE
+  SSO
+}
+
+Enum OrganizationAccessTokenType {
+  USER
+  SYSTEM
+}
+
+Enum OrgMemberRole {
+  ADMIN
+  MEMBER
+}
+
+Enum RuntimeEnvironmentType {
+  PRODUCTION
+  STAGING
+  DEVELOPMENT
+  PREVIEW
+}
+
+Enum EnvironmentPauseSource {
+  BILLING_LIMIT
+}
+
+Enum ProjectVersion {
+  V2
+  V3
+}
+
+Enum SecretStoreProvider {
+  DATABASE
+  AWS_PARAM_STORE
+}
+
+Enum OidcSigningKeyStatus {
+  STAGED
+  ACTIVE
+  RETIRED
+}
+
+Enum OidcSigningKeyPurpose {
+  EXTERNAL_OIDC
+  INTERNAL_RUN
+}
+
+Enum TaskTriggerSource {
+  STANDARD
+  SCHEDULED
+  AGENT
+  WEBHOOK
+}
+
+Enum WebhookEndpointStatus {
+  ACTIVE
+  INACTIVE
+  DELETING
+}
+
+Enum WebhookDeliveryStatus {
+  PENDING
+  PROCESSING
+  SUCCEEDED
+  FAILED
+  FILTERED
+  UNMATCHED
+}
+
+Enum TaskRunStatus {
+  DELAYED
+  PENDING
+  PENDING_VERSION
+  WAITING_FOR_DEPLOY
+  DEQUEUED
+  EXECUTING
+  WAITING_TO_RESUME
+  RETRYING_AFTER_FAILURE
+  PAUSED
+  CANCELED
+  INTERRUPTED
+  COMPLETED_SUCCESSFULLY
+  COMPLETED_WITH_ERRORS
+  SYSTEM_FAILURE
+  CRASHED
+  EXPIRED
+  TIMED_OUT
+}
+
+Enum RunEngineVersion {
+  V1
+  V2
+}
+
+Enum TaskRunExecutionStatus {
+  RUN_CREATED
+  DELAYED
+  QUEUED
+  QUEUED_EXECUTING
+  PENDING_EXECUTING
+  EXECUTING
+  EXECUTING_WITH_WAITPOINTS
+  SUSPENDED
+  PENDING_CANCEL
+  FINISHED
+}
+
+Enum TaskRunCheckpointType {
+  DOCKER
+  KUBERNETES
+  COMPUTE
+}
+
+Enum WaitpointType {
+  RUN
+  DATETIME
+  MANUAL
+  BATCH
+}
+
+Enum WaitpointStatus {
+  PENDING
+  COMPLETED
+}
+
+Enum WorkerInstanceGroupType {
+  MANAGED
+  UNMANAGED
+}
+
+Enum WorkloadType {
+  CONTAINER
+  MICROVM
+}
+
+Enum TaskRunAttemptStatus {
+  PENDING
+  EXECUTING
+  PAUSED
+  FAILED
+  CANCELED
+  COMPLETED
+}
+
+Enum TaskEventLevel {
+  TRACE
+  DEBUG
+  LOG
+  INFO
+  WARN
+  ERROR
+}
+
+Enum TaskEventKind {
+  UNSPECIFIED
+  INTERNAL
+  SERVER
+  CLIENT
+  PRODUCER
+  CONSUMER
+  UNRECOGNIZED
+  LOG
+}
+
+Enum TaskEventStatus {
+  UNSET
+  OK
+  ERROR
+  UNRECOGNIZED
+}
+
+Enum TaskQueueType {
+  VIRTUAL
+  NAMED
+}
+
+Enum TaskQueueVersion {
+  V1
+  V2
+}
+
+Enum TaskQueueConcurrencyVersion {
+  V1
+  V2
+}
+
+Enum TaskQueueRole {
+  QUEUE
+  LIMIT
+}
+
+Enum BatchTaskRunStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  PARTIAL_FAILED
+  ABORTED
+}
+
+Enum BatchTaskRunItemStatus {
+  PENDING
+  FAILED
+  CANCELED
+  COMPLETED
+}
+
+Enum CheckpointType {
+  DOCKER
+  KUBERNETES
+}
+
+Enum CheckpointRestoreEventType {
+  CHECKPOINT
+  RESTORE
+}
+
+Enum WorkerDeploymentType {
+  MANAGED
+  UNMANAGED
+  V1
+}
+
+Enum WorkerDeploymentStatus {
+  PENDING
+  INSTALLING
+  BUILDING
+  DEPLOYING
+  DEPLOYED
+  FAILED
+  CANCELED
+  TIMED_OUT
+}
+
+Enum ScheduleType {
+  DECLARATIVE
+  IMPERATIVE
+}
+
+Enum ScheduleGeneratorType {
+  CRON
+}
+
+Enum ProjectAlertChannelType {
+  EMAIL
+  SLACK
+  WEBHOOK
+}
+
+Enum ProjectAlertType {
+  TASK_RUN
+  TASK_RUN_ATTEMPT
+  DEPLOYMENT_FAILURE
+  DEPLOYMENT_SUCCESS
+  ERROR_GROUP
+  DASHBOARD_AGENT_WATCH
+}
+
+Enum ProjectAlertStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+Enum IntegrationService {
+  SLACK
+  VERCEL
+}
+
+Enum BulkActionType {
+  CANCEL
+  REPLAY
+}
+
+Enum BulkActionStatus {
+  PENDING
+  COMPLETED
+  ABORTED
+}
+
+Enum BulkActionNotificationType {
+  NONE
+  EMAIL
+}
+
+Enum BulkActionItemStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+Enum GithubRepositorySelection {
+  ALL
+  SELECTED
+}
+
+Enum ImpersonationAuditLogAction {
+  START
+  STOP
+}
+
+Enum SupportAccessMode {
+  ALLOW
+  REQUIRES_REQUEST
+}
+
+Enum SupportAccessRequestStatus {
+  PENDING
+  APPROVED
+  CANCELLED
+}
+
+Enum CustomerQuerySource {
+  DASHBOARD
+  API
+}
+
+Enum CustomerQueryScope {
+  ORGANIZATION
+  PROJECT
+  ENVIRONMENT
+}
+
+Enum PlatformNotificationSurface {
+  WEBAPP
+  CLI
+}
+
+Enum PlatformNotificationScope {
+  USER
+  PROJECT
+  ORGANIZATION
+  GLOBAL
+}
+
+Enum ErrorGroupStatus {
+  UNRESOLVED
+  RESOLVED
+  IGNORED
+}
+
+Enum DataStoreKind {
+  CLICKHOUSE
+}
+
+Table User {
+  id String [pk]
+  email String [unique, not null]
+  pendingEmail String [note: 'Address awaiting confirmation; becomes `email` only after a link sent to it is opened']
+  authenticationMethod AuthenticationMethod [not null]
+  authenticationProfile Json
+  authenticationExtraParams Json
+  authIdentifier String [unique]
+  displayName String
+  name String
+  avatarUrl String
+  admin Boolean [default: false, not null]
+  dashboardPreferences Json [note: 'Preferences for the dashboard']
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  isOnCloudWaitlist Boolean [default: false, not null, note: '@deprecated']
+  featureCloud Boolean [default: false, not null, note: '@deprecated']
+  isOnHostedRepoWaitlist Boolean [default: false, not null, note: '@deprecated']
+  marketingEmails Boolean [default: true, not null]
+  confirmedBasicDetails Boolean [default: false, not null]
+  referralSource String
+  onboardingData Json
+  mfaEnabledAt DateTime
+  mfaSecretReferenceId String
+  mfaLastUsedCode String [note: 'Hash of the last used code to prevent replay attacks']
+  sessionDuration Int [default: 31556952, not null, note: '''Maximum session lifetime in seconds for this user. Default = 1 year (Gregorian).
+May be further restricted by Organization.maxSessionDuration on any of the user\'s orgs.''']
+  nextSessionEnd DateTime [note: '''Absolute timestamp at which the user\'s current session must end. Written
+at login (and any time the effective duration is recomputed) and shortened
+when an admin lowers an org cap. Read on requireUser / getUser; null is
+treated as "no enforced deadline" (legacy sessions from before this
+shipped). Read-on-demand has zero per-request DB cost — the value
+piggybacks on the User fetch that requireUser already does.''']
+  invitationCodeId String
+}
+
+Table MfaBackupCode {
+  id String [pk]
+  code String [not null, note: 'Hash of the actual code']
+  userId String [not null]
+  usedAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (userId, code) [unique]
+  }
+}
+
+Table InvitationCode {
+  id String [pk]
+  code String [unique, not null]
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Table AuthorizationCode {
+  id String [pk]
+  code String [unique, not null]
+  personalAccessTokenId String
+  requesterIp String [note: 'Client IP of the request that minted the code, compared with the approving browser\'s IP. Deleted with the code once it expires.']
+  codeChallenge String [note: 'S256 PKCE challenge from the client that minted the code. Null for codes minted by CLIs that predate it.']
+  callbackPort Int [note: 'Loopback port the approving browser is redirected to with the approval code. Null means the user pastes it.']
+  approvalCodeHash String [note: 'sha256 of the approval code, which only the approving browser ever sees.']
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  Note: 'Used to generate PersonalAccessTokens, they\'re one-time use'
+}
+
+Table PersonalAccessToken {
+  id String [pk]
+  name String [not null, note: 'If generated by the CLI this will be "cli", otherwise user-provided']
+  encryptedToken Json [not null, note: 'This is the token encrypted using the ENCRYPTION_KEY']
+  obfuscatedToken String [not null, note: 'This is shown in the UI, with ********']
+  hashedToken String [unique, not null, note: 'This is used to find the token in the database']
+  userId String [not null]
+  revokedAt DateTime
+  lastAccessedAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table OrganizationAccessToken {
+  id String [pk]
+  name String [not null, note: 'User-provided name for the token']
+  type OrganizationAccessTokenType [default: 'USER', not null, note: 'Used to differentiate between user-generated and system-generated tokens']
+  hashedToken String [unique, not null, note: 'This is used to find the token in the database']
+  organizationId String [not null]
+  expiresAt DateTime [note: 'Optional expiration date for the token']
+  revokedAt DateTime
+  lastAccessedAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table Organization {
+  id String [pk]
+  slug String [unique, not null]
+  title String [not null]
+  maximumExecutionTimePerRunInMs Int [default: 900000, not null]
+  maximumConcurrencyLimit Int [default: 10, not null]
+  maximumSchedulesLimit Int [default: 5, not null, note: 'This is deprecated and will be removed in the future']
+  maximumDevQueueSize Int
+  maximumDeployedQueueSize Int
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  deletedAt DateTime
+  companySize String
+  onboardingData Json
+  avatar Json
+  runsEnabled Boolean [default: true, not null]
+  v3Enabled Boolean [default: false, not null]
+  v2Enabled Boolean [default: false, not null, note: '@deprecated']
+  v2MarqsEnabled Boolean [default: false, not null, note: '@deprecated']
+  hasRequestedV3 Boolean [default: false, not null, note: '@deprecated']
+  apiRateLimiterConfig Json
+  realtimeRateLimiterConfig Json
+  batchRateLimitConfig Json
+  batchQueueConcurrencyConfig Json
+  webhookLimitsConfig Json [note: 'Webhook limits from the org\'s plan or the back office: { maxWaitersPerEnvironment, maxWaitersPerEndpoint, concurrency }. Null uses the env defaults.']
+  featureFlags Json
+  maximumProjectCount Int [default: 25, not null]
+  maxSessionDuration Int [note: '''Maximum session lifetime in seconds for members of this organization.
+When set, caps each member\'s User.sessionDuration. The most restrictive cap across
+all of a user\'s orgs (excluding nulls) wins.''']
+  streamBasinName String [note: '''S2 basin that holds this org\'s realtime streams. Null until the
+per-org basin has been provisioned (OSS / s2-lite installs leave
+it null forever; reads fall back to the global basin env var).
+Set once at provisioning time; retention is reconfigured in-place
+when the org\'s plan changes.''']
+  supportAccessMode SupportAccessMode [default: 'ALLOW', not null]
+  supportAccessModeUpdatedAt DateTime
+  supportAccessModeUpdatedById String
+}
+
+Table OrgMember {
+  id String [pk]
+  organizationId String [not null]
+  userId String [not null]
+  role OrgMemberRole [default: 'MEMBER', not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (organizationId, userId) [unique]
+  }
+}
+
+Table OrgMemberInvite {
+  id String [pk]
+  token String [unique, not null]
+  email String [not null]
+  role OrgMemberRole [default: 'MEMBER', not null]
+  rbacRoleId String [note: '''Optional RBAC role to assign on invite acceptance. When set, the
+accept-invite flow calls the loaded RBAC plugin\'s setUserRole with
+this id after creating the OrgMember. Null = legacy behaviour, the
+runtime fallback derives the role from `role` above.
+
+Plain text (not an FK) — the RBAC plugin\'s RbacRole table lives on
+a separate schema (Drizzle, not Prisma) so we can\'t model the FK
+here. Validation happens at write time (action) and read time
+(acceptInvite).''']
+  organizationId String [not null]
+  inviterId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (organizationId, email) [unique]
+  }
+}
+
+Table RuntimeEnvironment {
+  id String [pk]
+  slug String [not null]
+  apiKey String [unique, not null]
+  rootApiKeyHiddenAt DateTime [note: 'Non-null prevents the root API key from being returned to users.']
+  pkApiKey String [unique, not null, note: '@deprecated was for v2']
+  type RuntimeEnvironmentType [default: 'DEVELOPMENT', not null]
+  isBranchableEnvironment Boolean [default: false, not null, note: '''If true, this environment has branches and is treated differently in the dashboard/API
+NB: this flag is NOT used for Development branches, instead (type, parentEnvironmentId) = (DEVELOPMENT, NULL) is used''']
+  branchName String
+  parentEnvironmentId String
+  previewAutoArchiveAfterDays Int [note: 'Only configured on the PREVIEW root. Null disables automatic archiving.']
+  previewAutoArchiveExcludedBranches String[] [not null]
+  previewAutoArchiveNextCheckAt DateTime [note: 'Durable per-project cleanup progress. Null next-check disables scheduling.']
+  previewAutoArchiveCursorCreatedAt DateTime
+  previewAutoArchiveCursorId String
+  git Json
+  archivedAt DateTime [note: 'When set API calls will fail']
+  shortcode String [not null, note: 'A memorable code for the environment']
+  maximumConcurrencyLimit Int [default: 5, not null]
+  concurrencyLimitBurstFactor Decimal [default: 2, not null]
+  paused Boolean [default: false, not null]
+  pauseSource EnvironmentPauseSource
+  autoEnableInternalSources Boolean [default: true, not null]
+  organizationId String [not null]
+  projectId String [not null]
+  orgMemberId String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  builtInEnvironmentVariableOverrides Json [note: 'Allows us to customize the built-in environment variables for a specific environment, like TRIGGER_OTEL_SPAN_ATTRIBUTE_VALUE_LENGTH_LIMIT']
+  tunnelId String
+  currentSessionId String
+
+  indexes {
+    (projectId, slug, orgMemberId) [unique]
+    (projectId, shortcode) [unique]
+  }
+}
+
+Table api_keys {
+  id String [pk]
+  name String [not null]
+  key_hash String [unique, not null]
+  last_four String [not null]
+  runtime_environment_id String [not null]
+  created_by_user_id String
+  preset_id String
+  scopes String[] [not null]
+  last_used_at DateTime
+  revoked_at DateTime
+  expires_at DateTime
+  updated_at DateTime [not null]
+  created_at DateTime [default: `now()`, not null]
+}
+
+Table RevokedApiKey {
+  id String [pk]
+  apiKey String [not null]
+  runtimeEnvironmentId String [not null]
+  expiresAt DateTime [not null]
+  createdAt DateTime [default: `now()`, not null]
+
+  Note: '''Records of previously-valid API keys that are still accepted for authentication
+during a grace window after rotation. Extend or end the grace period by updating `expiresAt`.'''
+}
+
+Table Project {
+  id String [pk]
+  slug String [unique, not null]
+  name String [not null]
+  externalRef String [unique, not null]
+  organizationId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  deletedAt DateTime
+  initializedAt DateTime [note: 'Set the first time the CLI `init` command completes against this project. Drives the dev onboarding progress.']
+  defaultRuntime String [note: 'Runtime used when a deployment config does not specify one. Null preserves the legacy Node 20 fallback.']
+  version ProjectVersion [default: 'V2', not null]
+  engine RunEngineVersion [default: 'V1', not null]
+  builderProjectId String
+  defaultWorkerGroupId String
+  allowedMasterQueues String[] [not null, note: 'The master queues they are allowed to use (impacts what they can set as default and trigger runs with)']
+  buildSettings Json
+  onboardingData Json
+}
+
+Table SecretReference {
+  id String [pk]
+  key String [unique, not null]
+  provider SecretStoreProvider [default: 'DATABASE', not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table SecretStore {
+  key String [unique, not null]
+  value Json [not null]
+  version String [default: '1', not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table OidcSigningKey {
+  id String [pk]
+  kid String [unique, not null]
+  purpose OidcSigningKeyPurpose [default: 'EXTERNAL_OIDC', not null]
+  status OidcSigningKeyStatus [not null, note: 'At most one STAGED and one ACTIVE key per purpose: enforced by a partial unique index in the migration.']
+  publicJwk Json [not null]
+  readyAt DateTime [not null]
+  publicUntil DateTime
+  generatedByUserId String [not null]
+  activatedAt DateTime
+  activatedByUserId String
+  retiredAt DateTime
+  retiredByUserId String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table DataMigration {
+  id String [pk]
+  name String [unique, not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  completedAt DateTime
+}
+
+Table BackgroundWorker {
+  id String [pk]
+  friendlyId String [unique, not null]
+  engine RunEngineVersion [default: 'V1', not null]
+  contentHash String [not null]
+  sdkVersion String [default: 'unknown', not null]
+  cliVersion String [default: 'unknown', not null]
+  projectId String [not null]
+  runtimeEnvironmentId String [not null]
+  version String [not null]
+  metadata Json [not null]
+  runtime String
+  runtimeVersion String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  workerGroupId String
+  supportsLazyAttempts Boolean [default: false, not null]
+
+  indexes {
+    (projectId, runtimeEnvironmentId, version) [unique]
+  }
+}
+
+Table BackgroundWorkerFile {
+  id String [pk]
+  friendlyId String [unique, not null]
+  filePath String [not null]
+  contentHash String [not null]
+  contents Bytes [not null]
+  projectId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+
+  indexes {
+    (projectId, contentHash) [unique]
+  }
+}
+
+Table prompts {
+  id String [pk]
+  friendly_id String [unique, not null]
+  slug String [not null]
+  description String
+  type String [default: 'text', not null]
+  organizationId String [not null]
+  projectId String [not null]
+  runtimeEnvironmentId String [not null]
+  filePath String
+  exportName String
+  variableSchema Json
+  defaultModel String
+  defaultConfig Json
+  tags String[] [not null]
+  archivedAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (projectId, runtimeEnvironmentId, slug) [unique]
+  }
+}
+
+Table prompt_versions {
+  id String [pk]
+  version Int [not null]
+  promptId String [not null]
+  textContent String
+  chatContent Json
+  model String
+  config Json
+  source String [not null]
+  commitMessage String
+  contentHash String [not null]
+  labels String[] [not null]
+  workerId String
+  createdBy String
+  createdAt DateTime [default: `now()`, not null]
+
+  indexes {
+    (promptId, version) [unique]
+  }
+}
+
+Table BackgroundWorkerTask {
+  id String [pk]
+  slug String [not null]
+  description String
+  friendlyId String [unique, not null]
+  filePath String [not null]
+  exportName String
+  workerId String [not null]
+  projectId String [not null]
+  fileId String
+  runtimeEnvironmentId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  queueConfig Json
+  retryConfig Json
+  machineConfig Json
+  gates Json [note: '''Gates declared on the task: other queues its runs must also hold a concurrency
+slot in while executing. Shape: [{ queue: string, concurrencyKey?: string }]''']
+  queueId String
+  maxDurationInSeconds Int
+  ttl String
+  triggerSource TaskTriggerSource [default: 'STANDARD', not null]
+  config Json [note: '''Extra task configuration JSON. Shape depends on triggerSource.
+AGENT: { type: "ai-sdk-chat" }''']
+  payloadSchema Json
+
+  indexes {
+    (workerId, slug) [unique]
+  }
+}
+
+Table WebhookEndpoint {
+  id String [pk]
+  friendlyId String [unique, not null]
+  opaqueId String [unique, not null, note: '''URL key. CSPRNG, NOT a friendlyId: crypto.randomBytes(16) base64url.
+Generated by the create path (deploy-sync / P2 API), NOT by @default.''']
+  organizationId String [not null]
+  projectId String [not null]
+  runtimeEnvironmentId String [not null]
+  environmentType RuntimeEnvironmentType [not null]
+  endpointTenantId String [default: '', not null]
+  endpointExternalRef String [default: '', not null]
+  source String [not null]
+  declaredId String [not null, note: 'The declared webhooks.endpoint.define id (string ref, no relation).']
+  routingTargets Json [default: '[]', not null, note: 'Subscribers of this endpoint: StoredWebhookRoutingTarget[] ({ id, type: "task" | "session", ..., filterAst }).']
+  verifierArtifact Json [not null]
+  metadata Json [default: '{}', not null]
+  secretProvisioning String [default: 'either', not null]
+  setupPrompt String [note: 'The source\'s instructions for an AI agent registering this endpoint with the provider.']
+  signingSecretKey String [note: 'SecretReference.key string. Plain String, NO @relation -> no FK to SecretReference.']
+  status WebhookEndpointStatus [default: 'ACTIVE', not null]
+  manuallyDeactivatedAt DateTime [note: '''When an operator disabled the endpoint via the dashboard/API. Null means the declarative sync
+owns the status: a redeploy that re-declares a previously-removed (auto-deactivated) webhook
+reactivates it. Non-null means the operator disabled it, so the sync leaves the status alone.''']
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (runtimeEnvironmentId, declaredId, endpointTenantId, endpointExternalRef) [unique]
+  }
+}
+
+Table WebhookDelivery {
+  id String [not null]
+  friendlyId String [not null]
+  webhookEndpointId String [not null]
+  organizationId String [not null]
+  projectId String [not null]
+  runtimeEnvironmentId String [not null]
+  environmentType RuntimeEnvironmentType [not null]
+  externalDeliveryId String [not null]
+  idempotencyKey String [not null]
+  runId String
+  status WebhookDeliveryStatus [default: 'PENDING', not null]
+  isTest Boolean [default: false, not null, note: 'Set from the x-trigger-test ingress header; marks console/test-send deliveries so the list can filter them.']
+  parsedEvent Json
+  headers Json
+  rawBodyHash String
+  errorMessage String
+  filterReason String
+  targets Json [default: '[]', not null, note: 'Per-target results: WebhookDeliveryTargetResult[] ({ id, type, status, reason?, runId?, error? }).']
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  processedAt DateTime
+  retentionDays Int [default: 30, not null, note: 'Retention class in days: the LIST partition key, stamped at ingest from the org\'s plan and encoded in the id.']
+
+  indexes {
+    (id, createdAt, retentionDays) [pk]
+  }
+}
+
+Table Alert {
+  id String [pk]
+  organizationId String [not null]
+  projectId String [not null]
+  environmentId String [not null]
+  capabilityKey String [not null]
+  params Json [not null]
+  condition Json [not null]
+  query String
+  expiresAt DateTime
+  lifecycle String [default: 'active', not null]
+  attention String [default: 'clear', not null]
+  observedCondition String [default: 'unknown', not null]
+  observedConditionChangedAt DateTime
+  pendingMetSince DateTime
+  evaluatorState Json
+  evaluationLeaseId String
+  evaluationLeaseUntil DateTime
+  lastEvaluatedAt DateTime
+  nextEvaluationAt DateTime
+  notifiers Json [default: '[]', not null]
+  name String
+  createdBy String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+  resolvedAt DateTime
+  resolvedBy String
+  stoppedAt DateTime
+  stoppedBy String
+  lastOccurrenceAt DateTime
+  occurrencesSinceRaise Int [default: 0, not null]
+  occurrencesTotal BigInt [default: 0, not null]
+}
+
+Table AlertEvent {
+  id String [not null]
+  alertId String [not null]
+  type String [not null]
+  at DateTime [default: `now()`, not null]
+  facts Json [default: '{}', not null]
+  actorId String
+  sourceEventId String
+
+  indexes {
+    (id, at) [pk]
+  }
+
+  Note: 'RANGE-partitioned by month on `at` (see migration).'
+}
+
+Table AlertOccurrenceSeen {
+  alertId String [not null]
+  sourceEventId String [not null]
+  rowTime DateTime [not null]
+  seenAt DateTime [default: `now()`, not null]
+  expiresAt DateTime [not null]
+
+  indexes {
+    (alertId, sourceEventId) [pk]
+  }
+}
+
+Table AlertDelivery {
+  id String [not null]
+  alertEventId String [not null]
+  eventAt DateTime [not null]
+  notifierId String [not null]
+  notifier Json [not null]
+  status String [default: 'pending', not null]
+  claimId String
+  claimedAt DateTime
+  deliveredAt DateTime
+  failureReason String
+  providerMetadata Json
+  attempts Int [default: 0, not null]
+  firstAttemptAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+
+  indexes {
+    (id, eventAt) [pk]
+    (alertEventId, notifierId, eventAt) [unique]
+  }
+
+  Note: 'RANGE-partitioned by month on `eventAt` (see migration).'
+}
+
+Table PlaygroundConversation {
+  id String [pk]
+  chatId String [not null, note: 'The chat session ID used by the transport']
+  title String [default: 'New conversation', not null, note: 'User-editable conversation title (auto-generated from first message)']
+  agentSlug String [not null, note: 'Which agent this conversation is with']
+  runId String [note: 'The current active run backing this conversation (null if no run yet)']
+  clientData Json [note: 'The client data JSON used for this conversation']
+  messages Json [note: 'Accumulated UIMessages from completed turns (for resume without stream replay)']
+  lastEventId String [note: 'Last SSE event ID — resume from this position to avoid replaying old turns']
+  projectId String [not null]
+  runtimeEnvironmentId String [not null]
+  userId String [not null, note: 'The user who started this conversation']
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (chatId, runtimeEnvironmentId) [unique]
+  }
+}
+
+Table Session {
+  id String [pk]
+  friendlyId String [unique, not null]
+  externalId String [note: '''User-supplied identifier scoped to the environment. Used for
+idempotent upsert and for resolving sessions via the public API.''']
+  type String [not null, note: 'Plain string — intentionally not an enum.']
+  projectId String [not null, note: 'Denormalized scoping columns — no FK relations.']
+  runtimeEnvironmentId String [not null]
+  environmentType RuntimeEnvironmentType [not null]
+  organizationId String [not null]
+  taskIdentifier String [not null, note: '''Task this session triggers runs against. Required — Sessions are
+task-bound: creating a session also triggers its first run, and
+every subsequent re-trigger uses this same identifier.''']
+  triggerConfig Json [not null, note: '''Trigger config used for every run this session schedules. Shape
+(validated at the route layer, opaque to the DB):
+{ basePayload: object, machine?: string, queue?: string,
+tags?: string[], maxAttempts?: number,
+idleTimeoutInSeconds?: number }
+`basePayload` carries the customer\'s client-data; runtime fields
+(chatId, messages, trigger) are merged at trigger time.''']
+  isTest Boolean [default: false, not null, note: '''Whether this session was created from the Test/playground UI rather
+than by a real chat.agent() trigger. Mirrors TaskRun.isTest.''']
+  tags String[] [not null]
+  metadata Json
+  currentRunId String [note: '''Live run pointer — non-FK so run deletion never cascades. Can lag
+reality; the `.in/append` handler re-checks the snapshot status
+before reusing it.''']
+  currentRunVersion Int [default: 0, not null, note: '''Monotonic counter used for optimistic locking on `currentRunId`
+swaps. Bumped atomically alongside any update that changes
+`currentRunId`.''']
+  closedAt DateTime [note: 'Terminal markers — written once, never flipped back.']
+  closedReason String
+  expiresAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  streamBasinName String [note: '''S2 basin where this session\'s stream pair lives. Stamped at create
+time from `Organization.streamBasinName` so reads can resolve the
+basin without joining org. Null when the org has no per-org basin
+(OSS, or pre-backfill); reads fall back to the global basin.''']
+  chatSnapshotStoragePath String [note: '''Storage URI (with protocol prefix) for this session\'s chat.agent
+snapshot blob. Set on first snapshot write. Null = pre-column session,
+fall back to computed default path.''']
+
+  indexes {
+    (runtimeEnvironmentId, externalId) [unique]
+  }
+
+  Note: '''Durable, typed, bidirectional I/O primitive. Owns two S2 streams (.out / .in).
+The row is essentially static — no status, no counters, no pointers. No
+foreign keys: project/runtimeEnvironment/organization ids are plain
+scalar columns (matches TaskRun pattern). List-style queries are served
+from ClickHouse, not Postgres, so only point-lookup indexes live here.'''
+}
+
+Table SessionRun {
+  id String [pk]
+  sessionId String [not null]
+  runId String [unique, not null, note: 'TaskRun.id (no FK — runs may be archived independently of session history)']
+  reason String [not null, note: '''One of: "initial" | "continuation" | "upgrade" | "manual".
+Plain string for forward-compat with future trigger reasons.''']
+  triggeredAt DateTime [default: `now()`, not null]
+
+  Note: '''Historical record of every run a Session has owned. Append-only —
+rows are inserted on each `ensureRunForSession` claim, never updated.
+Lets us reconstruct the run timeline of a chat for debugging /
+dashboard surfaces. The relation cascades on Session delete (tied to
+the session lifecycle) but `runId` is a plain string column with no
+FK to TaskRun so run pruning is independent.'''
+}
+
+Table TaskRun {
+  id String [pk]
+  number Int [default: 0, not null]
+  friendlyId String [unique, not null]
+  engine RunEngineVersion [default: 'V1', not null]
+  status TaskRunStatus [default: 'PENDING', not null]
+  statusReason String
+  idempotencyKey String
+  idempotencyKeyExpiresAt DateTime
+  idempotencyKeyOptions Json [note: 'Stores the user-provided key and scope: { key: string, scope: "run" | "attempt" | "global" }']
+  debounce Json [note: 'Debounce options: { key: string, delay: string, createdAt: Date }']
+  taskIdentifier String [not null]
+  isTest Boolean [default: false, not null]
+  payload String [not null]
+  payloadType String [default: 'application/json', not null]
+  context Json
+  traceContext Json
+  traceId String [not null]
+  spanId String [not null]
+  runtimeEnvironmentId String [not null]
+  environmentType RuntimeEnvironmentType
+  projectId String [not null]
+  organizationId String
+  queue String [not null]
+  lockedQueueId String
+  masterQueue String [default: 'main', not null, note: 'The main queue that this run is part of']
+  region String [note: 'User-facing geo region, stamped at trigger; workerQueue is where it actually ran.']
+  secondaryMasterQueue String [note: '@deprecated']
+  attemptNumber Int [note: 'From engine v2+ this will be defined after a run has been dequeued (starting at 1)']
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  runTags String[] [not null, note: 'Denormized column that holds the raw tags']
+  taskVersion String [note: 'Denormalized version of the background worker task']
+  sdkVersion String
+  cliVersion String
+  startedAt DateTime [note: 'startedAt marks the point at which a run is dequeued from MarQS']
+  executedAt DateTime [note: 'executedAt is set when the first attempt is about to execute']
+  completedAt DateTime
+  machinePreset String
+  usageDurationMs Int [default: 0, not null]
+  costInCents Float [default: 0, not null]
+  baseCostInCents Float [default: 0, not null]
+  lockedAt DateTime
+  lockedById String
+  lockedToVersionId String
+  priorityMs Int [default: 0, not null, note: '''The "priority" of the run. This is just a negative offset in ms for the queue timestamp
+E.g. a value of 60_000 would put the run into the queue 60s ago.''']
+  concurrencyKey String
+  gates Json [note: '''Gates for this run: other queues it must also hold a concurrency slot in while
+executing. Shape: [{ queue: string, concurrencyKey?: string }]''']
+  delayUntil DateTime
+  queuedAt DateTime
+  ttl String
+  expiredAt DateTime
+  maxAttempts Int
+  lockedRetryConfig Json
+  oneTimeUseToken String [unique, note: 'optional token that can be used to authenticate the task run']
+  taskEventStore String [default: 'taskEvent', not null, note: 'Where the logs are stored']
+  queueTimestamp DateTime
+  scheduleInstanceId String
+  scheduleId String
+  bulkActionGroupIds String[] [not null]
+  logsDeletedAt DateTime
+  replayedFromTaskRunFriendlyId String
+  rootTaskRunId String
+  parentTaskRunId String
+  parentTaskRunAttemptId String
+  batchId String
+  resumeParentOnCompletion Boolean [default: false, not null, note: 'whether or not the task run was created because of a triggerAndWait for batchTriggerAndWait']
+  depth Int [default: 0, not null, note: 'The depth of this task run in the task run hierarchy']
+  parentSpanId String [note: 'The span ID of the "trigger" span in the parent task run']
+  runChainState Json [note: 'Holds the state of the run chain for deadlock detection']
+  seedMetadata String [note: 'seed run metadata']
+  seedMetadataType String [default: 'application/json', not null]
+  metadata String [note: 'Run metadata']
+  metadataType String [default: 'application/json', not null]
+  metadataVersion Int [default: 1, not null]
+  annotations Json [note: 'Structured annotations: triggerSource, triggerAction, rootTriggerSource, rootScheduleId']
+  isWarmStart Boolean [note: 'Whether the latest attempt was a warm start. Null until first attempt starts.']
+  output String [note: 'Run output']
+  outputType String [default: 'application/json', not null]
+  error Json [note: 'Run error']
+  planType String [note: 'Organization\'s billing plan type (cached for fallback when billing API fails)']
+  maxDurationInSeconds Int
+  realtimeStreamsVersion String [default: 'v1', not null, note: 'The version of the realtime streams implementation used by the run']
+  realtimeStreams String[] [not null, note: 'Store the stream keys that are being used by the run']
+  streamBasinName String [note: '''S2 basin where this run\'s realtime streams live. Stamped at create
+time from `Organization.streamBasinName` so reads can resolve the
+basin without joining org. Null when the org has no per-org basin
+(OSS, or pre-backfill); reads fall back to the global basin.''']
+
+  indexes {
+    (runtimeEnvironmentId, taskIdentifier, idempotencyKey) [unique]
+  }
+}
+
+Table TaskRunTemplate {
+  id String [pk]
+  taskSlug String [not null]
+  triggerSource TaskTriggerSource [not null]
+  label String [not null]
+  payload String
+  payloadType String [default: 'application/json', not null]
+  metadata String
+  metadataType String [default: 'application/json', not null]
+  queue String
+  concurrencyKey String
+  ttlSeconds Int
+  maxAttempts Int
+  maxDurationSeconds Int
+  tags String[] [not null]
+  machinePreset String
+  projectId String [not null]
+  organizationId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table TaskRunExecutionSnapshot {
+  id String [pk]
+  engine RunEngineVersion [default: 'V2', not null, note: 'This should always be 2+ (V1 didn\'t use the run engine or snapshots)']
+  executionStatus TaskRunExecutionStatus [not null, note: 'The execution status']
+  description String [not null, note: 'For debugging']
+  isValid Boolean [default: true, not null, note: 'We store invalid snapshots as a record of the run state when we tried to move']
+  error String
+  previousSnapshotId String [note: 'The previous snapshot ID']
+  runId String [not null, note: 'Run']
+  runStatus TaskRunStatus [not null]
+  batchId String
+  attemptNumber Int [note: 'This is the current run attempt number. Users can define how many attempts they want for a run.']
+  environmentId String [not null, note: 'Environment']
+  environmentType RuntimeEnvironmentType [not null]
+  projectId String [not null]
+  organizationId String [not null]
+  completedWaitpointOrder String[] [not null, note: 'An array of waitpoint IDs in the correct order, used for batches']
+  checkpointId String [note: 'Checkpoint']
+  workerId String [note: 'Worker']
+  runnerId String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  lastHeartbeatAt DateTime
+  metadata Json [note: 'Metadata used by various systems in the run engine']
+
+  Note: '''Used by the RunEngine during TaskRun execution
+It has the required information to transactionally progress a run through states,
+and prevent side effects like heartbeats failing a run that has progressed.
+It is optimised for performance and is designed to be cleared at some point,
+so there are no cascading relationships to other models.'''
+}
+
+Table TaskRunCheckpoint {
+  id String [pk]
+  friendlyId String [unique, not null]
+  type TaskRunCheckpointType [not null]
+  location String [not null]
+  imageRef String
+  reason String
+  metadata String
+  projectId String [not null]
+  runtimeEnvironmentId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table Waitpoint {
+  id String [pk]
+  friendlyId String [unique, not null]
+  type WaitpointType [not null]
+  status WaitpointStatus [default: 'PENDING', not null]
+  completedAt DateTime
+  idempotencyKey String [not null, note: 'If it\'s an Event type waitpoint, this is the event. It can also be provided for the DATETIME type']
+  userProvidedIdempotencyKey Boolean [not null, note: 'If this is true then we can show it in the dashboard/return it from the SDK']
+  idempotencyKeyExpiresAt DateTime [note: 'If there\'s a user provided idempotency key, this is the time it expires at']
+  inactiveIdempotencyKey String [note: '''If an idempotencyKey is no longer active, we store it here and generate a new one for the idempotencyKey field.
+Clearing an idempotencyKey is useful for debounce or cancelling child runs.
+This is a workaround because Prisma doesn\'t support partial indexes.''']
+  completedByTaskRunId String [unique, note: 'If it\'s a RUN type waitpoint, this is the associated run']
+  completedAfter DateTime [note: '''If it\'s a DATETIME type waitpoint, this is the date.
+If it\'s a MANUAL waitpoint, this can be set as the `timeout`.''']
+  completedByBatchId String [note: 'If it\'s a BATCH type waitpoint, this is the associated batch']
+  output String [note: 'When completed, an output can be stored here']
+  outputType String [default: 'application/json', not null]
+  outputIsError Boolean [default: false, not null]
+  projectId String [not null]
+  environmentId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  tags String[] [not null, note: '''Denormized column that holds the raw tags
+Denormalized column that holds the raw tags''']
+
+  indexes {
+    (environmentId, idempotencyKey) [unique]
+  }
+
+  Note: '''A Waitpoint blocks a run from continuing until it\'s completed
+If there\'s a waitpoint blocking a run, it shouldn\'t be in the queue'''
+}
+
+Table TaskRunWaitpoint {
+  id String [pk]
+  taskRunId String [not null]
+  waitpointId String [not null]
+  projectId String [not null]
+  spanIdToComplete String [note: 'This span id is completed when the waitpoint is completed. This is used with cached runs (idempotent)']
+  batchId String
+  batchIndex Int
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (taskRunId, waitpointId, batchIndex) [unique]
+  }
+}
+
+Table WaitpointTag {
+  id String [pk]
+  name String [not null]
+  environmentId String [not null]
+  projectId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+
+  indexes {
+    (environmentId, name) [unique]
+  }
+}
+
+Table FeatureFlag {
+  id String [pk]
+  key String [unique, not null]
+  value Json
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table WorkerInstance {
+  id String [pk]
+  name String [not null, note: 'For example "worker-1"']
+  resourceIdentifier String [not null, note: '''If managed, it will default to the name, e.g. "worker-1"
+If unmanged, it will be prefixed with the deployment ID e.g. "deploy-123-worker-1"''']
+  metadata Json
+  workerGroupId String [not null]
+  organizationId String
+  projectId String
+  environmentId String
+  deploymentId String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  lastDequeueAt DateTime
+  lastHeartbeatAt DateTime
+
+  indexes {
+    (workerGroupId, resourceIdentifier) [unique]
+  }
+}
+
+Table WorkerInstanceGroup {
+  id String [pk]
+  type WorkerInstanceGroupType [not null]
+  name String [not null, note: 'For example "us-east-1"']
+  masterQueue String [unique, not null, note: '''If managed, it will default to the name, e.g. "us-east-1"
+If unmanged, it will be prefixed with the project ID e.g. "project_1-us-east-1"''']
+  description String [note: '"N. Virginia, USA", "Frankfurt, Germany", etc. Used for display purposes']
+  hidden Boolean [default: false, not null]
+  tokenId String [unique, not null]
+  organizationId String
+  projectId String
+  cloudProvider String
+  location String [note: '"usa", "europe", etc. Used like a pseudo enum for things like flags']
+  staticIPs String
+  workloadType WorkloadType [default: 'CONTAINER', not null]
+  region String [note: 'Geo region; container + MICROVM groups for one geo share it. Set-once once it has runs.']
+  enableFastPath Boolean [default: false, not null, note: '''When true, runs enqueued to this worker queue may skip the intermediate queue
+and be pushed directly to the worker queue when concurrency is available.''']
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table WorkerGroupToken {
+  id String [pk]
+  tokenHash String [unique, not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table TaskRunTag {
+  id String [pk]
+  name String [not null]
+  friendlyId String [unique, not null]
+  projectId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+
+  indexes {
+    (projectId, name) [unique]
+  }
+}
+
+Table TaskRunDependency {
+  id String [pk]
+  taskRunId String [unique, not null]
+  checkpointEventId String [unique]
+  dependentAttemptId String
+  dependentBatchRunId String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  resumedAt DateTime
+
+  Note: 'This is used for triggerAndWait and batchTriggerAndWait. The taskRun is the child task, it points at a parent attempt or a batch'
+}
+
+Table TaskRunCounter {
+  taskIdentifier String [pk]
+  lastNumber Int [default: 0, not null]
+
+  Note: 'deprecated, we hadn\'t included the project id in the unique constraint'
+}
+
+Table TaskRunNumberCounter {
+  id String [pk]
+  taskIdentifier String [not null]
+  environmentId String [not null]
+  lastNumber Int [default: 0, not null]
+
+  indexes {
+    (taskIdentifier, environmentId) [unique]
+  }
+
+  Note: 'Used for the TaskRun number (e.g. #1,421)'
+}
+
+Table TaskRunAttempt {
+  id String [pk]
+  number Int [default: 0, not null]
+  friendlyId String [unique, not null]
+  taskRunId String [not null]
+  backgroundWorkerId String [not null]
+  backgroundWorkerTaskId String [not null]
+  runtimeEnvironmentId String [not null]
+  queueId String [not null]
+  status TaskRunAttemptStatus [default: 'PENDING', not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  startedAt DateTime
+  completedAt DateTime
+  usageDurationMs Int [default: 0, not null]
+  error Json
+  output String
+  outputType String [default: 'application/json', not null]
+
+  indexes {
+    (taskRunId, number) [unique]
+  }
+
+  Note: 'This is not used from engine v2+, attempts use the TaskRunExecutionSnapshot and TaskRun'
+}
+
+Table TaskEvent {
+  id String [pk]
+  message String [not null, note: 'This matches the span name for a trace event, or the log body for a log event']
+  traceId String [not null]
+  spanId String [not null]
+  parentId String
+  tracestate String
+  isError Boolean [default: false, not null]
+  isPartial Boolean [default: false, not null]
+  isCancelled Boolean [default: false, not null]
+  isDebug Boolean [default: false, not null, note: 'deprecated: don\'t use this, moving this to properties, this now uses TaskEventKind.LOG']
+  serviceName String [not null]
+  serviceNamespace String [not null]
+  level TaskEventLevel [default: 'TRACE', not null]
+  kind TaskEventKind [default: 'INTERNAL', not null]
+  status TaskEventStatus [default: 'UNSET', not null]
+  links Json
+  events Json
+  startTime BigInt [not null, note: 'This is the time the event started in nanoseconds since the epoch']
+  duration BigInt [default: 0, not null, note: 'This is the duration of the event in nanoseconds']
+  attemptId String
+  attemptNumber Int
+  environmentId String [not null]
+  environmentType RuntimeEnvironmentType [not null]
+  organizationId String [not null]
+  projectId String [not null]
+  projectRef String [not null]
+  runId String [not null]
+  runIsTest Boolean [default: false, not null]
+  idempotencyKey String
+  taskSlug String [not null]
+  taskPath String
+  taskExportName String
+  workerId String
+  workerVersion String
+  queueId String
+  queueName String
+  batchId String
+  properties Json [not null, note: 'This represents all the span attributes available, like http.status_code, and special attributes like $style.icon, $output, $metadata.payload.userId, as it\'s used for searching and filtering']
+  metadata Json [note: 'This represents all span attributes in the $metadata namespace, like $metadata.payload']
+  style Json [note: 'This represents all span attributes in the $style namespace, like $style']
+  output Json [note: 'This represents all span attributes in the $output namespace, like $output']
+  outputType String [note: 'This represents the mimetype of the output, such as application/json or application/super+json']
+  payload Json
+  payloadType String
+  createdAt DateTime [default: `now()`, not null]
+  usageDurationMs Int [default: 0, not null]
+  usageCostInCents Float [default: 0, not null]
+  machinePreset String
+  machinePresetCpu Float
+  machinePresetMemory Float
+  machinePresetCentsPerMs Float
+
+  Note: 'This is the unified otel span/log model that will eventually be replaced by clickhouse'
+}
+
+Table TaskQueue {
+  id String [pk]
+  friendlyId String [unique, not null]
+  name String [not null]
+  type TaskQueueType [default: 'VIRTUAL', not null]
+  version TaskQueueVersion [default: 'V1', not null]
+  orderableName String
+  concurrencyVersion TaskQueueConcurrencyVersion [default: 'V1', not null, note: '''How the queue\'s concurrency was declared: V1 = legacy concurrencyLimit semantics
+(per key when keyed, whole queue otherwise), V2 = the explicit perKey/total shape.''']
+  role TaskQueueRole [default: 'QUEUE', not null, note: '''QUEUE rows are real queues; LIMIT rows back named concurrency limits and are
+excluded from every queue-facing surface.''']
+  projectId String [not null]
+  runtimeEnvironmentId String [not null]
+  concurrencyLimit Int [note: 'Represents the current concurrency limit for the queue']
+  concurrencyLimitOverriddenAt DateTime [note: 'When the concurrency limit was overridden']
+  concurrencyLimitOverriddenBy String [note: 'Who overrode the concurrency limit (will be null if overridden via the API)']
+  concurrencyLimitBase Int [note: 'If concurrencyLimit is overridden, this is the overridden value']
+  concurrencyLimitOverridePercent Decimal [note: '''If the override was expressed as a percentage of the environment limit, this stores that
+percentage (the source of truth). The absolute concurrencyLimit is materialized from it.
+Decimal(5,2) allows fractional percentages like 12.50% (0.01–100.00).''']
+  totalConcurrencyLimit Int [note: '''Caps total concurrent runs across ALL concurrencyKey values of this queue
+(concurrencyLimit applies per key value). Null = no total cap.''']
+  totalConcurrencyLimitOverriddenAt DateTime [note: 'When the total concurrency limit was overridden']
+  totalConcurrencyLimitOverriddenBy String [note: 'Who overrode the total concurrency limit (null when overridden via the API)']
+  totalConcurrencyLimitBase Int [note: 'If totalConcurrencyLimit is overridden, the declared value it reverts to on reset']
+  rateLimit Json
+  paused Boolean [default: false, not null]
+  archivedAt DateTime [note: 'Hidden from the dashboard queue list. Display-only: never read on trigger/dequeue paths.']
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (runtimeEnvironmentId, name) [unique]
+  }
+}
+
+Table BatchTaskRun {
+  id String [pk]
+  friendlyId String [unique, not null]
+  idempotencyKey String
+  idempotencyKeyExpiresAt DateTime
+  status BatchTaskRunStatus [default: 'PENDING', not null]
+  runtimeEnvironmentId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  runIds String[] [not null, note: 'Friendly IDs']
+  runCount Int [default: 0, not null]
+  payload String
+  payloadType String [default: 'application/json', not null]
+  options Json
+  batchVersion String [default: 'v1', not null]
+  sealed Boolean [default: false, not null, note: 'sealed is set to true once no more items can be added to the batch']
+  sealedAt DateTime
+  expectedCount Int [default: 0, not null, note: 'this is the expected number of items in the batch']
+  completedCount Int [default: 0, not null, note: 'this is the completed number of items in the batch. once this reaches expectedCount, and the batch is sealed, the batch is considered completed']
+  completedAt DateTime
+  resumedAt DateTime
+  processingJobsCount Int [default: 0, not null, note: 'this is used to be able to "seal" this BatchTaskRun when all of the runs have been triggered asynchronously, and using the "parallel" processing strategy']
+  processingJobsExpectedCount Int [default: 0, not null]
+  oneTimeUseToken String [unique, note: 'optional token that can be used to authenticate the task run']
+  processingStartedAt DateTime [note: 'When processing started (status changed to PROCESSING)']
+  processingCompletedAt DateTime [note: 'When processing completed (all items processed)']
+  successfulRunCount Int [note: 'Count of successfully created runs']
+  failedRunCount Int [note: 'Count of failed run creations']
+  taskIdentifier String
+  checkpointEventId String [unique]
+  dependentTaskAttemptId String
+
+  indexes {
+    (runtimeEnvironmentId, idempotencyKey) [unique]
+  }
+}
+
+Table BatchTaskRunItem {
+  id String [pk]
+  status BatchTaskRunItemStatus [default: 'PENDING', not null]
+  batchTaskRunId String [not null]
+  taskRunId String [not null]
+  taskRunAttemptId String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  completedAt DateTime
+
+  indexes {
+    (batchTaskRunId, taskRunId) [unique]
+  }
+
+  Note: 'Used in engine V1 only'
+}
+
+Table BatchTaskRunError {
+  id String [pk]
+  batchTaskRunId String [not null]
+  index Int [not null, note: 'Which item in the batch (0-based index)']
+  taskIdentifier String [not null, note: 'The task identifier that was being triggered']
+  payload String [note: 'The payload that failed (JSON, may be truncated)']
+  options Json [note: 'The options that were used']
+  error String [not null, note: 'Error message']
+  errorCode String [note: 'Error code if available']
+  createdAt DateTime [default: `now()`, not null]
+
+  indexes {
+    (batchTaskRunId, index) [unique]
+  }
+
+  Note: 'Track individual run creation failures in batch processing (Run Engine v2)'
+}
+
+Table EnvironmentVariable {
+  id String [pk]
+  friendlyId String [unique, not null]
+  key String [not null]
+  projectId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (projectId, key) [unique]
+  }
+}
+
+Table EnvironmentVariableValue {
+  id String [pk]
+  valueReferenceId String
+  variableId String [not null]
+  environmentId String [not null]
+  isSecret Boolean [default: false, not null, note: 'If true, the value is secret and cannot be revealed']
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  version Int [default: 1, not null]
+  lastUpdatedBy Json
+
+  indexes {
+    (variableId, environmentId) [unique]
+  }
+}
+
+Table Checkpoint {
+  id String [pk]
+  friendlyId String [unique, not null]
+  type CheckpointType [not null]
+  location String [not null]
+  imageRef String [not null]
+  reason String
+  metadata String
+  runId String [not null]
+  attemptId String [not null]
+  attemptNumber Int
+  projectId String [not null]
+  runtimeEnvironmentId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table CheckpointRestoreEvent {
+  id String [pk]
+  type CheckpointRestoreEventType [not null]
+  reason String
+  metadata String
+  checkpointId String [not null]
+  runId String [not null]
+  attemptId String [not null]
+  projectId String [not null]
+  runtimeEnvironmentId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table WorkerDeployment {
+  id String [pk]
+  contentHash String [not null]
+  friendlyId String [unique, not null]
+  shortCode String [not null]
+  version String [not null]
+  runtime String
+  runtimeVersion String
+  cliVersion String [note: 'CLI version that initiated the deploy, stamped at initialization']
+  imageReference String
+  imagePlatform String [default: 'linux/amd64', not null]
+  templateKey String [note: 'Key of the microVM template prebuilt from this deployment\'s image, set when the builder succeeds']
+  indexObjectKey String [note: 'Object key of the full index snapshot in the deployment index store. Set only after the upload succeeds.']
+  indexSha256 String [note: 'sha256 hex of the snapshot\'s uncompressed JSON']
+  indexFormatVersion Int
+  externalBuildData Json
+  buildServerMetadata Json
+  buildEnvVars Json [note: '''Encrypted build-time env vars for pre-bundled (fromBundle) deploys, as an
+EncryptedSecretValue envelope. Kept for the redeploy window, then cleared by a sweep.''']
+  status WorkerDeploymentStatus [default: 'PENDING', not null]
+  type WorkerDeploymentType [default: 'V1', not null]
+  projectId String [not null]
+  environmentId String [not null]
+  workerId String [unique]
+  triggeredById String
+  triggeredVia String
+  commitSHA String
+  externalId String
+  startedAt DateTime
+  installedAt DateTime
+  builtAt DateTime
+  deployedAt DateTime
+  failedAt DateTime
+  errorData Json
+  canceledAt DateTime
+  canceledReason String
+  git Json
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (projectId, shortCode) [unique]
+    (environmentId, version) [unique]
+  }
+}
+
+Table WorkerDeploymentPromotion {
+  id String [pk]
+  label String [not null, note: 'This is the promotion label, e.g. "current"']
+  deploymentId String [not null]
+  environmentId String [not null]
+
+  indexes {
+    (environmentId, label) [unique]
+  }
+}
+
+Table TaskSchedule {
+  id String [pk]
+  type ScheduleType [default: 'IMPERATIVE', not null]
+  friendlyId String [unique, not null, note: 'users see this as `id`. They start with schedule_']
+  taskIdentifier String [not null, note: 'a reference to a task (not a foreign key because it\'s across versions)']
+  deduplicationKey String [not null, note: 'can be provided and we won\'t create another with the same key']
+  userProvidedDeduplicationKey Boolean [default: false, not null]
+  generatorExpression String [not null, note: 'the CRON pattern']
+  generatorDescription String [default: '', not null]
+  generatorType ScheduleGeneratorType [default: 'CRON', not null]
+  timezone String [default: 'UTC', not null, note: 'These are IANA format string, or the default "UTC". E.g. "America/New_York"']
+  windowDurationSeconds Int
+  windowPercentage Int
+  defaultWindowDurationSeconds Int
+  minimumWindowDurationSeconds Int
+  externalId String [note: 'Can be provided by the user then accessed inside a run']
+  lastRunTriggeredAt DateTime [note: '@deprecated stop writing 2026-04-30; reads moved out of code (UI now derives from cron\'s previous slot). Drop in follow-up.']
+  projectId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  active Boolean [default: true, not null]
+
+  indexes {
+    (projectId, deduplicationKey) [unique]
+  }
+
+  Note: 'Schedules can be attached to tasks to trigger them on a schedule'
+}
+
+Table TaskScheduleInstance {
+  id String [pk]
+  taskScheduleId String [not null]
+  environmentId String [not null]
+  projectId String [not null]
+  schedulePhase Int
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  active Boolean [default: true, not null]
+  lastScheduledTimestamp DateTime [note: '@deprecated stop writing 2026-04-30; engine derives from cron + exactScheduleTime. Drop in follow-up.']
+  nextScheduledTimestamp DateTime [note: '@deprecated stop writing 2026-04-30; engine derives from cron + now(). Drop in follow-up.']
+
+  indexes {
+    (taskScheduleId, environmentId) [unique]
+  }
+
+  Note: 'An instance links a schedule with an environment'
+}
+
+Table RuntimeEnvironmentSession {
+  id String [pk]
+  ipAddress String [not null]
+  environmentId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  disconnectedAt DateTime
+}
+
+Table ProjectAlertChannel {
+  id String [pk]
+  friendlyId String [unique, not null]
+  deduplicationKey String [not null, note: 'can be provided and we won\'t create another with the same key']
+  userProvidedDeduplicationKey Boolean [default: false, not null]
+  integrationId String
+  enabled Boolean [default: true, not null]
+  type ProjectAlertChannelType [not null]
+  name String [not null]
+  properties Json [not null]
+  alertTypes ProjectAlertType[] [not null]
+  environmentTypes RuntimeEnvironmentType[] [not null]
+  errorAlertConfig Json
+  projectId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (projectId, deduplicationKey) [unique]
+  }
+}
+
+Table ProjectAlert {
+  id String [pk]
+  friendlyId String [unique, not null]
+  projectId String [not null]
+  environmentId String [not null]
+  channelId String [not null]
+  status ProjectAlertStatus [default: 'PENDING', not null]
+  type ProjectAlertType [not null]
+  taskRunAttemptId String
+  taskRunId String
+  workerDeploymentId String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table ProjectAlertStorage {
+  id String [pk]
+  projectId String [not null]
+  alertChannelId String [not null]
+  alertType ProjectAlertType [not null]
+  storageId String [not null]
+  storageData Json [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table OrganizationIntegration {
+  id String [pk]
+  friendlyId String [unique, not null]
+  service IntegrationService [not null]
+  externalOrganizationId String [note: 'Identifier for external, integration\'s organization (e.g. Vercel\'s team)']
+  integrationData Json [not null]
+  tokenReferenceId String [not null]
+  organizationId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  deletedAt DateTime
+}
+
+Table OrganizationProjectIntegration {
+  id String [pk]
+  organizationIntegrationId String [not null]
+  projectId String [not null]
+  externalEntityId String [not null, note: 'Identifier for webhooks, for example Vercel\'s projectId']
+  integrationData Json [not null, note: 'Save useful data like config or external entity name']
+  installedBy String [note: 'UserId who installed the integration']
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  deletedAt DateTime
+}
+
+Table BulkActionGroup {
+  id String [pk]
+  friendlyId String [unique, not null]
+  projectId String [not null]
+  environmentId String
+  type BulkActionType [not null]
+  status BulkActionStatus [default: 'PENDING', not null, note: 'When the group is created it\'s pending. After we\'ve processed all the items it\'s completed. This does not mean the associated runs are completed.']
+  queryName String [note: 'The query that will be executed to get the runs to process (if null, we are passing run ids directly)']
+  params Json [note: 'The params that will be passed to the query']
+  dedupeKey String [note: 'Billing-limit dedupe key (grace hitAt or resolve job key). Null for dashboard bulk actions.']
+  cursor Json [note: 'The cursor that will be passed to the query (null for the first page)']
+  successCount Int [default: 0, not null, note: 'The number of runs that have been processed successfully']
+  failureCount Int [default: 0, not null, note: 'The number of runs that have been failed']
+  totalCount Int [default: 0, not null, note: 'The total number of runs that will be processed']
+  completionNotification BulkActionNotificationType [default: 'NONE', not null]
+  userId String
+  name String [note: 'The name of the bulk action']
+  completedAt DateTime [note: 'The time the bulk action was completed']
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  Note: 'Bulk actions, like canceling and replaying runs'
+}
+
+Table BulkActionItem {
+  id String [pk]
+  friendlyId String [note: '@deprecated not used in new BulkActions']
+  groupId String [not null]
+  type BulkActionType [not null]
+  status BulkActionItemStatus [default: 'PENDING', not null, note: 'When the item is created it\'s pending. After we\'ve processed the item it\'s completed. This does not mean the associated runs are completed.']
+  sourceRunId String [not null]
+  destinationRunId String
+  error String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table RealtimeStreamChunk {
+  id String [pk]
+  key String [not null]
+  value String [not null]
+  sequence Int [not null]
+  runId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Table TaskEventPartitioned {
+  id String [not null]
+  message String [not null, note: 'This matches the span name for a trace event, or the log body for a log event']
+  traceId String [not null]
+  spanId String [not null]
+  parentId String
+  tracestate String
+  isError Boolean [default: false, not null]
+  isPartial Boolean [default: false, not null]
+  isCancelled Boolean [default: false, not null]
+  serviceName String [not null]
+  serviceNamespace String [not null]
+  level TaskEventLevel [default: 'TRACE', not null]
+  kind TaskEventKind [default: 'INTERNAL', not null]
+  status TaskEventStatus [default: 'UNSET', not null]
+  links Json
+  events Json
+  startTime BigInt [not null, note: 'This is the time the event started in nanoseconds since the epoch']
+  duration BigInt [default: 0, not null, note: 'This is the duration of the event in nanoseconds']
+  attemptId String
+  attemptNumber Int
+  environmentId String [not null]
+  environmentType RuntimeEnvironmentType [not null]
+  organizationId String [not null]
+  projectId String [not null]
+  projectRef String [not null]
+  runId String [not null]
+  runIsTest Boolean [default: false, not null]
+  idempotencyKey String
+  taskSlug String [not null]
+  taskPath String
+  taskExportName String
+  workerId String
+  workerVersion String
+  queueId String
+  queueName String
+  batchId String
+  properties Json [not null, note: 'This represents all the span attributes available, like http.status_code, and special attributes like $style.icon, $output, $metadata.payload.userId, as it\'s used for searching and filtering']
+  metadata Json [note: 'This represents all span attributes in the $metadata namespace, like $metadata.payload']
+  style Json [note: 'This represents all span attributes in the $style namespace, like $style']
+  output Json [note: 'This represents all span attributes in the $output namespace, like $output']
+  outputType String [note: 'This represents the mimetype of the output, such as application/json or application/super+json']
+  payload Json
+  payloadType String
+  createdAt DateTime [default: `now()`, not null]
+  usageDurationMs Int [default: 0, not null]
+  usageCostInCents Float [default: 0, not null]
+  machinePreset String
+  machinePresetCpu Float
+  machinePresetMemory Float
+  machinePresetCentsPerMs Float
+
+  indexes {
+    (id, createdAt) [pk]
+  }
+
+  Note: 'This is the unified otel span/log model that will eventually be replaced by clickhouse'
+}
+
+Table GithubAppInstallation {
+  id String [pk]
+  appInstallationId BigInt [unique, not null]
+  targetId BigInt [not null]
+  targetType String [not null]
+  accountHandle String [not null]
+  permissions Json
+  repositorySelection GithubRepositorySelection [not null]
+  installedBy String
+  installedByUserId String
+  organizationId String [not null]
+  deletedAt DateTime
+  suspendedAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table GithubRepository {
+  id String [pk]
+  githubId BigInt [not null]
+  name String [not null]
+  fullName String [not null]
+  htmlUrl String [not null]
+  private Boolean [not null]
+  defaultBranch String [not null]
+  installationId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (installationId, githubId) [unique]
+  }
+}
+
+Table ConnectedGithubRepository {
+  id String [pk]
+  projectId String [unique, not null]
+  repositoryId String [not null]
+  branchTracking Json [not null]
+  previewDeploymentsEnabled Boolean [default: true, not null]
+  buildFilters Json
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table ImpersonationAuditLog {
+  id String [pk]
+  action ImpersonationAuditLogAction [not null]
+  adminId String [not null]
+  targetId String [not null]
+  ipAddress String
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Table SupportAccessRequest {
+  id String [pk]
+  organizationId String [not null]
+  requestedById String
+  reason String [not null]
+  status SupportAccessRequestStatus [default: 'PENDING', not null]
+  approvedById String
+  approvedAt DateTime
+  expiresAt DateTime
+  cancelledById String
+  cancelledAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table CustomerQuery {
+  id String [pk]
+  query String [not null, note: 'The TSQL query text that was executed']
+  scope CustomerQueryScope [not null, note: 'The scope of the query (determines which tenant IDs were used)']
+  stats Json [not null, note: 'Query execution statistics from ClickHouse']
+  title String [note: 'AI-generated title summarizing the query']
+  source CustomerQuerySource [default: 'DASHBOARD', not null, note: 'Where the query originated from']
+  organizationId String [not null]
+  projectId String
+  environmentId String
+  userId String
+  filterPeriod String [note: '''Time filter settings used when the query was executed
+Period like "7d", "24h", etc.''']
+  filterFrom DateTime [note: 'Custom start date (ISO 8601)']
+  filterTo DateTime [note: 'Custom end date (ISO 8601)']
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Table IntegrationDeployment {
+  id String [pk]
+  integrationName String [not null, note: 'For example Vercel']
+  integrationDeploymentId String [not null, note: 'External ID']
+  commitSHA String [not null]
+  deploymentId String
+  status String [note: 'External deployment status']
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table MetricsDashboard {
+  id String [pk]
+  friendlyId String [unique, not null]
+  title String [not null]
+  description String [default: '', not null]
+  organizationId String [not null]
+  projectId String
+  ownerId String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  layout String [not null, note: '''JSON that defines the config, queries, layout and config of all widgets.
+There will be a version field for the format.''']
+
+  Note: 'A user-defined metrics dashboard'
+}
+
+Table llm_models {
+  id String [pk]
+  friendly_id String [unique, not null]
+  project_id String
+  model_name String [not null]
+  match_pattern String [not null]
+  start_date DateTime
+  source String [default: 'default', not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  provider String
+  description String
+  context_window Int
+  max_output_tokens Int
+  capabilities String[] [not null]
+  is_hidden Boolean [default: false, not null]
+  base_model_name String
+  pricing_unit String
+
+  indexes {
+    (project_id, model_name, start_date) [unique]
+  }
+
+  Note: 'A known LLM model or model pattern for cost tracking'
+}
+
+Table llm_pricing_tiers {
+  id String [pk]
+  model_id String [not null]
+  name String [not null]
+  is_default Boolean [default: true, not null]
+  priority Int [default: 0, not null]
+  conditions Json [default: '[]', not null]
+
+  indexes {
+    (model_id, priority) [unique]
+    (model_id, name) [unique]
+  }
+
+  Note: 'A pricing tier for a model (supports volume-based or conditional pricing)'
+}
+
+Table llm_prices {
+  id String [pk]
+  model_id String [not null]
+  pricing_tier_id String [not null]
+  usage_type String [not null]
+  price Decimal [not null]
+
+  indexes {
+    (model_id, usage_type, pricing_tier_id) [unique]
+  }
+
+  Note: 'A price point for a usage type within a pricing tier'
+}
+
+Table PlatformNotification {
+  id String [pk]
+  friendlyId String [unique, not null]
+  title String [not null, note: 'Admin-facing title for identification in admin tools']
+  payload Json [not null, note: 'Versioned JSON rendering content (see payload schema in spec)']
+  surface PlatformNotificationSurface [not null]
+  scope PlatformNotificationScope [not null]
+  userId String
+  organizationId String
+  projectId String
+  startsAt DateTime [not null, note: 'When notification becomes active']
+  endsAt DateTime [not null, note: 'When notification expires']
+  cliMaxDaysAfterFirstSeen Int [note: 'CLI: auto-expire N days after user first saw it']
+  cliMaxShowCount Int [note: 'CLI: auto-expire after shown N times to user']
+  cliShowEvery Int [note: 'CLI: only show every N-th request (e.g. cliShowEvery=3 means show on 3rd, 6th, 9th…)']
+  priority Int [default: 0, not null, note: 'Ordering within same scope level (higher = more important)']
+  isDraft Boolean [default: false, not null, note: '''Staged-but-unpublished. While true the notification is hidden from all
+user-facing reads regardless of startsAt/endsAt; publishing sets real
+dates and flips this to false.''']
+  archivedAt DateTime [note: 'Soft delete']
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  Note: 'Admin-created notification definitions'
+}
+
+Table PlatformNotificationInteraction {
+  id String [pk]
+  notificationId String [not null]
+  userId String [not null]
+  firstSeenAt DateTime [default: `now()`, not null, note: 'Set by beacon/CLI GET on first impression']
+  showCount Int [default: 1, not null, note: 'Times shown (incremented per beacon/CLI view)']
+  webappDismissedAt DateTime [note: 'User dismissed in webapp']
+  webappClickedAt DateTime [note: 'User clicked a link in webapp']
+  cliDismissedAt DateTime [note: 'Auto-dismissed or expired in CLI']
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (notificationId, userId) [unique]
+  }
+
+  Note: 'Per-user tracking of notification views and dismissals'
+}
+
+Table ErrorGroupState {
+  id String [pk]
+  organizationId String [not null]
+  projectId String [not null]
+  environmentId String
+  taskIdentifier String [not null]
+  errorFingerprint String [not null]
+  status ErrorGroupStatus [default: 'UNRESOLVED', not null]
+  ignoredUntil DateTime [note: '''*
+* Error is ignored until this date''']
+  ignoredUntilOccurrenceRate Int [note: '''*
+* Error is ignored until this occurrence rate''']
+  ignoredUntilTotalOccurrences Int [note: '''*
+* Error is ignored until this total occurrences''']
+  ignoredAtOccurrenceCount BigInt [note: '''Total occurrence count at the time the error was ignored (from ClickHouse).
+Used with ignoredUntilTotalOccurrences to compute occurrences since ignoring.''']
+  ignoredAt DateTime [note: '''*
+* Error was ignored at this date''']
+  ignoredReason String [note: '''*
+* Reason for ignoring the error''']
+  ignoredByUserId String [note: '''*
+* User who ignored the error''']
+  resolvedAt DateTime [note: '''*
+* Error was resolved at this date''']
+  resolvedInVersion String [note: '''*
+* Error was resolved in this version''']
+  resolvedBy String [note: '''*
+* User who resolved the error''']
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (environmentId, taskIdentifier, errorFingerprint) [unique]
+  }
+
+  Note: '''*
+* Error group state is used to track when a user has interacted with an error (ignored/resolved)
+* The actual error data is in ClickHouse.'''
+}
+
+Table TaskIdentifier {
+  id String [pk]
+  runtimeEnvironmentId String [not null]
+  projectId String [not null]
+  slug String [not null]
+  currentTriggerSource TaskTriggerSource [default: 'STANDARD', not null]
+  currentWorkerId String
+  firstSeenAt DateTime [default: `now()`, not null]
+  lastSeenAt DateTime [default: `now()`, not null]
+  isInLatestDeployment Boolean [default: true, not null]
+
+  indexes {
+    (runtimeEnvironmentId, slug) [unique]
+  }
+}
+
+Table OrganizationDataStore {
+  id String [pk]
+  key String [unique, not null, note: 'Human-readable unique key (e.g. "hipaa-clickhouse-us-east")']
+  organizationIds String[] [not null, note: 'Organization IDs that use this data store']
+  kind DataStoreKind [not null]
+  config Json [not null, note: 'Versioned config JSON. Structure is discriminated by the top-level `version` field.']
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  Note: '''Defines org-scoped data store overrides (e.g. dedicated ClickHouse for HIPAA orgs).
+Multiple organizations can share a single data store row via organizationIds.'''
+}
+
+Ref User_mfaSecretReferenceId_fk: User.mfaSecretReferenceId > SecretReference.id
+
+Ref User_invitationCodeId_fk: User.invitationCodeId > InvitationCode.id
+
+Ref MfaBackupCode_userId_fk: MfaBackupCode.userId > User.id
+
+Ref AuthorizationCode_personalAccessTokenId_fk: AuthorizationCode.personalAccessTokenId > PersonalAccessToken.id [delete: cascade, update: cascade]
+
+Ref PersonalAccessToken_userId_fk: PersonalAccessToken.userId > User.id
+
+Ref OrganizationAccessToken_organizationId_fk: OrganizationAccessToken.organizationId > Organization.id
+
+Ref OrgMember_organizationId_fk: OrgMember.organizationId > Organization.id [delete: cascade, update: cascade]
+
+Ref OrgMember_userId_fk: OrgMember.userId > User.id [delete: cascade, update: cascade]
+
+Ref OrgMemberInvite_organizationId_fk: OrgMemberInvite.organizationId > Organization.id [delete: cascade, update: cascade]
+
+Ref OrgMemberInvite_inviterId_fk: OrgMemberInvite.inviterId > User.id [delete: cascade, update: cascade]
+
+Ref RuntimeEnvironment_parentEnvironmentId_fk: RuntimeEnvironment.parentEnvironmentId > RuntimeEnvironment.id [delete: cascade, update: cascade]
+
+Ref RuntimeEnvironment_organizationId_fk: RuntimeEnvironment.organizationId > Organization.id [delete: cascade, update: cascade]
+
+Ref RuntimeEnvironment_projectId_fk: RuntimeEnvironment.projectId > Project.id [delete: cascade, update: cascade]
+
+Ref RuntimeEnvironment_orgMemberId_fk: RuntimeEnvironment.orgMemberId > OrgMember.id [delete: set null, update: cascade]
+
+Ref RuntimeEnvironment_currentSessionId_fk: RuntimeEnvironment.currentSessionId > RuntimeEnvironmentSession.id [delete: set null, update: cascade]
+
+Ref api_keys_runtime_environment_id_fk: api_keys.runtime_environment_id > RuntimeEnvironment.id [delete: cascade, update: cascade]
+
+Ref api_keys_created_by_user_id_fk: api_keys.created_by_user_id > User.id [delete: set null, update: cascade]
+
+Ref RevokedApiKey_runtimeEnvironmentId_fk: RevokedApiKey.runtimeEnvironmentId > RuntimeEnvironment.id [delete: cascade, update: cascade]
+
+Ref Project_organizationId_fk: Project.organizationId > Organization.id [delete: cascade, update: cascade]
+
+Ref Project_defaultWorkerGroupId_fk: Project.defaultWorkerGroupId > WorkerInstanceGroup.id
+
+Ref BackgroundWorker_projectId_fk: BackgroundWorker.projectId > Project.id [delete: cascade, update: cascade]
+
+Ref BackgroundWorker_runtimeEnvironmentId_fk: BackgroundWorker.runtimeEnvironmentId > RuntimeEnvironment.id [delete: cascade, update: cascade]
+
+Ref BackgroundWorker_workerGroupId_fk: BackgroundWorker.workerGroupId > WorkerInstanceGroup.id [delete: set null, update: cascade]
+
+Ref BackgroundWorkerFile_projectId_fk: BackgroundWorkerFile.projectId > Project.id [delete: cascade, update: cascade]
+
+Ref prompts_organizationId_fk: prompts.organizationId > Organization.id [delete: cascade, update: cascade]
+
+Ref prompts_projectId_fk: prompts.projectId > Project.id [delete: cascade, update: cascade]
+
+Ref prompts_runtimeEnvironmentId_fk: prompts.runtimeEnvironmentId > RuntimeEnvironment.id [delete: cascade, update: cascade]
+
+Ref prompt_versions_promptId_fk: prompt_versions.promptId > prompts.id [delete: cascade, update: cascade]
+
+Ref prompt_versions_workerId_fk: prompt_versions.workerId > BackgroundWorker.id
+
+Ref BackgroundWorkerTask_workerId_fk: BackgroundWorkerTask.workerId > BackgroundWorker.id [delete: cascade, update: cascade]
+
+Ref BackgroundWorkerTask_projectId_fk: BackgroundWorkerTask.projectId > Project.id [delete: cascade, update: cascade]
+
+Ref BackgroundWorkerTask_fileId_fk: BackgroundWorkerTask.fileId > BackgroundWorkerFile.id [delete: cascade, update: cascade]
+
+Ref BackgroundWorkerTask_runtimeEnvironmentId_fk: BackgroundWorkerTask.runtimeEnvironmentId > RuntimeEnvironment.id [delete: cascade, update: cascade]
+
+Ref BackgroundWorkerTask_queueId_fk: BackgroundWorkerTask.queueId > TaskQueue.id [delete: set null, update: cascade]
+
+Ref PlaygroundConversation_runId_fk: PlaygroundConversation.runId > TaskRun.id [delete: set null, update: cascade]
+
+Ref PlaygroundConversation_projectId_fk: PlaygroundConversation.projectId > Project.id [delete: cascade, update: cascade]
+
+Ref PlaygroundConversation_runtimeEnvironmentId_fk: PlaygroundConversation.runtimeEnvironmentId > RuntimeEnvironment.id [delete: cascade, update: cascade]
+
+Ref SessionRun_sessionId_fk: SessionRun.sessionId > Session.id [delete: cascade]
+
+Ref TaskRun_runtimeEnvironmentId_fk: TaskRun.runtimeEnvironmentId > RuntimeEnvironment.id [delete: cascade, update: cascade]
+
+Ref TaskRun_projectId_fk: TaskRun.projectId > Project.id [delete: cascade, update: cascade]
+
+Ref TaskRun_lockedById_fk: TaskRun.lockedById > BackgroundWorkerTask.id
+
+Ref TaskRun_lockedToVersionId_fk: TaskRun.lockedToVersionId > BackgroundWorker.id
+
+Ref TaskRun_rootTaskRunId_fk: TaskRun.rootTaskRunId > TaskRun.id [delete: set null, update: no action]
+
+Ref TaskRun_parentTaskRunId_fk: TaskRun.parentTaskRunId > TaskRun.id [delete: set null, update: no action]
+
+Ref TaskRun_parentTaskRunAttemptId_fk: TaskRun.parentTaskRunAttemptId > TaskRunAttempt.id [delete: set null, update: no action]
+
+Ref TaskRun_batchId_fk: TaskRun.batchId > BatchTaskRun.id [delete: set null, update: no action]
+
+Ref TaskRunExecutionSnapshot_runId_fk: TaskRunExecutionSnapshot.runId > TaskRun.id
+
+Ref TaskRunExecutionSnapshot_checkpointId_fk: TaskRunExecutionSnapshot.checkpointId > TaskRunCheckpoint.id
+
+Ref TaskRunCheckpoint_projectId_fk: TaskRunCheckpoint.projectId > Project.id [delete: cascade, update: cascade]
+
+Ref TaskRunCheckpoint_runtimeEnvironmentId_fk: TaskRunCheckpoint.runtimeEnvironmentId > RuntimeEnvironment.id [delete: cascade, update: cascade]
+
+Ref Waitpoint_completedByTaskRunId_fk: Waitpoint.completedByTaskRunId - TaskRun.id [delete: set null]
+
+Ref Waitpoint_completedByBatchId_fk: Waitpoint.completedByBatchId > BatchTaskRun.id [delete: set null]
+
+Ref Waitpoint_projectId_fk: Waitpoint.projectId > Project.id [delete: cascade, update: cascade]
+
+Ref Waitpoint_environmentId_fk: Waitpoint.environmentId > RuntimeEnvironment.id [delete: cascade, update: cascade]
+
+Ref TaskRunWaitpoint_taskRunId_fk: TaskRunWaitpoint.taskRunId > TaskRun.id
+
+Ref TaskRunWaitpoint_waitpointId_fk: TaskRunWaitpoint.waitpointId > Waitpoint.id
+
+Ref TaskRunWaitpoint_projectId_fk: TaskRunWaitpoint.projectId > Project.id [delete: cascade, update: cascade]
+
+Ref TaskRunWaitpoint_batchId_fk: TaskRunWaitpoint.batchId > BatchTaskRun.id
+
+Ref WaitpointTag_environmentId_fk: WaitpointTag.environmentId > RuntimeEnvironment.id [delete: cascade, update: cascade]
+
+Ref WaitpointTag_projectId_fk: WaitpointTag.projectId > Project.id [delete: cascade, update: cascade]
+
+Ref WorkerInstance_workerGroupId_fk: WorkerInstance.workerGroupId > WorkerInstanceGroup.id
+
+Ref WorkerInstance_organizationId_fk: WorkerInstance.organizationId > Organization.id [delete: cascade, update: cascade]
+
+Ref WorkerInstance_projectId_fk: WorkerInstance.projectId > Project.id [delete: cascade, update: cascade]
+
+Ref WorkerInstance_environmentId_fk: WorkerInstance.environmentId > RuntimeEnvironment.id [delete: cascade, update: cascade]
+
+Ref WorkerInstance_deploymentId_fk: WorkerInstance.deploymentId > WorkerDeployment.id [delete: set null, update: cascade]
+
+Ref WorkerInstanceGroup_tokenId_fk: WorkerInstanceGroup.tokenId - WorkerGroupToken.id [delete: cascade, update: cascade]
+
+Ref WorkerInstanceGroup_organizationId_fk: WorkerInstanceGroup.organizationId > Organization.id [delete: cascade, update: cascade]
+
+Ref WorkerInstanceGroup_projectId_fk: WorkerInstanceGroup.projectId > Project.id [delete: cascade, update: cascade]
+
+Ref TaskRunTag_projectId_fk: TaskRunTag.projectId > Project.id [delete: cascade, update: cascade]
+
+Ref TaskRunDependency_taskRunId_fk: TaskRunDependency.taskRunId - TaskRun.id [delete: cascade, update: cascade]
+
+Ref TaskRunDependency_checkpointEventId_fk: TaskRunDependency.checkpointEventId - CheckpointRestoreEvent.id [delete: cascade, update: cascade]
+
+Ref TaskRunDependency_dependentAttemptId_fk: TaskRunDependency.dependentAttemptId > TaskRunAttempt.id
+
+Ref TaskRunDependency_dependentBatchRunId_fk: TaskRunDependency.dependentBatchRunId > BatchTaskRun.id
+
+Ref TaskRunNumberCounter_environmentId_fk: TaskRunNumberCounter.environmentId > RuntimeEnvironment.id [delete: cascade, update: cascade]
+
+Ref TaskRunAttempt_taskRunId_fk: TaskRunAttempt.taskRunId > TaskRun.id [delete: cascade, update: cascade]
+
+Ref TaskRunAttempt_backgroundWorkerId_fk: TaskRunAttempt.backgroundWorkerId > BackgroundWorker.id [delete: cascade, update: cascade]
+
+Ref TaskRunAttempt_backgroundWorkerTaskId_fk: TaskRunAttempt.backgroundWorkerTaskId > BackgroundWorkerTask.id [delete: cascade, update: cascade]
+
+Ref TaskRunAttempt_runtimeEnvironmentId_fk: TaskRunAttempt.runtimeEnvironmentId > RuntimeEnvironment.id [delete: cascade, update: cascade]
+
+Ref TaskRunAttempt_queueId_fk: TaskRunAttempt.queueId > TaskQueue.id [delete: cascade, update: cascade]
+
+Ref TaskQueue_projectId_fk: TaskQueue.projectId > Project.id [delete: cascade, update: cascade]
+
+Ref TaskQueue_runtimeEnvironmentId_fk: TaskQueue.runtimeEnvironmentId > RuntimeEnvironment.id [delete: cascade, update: cascade]
+
+Ref BatchTaskRun_checkpointEventId_fk: BatchTaskRun.checkpointEventId - CheckpointRestoreEvent.id [delete: cascade, update: cascade]
+
+Ref BatchTaskRun_dependentTaskAttemptId_fk: BatchTaskRun.dependentTaskAttemptId > TaskRunAttempt.id [delete: cascade, update: cascade]
+
+Ref BatchTaskRunItem_batchTaskRunId_fk: BatchTaskRunItem.batchTaskRunId > BatchTaskRun.id [delete: cascade, update: cascade]
+
+Ref BatchTaskRunItem_taskRunId_fk: BatchTaskRunItem.taskRunId > TaskRun.id [delete: cascade, update: cascade]
+
+Ref BatchTaskRunItem_taskRunAttemptId_fk: BatchTaskRunItem.taskRunAttemptId > TaskRunAttempt.id [delete: set null, update: cascade]
+
+Ref BatchTaskRunError_batchTaskRunId_fk: BatchTaskRunError.batchTaskRunId > BatchTaskRun.id [delete: cascade, update: cascade]
+
+Ref EnvironmentVariable_projectId_fk: EnvironmentVariable.projectId > Project.id [delete: cascade, update: cascade]
+
+Ref EnvironmentVariableValue_valueReferenceId_fk: EnvironmentVariableValue.valueReferenceId > SecretReference.id [delete: set null, update: cascade]
+
+Ref EnvironmentVariableValue_variableId_fk: EnvironmentVariableValue.variableId > EnvironmentVariable.id [delete: cascade, update: cascade]
+
+Ref EnvironmentVariableValue_environmentId_fk: EnvironmentVariableValue.environmentId > RuntimeEnvironment.id [delete: cascade, update: cascade]
+
+Ref Checkpoint_runId_fk: Checkpoint.runId > TaskRun.id [delete: cascade, update: cascade]
+
+Ref Checkpoint_attemptId_fk: Checkpoint.attemptId > TaskRunAttempt.id [delete: cascade, update: cascade]
+
+Ref Checkpoint_projectId_fk: Checkpoint.projectId > Project.id [delete: cascade, update: cascade]
+
+Ref Checkpoint_runtimeEnvironmentId_fk: Checkpoint.runtimeEnvironmentId > RuntimeEnvironment.id [delete: cascade, update: cascade]
+
+Ref CheckpointRestoreEvent_checkpointId_fk: CheckpointRestoreEvent.checkpointId > Checkpoint.id [delete: cascade, update: cascade]
+
+Ref CheckpointRestoreEvent_runId_fk: CheckpointRestoreEvent.runId > TaskRun.id [delete: cascade, update: cascade]
+
+Ref CheckpointRestoreEvent_attemptId_fk: CheckpointRestoreEvent.attemptId > TaskRunAttempt.id [delete: cascade, update: cascade]
+
+Ref CheckpointRestoreEvent_projectId_fk: CheckpointRestoreEvent.projectId > Project.id [delete: cascade, update: cascade]
+
+Ref CheckpointRestoreEvent_runtimeEnvironmentId_fk: CheckpointRestoreEvent.runtimeEnvironmentId > RuntimeEnvironment.id [delete: cascade, update: cascade]
+
+Ref WorkerDeployment_projectId_fk: WorkerDeployment.projectId > Project.id [delete: cascade, update: cascade]
+
+Ref WorkerDeployment_environmentId_fk: WorkerDeployment.environmentId > RuntimeEnvironment.id [delete: cascade, update: cascade]
+
+Ref WorkerDeployment_workerId_fk: WorkerDeployment.workerId - BackgroundWorker.id [delete: cascade, update: cascade]
+
+Ref WorkerDeployment_triggeredById_fk: WorkerDeployment.triggeredById > User.id [delete: set null, update: cascade]
+
+Ref WorkerDeploymentPromotion_deploymentId_fk: WorkerDeploymentPromotion.deploymentId > WorkerDeployment.id [delete: cascade, update: cascade]
+
+Ref WorkerDeploymentPromotion_environmentId_fk: WorkerDeploymentPromotion.environmentId > RuntimeEnvironment.id [delete: cascade, update: cascade]
+
+Ref TaskSchedule_projectId_fk: TaskSchedule.projectId > Project.id [delete: cascade, update: cascade]
+
+Ref TaskScheduleInstance_taskScheduleId_fk: TaskScheduleInstance.taskScheduleId > TaskSchedule.id [delete: cascade, update: cascade]
+
+Ref TaskScheduleInstance_environmentId_fk: TaskScheduleInstance.environmentId > RuntimeEnvironment.id [delete: cascade, update: cascade]
+
+Ref TaskScheduleInstance_projectId_fk: TaskScheduleInstance.projectId > Project.id [delete: cascade, update: cascade]
+
+Ref RuntimeEnvironmentSession_environmentId_fk: RuntimeEnvironmentSession.environmentId > RuntimeEnvironment.id [delete: cascade, update: cascade]
+
+Ref ProjectAlertChannel_integrationId_fk: ProjectAlertChannel.integrationId > OrganizationIntegration.id [delete: set null, update: cascade]
+
+Ref ProjectAlertChannel_projectId_fk: ProjectAlertChannel.projectId > Project.id [delete: cascade, update: cascade]
+
+Ref ProjectAlert_projectId_fk: ProjectAlert.projectId > Project.id [delete: cascade, update: cascade]
+
+Ref ProjectAlert_environmentId_fk: ProjectAlert.environmentId > RuntimeEnvironment.id [delete: cascade, update: cascade]
+
+Ref ProjectAlert_channelId_fk: ProjectAlert.channelId > ProjectAlertChannel.id [delete: cascade, update: cascade]
+
+Ref ProjectAlert_workerDeploymentId_fk: ProjectAlert.workerDeploymentId > WorkerDeployment.id [delete: cascade, update: cascade]
+
+Ref ProjectAlertStorage_projectId_fk: ProjectAlertStorage.projectId > Project.id [delete: cascade, update: cascade]
+
+Ref ProjectAlertStorage_alertChannelId_fk: ProjectAlertStorage.alertChannelId > ProjectAlertChannel.id [delete: cascade, update: cascade]
+
+Ref OrganizationIntegration_tokenReferenceId_fk: OrganizationIntegration.tokenReferenceId > SecretReference.id [delete: cascade, update: cascade]
+
+Ref OrganizationIntegration_organizationId_fk: OrganizationIntegration.organizationId > Organization.id [delete: cascade, update: cascade]
+
+Ref OrganizationProjectIntegration_organizationIntegrationId_fk: OrganizationProjectIntegration.organizationIntegrationId > OrganizationIntegration.id [delete: cascade, update: cascade]
+
+Ref OrganizationProjectIntegration_projectId_fk: OrganizationProjectIntegration.projectId > Project.id [delete: cascade, update: cascade]
+
+Ref BulkActionGroup_projectId_fk: BulkActionGroup.projectId > Project.id [delete: cascade, update: cascade]
+
+Ref BulkActionGroup_environmentId_fk: BulkActionGroup.environmentId > RuntimeEnvironment.id [delete: cascade, update: cascade]
+
+Ref BulkActionGroup_userId_fk: BulkActionGroup.userId > User.id [delete: set null, update: cascade]
+
+Ref BulkActionItem_sourceRunId_fk: BulkActionItem.sourceRunId > TaskRun.id [delete: cascade, update: cascade]
+
+Ref BulkActionItem_destinationRunId_fk: BulkActionItem.destinationRunId > TaskRun.id [delete: cascade, update: cascade]
+
+Ref GithubAppInstallation_organizationId_fk: GithubAppInstallation.organizationId > Organization.id
+
+Ref GithubRepository_installationId_fk: GithubRepository.installationId > GithubAppInstallation.id [delete: cascade, update: cascade]
+
+Ref ConnectedGithubRepository_projectId_fk: ConnectedGithubRepository.projectId - Project.id [delete: cascade, update: cascade]
+
+Ref ConnectedGithubRepository_repositoryId_fk: ConnectedGithubRepository.repositoryId > GithubRepository.id [delete: cascade, update: cascade]
+
+Ref ImpersonationAuditLog_adminId_fk: ImpersonationAuditLog.adminId > User.id [delete: cascade, update: cascade]
+
+Ref ImpersonationAuditLog_targetId_fk: ImpersonationAuditLog.targetId > User.id [delete: cascade, update: cascade]
+
+Ref SupportAccessRequest_organizationId_fk: SupportAccessRequest.organizationId > Organization.id [delete: cascade, update: cascade]
+
+Ref SupportAccessRequest_requestedById_fk: SupportAccessRequest.requestedById > User.id [delete: set null, update: cascade]
+
+Ref SupportAccessRequest_approvedById_fk: SupportAccessRequest.approvedById > User.id [delete: set null, update: cascade]
+
+Ref CustomerQuery_organizationId_fk: CustomerQuery.organizationId > Organization.id [delete: cascade, update: cascade]
+
+Ref CustomerQuery_projectId_fk: CustomerQuery.projectId > Project.id [delete: cascade, update: cascade]
+
+Ref CustomerQuery_environmentId_fk: CustomerQuery.environmentId > RuntimeEnvironment.id [delete: cascade, update: cascade]
+
+Ref CustomerQuery_userId_fk: CustomerQuery.userId > User.id [delete: set null, update: cascade]
+
+Ref IntegrationDeployment_deploymentId_fk: IntegrationDeployment.deploymentId > WorkerDeployment.id [delete: set null, update: cascade]
+
+Ref MetricsDashboard_organizationId_fk: MetricsDashboard.organizationId > Organization.id [delete: cascade, update: cascade]
+
+Ref MetricsDashboard_projectId_fk: MetricsDashboard.projectId > Project.id [delete: cascade, update: cascade]
+
+Ref MetricsDashboard_ownerId_fk: MetricsDashboard.ownerId > User.id [delete: set null, update: cascade]
+
+Ref llm_models_project_id_fk: llm_models.project_id > Project.id [delete: cascade]
+
+Ref llm_pricing_tiers_model_id_fk: llm_pricing_tiers.model_id > llm_models.id [delete: cascade]
+
+Ref llm_prices_model_id_fk: llm_prices.model_id > llm_models.id [delete: cascade]
+
+Ref llm_prices_pricing_tier_id_fk: llm_prices.pricing_tier_id > llm_pricing_tiers.id [delete: cascade]
+
+Ref PlatformNotification_userId_fk: PlatformNotification.userId > User.id [delete: cascade, update: cascade]
+
+Ref PlatformNotification_organizationId_fk: PlatformNotification.organizationId > Organization.id [delete: cascade, update: cascade]
+
+Ref PlatformNotification_projectId_fk: PlatformNotification.projectId > Project.id [delete: cascade, update: cascade]
+
+Ref PlatformNotificationInteraction_notificationId_fk: PlatformNotificationInteraction.notificationId > PlatformNotification.id [delete: cascade, update: cascade]
+
+Ref PlatformNotificationInteraction_userId_fk: PlatformNotificationInteraction.userId > User.id [delete: cascade, update: cascade]
+
+Ref ErrorGroupState_organizationId_fk: ErrorGroupState.organizationId > Organization.id [delete: cascade, update: cascade]
+
+Ref ErrorGroupState_projectId_fk: ErrorGroupState.projectId > Project.id [delete: cascade, update: cascade]
+
+Ref ErrorGroupState_environmentId_fk: ErrorGroupState.environmentId > RuntimeEnvironment.id [delete: cascade, update: cascade]
+
+Ref TaskIdentifier_runtimeEnvironmentId_fk: TaskIdentifier.runtimeEnvironmentId > RuntimeEnvironment.id [delete: cascade, update: cascade]
+
+Ref TaskIdentifier_projectId_fk: TaskIdentifier.projectId > Project.id [delete: cascade, update: cascade]
+
+Ref TaskIdentifier_currentWorkerId_fk: TaskIdentifier.currentWorkerId > BackgroundWorker.id [delete: set null, update: cascade]

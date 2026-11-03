@@ -1,0 +1,2 @@
+# schemas.bzl, the list of the schemas, is loaded by //checks.
+exports_files(["sources.json"])

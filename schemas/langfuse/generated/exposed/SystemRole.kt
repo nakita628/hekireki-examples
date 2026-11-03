@@ -1,0 +1,16 @@
+package langfuse.models
+
+enum class SystemRole(
+    val dbName: String,
+) {
+    OWNER("OWNER"),
+    ADMIN("ADMIN"),
+    MEMBER("MEMBER"),
+    VIEWER("VIEWER"),
+    NONE("NONE"),
+    LEGACY_PROJECT_API_KEY("LEGACY_PROJECT_API_KEY"),
+    LEGACY_ORGANIZATION_API_KEY("LEGACY_ORGANIZATION_API_KEY"),
+    SCORES_INGEST("SCORES_INGEST"),
+    INGEST("INGEST"),
+    AI_GATEWAY("AI_GATEWAY"),
+}

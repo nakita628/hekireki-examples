@@ -1,0 +1,11 @@
+load("//checks:defs.bzl", "lang_checks")
+
+# ruby -c and loading against Active Record for the models of every schema.
+lang_checks(
+    lang = "activerecord",
+    harness = [
+        "Gemfile",
+        "smoke.rb",
+        "//checks:common.sh",
+    ],
+)

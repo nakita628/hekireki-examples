@@ -1,0 +1,1790 @@
+Enum ApiKeyScope {
+  ORGANIZATION
+  PROJECT
+}
+
+Enum SystemRole {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
+  NONE
+  LEGACY_PROJECT_API_KEY
+  LEGACY_ORGANIZATION_API_KEY
+  SCORES_INGEST
+  INGEST
+  AI_GATEWAY
+}
+
+Enum GatewayIngestionMode {
+  none
+  usage
+  full
+}
+
+Enum GatewayProvider {
+  openai
+  anthropic
+}
+
+Enum GatewayConnectionStatus {
+  enabled
+  disabled
+  error
+}
+
+Enum InAppAgentConversationVisibilityScope {
+  PERSONAL
+  PROJECT
+}
+
+Enum Role {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
+  NONE
+  AI_GATEWAY
+}
+
+Enum ScoreConfigDataType {
+  CATEGORICAL
+  NUMERIC
+  BOOLEAN
+  TEXT
+}
+
+Enum AnnotationQueueStatus {
+  PENDING
+  COMPLETED
+}
+
+Enum AnnotationQueueObjectType {
+  TRACE
+  OBSERVATION
+  SESSION
+}
+
+Enum DatasetStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+Enum CommentObjectType {
+  TRACE
+  OBSERVATION
+  SESSION
+  PROMPT
+}
+
+Enum NotificationChannel {
+  EMAIL
+}
+
+Enum NotificationType {
+  COMMENT_MENTION
+}
+
+Enum AuditLogRecordType {
+  USER
+  API_KEY
+}
+
+Enum EvalTemplateType {
+  LLM_AS_JUDGE
+  CODE
+  DECISION_MODEL
+  FACET
+}
+
+Enum EvalTemplateSourceCodeLanguage {
+  PYTHON
+  TYPESCRIPT
+}
+
+Enum EvaluatorSourceCodeLanguage {
+  PYTHON
+  TYPESCRIPT
+}
+
+Enum JobType {
+  EVAL
+}
+
+Enum JobConfigState {
+  ACTIVE
+  INACTIVE
+}
+
+Enum EvaluatorBlockReason {
+  LLM_CONNECTION_AUTH_INVALID
+  LLM_CONNECTION_BILLING_EXHAUSTED
+  LLM_CONNECTION_ENDPOINT_UNREACHABLE
+  LLM_CONNECTION_MISSING
+  DEFAULT_EVAL_MODEL_MISSING
+  EVAL_MODEL_CONFIG_INVALID
+  EVAL_MODEL_UNAVAILABLE
+  PROVIDER_ACCOUNT_NOT_READY
+}
+
+Enum JobExecutionStatus {
+  COMPLETED
+  ERROR
+  PENDING
+  CANCELLED
+  DELAYED
+}
+
+Enum BlobStorageIntegrationFileType {
+  JSON
+  CSV
+  JSONL
+  PARQUET
+}
+
+Enum BlobStorageIntegrationType {
+  S3
+  S3_COMPATIBLE
+  AZURE_BLOB_STORAGE
+  GOOGLE_CLOUD_STORAGE
+}
+
+Enum ExternalMediaStorageIntegrationType {
+  S3
+  S3_COMPATIBLE
+}
+
+Enum BlobStorageExportMode {
+  FULL_HISTORY
+  FROM_TODAY
+  FROM_CUSTOM_DATE
+}
+
+Enum AnalyticsIntegrationExportSource {
+  TRACES_OBSERVATIONS
+  TRACES_OBSERVATIONS_EVENTS
+  EVENTS
+}
+
+Enum MediaAssociationOrigin {
+  UNKNOWN
+  CLIENT_UPLOAD
+  INGESTION_MEDIA_EXTRACTION
+  INGESTION_FIELD_OVERFLOW
+}
+
+Enum DashboardWidgetViews {
+  TRACES
+  OBSERVATIONS
+  SCORES_NUMERIC
+  SCORES_CATEGORICAL
+  SCORES_BOOLEAN
+}
+
+Enum DashboardWidgetChartType {
+  LINE_TIME_SERIES
+  AREA_TIME_SERIES
+  BAR_TIME_SERIES
+  HORIZONTAL_BAR
+  VERTICAL_BAR
+  PIE
+  NUMBER
+  HISTOGRAM
+  PIVOT_TABLE
+}
+
+Enum ActionType {
+  WEBHOOK
+  SLACK
+  GITHUB_DISPATCH
+  PAGERDUTY
+}
+
+Enum ActionExecutionStatus {
+  COMPLETED
+  ERROR
+  PENDING
+  CANCELLED
+}
+
+Enum MonitorThresholdOperator {
+  GT
+  GTE
+  LT
+  LTE
+  EQ
+  NEQ
+}
+
+Enum MonitorView {
+  OBSERVATIONS
+  SCORES_NUMERIC
+  SCORES_CATEGORICAL
+  SCORES_BOOLEAN
+}
+
+Enum MonitorSeverity {
+  PAUSED
+  UNKNOWN
+  NO_DATA
+  OK
+  WARNING
+  ALERT
+}
+
+Enum MonitorStatus {
+  PAUSED
+  ACTIVE
+  ERROR_BAD_QUERY
+}
+
+Enum SurveyName {
+  org_onboarding
+  user_onboarding
+}
+
+Table Account {
+  id String [pk]
+  user_id String [not null]
+  type String [not null]
+  provider String [not null]
+  providerAccountId String [not null]
+  refresh_token String
+  access_token String
+  expires_at Int
+  expires_in Int
+  ext_expires_in Int
+  token_type String
+  scope String
+  id_token String
+  session_state String
+  refresh_token_expires_in Int
+  created_at Int
+
+  indexes {
+    (provider, providerAccountId) [unique]
+  }
+}
+
+Table Session {
+  id String [pk]
+  session_token String [unique, not null]
+  user_id String [not null]
+  expires DateTime [not null]
+}
+
+Table users {
+  id String [pk]
+  name String
+  email String [unique]
+  email_verified DateTime
+  password String
+  sessions_expired_at DateTime
+  image String
+  admin Boolean [default: false, not null]
+  v4_beta_enabled Boolean [default: false, not null]
+  support_access Json
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+  feature_flags String[] [not null]
+}
+
+Table verification_tokens {
+  identifier String [not null]
+  token String [unique, not null]
+  expires DateTime [not null]
+
+  indexes {
+    (identifier, token) [unique]
+  }
+}
+
+Table organizations {
+  id String [pk]
+  name String [not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+  cloud_config Json
+  metadata Json
+  cloud_billing_cycle_anchor DateTime [default: `now()`]
+  cloud_billing_cycle_updated_at DateTime
+  cloud_current_cycle_usage Int
+  cloud_free_tier_usage_threshold_state String
+  ai_features_enabled Boolean [default: false, not null]
+  ai_telemetry_enabled Boolean [default: true, not null]
+  feature_flag_org_defaults String[] [not null]
+  sfdc_org_id String
+}
+
+Table projects {
+  id String [pk]
+  org_id String [not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+  deleted_at DateTime
+  name String [not null]
+  retention_days Int
+  has_traces Boolean [default: false, not null]
+  metadata Json
+  home_dashboard_id String
+}
+
+Table api_keys {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  note String
+  public_key String [unique, not null]
+  hashed_secret_key String [unique, not null]
+  fast_hashed_secret_key String [unique]
+  display_secret_key String [not null]
+  last_used_at DateTime
+  expires_at DateTime
+  is_in_app_agent_key Boolean [default: false, not null]
+  project_id String
+  organization_id String
+  scope ApiKeyScope [default: 'PROJECT', not null]
+  created_by_user_id String
+  user_id String
+  created_by_api_key_id String
+}
+
+Table role_assignments {
+  id String [pk]
+  owner_id String [not null]
+  project_id String
+  org_id String [not null]
+  principal_id String [not null]
+  user_id String
+  api_key_id String
+  role_id String [not null]
+  system_role SystemRole [not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+
+  indexes {
+    (deprecatedPrincipalUserId, deprecatedOwnerOrgId, system_role) [unique]
+    (deprecatedPrincipalUserId, deprecatedOwnerProjectId, system_role) [unique]
+    (deprecatedPrincipalApiKeyId, deprecatedOwnerOrgId, system_role) [unique]
+    (deprecatedPrincipalApiKeyId, deprecatedOwnerProjectId, system_role) [unique]
+    (owner_id, principal_id, role_id) [unique]
+  }
+}
+
+Table gateway_configs {
+  organization_id String [pk]
+  default_ingestion_project_id String
+  ingestion_mode GatewayIngestionMode [default: 'usage', not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+}
+
+Table gateway_ai_connections {
+  id String [pk]
+  organization_id String [not null]
+  name String [not null]
+  provider GatewayProvider [not null]
+  encrypted_credentials String [not null]
+  display_secret_key String [not null]
+  created_by_id String
+  status GatewayConnectionStatus [default: 'enabled', not null]
+  allowed_models Json
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+
+  indexes {
+    (organization_id, name) [unique]
+  }
+}
+
+Table gateway_api_key_associations {
+  api_key_id String [pk]
+  metadata Json [default: '{}', not null]
+}
+
+Table in_app_agent_conversations {
+  id String [not null]
+  project_id String [not null]
+  created_by_user_id String
+  title String
+  renamed_by_user_at DateTime
+  visibility_scope InAppAgentConversationVisibilityScope [default: 'PERSONAL', not null]
+  provider_session_id String
+  always_allowed_tools String[] [not null]
+  deleted_at DateTime
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+
+  indexes {
+    (id, project_id) [pk]
+  }
+}
+
+Table in_app_agent_events {
+  project_id String [not null]
+  conversation_id String [not null]
+  run_id String [not null]
+  sequence_number Int [not null]
+  type String [not null]
+  event Json [not null]
+  created_at DateTime [default: `now()`, not null]
+
+  indexes {
+    (project_id, conversation_id, sequence_number) [pk]
+  }
+}
+
+Table in_app_agent_runs {
+  id String [not null]
+  project_id String [not null]
+  conversation_id String [not null]
+  triggered_by_user_id String
+  model String
+  mcp_api_key_id String
+  error_code String
+  error_message String
+  finished_at DateTime
+  status String
+  request Json
+  claimed_at DateTime
+  heartbeat_at DateTime
+  cancel_requested_at DateTime
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+
+  indexes {
+    (id, project_id) [pk]
+  }
+}
+
+Table in_app_agent_pending_tool_approvals {
+  project_id String [not null]
+  conversation_id String [not null]
+  tool_call_id String [not null]
+  approval_fingerprint String [not null]
+  expires_at DateTime [not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+
+  indexes {
+    (project_id, conversation_id, tool_call_id) [pk]
+  }
+}
+
+Table background_migrations {
+  id String [pk]
+  name String [unique, not null]
+  script String [not null]
+  args Json [not null]
+  state Json [default: '{}', not null]
+  finished_at DateTime
+  failed_at DateTime
+  failed_reason String
+  worker_id String
+  locked_at DateTime
+}
+
+Table llm_api_keys {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+  provider String [not null]
+  adapter String [not null]
+  display_secret_key String [not null]
+  secret_key String [not null]
+  base_url String
+  custom_models String[] [not null]
+  with_default_models Boolean [default: true, not null]
+  extra_headers String
+  extra_header_keys String[] [not null]
+  config Json
+  project_id String
+  organization_id String
+
+  indexes {
+    (project_id, provider) [unique]
+    (organization_id, provider) [unique]
+  }
+}
+
+Table organization_memberships {
+  id String [pk]
+  org_id String [not null]
+  user_id String [not null]
+  role Role [not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+
+  indexes {
+    (org_id, user_id) [unique]
+  }
+}
+
+Table project_memberships {
+  org_membership_id String [not null]
+  project_id String [not null]
+  user_id String [not null]
+  role Role [not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+
+  indexes {
+    (project_id, user_id) [pk]
+  }
+}
+
+Table membership_invitations {
+  id String [pk]
+  email String [not null]
+  org_id String [not null]
+  org_role Role [not null]
+  project_id String
+  project_role Role
+  invited_by_user_id String
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+
+  indexes {
+    (email, org_id) [unique]
+  }
+}
+
+Table trace_sessions {
+  id String [not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+  project_id String [not null]
+  bookmarked Boolean [default: false, not null]
+  public Boolean [default: false, not null]
+  environment String [default: 'default', not null]
+
+  indexes {
+    (id, project_id) [pk]
+  }
+}
+
+Table score_configs {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+  project_id String [not null]
+  name String [not null]
+  data_type ScoreConfigDataType [not null]
+  is_archived Boolean [default: false, not null]
+  min_value Float
+  max_value Float
+  categories Json
+  description String
+
+  indexes {
+    (id, project_id) [unique]
+  }
+}
+
+Table annotation_queues {
+  id String [pk]
+  name String [not null]
+  description String
+  score_config_ids String[] [not null]
+  project_id String [not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+
+  indexes {
+    (project_id, name) [unique]
+  }
+}
+
+Table annotation_queue_items {
+  id String [pk]
+  queue_id String [not null]
+  object_id String [not null]
+  object_type AnnotationQueueObjectType [not null]
+  status AnnotationQueueStatus [default: 'PENDING', not null]
+  locked_at DateTime
+  locked_by_user_id String
+  annotator_user_id String
+  completed_at DateTime
+  project_id String [not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+}
+
+Table annotation_queue_assignments {
+  id String [pk]
+  project_id String [not null]
+  user_id String [not null]
+  queue_id String [not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+
+  indexes {
+    (project_id, queue_id, user_id) [unique]
+  }
+}
+
+Table cron_jobs {
+  name String [pk]
+  last_run DateTime
+  job_started_at DateTime
+  state String
+}
+
+Table datasets {
+  id String [not null]
+  project_id String [not null]
+  name String [not null]
+  description String
+  metadata Json
+  remote_experiment_url String
+  remote_experiment_payload Json
+  remote_experiment_enabled Boolean [default: true, not null]
+  remote_experiment_secret_key String
+  remote_experiment_display_secret_key String
+  remote_experiment_request_headers Json
+  remote_experiment_display_headers Json
+  input_schema Json
+  expected_output_schema Json
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+
+  indexes {
+    (id, project_id) [pk]
+    (project_id, name) [unique]
+  }
+}
+
+Table dataset_items {
+  id String [not null]
+  project_id String [not null]
+  status DatasetStatus [default: 'ACTIVE']
+  input Json
+  expected_output Json
+  metadata Json
+  source_trace_id String
+  source_observation_id String
+  dataset_id String [not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+  valid_from DateTime [default: `now()`, not null]
+  valid_to DateTime
+  is_deleted Boolean [default: false, not null]
+
+  indexes {
+    (id, project_id, valid_from) [pk]
+  }
+}
+
+Table dataset_runs {
+  id String [not null]
+  project_id String [not null]
+  name String [not null]
+  description String
+  metadata Json
+  dataset_id String [not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+
+  indexes {
+    (id, project_id) [pk]
+    (dataset_id, project_id, name) [unique]
+  }
+}
+
+Table comments {
+  id String [pk]
+  project_id String [not null]
+  object_type CommentObjectType [not null]
+  object_id String [not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+  content String [not null]
+  author_user_id String
+  data_field String
+  path String[] [not null]
+  range_start Int[] [not null]
+  range_end Int[] [not null]
+}
+
+Table comment_reactions {
+  id String [pk]
+  project_id String [not null]
+  comment_id String [not null]
+  user_id String [not null]
+  emoji String [not null]
+  created_at DateTime [default: `now()`, not null]
+
+  indexes {
+    (comment_id, user_id, emoji) [unique]
+  }
+}
+
+Table notification_preferences {
+  id String [pk]
+  user_id String [not null]
+  project_id String [not null]
+  channel NotificationChannel [not null]
+  type NotificationType [not null]
+  enabled Boolean [default: true, not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+
+  indexes {
+    (user_id, project_id, channel, type) [unique]
+  }
+}
+
+Table prompts {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+  project_id String [not null]
+  created_by String [not null]
+  prompt Json [not null]
+  name String [not null]
+  version Int [not null]
+  type String [default: 'text', not null]
+  is_active Boolean
+  config Json [default: '{}', not null]
+  tags String[] [not null]
+  labels String[] [not null]
+  commit_message String
+
+  indexes {
+    (project_id, name, version) [unique]
+  }
+}
+
+Table prompt_dependencies {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+  project_id String [not null]
+  parent_id String [not null]
+  child_name String [not null]
+  child_label String
+  child_version Int
+}
+
+Table prompt_protected_labels {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+  project_id String [not null]
+  label String [not null]
+
+  indexes {
+    (project_id, label) [unique]
+  }
+}
+
+Table skills {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+  project_id String [not null]
+  created_by String [not null]
+  name String [not null]
+  description String [not null]
+  frontmatter Json [default: '{}', not null]
+  version Int [not null]
+  tags String[] [not null]
+  labels String[] [not null]
+  commit_message String
+
+  indexes {
+    (project_id, name, version) [unique]
+  }
+}
+
+Table skill_files {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  project_id String [not null]
+  skill_id String [not null]
+  blob_id String [not null]
+  path String [not null]
+
+  indexes {
+    (project_id, skill_id, path) [unique]
+  }
+}
+
+Table skill_blobs {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  project_id String [not null]
+  sha_256_hash String [not null]
+  content_type String [not null]
+  content_length Int [not null]
+  content String [not null]
+
+  indexes {
+    (project_id, sha_256_hash) [unique]
+  }
+}
+
+Table models {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+  project_id String
+  model_name String [not null]
+  match_pattern String [not null]
+  start_date DateTime
+  input_price Decimal
+  output_price Decimal
+  total_price Decimal
+  unit String
+  tokenizer_id String
+  tokenizer_config Json
+
+  indexes {
+    (project_id, model_name, start_date, unit) [unique]
+  }
+}
+
+Table prices {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+  model_id String [not null]
+  project_id String
+  pricing_tier_id String [not null]
+  usage_type String [not null]
+  price Decimal [not null]
+
+  indexes {
+    (model_id, usage_type, pricing_tier_id) [unique]
+  }
+}
+
+Table pricing_tiers {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+  model_id String [not null]
+  name String [not null]
+  is_default Boolean [default: false, not null]
+  priority Int [not null]
+  conditions Json [not null]
+
+  indexes {
+    (model_id, priority) [unique]
+    (model_id, name) [unique]
+  }
+}
+
+Table audit_logs {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+  type AuditLogRecordType [default: 'USER', not null]
+  api_key_id String
+  user_id String
+  org_id String [not null]
+  user_org_role String
+  project_id String
+  user_project_role String
+  resource_type String [not null]
+  resource_id String [not null]
+  action String [not null]
+  before String
+  after String
+}
+
+Table audit_log_staging {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  payload Json [not null]
+  failed_at DateTime
+  last_error String
+}
+
+Table eval_templates {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+  project_id String
+  name String [not null]
+  version Int [not null]
+  prompt String
+  type EvalTemplateType [default: 'LLM_AS_JUDGE', not null]
+  partner String
+  model String
+  provider String
+  model_params Json
+  vars String[] [not null]
+  output_schema Json
+  source_code String
+  source_code_language EvalTemplateSourceCodeLanguage
+
+  indexes {
+    (project_id, name, version) [unique]
+  }
+}
+
+Table evaluators {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+  project_id String [not null]
+  name String [not null]
+  type EvalTemplateType [not null]
+  is_built_in Boolean [default: false, not null]
+  description String
+  created_by_user_id String
+  blocked_at DateTime
+  block_reason EvaluatorBlockReason
+  block_message String
+}
+
+Table evaluator_versions {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  evaluator_id String [not null]
+  version Int [not null]
+  created_by_user_id String
+  prompt String
+  prompt_messages Json
+  partner String
+  model String
+  provider String
+  model_params Json
+  vars String[] [not null]
+  variable_mapping Json
+  output_definition Json
+  source_code String
+  source_code_language EvaluatorSourceCodeLanguage
+  questions Json
+
+  indexes {
+    (evaluator_id, version) [unique]
+  }
+}
+
+Table job_configurations {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+  project_id String [not null]
+  job_type JobType [not null]
+  status JobConfigState [default: 'ACTIVE', not null]
+  blocked_at DateTime
+  block_reason EvaluatorBlockReason
+  block_message String
+  eval_template_id String
+  score_name String [not null]
+  filter Json [not null]
+  target_object String [not null]
+  variable_mapping Json [not null]
+  sampling Decimal [not null]
+  delay Int [not null]
+  time_scope String[] [not null]
+}
+
+Table evaluation_rules {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+  project_id String [not null]
+  created_by_user_id String
+  name String [not null]
+  status JobConfigState [default: 'ACTIVE', not null]
+  target_object String [not null]
+  filter Json [not null]
+  sampling Decimal [not null]
+  delay Int [not null]
+  idle_time Int
+  time_scope String[] [not null]
+}
+
+Table tracing_readiness_settings {
+  project_id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+  created_by String
+  updated_by String
+  trace_idle_ms Int
+}
+
+Table evaluation_rule_evaluator_assignments {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+  project_id String [not null]
+  evaluation_rule_id String [not null]
+  evaluator_id String [not null]
+  variable_mapping Json
+
+  indexes {
+    (evaluation_rule_id, evaluator_id) [unique]
+  }
+}
+
+Table job_executions {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+  project_id String [not null]
+  job_configuration_id String [not null]
+  job_template_id String
+  status JobExecutionStatus [not null]
+  start_time DateTime
+  end_time DateTime
+  error String
+  job_input_trace_id String
+  job_input_trace_timestamp DateTime
+  job_input_observation_id String
+  job_input_dataset_item_id String
+  job_input_dataset_item_valid_from DateTime
+  job_output_score_id String
+  execution_trace_id String
+}
+
+Table default_llm_models {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+  project_id String [unique, not null]
+  llm_api_key_id String [not null]
+  provider String [not null]
+  adapter String [not null]
+  model String [not null]
+  model_params Json
+}
+
+Table topic_configs {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+  created_by String
+  updated_by String
+  project_id String [unique, not null]
+  enabled Boolean [default: false, not null]
+  blocked_at DateTime
+  block_reason EvaluatorBlockReason
+  block_message String
+  summary_llm_api_key_id String
+  summary_model String
+  embedding_llm_api_key_id String
+  embedding_model String
+  embedding_dimensions Int [default: 1024, not null]
+  clustering_llm_api_key_id String
+  clustering_model String
+}
+
+Table sso_configs {
+  domain String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+  auth_provider String [not null]
+  auth_config Json
+}
+
+Table verified_domains {
+  id String [pk]
+  organization_id String [not null]
+  domain String [not null]
+  verification_token String [unique, not null]
+  verified_at DateTime
+  created_by_user_id String
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+
+  indexes {
+    (organization_id, domain) [unique]
+  }
+}
+
+Table posthog_integrations {
+  project_id String [pk]
+  encrypted_posthog_api_key String [not null]
+  posthog_host_name String [not null]
+  last_sync_at DateTime
+  enabled Boolean [not null]
+  created_at DateTime [default: `now()`, not null]
+  export_source AnalyticsIntegrationExportSource [default: 'TRACES_OBSERVATIONS', not null]
+  backfill Boolean [default: true, not null]
+  last_error String
+  last_error_at DateTime
+}
+
+Table mixpanel_integrations {
+  project_id String [pk]
+  encrypted_mixpanel_project_token String [not null]
+  mixpanel_region String [not null]
+  last_sync_at DateTime
+  enabled Boolean [not null]
+  created_at DateTime [default: `now()`, not null]
+  export_source AnalyticsIntegrationExportSource [default: 'TRACES_OBSERVATIONS', not null]
+  backfill Boolean [default: true, not null]
+}
+
+Table blob_storage_integrations {
+  project_id String [pk]
+  type BlobStorageIntegrationType [not null]
+  bucket_name String [not null]
+  prefix String [not null]
+  access_key_id String
+  secret_access_key String
+  region String [not null]
+  endpoint String
+  force_path_style Boolean [not null]
+  next_sync_at DateTime
+  last_sync_at DateTime
+  enabled Boolean [not null]
+  export_frequency String [not null]
+  file_type BlobStorageIntegrationFileType [default: 'CSV', not null]
+  export_mode BlobStorageExportMode [default: 'FULL_HISTORY', not null]
+  export_start_date DateTime
+  export_source AnalyticsIntegrationExportSource [default: 'TRACES_OBSERVATIONS', not null]
+  export_field_groups String[] [not null]
+  compressed Boolean [default: true, not null]
+  export_tuning Json
+  run_started_at DateTime
+  backfill Boolean [default: true, not null]
+  last_error String
+  last_error_at DateTime
+  last_failure_notification_sent_at DateTime
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+}
+
+Table external_media_storage_integrations {
+  project_id String [pk]
+  type ExternalMediaStorageIntegrationType [not null]
+  bucket_name String [not null]
+  prefix String
+  access_key_id String
+  secret_access_key String
+  region String [not null]
+  endpoint String
+  force_path_style Boolean [not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+}
+
+Table web_callout_endpoints {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+  project_id String [not null]
+  name String [default: 'Default', not null]
+  url String [not null]
+  enabled Boolean [default: true, not null]
+  toast_message String [default: 'Callout sent', not null]
+  request_headers String
+  request_header_keys String[] [not null]
+}
+
+Table batch_exports {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+  project_id String [not null]
+  user_id String [not null]
+  finished_at DateTime
+  expires_at DateTime
+  name String [not null]
+  status String [not null]
+  query Json [not null]
+  format String [not null]
+  url String
+  log String
+}
+
+Table batch_actions {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+  project_id String [not null]
+  user_id String [not null]
+  action_type String [not null]
+  table_name String [not null]
+  status String [not null]
+  finished_at DateTime
+  query Json [not null]
+  config Json
+  total_count Int
+  processed_count Int
+  failed_count Int
+  log String
+}
+
+Table media {
+  id String [not null]
+  sha_256_hash String [not null]
+  project_id String [not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+  uploaded_at DateTime
+  upload_http_status Int
+  upload_http_error String
+  bucket_path String [not null]
+  bucket_name String [not null]
+  content_type String [not null]
+  content_length BigInt [not null]
+
+  indexes {
+    (project_id, id) [unique]
+    (project_id, sha_256_hash) [unique]
+  }
+}
+
+Table trace_media {
+  id String [pk]
+  project_id String [not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+  media_id String [not null]
+  trace_id String [not null]
+  field String [not null]
+  origin MediaAssociationOrigin [default: 'UNKNOWN', not null]
+
+  indexes {
+    (project_id, trace_id, media_id, field) [unique]
+  }
+}
+
+Table observation_media {
+  id String [pk]
+  project_id String [not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+  media_id String [not null]
+  trace_id String [not null]
+  observation_id String [not null]
+  field String [not null]
+  origin MediaAssociationOrigin [default: 'UNKNOWN', not null]
+
+  indexes {
+    (project_id, trace_id, observation_id, media_id, field) [unique]
+  }
+}
+
+Table dataset_item_media {
+  id String [pk]
+  project_id String [not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+  media_id String [not null]
+  dataset_id String [not null]
+  dataset_item_id String [not null]
+  dataset_item_valid_from DateTime
+  field String [not null]
+  json_path String
+  reference_string String
+
+  indexes {
+    (project_id, dataset_item_id, dataset_item_valid_from, field, json_path) [unique]
+  }
+}
+
+Table billing_meter_backups {
+  stripe_customer_id String [not null]
+  meter_id String [not null]
+  start_time DateTime [not null]
+  end_time DateTime [not null]
+  aggregated_value Int [not null]
+  event_name String [not null]
+  org_id String [not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+
+  indexes {
+    (stripe_customer_id, meter_id, start_time, end_time) [unique]
+  }
+}
+
+Table llm_schemas {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+  project_id String [not null]
+  name String [not null]
+  description String [not null]
+  schema Json [not null]
+
+  indexes {
+    (project_id, name) [unique]
+  }
+}
+
+Table llm_tools {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+  project_id String [not null]
+  name String [not null]
+  description String [not null]
+  parameters Json [not null]
+
+  indexes {
+    (project_id, name) [unique]
+  }
+}
+
+Table dashboards {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+  created_by String
+  updated_by String
+  project_id String
+  name String [not null]
+  description String [not null]
+  definition Json [not null]
+  filters Json [default: '[]', not null]
+}
+
+Table dashboard_widgets {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+  created_by String
+  updated_by String
+  project_id String
+  name String [not null]
+  description String [not null]
+  view DashboardWidgetViews [not null]
+  dimensions Json [not null]
+  metrics Json [not null]
+  filters Json [not null]
+  chart_type DashboardWidgetChartType [not null]
+  chart_config Json [not null]
+  min_version Int [default: 1, not null]
+}
+
+Table table_view_presets {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+  project_id String [not null]
+  name String [not null]
+  table_name String [not null]
+  created_by String
+  updated_by String
+  filters Json [not null]
+  column_order Json [not null]
+  column_visibility Json [not null]
+  search_query String
+  order_by Json
+
+  indexes {
+    (project_id, table_name, name) [unique]
+  }
+}
+
+Table default_views {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+  project_id String [not null]
+  user_id String
+  view_name String [not null]
+  view_id String [not null]
+}
+
+Table actions {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+  project_id String [not null]
+  type ActionType [not null]
+  config Json [not null]
+}
+
+Table triggers {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+  project_id String [not null]
+  eventSource String [not null]
+  eventActions String[] [not null]
+  filter Json
+  status JobConfigState [default: 'ACTIVE', not null]
+}
+
+Table automations {
+  id String [pk]
+  name String [not null]
+  trigger_id String [not null]
+  action_id String [not null]
+  created_at DateTime [default: `now()`, not null]
+  project_id String [not null]
+}
+
+Table automation_executions {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+  source_id String [not null]
+  automation_id String [not null]
+  trigger_id String [not null]
+  action_id String [not null]
+  project_id String [not null]
+  status ActionExecutionStatus [default: 'PENDING', not null]
+  input Json [not null]
+  output Json
+  started_at DateTime
+  finished_at DateTime
+  error String
+}
+
+Table monitors {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+  created_by String
+  updated_by String
+  project_id String [not null]
+  view MonitorView [not null]
+  filters Json [not null]
+  metric Json [not null]
+  window_ms BigInt [not null]
+  cadence_ms BigInt [not null]
+  threshold_operator MonitorThresholdOperator [not null]
+  alert_threshold Decimal [not null]
+  warning_threshold Decimal
+  severity MonitorSeverity [default: 'UNKNOWN', not null]
+  severity_changed_at DateTime
+  no_data Json [not null]
+  renotify Json [not null]
+  status MonitorStatus [default: 'ACTIVE', not null]
+  scheduler_batch_id BigInt [not null]
+  next_run_at DateTime
+  last_published_at DateTime
+  last_claimed_at DateTime
+  last_completed_at DateTime
+  name String [not null]
+  tags String[] [not null]
+  trigger_ids String[] [not null]
+  alerted_at DateTime
+}
+
+Table slack_integrations {
+  id String [pk]
+  project_id String [unique, not null]
+  team_id String [not null]
+  team_name String [not null]
+  bot_token String [not null]
+  bot_user_id String [not null]
+  installer_user_id String
+  installer_slack_user_id String
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+}
+
+Table pending_deletions {
+  id String [pk]
+  project_id String [not null]
+  object String [not null]
+  object_id String [not null]
+  is_deleted Boolean [default: false, not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+}
+
+Table surveys {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  survey_name SurveyName [not null]
+  response Json [not null]
+  user_id String
+  user_email String
+  org_id String
+}
+
+Table cloud_spend_alerts {
+  id String [pk]
+  org_id String [not null]
+  title String [not null]
+  threshold Decimal [not null]
+  triggered_at DateTime
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+}
+
+Table topic_clustering_runs {
+  id String [pk]
+  project_id String [not null]
+  facet_id String [not null]
+  facet_version Int [not null]
+  status String [default: 'pending', not null]
+  config Json [default: '{}', not null]
+  error String
+  created_at DateTime [default: `now()`, not null]
+  started_at DateTime
+  finished_at DateTime
+  topic_version_ids String[] [not null]
+}
+
+Ref Account_user_id_fk: Account.user_id > users.id [delete: cascade]
+
+Ref Session_user_id_fk: Session.user_id > users.id [delete: cascade]
+
+Ref projects_home_dashboard_id_fk: projects.home_dashboard_id > dashboards.id [delete: set null]
+
+Ref projects_org_id_fk: projects.org_id > organizations.id [delete: cascade, update: cascade]
+
+Ref api_keys_project_id_fk: api_keys.project_id > projects.id [delete: cascade]
+
+Ref api_keys_organization_id_fk: api_keys.organization_id > organizations.id [delete: cascade]
+
+Ref api_keys_created_by_user_id_fk: api_keys.created_by_user_id > users.id [delete: set null]
+
+Ref api_keys_user_id_fk: api_keys.user_id > users.id [delete: cascade]
+
+Ref api_keys_created_by_api_key_id_fk: api_keys.created_by_api_key_id > api_keys.id [delete: set null]
+
+Ref role_assignments_project_id_fk: role_assignments.project_id > projects.id [delete: cascade]
+
+Ref role_assignments_org_id_fk: role_assignments.org_id > organizations.id [delete: cascade]
+
+Ref role_assignments_user_id_fk: role_assignments.user_id > users.id [delete: cascade]
+
+Ref role_assignments_api_key_id_fk: role_assignments.api_key_id > api_keys.id [delete: cascade]
+
+Ref gateway_configs_organization_id_fk: gateway_configs.organization_id - organizations.id [delete: cascade]
+
+Ref gateway_configs_default_ingestion_project_id_fk: gateway_configs.default_ingestion_project_id > projects.id [delete: set null]
+
+Ref gateway_ai_connections_organization_id_fk: gateway_ai_connections.organization_id > organizations.id [delete: cascade]
+
+Ref gateway_api_key_associations_api_key_id_fk: gateway_api_key_associations.api_key_id - api_keys.id [delete: cascade]
+
+Ref in_app_agent_conversations_project_id_fk: in_app_agent_conversations.project_id > projects.id [delete: cascade]
+
+Ref in_app_agent_conversations_created_by_user_id_fk: in_app_agent_conversations.created_by_user_id > users.id [delete: set null]
+
+Ref in_app_agent_events_project_id_fk: in_app_agent_events.project_id > projects.id [delete: cascade]
+
+Ref in_app_agent_events_(conversation_id, project_id)_fk: in_app_agent_events.(conversation_id, project_id) > in_app_agent_conversations.(id, project_id) [delete: cascade]
+
+Ref in_app_agent_events_(run_id, project_id)_fk: in_app_agent_events.(run_id, project_id) > in_app_agent_runs.(id, project_id) [delete: cascade]
+
+Ref in_app_agent_runs_project_id_fk: in_app_agent_runs.project_id > projects.id [delete: cascade]
+
+Ref in_app_agent_runs_(conversation_id, project_id)_fk: in_app_agent_runs.(conversation_id, project_id) > in_app_agent_conversations.(id, project_id) [delete: cascade]
+
+Ref in_app_agent_runs_triggered_by_user_id_fk: in_app_agent_runs.triggered_by_user_id > users.id [delete: set null]
+
+Ref in_app_agent_pending_tool_approvals_project_id_fk: in_app_agent_pending_tool_approvals.project_id > projects.id [delete: cascade]
+
+Ref in_app_agent_pending_tool_approvals_(conversation_id, project_id)_fk: in_app_agent_pending_tool_approvals.(conversation_id, project_id) > in_app_agent_conversations.(id, project_id) [delete: cascade]
+
+Ref llm_api_keys_project_id_fk: llm_api_keys.project_id > projects.id [delete: cascade]
+
+Ref llm_api_keys_organization_id_fk: llm_api_keys.organization_id > organizations.id [delete: cascade]
+
+Ref organization_memberships_org_id_fk: organization_memberships.org_id > organizations.id [delete: cascade]
+
+Ref organization_memberships_user_id_fk: organization_memberships.user_id > users.id [delete: cascade]
+
+Ref project_memberships_org_membership_id_fk: project_memberships.org_membership_id > organization_memberships.id [delete: cascade]
+
+Ref project_memberships_project_id_fk: project_memberships.project_id > projects.id [delete: cascade]
+
+Ref project_memberships_user_id_fk: project_memberships.user_id > users.id [delete: cascade]
+
+Ref membership_invitations_org_id_fk: membership_invitations.org_id > organizations.id [delete: cascade]
+
+Ref membership_invitations_project_id_fk: membership_invitations.project_id > projects.id [delete: set null]
+
+Ref membership_invitations_invited_by_user_id_fk: membership_invitations.invited_by_user_id > users.id [delete: set null]
+
+Ref trace_sessions_project_id_fk: trace_sessions.project_id > projects.id [delete: cascade]
+
+Ref score_configs_project_id_fk: score_configs.project_id > projects.id [delete: cascade]
+
+Ref annotation_queues_project_id_fk: annotation_queues.project_id > projects.id [delete: cascade]
+
+Ref annotation_queue_items_queue_id_fk: annotation_queue_items.queue_id > annotation_queues.id [delete: cascade]
+
+Ref annotation_queue_items_locked_by_user_id_fk: annotation_queue_items.locked_by_user_id > users.id [delete: set null]
+
+Ref annotation_queue_items_annotator_user_id_fk: annotation_queue_items.annotator_user_id > users.id [delete: set null]
+
+Ref annotation_queue_items_project_id_fk: annotation_queue_items.project_id > projects.id [delete: cascade]
+
+Ref annotation_queue_assignments_project_id_fk: annotation_queue_assignments.project_id > projects.id [delete: cascade]
+
+Ref annotation_queue_assignments_user_id_fk: annotation_queue_assignments.user_id > users.id [delete: cascade]
+
+Ref annotation_queue_assignments_queue_id_fk: annotation_queue_assignments.queue_id > annotation_queues.id [delete: cascade]
+
+Ref datasets_project_id_fk: datasets.project_id > projects.id [delete: cascade]
+
+Ref dataset_items_(dataset_id, project_id)_fk: dataset_items.(dataset_id, project_id) > datasets.(id, project_id) [delete: cascade]
+
+Ref dataset_runs_(dataset_id, project_id)_fk: dataset_runs.(dataset_id, project_id) > datasets.(id, project_id) [delete: cascade]
+
+Ref comments_project_id_fk: comments.project_id > projects.id [delete: cascade]
+
+Ref comment_reactions_project_id_fk: comment_reactions.project_id > projects.id [delete: cascade]
+
+Ref comment_reactions_comment_id_fk: comment_reactions.comment_id > comments.id [delete: cascade]
+
+Ref comment_reactions_user_id_fk: comment_reactions.user_id > users.id [delete: cascade]
+
+Ref notification_preferences_user_id_fk: notification_preferences.user_id > users.id [delete: cascade]
+
+Ref notification_preferences_project_id_fk: notification_preferences.project_id > projects.id [delete: cascade]
+
+Ref prompts_project_id_fk: prompts.project_id > projects.id [delete: cascade]
+
+Ref prompt_dependencies_project_id_fk: prompt_dependencies.project_id > projects.id [delete: cascade]
+
+Ref prompt_dependencies_parent_id_fk: prompt_dependencies.parent_id > prompts.id [delete: cascade]
+
+Ref prompt_protected_labels_project_id_fk: prompt_protected_labels.project_id > projects.id [delete: cascade]
+
+Ref skills_project_id_fk: skills.project_id > projects.id [delete: cascade]
+
+Ref skill_files_project_id_fk: skill_files.project_id > projects.id [delete: cascade]
+
+Ref skill_files_skill_id_fk: skill_files.skill_id > skills.id [delete: cascade]
+
+Ref skill_files_blob_id_fk: skill_files.blob_id > skill_blobs.id [delete: restrict]
+
+Ref skill_blobs_project_id_fk: skill_blobs.project_id > projects.id [delete: cascade]
+
+Ref models_project_id_fk: models.project_id > projects.id [delete: cascade]
+
+Ref prices_model_id_fk: prices.model_id > models.id [delete: cascade]
+
+Ref prices_project_id_fk: prices.project_id > projects.id [delete: cascade]
+
+Ref prices_pricing_tier_id_fk: prices.pricing_tier_id > pricing_tiers.id [delete: cascade]
+
+Ref pricing_tiers_model_id_fk: pricing_tiers.model_id > models.id [delete: cascade]
+
+Ref eval_templates_project_id_fk: eval_templates.project_id > projects.id [delete: cascade]
+
+Ref evaluators_project_id_fk: evaluators.project_id > projects.id [delete: cascade]
+
+Ref evaluators_created_by_user_id_fk: evaluators.created_by_user_id > users.id [delete: set null]
+
+Ref evaluator_versions_evaluator_id_fk: evaluator_versions.evaluator_id > evaluators.id [delete: cascade]
+
+Ref evaluator_versions_created_by_user_id_fk: evaluator_versions.created_by_user_id > users.id [delete: set null]
+
+Ref job_configurations_project_id_fk: job_configurations.project_id > projects.id [delete: cascade]
+
+Ref job_configurations_eval_template_id_fk: job_configurations.eval_template_id > eval_templates.id [delete: set null]
+
+Ref evaluation_rules_project_id_fk: evaluation_rules.project_id > projects.id [delete: cascade]
+
+Ref evaluation_rules_created_by_user_id_fk: evaluation_rules.created_by_user_id > users.id [delete: set null]
+
+Ref tracing_readiness_settings_project_id_fk: tracing_readiness_settings.project_id - projects.id [delete: cascade]
+
+Ref tracing_readiness_settings_created_by_fk: tracing_readiness_settings.created_by > users.id [delete: set null]
+
+Ref tracing_readiness_settings_updated_by_fk: tracing_readiness_settings.updated_by > users.id [delete: set null]
+
+Ref evaluation_rule_evaluator_assignments_project_id_fk: evaluation_rule_evaluator_assignments.project_id > projects.id [delete: cascade]
+
+Ref evaluation_rule_evaluator_assignments_evaluation_rule_id_fk: evaluation_rule_evaluator_assignments.evaluation_rule_id > evaluation_rules.id [delete: cascade]
+
+Ref evaluation_rule_evaluator_assignments_evaluator_id_fk: evaluation_rule_evaluator_assignments.evaluator_id > evaluators.id [delete: cascade]
+
+Ref job_executions_project_id_fk: job_executions.project_id > projects.id [delete: cascade]
+
+Ref default_llm_models_project_id_fk: default_llm_models.project_id > projects.id [delete: cascade]
+
+Ref default_llm_models_llm_api_key_id_fk: default_llm_models.llm_api_key_id > llm_api_keys.id [delete: cascade]
+
+Ref topic_configs_created_by_fk: topic_configs.created_by > users.id [delete: set null]
+
+Ref topic_configs_updated_by_fk: topic_configs.updated_by > users.id [delete: set null]
+
+Ref topic_configs_project_id_fk: topic_configs.project_id - projects.id [delete: cascade]
+
+Ref topic_configs_summary_llm_api_key_id_fk: topic_configs.summary_llm_api_key_id > llm_api_keys.id [delete: set null]
+
+Ref topic_configs_embedding_llm_api_key_id_fk: topic_configs.embedding_llm_api_key_id > llm_api_keys.id [delete: set null]
+
+Ref topic_configs_clustering_llm_api_key_id_fk: topic_configs.clustering_llm_api_key_id > llm_api_keys.id [delete: set null]
+
+Ref verified_domains_organization_id_fk: verified_domains.organization_id > organizations.id [delete: cascade]
+
+Ref posthog_integrations_project_id_fk: posthog_integrations.project_id > projects.id [delete: cascade]
+
+Ref mixpanel_integrations_project_id_fk: mixpanel_integrations.project_id > projects.id [delete: cascade]
+
+Ref blob_storage_integrations_project_id_fk: blob_storage_integrations.project_id > projects.id [delete: cascade]
+
+Ref external_media_storage_integrations_project_id_fk: external_media_storage_integrations.project_id - projects.id [delete: cascade]
+
+Ref web_callout_endpoints_project_id_fk: web_callout_endpoints.project_id > projects.id [delete: cascade]
+
+Ref batch_exports_project_id_fk: batch_exports.project_id > projects.id [delete: cascade]
+
+Ref batch_actions_project_id_fk: batch_actions.project_id > projects.id [delete: cascade]
+
+Ref media_project_id_fk: media.project_id > projects.id [delete: cascade]
+
+Ref llm_schemas_project_id_fk: llm_schemas.project_id > projects.id [delete: cascade]
+
+Ref llm_tools_project_id_fk: llm_tools.project_id > projects.id [delete: cascade]
+
+Ref dashboards_created_by_fk: dashboards.created_by > users.id [delete: set null]
+
+Ref dashboards_updated_by_fk: dashboards.updated_by > users.id [delete: set null]
+
+Ref dashboards_project_id_fk: dashboards.project_id > projects.id [delete: cascade]
+
+Ref dashboard_widgets_created_by_fk: dashboard_widgets.created_by > users.id [delete: set null]
+
+Ref dashboard_widgets_updated_by_fk: dashboard_widgets.updated_by > users.id [delete: set null]
+
+Ref dashboard_widgets_project_id_fk: dashboard_widgets.project_id > projects.id [delete: cascade]
+
+Ref table_view_presets_project_id_fk: table_view_presets.project_id > projects.id [delete: cascade]
+
+Ref table_view_presets_created_by_fk: table_view_presets.created_by > users.id [delete: set null]
+
+Ref table_view_presets_updated_by_fk: table_view_presets.updated_by > users.id [delete: set null]
+
+Ref default_views_project_id_fk: default_views.project_id > projects.id [delete: cascade]
+
+Ref default_views_user_id_fk: default_views.user_id > users.id [delete: cascade]
+
+Ref actions_project_id_fk: actions.project_id > projects.id [delete: cascade]
+
+Ref triggers_project_id_fk: triggers.project_id > projects.id [delete: cascade]
+
+Ref automations_trigger_id_fk: automations.trigger_id > triggers.id [delete: cascade]
+
+Ref automations_action_id_fk: automations.action_id > actions.id [delete: cascade]
+
+Ref automations_project_id_fk: automations.project_id > projects.id [delete: cascade]
+
+Ref automation_executions_automation_id_fk: automation_executions.automation_id > automations.id [delete: cascade]
+
+Ref automation_executions_trigger_id_fk: automation_executions.trigger_id > triggers.id [delete: cascade]
+
+Ref automation_executions_action_id_fk: automation_executions.action_id > actions.id [delete: cascade]
+
+Ref automation_executions_project_id_fk: automation_executions.project_id > projects.id [delete: cascade]
+
+Ref monitors_created_by_fk: monitors.created_by > users.id [delete: set null]
+
+Ref monitors_updated_by_fk: monitors.updated_by > users.id [delete: set null]
+
+Ref monitors_project_id_fk: monitors.project_id > projects.id [delete: cascade]
+
+Ref slack_integrations_project_id_fk: slack_integrations.project_id - projects.id [delete: cascade]
+
+Ref pending_deletions_project_id_fk: pending_deletions.project_id > projects.id [delete: cascade]
+
+Ref surveys_org_id_fk: surveys.org_id > organizations.id [delete: cascade]
+
+Ref surveys_user_id_fk: surveys.user_id > users.id [delete: cascade]
+
+Ref cloud_spend_alerts_org_id_fk: cloud_spend_alerts.org_id > organizations.id [delete: cascade]
+
+Ref topic_clustering_runs_project_id_fk: topic_clustering_runs.project_id > projects.id [delete: cascade]
+
+Ref topic_clustering_runs_(facet_id, facet_version)_fk: topic_clustering_runs.(facet_id, facet_version) > evaluator_versions.(evaluator_id, version) [delete: cascade]

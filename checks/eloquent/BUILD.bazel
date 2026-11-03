@@ -1,0 +1,11 @@
+load("//checks:defs.bzl", "lang_checks")
+
+# php -l and loading against Eloquent for the models of every schema.
+lang_checks(
+    lang = "eloquent",
+    harness = [
+        "composer.json",
+        "smoke.php",
+        "//checks:common.sh",
+    ],
+)

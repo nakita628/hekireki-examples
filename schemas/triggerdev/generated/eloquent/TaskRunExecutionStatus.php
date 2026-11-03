@@ -1,0 +1,17 @@
+<?php
+
+namespace App\Models;
+
+enum TaskRunExecutionStatus: string
+{
+    case RUN_CREATED = 'RUN_CREATED';
+    case DELAYED = 'DELAYED';
+    case QUEUED = 'QUEUED';
+    case QUEUED_EXECUTING = 'QUEUED_EXECUTING';
+    case PENDING_EXECUTING = 'PENDING_EXECUTING';
+    case EXECUTING = 'EXECUTING';
+    case EXECUTING_WITH_WAITPOINTS = 'EXECUTING_WITH_WAITPOINTS';
+    case SUSPENDED = 'SUSPENDED';
+    case PENDING_CANCEL = 'PENDING_CANCEL';
+    case FINISHED = 'FINISHED';
+}

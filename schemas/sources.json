@@ -1,0 +1,141 @@
+{
+  "taxonomy": {
+    "repo": "shadcn-ui/taxonomy",
+    "path": "prisma/schema.prisma",
+    "commit": "03ef292d26f1f96dfbd9d2773284c370e3fec7e4",
+    "license": "MIT",
+    "app": "Taxonomy",
+    "description": "shadcn's Next.js 13 app-directory example: NextAuth's tables and a Post."
+  },
+  "umami": {
+    "repo": "umami-software/umami",
+    "path": "prisma/schema.prisma",
+    "commit": "b185837063f4d63ffe01f565e5791c69b3c9c424",
+    "license": "MIT",
+    "app": "Umami",
+    "description": "Umami web analytics: websites, sessions, events and the reports over them."
+  },
+  "hoppscotch": {
+    "repo": "hoppscotch/hoppscotch",
+    "path": "packages/hoppscotch-backend/prisma/schema.prisma",
+    "commit": "4789a0f2fae484aa7bc1233603d66b97b8ebfd8b",
+    "license": "MIT",
+    "app": "Hoppscotch",
+    "description": "Hoppscotch's backend: users, teams, collections, requests and environments."
+  },
+  "langfuse": {
+    "repo": "langfuse/langfuse",
+    "path": "packages/shared/prisma/schema.prisma",
+    "commit": "497818fc717cf3668fcd37544f4ff0c5887f5bb9",
+    "license": "MIT",
+    "app": "Langfuse",
+    "description": "Langfuse LLM observability: organizations, projects, traces, prompts, datasets and evaluations."
+  },
+  "calcom": {
+    "repo": "calcom/cal.com",
+    "path": "packages/prisma/schema.prisma",
+    "commit": "91341cbba403460fac033f95003ce2e2911d4a4e",
+    "license": "MIT",
+    "app": "Calcom",
+    "description": "Cal.com scheduling: users, teams, event types, bookings, availability and integrations."
+  },
+  "nextauth": {
+    "repo": "nextauthjs/next-auth",
+    "path": "packages/adapter-prisma/prisma/schema.prisma",
+    "commit": "a1a16a5a7780488c7449feece410033f445d0b31",
+    "license": "ISC",
+    "app": "NextAuth",
+    "description": "Auth.js's Prisma adapter: the User, Account, Session, VerificationToken and Authenticator tables, on SQLite."
+  },
+  "ghostfolio": {
+    "repo": "ghostfolio/ghostfolio",
+    "path": "prisma/schema.prisma",
+    "commit": "fb8b12aa7eb2a9f28dc92ec18d7c951743782746",
+    "license": "AGPL-3.0",
+    "app": "Ghostfolio",
+    "description": "Ghostfolio wealth management: users, accounts, orders, symbol profiles and market data."
+  },
+  "typebot": {
+    "repo": "baptisteArno/typebot.io",
+    "path": "packages/prisma/postgresql/schema.prisma",
+    "commit": "fd1dc34e0acdeca99d204fde6e692fed1879d9f5",
+    "license": "FSL-1.1-Apache-2.0",
+    "app": "Typebot",
+    "description": "Typebot chatbot builder: workspaces, typebots, results, answers and credentials."
+  },
+  "linkwarden": {
+    "repo": "linkwarden/linkwarden",
+    "path": "packages/prisma/schema.prisma",
+    "commit": "eff7c6b735f6b20a4766745dc86c6bdc52bd9840",
+    "license": "AGPL-3.0",
+    "app": "Linkwarden",
+    "description": "Linkwarden bookmark manager: users, collections, links, tags and subscriptions."
+  },
+  "dub": {
+    "repo": "dubinc/dub",
+    "path": "apps/web/prisma/schema/",
+    "commit": "6b463b4bdd9ed2fd9aa416f67b5b77d317b1471e",
+    "license": "AGPL-3.0",
+    "app": "Dub",
+    "description": "Dub link management: workspaces, links, domains, tags, customers and partner programs, on MySQL."
+  },
+  "rallly": {
+    "repo": "lukevella/rallly",
+    "path": "packages/database/prisma/",
+    "commit": "78bc44572e7bd4fa3f1907d8afc87c3c1a4c6188",
+    "license": "AGPL-3.0",
+    "app": "Rallly",
+    "description": "Rallly scheduling polls: users, spaces, polls, options, participants and votes."
+  },
+  "documenso": {
+    "repo": "documenso/documenso",
+    "path": "packages/prisma/schema.prisma",
+    "commit": "86a0ff2da8d6eaf251a05eeb0fc32c06bbe49d29",
+    "license": "AGPL-3.0",
+    "app": "Documenso",
+    "description": "Documenso document signing: users, teams, documents, recipients, fields and signatures."
+  },
+  "teable": {
+    "repo": "teableio/teable",
+    "path": "packages/db-main-prisma/prisma/postgres/schema.prisma",
+    "commit": "b6ae0a1ab8a9c7ce8b6eef16b1af27cc770c2cd9",
+    "license": "MIT",
+    "app": "Teable",
+    "description": "Teable no-code database: spaces, bases, tables, fields, views and records."
+  },
+  "postiz": {
+    "repo": "gitroomhq/postiz-app",
+    "path": "libraries/nestjs-libraries/src/database/prisma/schema.prisma",
+    "commit": "e424fb587e0ae87a2428a0586cb00af6facd0d1d",
+    "license": "AGPL-3.0",
+    "app": "Postiz",
+    "description": "Postiz social media scheduling: organizations, integrations, posts, comments and media."
+  },
+  "papermark": {
+    "repo": "mfts/papermark",
+    "path": "prisma/schema/",
+    "commit": "ed19717ec02a1ac79aecf5569159aa9d2d869312",
+    "license": "AGPL-3.0",
+    "app": "Papermark",
+    "description": "Papermark document sharing: teams, documents, links, data rooms and views."
+  },
+  "formbricks": {
+    "repo": "formbricks/formbricks",
+    "path": "packages/database/schema/",
+    "commit": "f1611e781ea2473ceb9e9ad5be4e7456529bf533",
+    "license": "AGPL-3.0",
+    "app": "Formbricks",
+    "description": "Formbricks surveys: organizations, environments, surveys, responses and contacts.",
+    "skip": {
+      "eloquent": "a relation field named `refresh` (OauthAccessToken.refresh) collides with Eloquent's Model::refresh(), which hekireki-eloquent refuses"
+    }
+  },
+  "triggerdev": {
+    "repo": "triggerdotdev/trigger.dev",
+    "path": "internal-packages/database/prisma/schema.prisma",
+    "commit": "41ad1995b30573a9b55cfaab80c3293b7c35c1f8",
+    "license": "Apache-2.0",
+    "app": "Trigger",
+    "description": "Trigger.dev background jobs: organizations, projects, tasks, runs, queues and deployments."
+  }
+}

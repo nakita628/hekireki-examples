@@ -1,0 +1,1706 @@
+Enum ConversationVisibility {
+  PRIVATE
+  PUBLIC_LINK
+  PUBLIC_GROUP
+  PUBLIC_DOCUMENT
+  PUBLIC_DATAROOM
+}
+
+Enum ParticipantRole {
+  OWNER
+  PARTICIPANT
+}
+
+Enum FaqVisibility {
+  PUBLIC_DATAROOM
+  PUBLIC_LINK
+  PUBLIC_DOCUMENT
+}
+
+Enum FaqStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+Enum ItemType {
+  DATAROOM_DOCUMENT
+  DATAROOM_FOLDER
+}
+
+Enum DefaultPermissionStrategy {
+  INHERIT_FROM_PARENT
+  ASK_EVERY_TIME
+  HIDDEN_BY_DEFAULT
+}
+
+Enum RootItemAccess {
+  VIEW_ONLY
+  VIEW_AND_DOWNLOAD
+  HIDDEN
+}
+
+Enum DocumentStorageType {
+  S3_PATH
+  VERCEL_BLOB
+}
+
+Enum LinkType {
+  DOCUMENT_LINK
+  DATAROOM_LINK
+  WORKFLOW_LINK
+}
+
+Enum LinkAudienceType {
+  GENERAL
+  GROUP
+  TEAM
+}
+
+Enum CustomFieldType {
+  SHORT_TEXT
+  LONG_TEXT
+  NUMBER
+  PHONE_NUMBER
+  URL
+  CHECKBOX
+  SELECT
+  MULTI_SELECT
+}
+
+Enum ReferralTrack {
+  AFFILIATE
+  PARTNER_DISCOUNT
+}
+
+Enum ViewType {
+  DOCUMENT_VIEW
+  DATAROOM_VIEW
+}
+
+Enum DownloadType {
+  SINGLE
+  BULK
+  FOLDER
+}
+
+Enum EmailType {
+  FIRST_DAY_DOMAIN_REMINDER_EMAIL
+  FIRST_DOMAIN_INVALID_EMAIL
+  SECOND_DOMAIN_INVALID_EMAIL
+  FIRST_TRIAL_END_REMINDER_EMAIL
+  FINAL_TRIAL_END_REMINDER_EMAIL
+}
+
+Enum TagType {
+  LINK_TAG
+  DOCUMENT_TAG
+  DATAROOM_TAG
+}
+
+Enum InvitationStatus {
+  SENT
+  FAILED
+  BOUNCED
+}
+
+Enum Role {
+  ADMIN
+  MANAGER
+  MEMBER
+  DATAROOM_MEMBER
+}
+
+Enum WorkflowStepType {
+  ROUTER
+}
+
+Enum ExecutionStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+  BLOCKED
+}
+
+Table DocumentAnnotation {
+  id String [pk]
+  title String [not null]
+  content Json [not null]
+  pages Int[] [not null]
+  documentId String [not null]
+  teamId String [not null]
+  createdById String [not null]
+  isVisible Boolean [default: true, not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table AnnotationImage {
+  id String [pk]
+  filename String [not null]
+  url String [not null]
+  size Int
+  mimeType String
+  annotationId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Table Brand {
+  id String [pk]
+  logo String
+  hideLogo Boolean [default: false, not null]
+  banner String
+  brandColor String
+  accentColor String
+  accentButtonColor String
+  applyAccentColorToDataroomView Boolean [default: false, not null]
+  welcomeMessage String
+  ctaLabel String
+  ctaUrl String
+  privacyPolicyUrl String
+  cardLayout String [default: 'LIST', not null]
+  showFolderTree Boolean [default: true, not null]
+  viewerLayoutPreset String [default: 'STANDARD', not null]
+  viewerHeaderStyle String [default: 'DEFAULT', not null]
+  hideFolderIconsInMain Boolean [default: false, not null]
+  customLinkPreviewEnabled Boolean [default: false, not null]
+  linkPreviewTitle String
+  linkPreviewDescription String
+  linkPreviewImage String
+  linkPreviewFavicon String
+  defaultLanguage String [default: 'en', not null]
+  name String [default: 'Default', not null]
+  teamId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (teamId, name) [unique]
+  }
+}
+
+Table Conversation {
+  id String [pk]
+  title String
+  isEnabled Boolean [default: true, not null]
+  visibilityMode ConversationVisibility [default: 'PRIVATE', not null]
+  dataroomId String [not null]
+  dataroomDocumentId String
+  documentVersionNumber Int
+  documentPageNumber Int
+  linkId String
+  viewerGroupId String
+  questionId String
+  origin String [default: 'visitor', not null]
+  category String
+  priority String
+  recipientViewerId String
+  initialViewId String
+  teamId String [not null]
+  lastMessageAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (questionId, recipientViewerId) [unique]
+  }
+}
+
+Table DataroomQuestion {
+  id String [pk]
+  content String [not null]
+  category String
+  priority String
+  status String [default: 'unanswered', not null]
+  orderIndex Int
+  importBatchId String
+  dataroomId String [not null]
+  teamId String [not null]
+  createdByUserId String
+  dataroomDocumentId String
+  documentPageNumber Int
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table DataroomQuestionAssignment {
+  id String [pk]
+  questionId String [not null]
+  linkId String
+  groupId String
+  viewerId String
+  email String
+  createdAt DateTime [default: `now()`, not null]
+
+  indexes {
+    (questionId, linkId) [unique]
+    (questionId, groupId) [unique]
+    (questionId, viewerId) [unique]
+    (questionId, email) [unique]
+  }
+}
+
+Table ConversationParticipant {
+  id String [pk]
+  conversationId String [not null]
+  role ParticipantRole [default: 'PARTICIPANT', not null]
+  viewerId String
+  userId String
+  receiveNotifications Boolean [default: false, not null]
+  createdAt DateTime [default: `now()`, not null]
+
+  indexes {
+    (conversationId, viewerId) [unique]
+    (conversationId, userId) [unique]
+  }
+}
+
+Table Message {
+  id String [pk]
+  content String [not null]
+  conversationId String [not null]
+  userId String
+  viewerId String
+  viewId String
+  isRead Boolean [default: false, not null]
+  isInternalNote Boolean [default: false, not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table ConversationView {
+  id String [pk]
+  conversationId String [not null]
+  viewId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+
+  indexes {
+    (conversationId, viewId) [unique]
+  }
+}
+
+Table DataroomFaqItem {
+  id String [pk]
+  title String
+  editedQuestion String [not null]
+  originalQuestion String
+  answer String [not null]
+  description String
+  dataroomId String [not null]
+  linkId String
+  dataroomDocumentId String
+  sourceConversationId String
+  questionMessageId String
+  answerMessageId String
+  teamId String [not null]
+  publishedByUserId String [not null]
+  visibilityMode FaqVisibility [default: 'PUBLIC_DATAROOM', not null]
+  status FaqStatus [default: 'PUBLISHED', not null]
+  isAnonymized Boolean [default: true, not null]
+  viewCount Int [default: 0, not null]
+  tags String[] [not null]
+  documentPageNumber Int
+  documentVersionNumber Int
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table Dataroom {
+  id String [pk]
+  pId String [unique, not null]
+  name String [not null]
+  internalName String
+  description String
+  teamId String [not null]
+  brandId String
+  conversationsEnabled Boolean [default: false, not null]
+  agentsEnabled Boolean [default: false, not null]
+  vectorStoreId String
+  requestListEnabled Boolean [default: false, not null]
+  enableChangeNotifications Boolean [default: false, not null]
+  enableVisitorUploadChangeNotifications Boolean [default: false, not null]
+  defaultPermissionStrategy DefaultPermissionStrategy [default: 'INHERIT_FROM_PARENT', not null]
+  defaultShowBanner Boolean [default: true, not null]
+  defaultGroupPermissionStrategy DefaultPermissionStrategy [default: 'INHERIT_FROM_PARENT', not null]
+  defaultRootItemAccess RootItemAccess [default: 'VIEW_ONLY', not null]
+  defaultGroupRootItemAccess RootItemAccess [default: 'VIEW_ONLY', not null]
+  allowBulkDownload Boolean [default: true, not null]
+  showLastUpdated Boolean [default: true, not null]
+  introductionEnabled Boolean [default: false, not null]
+  introductionContent Json
+  isFrozen Boolean [default: false, not null]
+  frozenAt DateTime
+  frozenBy String
+  freezeArchiveUrl String
+  freezeArchiveHash String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table TaskList {
+  id String [pk]
+  name String [not null]
+  orderIndex Int
+  dataroomId String [not null]
+  teamId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table Task {
+  id String [pk]
+  title String [not null]
+  description String
+  type String [default: 'TODO', not null]
+  status String [default: 'OPEN', not null]
+  category String
+  dueDate DateTime
+  orderIndex Int
+  taskListId String [not null]
+  dataroomId String [not null]
+  teamId String [not null]
+  uploadFolderId String
+  createdByUserId String
+  lastActivityNotifiedAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table TaskAssignment {
+  id String [pk]
+  taskId String [not null]
+  viewerId String
+  groupId String
+  linkId String
+  email String
+  notifiedAt DateTime
+  lastReminderAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (taskId, viewerId) [unique]
+    (taskId, groupId) [unique]
+    (taskId, linkId) [unique]
+    (taskId, email) [unique]
+  }
+}
+
+Table TaskActivity {
+  id String [pk]
+  taskId String [not null]
+  type String [not null]
+  comment String
+  fromStatus String
+  toStatus String
+  userId String
+  viewerId String
+  viewId String
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Table DataroomDocument {
+  id String [pk]
+  dataroomId String [not null]
+  documentId String [not null]
+  folderId String
+  orderIndex Int
+  hierarchicalIndex String
+  vectorStoreFileId String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (dataroomId, documentId) [unique]
+  }
+}
+
+Table DataroomFolder {
+  id String [pk]
+  name String [not null]
+  path String [not null]
+  parentId String
+  icon String
+  color String
+  dataroomId String [not null]
+  orderIndex Int
+  hierarchicalIndex String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (dataroomId, path) [unique]
+  }
+}
+
+Table DataroomBrand {
+  id String [pk]
+  logo String
+  hideLogo Boolean
+  banner String
+  brandColor String
+  accentColor String
+  accentButtonColor String
+  applyAccentColorToDataroomView Boolean [default: false, not null]
+  welcomeMessage String
+  cardLayout String [default: 'LIST', not null]
+  showFolderTree Boolean [default: true, not null]
+  viewerLayoutPreset String [default: 'STANDARD', not null]
+  viewerHeaderStyle String [default: 'DEFAULT', not null]
+  hideFolderIconsInMain Boolean [default: false, not null]
+  ctaLabel String
+  ctaUrl String
+  customLinkPreviewEnabled Boolean [default: false, not null]
+  linkPreviewTitle String
+  linkPreviewDescription String
+  linkPreviewImage String
+  linkPreviewFavicon String
+  defaultLanguage String [default: 'en', not null]
+  dataroomId String [unique, not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table ViewerGroup {
+  id String [pk]
+  name String [not null]
+  domains String[] [not null]
+  allowAll Boolean [default: false, not null]
+  dataroomId String [not null]
+  teamId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table ViewerGroupMembership {
+  id String [pk]
+  viewerId String [not null]
+  groupId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (viewerId, groupId) [unique]
+  }
+}
+
+Table ViewerGroupAccessControls {
+  id String [pk]
+  groupId String [not null]
+  itemId String [not null]
+  itemType ItemType [not null]
+  canView Boolean [default: true, not null]
+  canDownload Boolean [default: false, not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (groupId, itemId) [unique]
+  }
+}
+
+Table PermissionGroup {
+  id String [pk]
+  name String [not null]
+  description String
+  dataroomId String [not null]
+  teamId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table PermissionGroupAccessControls {
+  id String [pk]
+  groupId String [not null]
+  itemId String [not null]
+  itemType ItemType [not null]
+  canView Boolean [default: true, not null]
+  canDownload Boolean [default: false, not null]
+  canDownloadOriginal Boolean [default: false, not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (groupId, itemId) [unique]
+  }
+}
+
+Table Document {
+  id String [pk]
+  name String [not null]
+  description String
+  file String [not null]
+  originalFile String
+  type String
+  contentType String
+  storageType DocumentStorageType [default: 'VERCEL_BLOB', not null]
+  numPages Int
+  teamId String [not null]
+  ownerId String
+  assistantEnabled Boolean [default: false, not null]
+  advancedExcelEnabled Boolean [default: false, not null]
+  agentsEnabled Boolean [default: false, not null]
+  downloadOnly Boolean [default: false, not null]
+  hiddenInAllDocuments Boolean [default: false, not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  folderId String
+  isExternalUpload Boolean [default: false, not null]
+}
+
+Table DocumentVersion {
+  id String [pk]
+  versionNumber Int [not null]
+  documentId String [not null]
+  file String [not null]
+  originalFile String
+  type String
+  contentType String
+  fileSize BigInt
+  storageType DocumentStorageType [default: 'VERCEL_BLOB', not null]
+  numPages Int
+  isPrimary Boolean [default: false, not null]
+  isVertical Boolean [default: false, not null]
+  fileId String
+  vectorStoreFileId String
+  hasPages Boolean [default: false, not null]
+  length Int
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (versionNumber, documentId) [unique]
+  }
+}
+
+Table DocumentPage {
+  id String [pk]
+  versionId String [not null]
+  pageNumber Int [not null]
+  embeddedLinks String[] [not null]
+  pageLinks Json
+  metadata Json
+  file String [not null]
+  storageType DocumentStorageType [default: 'VERCEL_BLOB', not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (pageNumber, versionId) [unique]
+  }
+}
+
+Table Folder {
+  id String [pk]
+  name String [not null]
+  path String [not null]
+  parentId String
+  hiddenInAllDocuments Boolean [default: false, not null]
+  icon String
+  color String
+  teamId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (teamId, path) [unique]
+  }
+}
+
+Table DocumentUpload {
+  id String [pk]
+  documentId String [not null]
+  teamId String [not null]
+  viewerId String
+  viewId String
+  linkId String [not null]
+  dataroomId String
+  dataroomDocumentId String
+  taskId String
+  originalFilename String
+  fileSize BigInt
+  numPages Int
+  mimeType String
+  uploadedAt DateTime [default: `now()`, not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table PendingDocumentUpload {
+  id String [pk]
+  uploadId String [unique, not null]
+  teamId String [not null]
+  tokenId String [not null]
+  key String [not null]
+  contentType String [not null]
+  storageType DocumentStorageType [default: 'S3_PATH', not null]
+  expiresAt DateTime [not null]
+  consumedAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Table Integration {
+  id String [pk]
+  name String [not null]
+  slug String [unique, not null]
+  description String
+  readme String
+  developer String [not null]
+  website String [not null]
+  logo String
+  screenshots Json
+  verified Boolean [default: false, not null]
+  installUrl String
+  category String
+  comingSoon Boolean [default: false, not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table InstalledIntegration {
+  id String [pk]
+  credentials Json
+  configuration Json
+  enabled Boolean [default: true, not null]
+  integrationId String [not null]
+  userId String
+  teamId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (teamId, integrationId) [unique]
+  }
+}
+
+Table jackson_index {
+  id Int [pk, increment]
+  key String [not null]
+  storeKey String [not null]
+}
+
+Table jackson_store {
+  key String [pk]
+  value String [not null]
+  iv String
+  tag String
+  namespace String
+  createdAt DateTime [default: `now()`, not null]
+  modifiedAt DateTime
+}
+
+Table jackson_ttl {
+  key String [pk]
+  expiresAt BigInt [not null]
+}
+
+Table Link {
+  id String [pk]
+  documentId String
+  dataroomId String
+  linkType LinkType [default: 'DOCUMENT_LINK', not null]
+  url String [unique]
+  name String
+  slug String
+  expiresAt DateTime
+  password String
+  allowList String[] [not null]
+  denyList String[] [not null]
+  emailProtected Boolean [default: true, not null]
+  emailAuthenticated Boolean [default: false, not null]
+  allowDownload Boolean [default: false]
+  isArchived Boolean [default: false, not null]
+  deletedAt DateTime
+  domainId String
+  domainSlug String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  enableNotification Boolean [default: true]
+  enableFeedback Boolean [default: false]
+  enableQuestion Boolean [default: false]
+  enableScreenshotProtection Boolean [default: false]
+  enableConfidentialView Boolean [default: false]
+  enableAgreement Boolean [default: false]
+  agreementId String
+  showBanner Boolean [default: false]
+  enableWatermark Boolean [default: false]
+  watermarkConfig Json
+  audienceType LinkAudienceType [default: 'GENERAL', not null]
+  groupId String
+  permissionGroupId String
+  metaTitle String
+  metaDescription String
+  metaImage String
+  metaFavicon String
+  enableCustomMetatag Boolean [default: false]
+  welcomeMessage String
+  enableConversation Boolean [default: false, not null]
+  enableAIAgents Boolean [default: false]
+  enableUpload Boolean [default: false]
+  isFileRequestOnly Boolean [default: false]
+  uploadFolderId String [note: '''Deprecated: replaced by `uploadFolderIds`. Retained in the DB only so old
+rows can be inspected; no application code reads or writes this column.''']
+  uploadFolderIds String[] [not null]
+  enableIndexFile Boolean [default: false]
+  teamId String
+  brandId String
+  ownerId String
+
+  indexes {
+    (domainSlug, slug) [unique]
+  }
+}
+
+Table LinkPreset {
+  id String [pk]
+  name String [not null]
+  teamId String [not null]
+  pId String [unique]
+  enableCustomMetaTag Boolean [default: false]
+  metaTitle String
+  metaDescription String
+  metaImage String
+  metaFavicon String
+  enableNotification Boolean [default: false]
+  emailProtected Boolean [default: true]
+  emailAuthenticated Boolean [default: false]
+  allowDownload Boolean [default: false]
+  enableAllowList Boolean [default: false]
+  allowList String[] [not null]
+  enableDenyList Boolean [default: false]
+  denyList String[] [not null]
+  expiresIn Int
+  enableScreenshotProtection Boolean [default: false]
+  enableConfidentialView Boolean [default: false]
+  expiresAt DateTime
+  enablePassword Boolean [default: false]
+  password String
+  enableWatermark Boolean [default: false]
+  watermarkConfig Json
+  enableAgreement Boolean [default: false]
+  agreementId String
+  enableCustomFields Boolean [default: false]
+  customFields Json
+  showBanner Boolean [default: false]
+  welcomeMessage String
+  isDefault Boolean [default: false, not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table VisitorGroup {
+  id String [pk]
+  name String [not null]
+  emails String[] [not null]
+  teamId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table LinkVisitorGroup {
+  id String [pk]
+  linkId String [not null]
+  visitorGroupId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+
+  indexes {
+    (linkId, visitorGroupId) [unique]
+  }
+}
+
+Table CustomField {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  type CustomFieldType [not null]
+  identifier String [not null]
+  label String [not null]
+  placeholder String
+  required Boolean [default: false, not null]
+  disabled Boolean [default: false, not null]
+  linkId String [not null]
+  orderIndex Int [default: 0, not null]
+}
+
+Table CustomFieldResponse {
+  id String [pk]
+  data Json [not null]
+  viewId String [unique, not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table NotificationPreference {
+  id String [pk]
+  userId String [not null]
+  teamId String [not null]
+  type String [not null]
+  frequency String [default: 'IMMEDIATE', not null]
+  scope String [default: 'ALL', not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (userId, teamId, type) [unique]
+  }
+}
+
+Table OAuthClient {
+  id String [pk]
+  clientId String [unique, not null]
+  clientName String [not null]
+  clientUri String
+  logoUri String
+  redirectUris String[] [not null]
+  grantTypes String[] [not null]
+  scopes String [not null]
+  tokenAuthMethod String [not null]
+  hashedSecret String
+  registrationType String [not null]
+  metadataUrl String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table OAuthClientApproval {
+  id String [pk]
+  userId String [not null]
+  clientId String [not null]
+  approvedAt DateTime [default: `now()`, not null]
+  revokedAt DateTime
+  clientMetadataHash String
+
+  indexes {
+    (userId, clientId) [unique]
+  }
+}
+
+Table OAuthGrantTeam {
+  id String [pk]
+  grantId String [unique, not null]
+  teamId String [not null]
+  userId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Table OAuthRecord {
+  id String [pk]
+  kind String [not null]
+  payload Json [not null]
+  grantId String
+  userCode String
+  uid String
+  expiresAt DateTime
+  consumedAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Table DocumentRedactionJob {
+  id String [pk]
+  documentId String [not null]
+  documentVersionId String [not null]
+  teamId String [not null]
+  createdById String [not null]
+  status String [default: 'PENDING', not null]
+  customTerms String[] [not null]
+  reasons String[] [not null]
+  resultVersionId String
+  error String
+  detectRunId String
+  applyRunId String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table DocumentRedaction {
+  id String [pk]
+  jobId String [not null]
+  pageNumber Int [not null]
+  x Float [not null]
+  y Float [not null]
+  width Float [not null]
+  height Float [not null]
+  textPreview String
+  category String
+  confidence String
+  reason String
+  source String [default: 'AI', not null]
+  status String [default: 'PENDING', not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table ReferralInvite {
+  id String [pk]
+  userId String [not null]
+  teamId String
+  scopeId String [not null, note: '''*
+* Whose cap and discount this invite counts against — the fund\'s team, or the
+* sender alone. One non-null key rather than a pair of nullable ones: on a
+* nullable teamId every personal invite is distinct to Postgres, so the two
+* keys guarded different scopes and a member could not invite a company both
+* for their fund and for themselves.''']
+  email String [not null]
+  referralLink String
+  sentAt DateTime [default: `now()`, not null]
+
+  indexes {
+    (scopeId, email) [unique]
+  }
+}
+
+Table Account {
+  id String [pk]
+  userId String [not null]
+  type String [not null]
+  provider String [not null]
+  providerAccountId String [not null]
+  refresh_token String
+  access_token String
+  expires_at Int
+  token_type String
+  scope String
+  id_token String
+  session_state String
+
+  indexes {
+    (provider, providerAccountId) [unique]
+  }
+}
+
+Table Session {
+  id String [pk]
+  sessionToken String [unique, not null]
+  userId String [not null]
+  expires DateTime [not null]
+}
+
+Table User {
+  id String [pk]
+  name String
+  email String [unique]
+  emailVerified DateTime
+  image String
+  createdAt DateTime [default: `now()`, not null]
+  contactId String
+  plan String [default: 'free', not null]
+  stripeId String [unique]
+  subscriptionId String [unique]
+  startsAt DateTime
+  endsAt DateTime
+  referralTrack ReferralTrack
+  referralTrackSelectedAt DateTime
+  referralProfile Json
+}
+
+Table VerificationToken {
+  identifier String [not null]
+  token String [unique, not null]
+  expires DateTime [not null]
+
+  indexes {
+    (identifier, token) [unique]
+  }
+}
+
+Table Domain {
+  id String [pk]
+  slug String [unique, not null]
+  userId String
+  teamId String [not null]
+  verified Boolean [default: false, not null]
+  isDefault Boolean [default: false, not null]
+  redirectUrl String
+  lastChecked DateTime [default: `now()`, not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table View {
+  id String [pk]
+  linkId String [not null]
+  documentId String
+  dataroomId String
+  dataroomViewId String
+  viewerEmail String
+  viewerName String
+  verified Boolean [default: false, not null]
+  viewedAt DateTime [default: `now()`, not null]
+  downloadedAt DateTime
+  downloadType DownloadType
+  downloadMetadata Json
+  viewType ViewType [default: 'DOCUMENT_VIEW', not null]
+  viewerId String
+  groupId String
+  isArchived Boolean [default: false, not null]
+  teamId String
+}
+
+Table Viewer {
+  id String [pk]
+  email String [not null]
+  verified Boolean [default: false, not null]
+  invitedAt DateTime
+  notificationPreferences Json
+  dataroomId String
+  teamId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (teamId, email) [unique]
+  }
+}
+
+Table Reaction {
+  id String [pk]
+  viewId String [not null]
+  pageNumber Int [not null]
+  type String [not null]
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Table Invitation {
+  email String [not null]
+  expires DateTime [not null]
+  teamId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  token String [unique, not null]
+  role Role [default: 'MEMBER', not null]
+  dataroomIds String[] [not null]
+
+  indexes {
+    (email, teamId) [unique]
+  }
+}
+
+Table SentEmail {
+  id String [pk]
+  type EmailType [not null]
+  recipient String [not null]
+  marketing Boolean [default: false, not null]
+  createdAt DateTime [default: `now()`, not null]
+  teamId String [not null]
+  domainSlug String
+}
+
+Table Chat {
+  id String [pk]
+  title String
+  teamId String [not null]
+  documentId String
+  dataroomId String
+  linkId String
+  viewId String
+  userId String
+  viewerId String
+  vectorStoreId String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  lastMessageAt DateTime
+}
+
+Table ChatMessage {
+  id String [pk]
+  chatId String [not null]
+  role String [not null]
+  content String [not null]
+  metadata Json
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Table Feedback {
+  id String [pk]
+  linkId String [unique, not null]
+  data Json [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table FeedbackResponse {
+  id String [pk]
+  feedbackId String [not null]
+  data Json [not null]
+  viewId String [unique, not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table Agreement {
+  id String [pk]
+  name String [not null]
+  content String [not null]
+  contentType String [default: 'LINK', not null]
+  signingProvider String [default: 'LEGACY', not null]
+  signingExternalId String [unique]
+  signingEnvelopeId String
+  signingTemplateId String
+  requireName Boolean [default: true, not null]
+  teamId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  deletedAt DateTime
+  deletedBy String
+}
+
+Table AgreementResponse {
+  id String [pk]
+  agreementId String [not null]
+  viewId String [unique]
+  linkId String
+  signerEmail String
+  signerName String
+  signingStatus String [default: 'PENDING', not null]
+  signingExternalId String [unique]
+  signingEnvelopeId String
+  signingDocumentId Int
+  signedAt DateTime
+  completedAt DateTime
+  signedFileKey String
+  signedFileName String
+  signedFileStorageType DocumentStorageType
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table IncomingWebhook {
+  id String [pk]
+  externalId String [unique, not null]
+  name String [not null]
+  secret String
+  source String
+  actions String
+  consecutiveFailures Int [default: 0, not null]
+  lastFailedAt DateTime
+  disabledAt DateTime
+  teamId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table RestrictedToken {
+  id String [pk]
+  name String [not null]
+  hashedKey String [unique, not null]
+  partialKey String [not null]
+  scopes String
+  mode String [default: 'live', not null]
+  source String [default: 'dashboard', not null]
+  subjectType String [default: 'user', not null]
+  clientId String
+  expires DateTime
+  lastUsed DateTime
+  rateLimit Int [default: 60, not null]
+  userId String [not null]
+  teamId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table Webhook {
+  id String [pk]
+  pId String [unique, not null]
+  name String [not null]
+  url String [not null]
+  secret String [not null]
+  triggers Json [not null]
+  teamId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table YearInReview {
+  id String [pk]
+  teamId String [not null]
+  status String [default: 'pending', not null]
+  attempts Int [default: 0, not null]
+  lastAttempted DateTime
+  error String
+  stats Json [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table Tag {
+  id String [pk]
+  name String [not null]
+  color String [not null]
+  description String
+  teamId String [not null]
+  createdBy String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (teamId, name) [unique]
+  }
+}
+
+Table TagItem {
+  id String [pk]
+  tagId String [not null]
+  itemType TagType [not null]
+  linkId String
+  documentId String
+  dataroomId String
+  taggedBy String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table ViewerInvitation {
+  id String [pk]
+  viewerId String [not null]
+  linkId String [not null]
+  groupId String
+  invitedBy String [not null]
+  customMessage String
+  sentAt DateTime [default: `now()`, not null]
+  status InvitationStatus [default: 'SENT', not null]
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Table Team {
+  id String [pk]
+  name String [not null]
+  slug String [unique]
+  defaultBrandId String
+  plan String [default: 'free', not null]
+  stripeId String [unique]
+  subscriptionId String [unique]
+  startsAt DateTime
+  endsAt DateTime
+  pausedAt DateTime
+  pauseStartsAt DateTime
+  pauseEndsAt DateTime
+  cancelledAt DateTime
+  trialStartedAt DateTime
+  trialEndsAt DateTime
+  trialReminderRunId String
+  trialExpiredRunId String
+  limits Json
+  enableExcelAdvancedMode Boolean [default: false, not null]
+  replicateDataroomFolders Boolean [default: true, not null]
+  timezone String [default: 'Etc/UTC', not null]
+  ssoEnabled Boolean [default: false, not null]
+  ssoEmailDomain String [unique]
+  ssoEnforcedAt DateTime
+  surveyData Json
+  agentsEnabled Boolean [default: false, not null]
+  vectorStoreId String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  ignoredDomains String[] [not null]
+  globalBlockList String[] [not null]
+  referralTrack ReferralTrack
+  referralTrackSelectedAt DateTime
+  referralProfile Json
+}
+
+Table UserDataroom {
+  userId String [not null]
+  teamId String [not null]
+  dataroomId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+
+  indexes {
+    (userId, dataroomId) [pk]
+  }
+}
+
+Table UserTeam {
+  role Role [default: 'MEMBER', not null]
+  status String [default: 'ACTIVE', not null]
+  userId String [not null]
+  teamId String [not null]
+  blockedAt DateTime
+  notificationPreferences Json
+
+  indexes {
+    (userId, teamId) [pk]
+  }
+}
+
+Table Workflow {
+  id String [pk]
+  name String [not null]
+  description String
+  entryLinkId String [unique, not null]
+  teamId String [not null]
+  isActive Boolean [default: true, not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table WorkflowStep {
+  id String [pk]
+  workflowId String [not null]
+  name String [not null]
+  stepOrder Int [not null]
+  stepType WorkflowStepType [default: 'ROUTER', not null]
+  conditions Json [not null]
+  actions Json [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (workflowId, stepOrder) [unique]
+  }
+}
+
+Table WorkflowExecution {
+  id String [pk]
+  workflowId String [not null]
+  visitorEmail String
+  visitorIp String
+  status ExecutionStatus [not null]
+  startedAt DateTime [default: `now()`, not null]
+  completedAt DateTime
+  result Json
+  metadata Json
+}
+
+Table WorkflowStepLog {
+  id String [pk]
+  executionId String [not null]
+  workflowStepId String [not null]
+  conditionsMatched Boolean [not null]
+  conditionResults Json
+  actionsExecuted Json
+  executedAt DateTime [default: `now()`, not null]
+  duration Int
+  error String
+}
+
+Ref DocumentAnnotation_documentId_fk: DocumentAnnotation.documentId > Document.id [delete: cascade]
+
+Ref DocumentAnnotation_teamId_fk: DocumentAnnotation.teamId > Team.id [delete: cascade]
+
+Ref DocumentAnnotation_createdById_fk: DocumentAnnotation.createdById > User.id [delete: cascade]
+
+Ref AnnotationImage_annotationId_fk: AnnotationImage.annotationId > DocumentAnnotation.id [delete: cascade]
+
+Ref Brand_teamId_fk: Brand.teamId > Team.id [delete: cascade]
+
+Ref Conversation_dataroomId_fk: Conversation.dataroomId > Dataroom.id [delete: cascade]
+
+Ref Conversation_dataroomDocumentId_fk: Conversation.dataroomDocumentId > DataroomDocument.id [delete: set null]
+
+Ref Conversation_linkId_fk: Conversation.linkId > Link.id [delete: set null]
+
+Ref Conversation_viewerGroupId_fk: Conversation.viewerGroupId > ViewerGroup.id [delete: set null]
+
+Ref Conversation_questionId_fk: Conversation.questionId > DataroomQuestion.id [delete: cascade]
+
+Ref Conversation_recipientViewerId_fk: Conversation.recipientViewerId > Viewer.id [delete: set null]
+
+Ref Conversation_initialViewId_fk: Conversation.initialViewId > View.id [delete: set null]
+
+Ref Conversation_teamId_fk: Conversation.teamId > Team.id [delete: cascade]
+
+Ref DataroomQuestion_dataroomId_fk: DataroomQuestion.dataroomId > Dataroom.id [delete: cascade]
+
+Ref DataroomQuestion_teamId_fk: DataroomQuestion.teamId > Team.id [delete: cascade]
+
+Ref DataroomQuestion_createdByUserId_fk: DataroomQuestion.createdByUserId > User.id [delete: set null]
+
+Ref DataroomQuestion_dataroomDocumentId_fk: DataroomQuestion.dataroomDocumentId > DataroomDocument.id [delete: set null]
+
+Ref DataroomQuestionAssignment_questionId_fk: DataroomQuestionAssignment.questionId > DataroomQuestion.id [delete: cascade]
+
+Ref DataroomQuestionAssignment_linkId_fk: DataroomQuestionAssignment.linkId > Link.id [delete: cascade]
+
+Ref DataroomQuestionAssignment_groupId_fk: DataroomQuestionAssignment.groupId > ViewerGroup.id [delete: cascade]
+
+Ref DataroomQuestionAssignment_viewerId_fk: DataroomQuestionAssignment.viewerId > Viewer.id [delete: cascade]
+
+Ref ConversationParticipant_conversationId_fk: ConversationParticipant.conversationId > Conversation.id [delete: cascade]
+
+Ref ConversationParticipant_viewerId_fk: ConversationParticipant.viewerId > Viewer.id [delete: set null]
+
+Ref ConversationParticipant_userId_fk: ConversationParticipant.userId > User.id [delete: set null]
+
+Ref Message_conversationId_fk: Message.conversationId > Conversation.id [delete: cascade]
+
+Ref Message_userId_fk: Message.userId > User.id [delete: set null]
+
+Ref Message_viewerId_fk: Message.viewerId > Viewer.id [delete: set null]
+
+Ref Message_viewId_fk: Message.viewId > View.id [delete: set null]
+
+Ref ConversationView_conversationId_fk: ConversationView.conversationId > Conversation.id [delete: cascade]
+
+Ref ConversationView_viewId_fk: ConversationView.viewId > View.id [delete: cascade]
+
+Ref DataroomFaqItem_dataroomId_fk: DataroomFaqItem.dataroomId > Dataroom.id [delete: cascade]
+
+Ref DataroomFaqItem_linkId_fk: DataroomFaqItem.linkId > Link.id [delete: set null]
+
+Ref DataroomFaqItem_dataroomDocumentId_fk: DataroomFaqItem.dataroomDocumentId > DataroomDocument.id [delete: set null]
+
+Ref DataroomFaqItem_sourceConversationId_fk: DataroomFaqItem.sourceConversationId > Conversation.id [delete: set null]
+
+Ref DataroomFaqItem_questionMessageId_fk: DataroomFaqItem.questionMessageId > Message.id [delete: set null]
+
+Ref DataroomFaqItem_answerMessageId_fk: DataroomFaqItem.answerMessageId > Message.id [delete: set null]
+
+Ref DataroomFaqItem_teamId_fk: DataroomFaqItem.teamId > Team.id [delete: cascade]
+
+Ref DataroomFaqItem_publishedByUserId_fk: DataroomFaqItem.publishedByUserId > User.id [delete: cascade]
+
+Ref Dataroom_teamId_fk: Dataroom.teamId > Team.id [delete: cascade]
+
+Ref Dataroom_brandId_fk: Dataroom.brandId > Brand.id [delete: set null]
+
+Ref Dataroom_frozenBy_fk: Dataroom.frozenBy > User.id [delete: set null]
+
+Ref TaskList_dataroomId_fk: TaskList.dataroomId > Dataroom.id [delete: cascade]
+
+Ref TaskList_teamId_fk: TaskList.teamId > Team.id [delete: cascade]
+
+Ref Task_taskListId_fk: Task.taskListId > TaskList.id [delete: cascade]
+
+Ref Task_dataroomId_fk: Task.dataroomId > Dataroom.id [delete: cascade]
+
+Ref Task_teamId_fk: Task.teamId > Team.id [delete: cascade]
+
+Ref Task_uploadFolderId_fk: Task.uploadFolderId > DataroomFolder.id [delete: set null]
+
+Ref Task_createdByUserId_fk: Task.createdByUserId > User.id [delete: set null]
+
+Ref TaskAssignment_taskId_fk: TaskAssignment.taskId > Task.id [delete: cascade]
+
+Ref TaskAssignment_viewerId_fk: TaskAssignment.viewerId > Viewer.id [delete: cascade]
+
+Ref TaskAssignment_groupId_fk: TaskAssignment.groupId > ViewerGroup.id [delete: cascade]
+
+Ref TaskAssignment_linkId_fk: TaskAssignment.linkId > Link.id [delete: cascade]
+
+Ref TaskActivity_taskId_fk: TaskActivity.taskId > Task.id [delete: cascade]
+
+Ref TaskActivity_userId_fk: TaskActivity.userId > User.id [delete: set null]
+
+Ref TaskActivity_viewerId_fk: TaskActivity.viewerId > Viewer.id [delete: set null]
+
+Ref TaskActivity_viewId_fk: TaskActivity.viewId > View.id [delete: set null]
+
+Ref DataroomDocument_dataroomId_fk: DataroomDocument.dataroomId > Dataroom.id [delete: cascade]
+
+Ref DataroomDocument_documentId_fk: DataroomDocument.documentId > Document.id [delete: cascade]
+
+Ref DataroomDocument_folderId_fk: DataroomDocument.folderId > DataroomFolder.id [delete: set null]
+
+Ref DataroomFolder_parentId_fk: DataroomFolder.parentId > DataroomFolder.id [delete: set null]
+
+Ref DataroomFolder_dataroomId_fk: DataroomFolder.dataroomId > Dataroom.id [delete: cascade]
+
+Ref DataroomBrand_dataroomId_fk: DataroomBrand.dataroomId - Dataroom.id [delete: cascade]
+
+Ref ViewerGroup_dataroomId_fk: ViewerGroup.dataroomId > Dataroom.id [delete: cascade]
+
+Ref ViewerGroup_teamId_fk: ViewerGroup.teamId > Team.id [delete: cascade]
+
+Ref ViewerGroupMembership_viewerId_fk: ViewerGroupMembership.viewerId > Viewer.id [delete: cascade]
+
+Ref ViewerGroupMembership_groupId_fk: ViewerGroupMembership.groupId > ViewerGroup.id [delete: cascade]
+
+Ref ViewerGroupAccessControls_groupId_fk: ViewerGroupAccessControls.groupId > ViewerGroup.id [delete: cascade]
+
+Ref PermissionGroup_dataroomId_fk: PermissionGroup.dataroomId > Dataroom.id [delete: cascade]
+
+Ref PermissionGroup_teamId_fk: PermissionGroup.teamId > Team.id [delete: cascade]
+
+Ref PermissionGroupAccessControls_groupId_fk: PermissionGroupAccessControls.groupId > PermissionGroup.id [delete: cascade]
+
+Ref Document_ownerId_fk: Document.ownerId > User.id [delete: set null]
+
+Ref Document_teamId_fk: Document.teamId > Team.id [delete: cascade]
+
+Ref Document_folderId_fk: Document.folderId > Folder.id [delete: set null]
+
+Ref DocumentVersion_documentId_fk: DocumentVersion.documentId > Document.id [delete: cascade]
+
+Ref DocumentPage_versionId_fk: DocumentPage.versionId > DocumentVersion.id [delete: cascade]
+
+Ref Folder_parentId_fk: Folder.parentId > Folder.id [delete: set null]
+
+Ref Folder_teamId_fk: Folder.teamId > Team.id [delete: cascade]
+
+Ref DocumentUpload_documentId_fk: DocumentUpload.documentId > Document.id [delete: cascade]
+
+Ref DocumentUpload_teamId_fk: DocumentUpload.teamId > Team.id [delete: cascade]
+
+Ref DocumentUpload_viewerId_fk: DocumentUpload.viewerId > Viewer.id [delete: set null]
+
+Ref DocumentUpload_viewId_fk: DocumentUpload.viewId > View.id [delete: set null]
+
+Ref DocumentUpload_linkId_fk: DocumentUpload.linkId > Link.id [delete: cascade]
+
+Ref DocumentUpload_dataroomId_fk: DocumentUpload.dataroomId > Dataroom.id [delete: set null]
+
+Ref DocumentUpload_dataroomDocumentId_fk: DocumentUpload.dataroomDocumentId > DataroomDocument.id [delete: set null]
+
+Ref DocumentUpload_taskId_fk: DocumentUpload.taskId > Task.id [delete: set null]
+
+Ref InstalledIntegration_integrationId_fk: InstalledIntegration.integrationId > Integration.id [delete: cascade]
+
+Ref InstalledIntegration_userId_fk: InstalledIntegration.userId > User.id [delete: set null]
+
+Ref InstalledIntegration_teamId_fk: InstalledIntegration.teamId > Team.id [delete: cascade]
+
+Ref Link_documentId_fk: Link.documentId > Document.id [delete: cascade]
+
+Ref Link_dataroomId_fk: Link.dataroomId > Dataroom.id [delete: cascade]
+
+Ref Link_domainId_fk: Link.domainId > Domain.id [delete: set null]
+
+Ref Link_agreementId_fk: Link.agreementId > Agreement.id [delete: set null]
+
+Ref Link_groupId_fk: Link.groupId > ViewerGroup.id [delete: set null]
+
+Ref Link_permissionGroupId_fk: Link.permissionGroupId > PermissionGroup.id [delete: set null]
+
+Ref Link_teamId_fk: Link.teamId > Team.id [delete: cascade]
+
+Ref Link_brandId_fk: Link.brandId > Brand.id [delete: set null]
+
+Ref Link_ownerId_fk: Link.ownerId > User.id [delete: set null]
+
+Ref LinkPreset_teamId_fk: LinkPreset.teamId > Team.id [delete: cascade]
+
+Ref VisitorGroup_teamId_fk: VisitorGroup.teamId > Team.id [delete: cascade]
+
+Ref LinkVisitorGroup_linkId_fk: LinkVisitorGroup.linkId > Link.id [delete: cascade]
+
+Ref LinkVisitorGroup_visitorGroupId_fk: LinkVisitorGroup.visitorGroupId > VisitorGroup.id [delete: cascade]
+
+Ref CustomField_linkId_fk: CustomField.linkId > Link.id [delete: cascade]
+
+Ref CustomFieldResponse_viewId_fk: CustomFieldResponse.viewId - View.id [delete: cascade]
+
+Ref NotificationPreference_userId_fk: NotificationPreference.userId > User.id [delete: cascade]
+
+Ref NotificationPreference_teamId_fk: NotificationPreference.teamId > Team.id [delete: cascade]
+
+Ref DocumentRedactionJob_documentId_fk: DocumentRedactionJob.documentId > Document.id [delete: cascade]
+
+Ref DocumentRedactionJob_documentVersionId_fk: DocumentRedactionJob.documentVersionId > DocumentVersion.id [delete: cascade]
+
+Ref DocumentRedactionJob_teamId_fk: DocumentRedactionJob.teamId > Team.id [delete: cascade]
+
+Ref DocumentRedactionJob_createdById_fk: DocumentRedactionJob.createdById > User.id
+
+Ref DocumentRedaction_jobId_fk: DocumentRedaction.jobId > DocumentRedactionJob.id [delete: cascade]
+
+Ref ReferralInvite_userId_fk: ReferralInvite.userId > User.id [delete: cascade]
+
+Ref ReferralInvite_teamId_fk: ReferralInvite.teamId > Team.id [delete: cascade]
+
+Ref Account_userId_fk: Account.userId > User.id [delete: cascade]
+
+Ref Session_userId_fk: Session.userId > User.id [delete: cascade]
+
+Ref Domain_userId_fk: Domain.userId > User.id [delete: set null]
+
+Ref Domain_teamId_fk: Domain.teamId > Team.id [delete: cascade]
+
+Ref View_linkId_fk: View.linkId > Link.id [delete: cascade]
+
+Ref View_documentId_fk: View.documentId > Document.id [delete: cascade]
+
+Ref View_dataroomId_fk: View.dataroomId > Dataroom.id [delete: cascade]
+
+Ref View_viewerId_fk: View.viewerId > Viewer.id [delete: cascade]
+
+Ref View_groupId_fk: View.groupId > ViewerGroup.id [delete: set null]
+
+Ref View_teamId_fk: View.teamId > Team.id [delete: cascade]
+
+Ref Viewer_dataroomId_fk: Viewer.dataroomId > Dataroom.id [delete: set null]
+
+Ref Viewer_teamId_fk: Viewer.teamId > Team.id [delete: cascade]
+
+Ref Reaction_viewId_fk: Reaction.viewId > View.id [delete: cascade]
+
+Ref Invitation_teamId_fk: Invitation.teamId > Team.id [delete: cascade]
+
+Ref SentEmail_teamId_fk: SentEmail.teamId > Team.id [delete: cascade]
+
+Ref Chat_teamId_fk: Chat.teamId > Team.id [delete: cascade]
+
+Ref Chat_documentId_fk: Chat.documentId > Document.id [delete: cascade]
+
+Ref Chat_dataroomId_fk: Chat.dataroomId > Dataroom.id [delete: cascade]
+
+Ref Chat_linkId_fk: Chat.linkId > Link.id [delete: cascade]
+
+Ref Chat_viewId_fk: Chat.viewId > View.id [delete: cascade]
+
+Ref Chat_userId_fk: Chat.userId > User.id [delete: cascade]
+
+Ref Chat_viewerId_fk: Chat.viewerId > Viewer.id [delete: cascade]
+
+Ref ChatMessage_chatId_fk: ChatMessage.chatId > Chat.id [delete: cascade]
+
+Ref Feedback_linkId_fk: Feedback.linkId - Link.id [delete: cascade]
+
+Ref FeedbackResponse_feedbackId_fk: FeedbackResponse.feedbackId > Feedback.id [delete: cascade]
+
+Ref FeedbackResponse_viewId_fk: FeedbackResponse.viewId - View.id [delete: cascade]
+
+Ref Agreement_teamId_fk: Agreement.teamId > Team.id [delete: cascade]
+
+Ref AgreementResponse_agreementId_fk: AgreementResponse.agreementId > Agreement.id [delete: cascade]
+
+Ref AgreementResponse_viewId_fk: AgreementResponse.viewId - View.id [delete: cascade]
+
+Ref IncomingWebhook_teamId_fk: IncomingWebhook.teamId > Team.id [delete: cascade]
+
+Ref RestrictedToken_userId_fk: RestrictedToken.userId > User.id [delete: cascade]
+
+Ref RestrictedToken_teamId_fk: RestrictedToken.teamId > Team.id [delete: cascade]
+
+Ref RestrictedToken_clientId_fk: RestrictedToken.clientId > OAuthClient.id [delete: set null]
+
+Ref Webhook_teamId_fk: Webhook.teamId > Team.id [delete: cascade]
+
+Ref Tag_teamId_fk: Tag.teamId > Team.id [delete: cascade]
+
+Ref TagItem_tagId_fk: TagItem.tagId > Tag.id [delete: cascade]
+
+Ref TagItem_linkId_fk: TagItem.linkId > Link.id [delete: cascade]
+
+Ref TagItem_documentId_fk: TagItem.documentId > Document.id [delete: cascade]
+
+Ref TagItem_dataroomId_fk: TagItem.dataroomId > Dataroom.id [delete: cascade]
+
+Ref ViewerInvitation_viewerId_fk: ViewerInvitation.viewerId > Viewer.id [delete: cascade]
+
+Ref ViewerInvitation_linkId_fk: ViewerInvitation.linkId > Link.id [delete: cascade]
+
+Ref ViewerInvitation_groupId_fk: ViewerInvitation.groupId > ViewerGroup.id [delete: set null]
+
+Ref Team_defaultBrandId_fk: Team.defaultBrandId > Brand.id [delete: set null]
+
+Ref UserDataroom_userId_fk: UserDataroom.userId > User.id [delete: cascade]
+
+Ref UserDataroom_teamId_fk: UserDataroom.teamId > Team.id [delete: cascade]
+
+Ref UserDataroom_dataroomId_fk: UserDataroom.dataroomId > Dataroom.id [delete: cascade]
+
+Ref UserTeam_userId_fk: UserTeam.userId > User.id [delete: cascade]
+
+Ref UserTeam_teamId_fk: UserTeam.teamId > Team.id [delete: cascade]
+
+Ref Workflow_entryLinkId_fk: Workflow.entryLinkId - Link.id [delete: cascade]
+
+Ref Workflow_teamId_fk: Workflow.teamId > Team.id [delete: cascade]
+
+Ref WorkflowStep_workflowId_fk: WorkflowStep.workflowId > Workflow.id [delete: cascade]
+
+Ref WorkflowExecution_workflowId_fk: WorkflowExecution.workflowId > Workflow.id [delete: cascade]
+
+Ref WorkflowStepLog_executionId_fk: WorkflowStepLog.executionId > WorkflowExecution.id [delete: cascade]
+
+Ref WorkflowStepLog_workflowStepId_fk: WorkflowStepLog.workflowStepId > WorkflowStep.id [delete: cascade]

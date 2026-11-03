@@ -1,0 +1,1129 @@
+Enum ProvisionState {
+  pending
+  ready
+  error
+  deleting
+}
+
+Enum DataDbProvider {
+  postgres
+}
+
+Enum DataDbConnectionStatus {
+  pending
+  validating
+  ready
+  error
+  migrating
+  disabled
+}
+
+Enum DataDbConnectionHealthState {
+  healthy
+  read_only
+  unreachable
+  degraded
+}
+
+Enum SpaceDataDbBindingMode {
+  default
+  byodb
+}
+
+Enum SpaceDataDbBindingState {
+  ready
+  validating
+  initializing
+  migrating
+  error
+  disabled
+}
+
+Enum SpaceDataDbMigrationJobState {
+  pending
+  waiting_worker
+  preflight
+  freezing_writes
+  copying
+  validating
+  switching
+  succeeded
+  failed
+  canceled
+  rolled_back
+}
+
+Enum BaseDataDbMoveJobState {
+  pending
+  waiting_worker
+  copying_base_schema
+  copying_shared_rows
+  validating
+  switching
+  succeeded
+  failed
+  cancelled
+}
+
+Table space {
+  id String [pk]
+  name String [not null]
+  avatar String
+  credit Int
+  deleted_time DateTime
+  created_time DateTime [default: `now()`, not null]
+  created_by String [not null]
+  last_modified_by String
+  last_modified_time DateTime
+  is_template Boolean
+}
+
+Table data_db_connection {
+  id String [pk]
+  provider DataDbProvider [default: 'postgres', not null]
+  encrypted_url String [not null]
+  url_fingerprint String [unique, not null]
+  display_host String
+  display_database String
+  internal_schema String [not null]
+  status DataDbConnectionStatus [default: 'pending', not null]
+  schema_version String
+  capabilities Json
+  last_validated_at DateTime
+  last_error String
+  health_state DataDbConnectionHealthState [default: 'healthy', not null]
+  health_reason String
+  health_changed_at DateTime
+  last_health_check_at DateTime
+  consecutive_health_failures Int [default: 0, not null]
+  created_by String [not null]
+  created_time DateTime [default: `now()`, not null]
+  last_modified_time DateTime
+}
+
+Table space_data_db_binding {
+  id String [pk]
+  space_id String [unique, not null]
+  data_db_connection_id String
+  mode SpaceDataDbBindingMode [default: 'default', not null]
+  state SpaceDataDbBindingState [default: 'ready', not null]
+  created_by String [not null]
+  created_time DateTime [default: `now()`, not null]
+  last_modified_time DateTime
+  last_history_flushed_at DateTime
+  last_removal_flushed_at DateTime
+}
+
+Table space_data_db_migration_job {
+  id String [pk]
+  space_id String [not null]
+  source_connection_id String
+  target_connection_id String
+  target_mode String [default: 'migrate-space', not null]
+  switch_on_completion Boolean [default: false, not null]
+  state SpaceDataDbMigrationJobState [default: 'pending', not null]
+  target_url_fingerprint String [not null]
+  target_internal_schema String [not null]
+  inventory Json
+  copy_stats Json
+  validation_stats Json
+  last_error String
+  started_at DateTime
+  completed_at DateTime
+  created_by String [not null]
+  created_time DateTime [default: `now()`, not null]
+  last_modified_time DateTime
+}
+
+Table base_data_db_move_job {
+  id String [pk]
+  base_id String [not null]
+  source_space_id String [not null]
+  target_space_id String [not null]
+  source_connection_id String
+  target_connection_id String
+  state BaseDataDbMoveJobState [default: 'pending', not null]
+  inventory Json
+  copy_stats Json
+  validation_stats Json
+  last_error String
+  started_at DateTime
+  completed_at DateTime
+  created_by String [not null]
+  created_time DateTime [default: `now()`, not null]
+  last_modified_time DateTime
+}
+
+Table pin_resource {
+  id String [pk]
+  type String [not null]
+  resource_id String [not null]
+  created_time DateTime [default: `now()`, not null]
+  created_by String [not null]
+  order Float [not null]
+
+  indexes {
+    (created_by, resource_id) [unique]
+  }
+}
+
+Table base {
+  id String [pk]
+  space_id String [not null]
+  name String [not null]
+  order Float [not null]
+  icon String
+  schema_pass String
+  v2_enabled Boolean [default: false, not null]
+  provision_state ProvisionState [default: 'ready', not null]
+  deleted_time DateTime
+  created_time DateTime [default: `now()`, not null]
+  created_by String [not null]
+  last_modified_by String
+  last_modified_time DateTime
+}
+
+Table table_meta {
+  id String [pk]
+  base_id String [not null]
+  name String [not null]
+  description String
+  icon String
+  db_table_name String [not null]
+  db_view_name String
+  search_index Json
+  search_index_policy Json
+  query_index_policy Json
+  provision_state ProvisionState [default: 'ready', not null]
+  version Int [not null]
+  order Float [not null]
+  created_time DateTime [default: `now()`, not null]
+  last_modified_time DateTime
+  deleted_time DateTime
+  created_by String [not null]
+  last_modified_by String
+}
+
+Table table_query_observation_shard {
+  space_id String
+  base_id String [not null]
+  table_id String [not null]
+  query_kind String [not null]
+  shape_hash String [not null]
+  window_start DateTime [not null]
+  writer_id String [not null]
+  window_size_seconds Int [not null]
+  request_count Int [not null]
+  slow_count Int [not null]
+  timeout_count Int [not null]
+  db_error_count Int [not null]
+  total_duration_ms Float [not null]
+  max_duration_ms Float [not null]
+  total_db_duration_ms Float
+  max_db_duration_ms Float
+  shape Json [not null]
+  sql_diagnostics Json
+  created_time DateTime [default: `now()`, not null]
+  last_modified_time DateTime
+
+  indexes {
+    (table_id, query_kind, shape_hash, window_start, writer_id) [pk]
+  }
+}
+
+Table schema_operation {
+  id String [pk]
+  type String [not null]
+  status String [not null]
+  phase String [not null]
+  resource_type String [not null]
+  resource_id String [not null]
+  base_id String
+  table_id String
+  idempotency_key String [unique, not null]
+  payload Json
+  result Json
+  attempts Int [default: 0, not null]
+  max_attempts Int [default: 8, not null]
+  next_run_at DateTime [default: `now()`, not null]
+  locked_at DateTime
+  locked_by String
+  last_error String
+  created_time DateTime [default: `now()`, not null]
+  created_by String [not null]
+  last_modified_time DateTime
+  last_modified_by String
+}
+
+Table field {
+  id String [pk]
+  name String [not null]
+  description String
+  options String
+  meta String
+  ai_config String
+  type String [not null]
+  cell_value_type String [not null]
+  is_multiple_cell_value Boolean
+  db_field_type String [not null]
+  db_field_name String [not null]
+  provision_state ProvisionState [default: 'ready', not null]
+  not_null Boolean
+  unique Boolean
+  is_primary Boolean
+  is_computed Boolean
+  is_lookup Boolean
+  is_conditional_lookup Boolean
+  is_pending Boolean
+  has_error Boolean
+  lookup_linked_field_id String
+  lookup_options String
+  table_id String [not null]
+  order Float [not null]
+  version Int [not null]
+  created_time DateTime [default: `now()`, not null]
+  last_modified_time DateTime
+  deleted_time DateTime
+  created_by String [not null]
+  last_modified_by String
+}
+
+Table computed_update_outbox {
+  id String [pk]
+  base_id String [not null]
+  seed_table_id String [not null]
+  seed_record_ids Json
+  change_type String [not null]
+  steps Json
+  edges Json
+  status String [not null]
+  attempts Int [default: 0, not null]
+  max_attempts Int [default: 8, not null]
+  next_run_at DateTime [default: `now()`, not null]
+  locked_at DateTime
+  locked_by String
+  last_error String
+  estimated_complexity Int [default: 0, not null]
+  plan_hash String [not null]
+  dirty_stats Json
+  run_id String [not null]
+  origin_run_ids String[] [not null]
+  run_total_steps Int [default: 0, not null]
+  run_completed_steps_before Int [default: 0, not null]
+  affected_table_ids String[] [not null]
+  affected_field_ids String[] [not null]
+  sync_max_level Int
+  source_changed_at DateTime
+  stage_depth Int [default: 0, not null]
+  predecessor_task_id String
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+}
+
+Table computed_update_outbox_seed {
+  id String [pk]
+  task_id String [not null]
+  table_id String [not null]
+  record_id String [not null]
+
+  indexes {
+    (task_id, table_id, record_id) [unique]
+  }
+}
+
+Table computed_update_change_frontier {
+  scope_id String [not null]
+  kind String [not null]
+  table_id String [not null]
+  record_id String [not null]
+  field_id String [not null]
+
+  indexes {
+    (scope_id, kind, table_id, record_id, field_id) [pk]
+  }
+
+  Note: 'Actual output-value evidence; independent from continuation progress.'
+}
+
+Table computed_update_stage_ledger {
+  scope_id String [not null]
+  kind String [not null]
+  table_id String [not null]
+  record_id String [not null]
+  seq BigInt [default: 0, not null]
+
+  indexes {
+    (scope_id, kind, table_id, record_id) [pk]
+  }
+
+  Note: '''Durable per-stage state for budget-staged computed updates, keyed by the
+continuation chain\'s root task id (its scope). Rows are written once per
+record and never copied between continuation tasks:
+- kind \'excluded\': processed-target exclusion ledger for partial batches;
+- kind \'frontier\': seq-ordered queue of sources whose outgoing propagation
+is not finished (self-referential generations + migrated explicit seeds);
+- kind \'consumed\': retired frontier sources preserved for deferred edge
+chunks, handed to the continuation as seeds at stage completion.
+Cleared when the chain\'s stage completes or the chain dead-letters.'''
+}
+
+Table computed_update_dead_letter {
+  id String [pk]
+  base_id String [not null]
+  seed_table_id String [not null]
+  seed_record_ids Json
+  change_type String [not null]
+  steps Json
+  edges Json
+  status String [not null]
+  attempts Int [default: 0, not null]
+  max_attempts Int [default: 8, not null]
+  next_run_at DateTime [not null]
+  locked_at DateTime
+  locked_by String
+  last_error String
+  estimated_complexity Int [default: 0, not null]
+  plan_hash String [not null]
+  dirty_stats Json
+  run_id String [not null]
+  origin_run_ids String[] [not null]
+  run_total_steps Int [default: 0, not null]
+  run_completed_steps_before Int [default: 0, not null]
+  affected_table_ids String[] [not null]
+  affected_field_ids String[] [not null]
+  sync_max_level Int
+  source_changed_at DateTime
+  stage_depth Int [default: 0, not null]
+  predecessor_task_id String
+  trace_data Json
+  failed_at DateTime [not null]
+  created_at DateTime [not null]
+  updated_at DateTime [not null]
+}
+
+Table computed_update_run_history {
+  task_id String [pk]
+  base_id String [not null]
+  seed_table_id String [not null]
+  change_type String [not null]
+  run_id String [not null]
+  origin_run_ids String[] [not null]
+  steps Json
+  edges Json
+  affected_table_ids String[] [not null]
+  affected_field_ids String[] [not null]
+  source_field_ids String[] [not null, note: '''Source (changed) field ids; populated for seed tasks, where
+affected_field_ids carries the trigger fields rather than targets.''']
+  seed_record_count Int [default: 0, not null]
+  stage_depth Int [default: 0, not null]
+  predecessor_task_id String
+  run_total_steps Int [default: 0, not null]
+  run_completed_steps_before Int [default: 0, not null]
+  sync_max_level Int
+  estimated_complexity Int [default: 0, not null]
+  attempts Int [default: 0, not null]
+  outcome String [not null]
+  source_changed_at DateTime
+  enqueued_at DateTime [not null]
+  started_at DateTime
+  completed_at DateTime [not null]
+  duration_ms Int [default: 0, not null]
+
+  Note: '''Completion ledger for computed-update outbox tasks (lineage / latency
+tracing). Successful tasks are hard-deleted from the outbox on markDone,
+so this table keeps a retention-bounded trail per completed task: the
+run/stage chain (runId, stageDepth, predecessorTaskId) and the timeline
+from source mutation to converged write (sourceChangedAt → completedAt).
+Observability only — the worker never reads it; rows are pruned after a
+retention window.'''
+}
+
+Table computed_update_pause_scope {
+  id String [pk]
+  scope_type String [not null]
+  scope_id String [not null]
+  paused_at DateTime [default: `now()`, not null]
+  paused_by String
+  resume_at DateTime
+  reason String
+  write_policy String [default: 'allow_bounded', not null]
+  updated_at DateTime [default: `now()`, not null]
+  updated_by String
+
+  indexes {
+    (scope_type, scope_id) [unique]
+  }
+}
+
+Table computed_field_activity {
+  field_id String [pk]
+  table_id String [not null]
+  base_id String [not null]
+  status String [not null]
+  active_task_count Int [default: 0, not null]
+  processing_task_count Int [default: 0, not null]
+  generation BigInt [default: 0, not null]
+  estimated_complexity BigInt [default: 0, not null]
+  estimated_dirty_records BigInt [default: 0, not null]
+  has_all_target_records Boolean [default: false, not null]
+  queued_at DateTime
+  started_at DateTime
+  last_completed_at DateTime
+  last_duration_ms Int
+  last_error Json
+  extensions Json
+  updated_at DateTime [default: `now()`, not null]
+
+  Note: 'Projection of async computed activity per field (not field schema meta).'
+}
+
+Table computed_table_activity {
+  table_id String [pk]
+  base_id String [not null]
+  status String [not null]
+  calculating_field_count Int [default: 0, not null]
+  queued_field_count Int [default: 0, not null]
+  estimated_complexity BigInt [default: 0, not null]
+  recent_completions Json [default: '[]', not null]
+  generation BigInt [default: 0, not null]
+  updated_at DateTime [default: `now()`, not null]
+
+  Note: 'Projection of async computed activity per table.'
+}
+
+Table computed_task_field_ref {
+  task_id String [not null]
+  field_id String [not null]
+  table_id String [not null]
+  base_id String [not null]
+  was_processing Boolean [default: false, not null]
+  created_at DateTime [default: `now()`, not null]
+
+  indexes {
+    (task_id, field_id) [pk]
+  }
+
+  Note: 'Task→field refset for activity refcounting (prevents merge double-count).'
+}
+
+Table view {
+  id String [pk]
+  name String [not null]
+  description String
+  table_id String [not null]
+  type String [not null]
+  sort String
+  filter String
+  group String
+  options String
+  order Float [not null]
+  version Int [not null]
+  column_meta String [not null]
+  is_locked Boolean
+  enable_share Boolean
+  share_id String [unique]
+  share_meta String
+  created_time DateTime [default: `now()`, not null]
+  last_modified_time DateTime
+  deleted_time DateTime
+  created_by String [not null]
+  last_modified_by String
+}
+
+Table ops {
+  id String [pk]
+  collection String [not null]
+  doc_id String [not null]
+  doc_type String [not null]
+  version Int [not null]
+  operation String [not null]
+  created_time DateTime [default: `now()`, not null]
+  created_by String [not null]
+
+  indexes {
+    (collection, doc_id, version) [unique]
+  }
+}
+
+Table reference {
+  id String [pk]
+  from_field_id String [not null]
+  to_field_id String [not null]
+  created_time DateTime [default: `now()`, not null]
+
+  indexes {
+    (to_field_id, from_field_id) [unique]
+  }
+}
+
+Table users {
+  id String [pk]
+  name String [not null]
+  password String
+  salt String
+  phone String [unique]
+  email String [unique, not null]
+  avatar String
+  is_system Boolean
+  is_admin Boolean
+  is_trial_used Boolean
+  lang String
+  notify_meta String
+  last_sign_time DateTime
+  deactivated_time DateTime
+  created_time DateTime [default: `now()`, not null]
+  deleted_time DateTime
+  last_modified_time DateTime
+  permanent_deleted_time DateTime
+  ref_meta String
+}
+
+Table account {
+  id String [pk]
+  user_id String [not null]
+  type String [not null]
+  provider String [not null]
+  provider_id String [not null]
+  connection_id String [default: '', not null]
+  created_time DateTime [default: `now()`, not null]
+
+  indexes {
+    (provider, provider_id, connection_id) [unique]
+  }
+}
+
+Table attachments {
+  id String [pk]
+  token String [unique, not null]
+  hash String [not null]
+  size BigInt [not null]
+  mimetype String [not null]
+  path String [not null]
+  width Int
+  height Int
+  deleted_time DateTime
+  created_time DateTime [default: `now()`, not null]
+  created_by String [not null]
+  last_modified_by String
+  thumbnail_path String
+}
+
+Table attachments_table {
+  id String [pk]
+  attachment_id String [not null]
+  name String [not null]
+  token String [not null]
+  table_id String [not null]
+  record_id String [not null]
+  field_id String [not null]
+  created_time DateTime [default: `now()`, not null]
+  created_by String [not null]
+  last_modified_by String
+  last_modified_time DateTime
+}
+
+Table collaborator {
+  id String [pk]
+  role_name String [not null]
+  resource_type String [not null]
+  resource_id String [not null]
+  principal_id String [not null]
+  principal_type String [not null]
+  created_by String [not null]
+  created_time DateTime [default: `now()`, not null]
+  last_modified_time DateTime
+  last_modified_by String
+
+  indexes {
+    (resource_type, resource_id, principal_id, principal_type) [unique]
+  }
+}
+
+Table invitation {
+  id String [pk]
+  base_id String
+  space_id String
+  type String [not null]
+  role String [not null]
+  invitation_code String [not null]
+  expired_time DateTime
+  create_by String [not null]
+  created_time DateTime [default: `now()`, not null]
+  last_modified_time DateTime
+  last_modified_by String
+  deleted_time DateTime
+}
+
+Table invitation_record {
+  id String [pk]
+  invitation_id String [not null]
+  base_id String
+  space_id String
+  type String [not null]
+  inviter String [not null]
+  accepter String [not null]
+  created_time DateTime [default: `now()`, not null]
+}
+
+Table notification {
+  id String [pk]
+  from_user_id String [not null]
+  to_user_id String [not null]
+  type String [not null]
+  message String [not null]
+  message_i18n String
+  severity String [default: 'info', not null]
+  url_path String
+  is_read Boolean [default: false, not null]
+  created_time DateTime [default: `now()`, not null]
+  created_by String [not null]
+}
+
+Table access_token {
+  id String [pk]
+  name String [not null]
+  description String
+  user_id String [not null]
+  scopes String [not null]
+  space_ids String
+  base_ids String
+  sign String [not null]
+  client_id String
+  has_full_access Boolean
+  expired_time DateTime [not null]
+  last_used_time DateTime
+  created_time DateTime [default: `now()`, not null]
+  last_modified_time DateTime
+}
+
+Table setting {
+  name String [unique, not null]
+  content String
+  created_time DateTime [default: `now()`, not null]
+  last_modified_time DateTime
+  created_by String [not null]
+  last_modified_by String
+}
+
+Table oauth_app {
+  id String [pk]
+  name String [not null]
+  logo String
+  homepage String [not null]
+  description String
+  client_id String [unique, not null]
+  redirect_uris String
+  scopes String
+  allow_device_flow Boolean [default: false, not null]
+  dynamic_registration Boolean [default: false, not null]
+  created_time DateTime [default: `now()`, not null]
+  last_modified_time DateTime
+  created_by String [not null]
+}
+
+Table oauth_app_authorized {
+  id String [pk]
+  client_id String [not null]
+  user_id String [not null]
+  authorized_time DateTime [not null]
+
+  indexes {
+    (client_id, user_id) [unique]
+  }
+}
+
+Table oauth_app_secret {
+  id String [pk]
+  client_id String [not null]
+  secret String [unique, not null]
+  masked_secret String [not null]
+  created_time DateTime [default: `now()`, not null]
+  created_by String [not null]
+  last_used_time DateTime
+}
+
+Table oauth_app_token {
+  id String [pk]
+  client_id String [not null]
+  app_secret_id String
+  refresh_token_sign String [unique, not null]
+  expired_time DateTime [not null]
+  created_time DateTime [default: `now()`, not null]
+  created_by String [not null]
+}
+
+Table record_history {
+  id String [pk]
+  table_id String [not null]
+  record_id String [not null]
+  field_id String [not null]
+  before String [not null]
+  after String [not null]
+  created_time DateTime [default: `now()`, not null]
+  created_by String [not null]
+}
+
+Table trash {
+  id String [pk]
+  resource_type String [not null]
+  resource_id String [not null]
+  parent_id String
+  deleted_time DateTime [default: `now()`, not null]
+  deleted_by String [not null]
+
+  indexes {
+    (resource_type, resource_id) [unique]
+  }
+}
+
+Table table_trash {
+  id String [pk]
+  table_id String [not null]
+  resource_type String [not null]
+  snapshot String [not null]
+  created_time DateTime [default: `now()`, not null]
+  created_by String [not null]
+}
+
+Table record_trash {
+  id String [pk]
+  table_id String [not null]
+  record_id String [not null]
+  snapshot String [not null]
+  created_time DateTime [default: `now()`, not null]
+  created_by String [not null]
+  reason String [default: 'deleted', not null]
+  record_created_time DateTime
+  record_created_by String
+  record_last_modified_time DateTime
+  record_last_modified_by String
+  operation_id String
+}
+
+Table record_removal_tombstone {
+  id String [pk]
+  table_id String [not null]
+  record_id String [not null]
+  type String [not null]
+  created_time DateTime [default: `now()`, not null]
+}
+
+Table plugin {
+  id String [pk]
+  name String [not null]
+  description String
+  detail_desc String
+  logo String [not null]
+  help_url String
+  status String [not null]
+  positions String [not null]
+  url String
+  secret String [unique, not null]
+  masked_secret String [not null]
+  i18n String
+  config String
+  plugin_user String
+  created_time DateTime [default: `now()`, not null]
+  last_modified_time DateTime
+  created_by String [not null]
+  last_modified_by String
+}
+
+Table plugin_install {
+  id String [pk]
+  plugin_id String [not null]
+  base_id String [not null]
+  name String [not null]
+  position_id String [not null]
+  position String [not null]
+  storage String
+  created_time DateTime [default: `now()`, not null]
+  created_by String [not null]
+  last_modified_time DateTime
+  last_modified_by String
+}
+
+Table dashboard {
+  id String [pk]
+  name String [not null]
+  base_id String [not null]
+  layout String
+  created_by String [not null]
+  created_time DateTime [default: `now()`, not null]
+  last_modified_time DateTime
+  last_modified_by String
+}
+
+Table comment {
+  id String [pk]
+  table_id String [not null]
+  record_id String [not null]
+  quote_Id String
+  content String
+  reaction String
+  deleted_time DateTime
+  created_time DateTime [default: `now()`, not null]
+  created_by String [not null]
+  last_modified_time DateTime
+}
+
+Table comment_subscription {
+  id String [pk]
+  table_id String [not null]
+  record_id String [not null]
+  created_by String [not null]
+  created_time DateTime [default: `now()`, not null]
+
+  indexes {
+    (table_id, record_id) [unique]
+  }
+}
+
+Table integration {
+  id String [pk]
+  resource_id String [unique, not null]
+  config String [not null]
+  type String [not null]
+  enable Boolean
+  created_time DateTime [default: `now()`, not null]
+  last_modified_time DateTime
+}
+
+Table plugin_panel {
+  id String [pk]
+  name String [not null]
+  table_id String [not null]
+  layout String
+  created_by String [not null]
+  created_time DateTime [default: `now()`, not null]
+  last_modified_time DateTime
+  last_modified_by String
+}
+
+Table plugin_context_menu {
+  id String [pk]
+  table_id String [not null]
+  plugin_install_id String [unique, not null]
+  order Float [not null]
+  created_time DateTime [default: `now()`, not null]
+  created_by String [not null]
+  last_modified_time DateTime
+  last_modified_by String
+}
+
+Table user_last_visit {
+  id String [pk]
+  user_id String [not null]
+  resource_type String [not null]
+  resource_id String [not null]
+  parent_resource_id String [not null]
+  last_visit_time DateTime [default: `now()`, not null]
+
+  indexes {
+    (user_id, resource_type, resource_id) [unique]
+  }
+}
+
+Table user_base_order {
+  id String [pk]
+  user_id String [not null]
+  base_id String [not null]
+  order Float [not null]
+  created_time DateTime [default: `now()`, not null]
+  last_modified_time DateTime
+
+  indexes {
+    (user_id, base_id) [unique]
+  }
+}
+
+Table template {
+  id String [pk]
+  base_id String [unique]
+  cover String
+  name String
+  description String
+  markdown_description String
+  category_id String[] [not null]
+  created_time DateTime [default: `now()`, not null]
+  created_by String [not null]
+  last_modified_time DateTime
+  last_modified_by String
+  is_system Boolean
+  is_published Boolean
+  featured Boolean
+  snapshot String
+  order Float [not null]
+  usage_count Int [default: 0, not null]
+  publish_info Json
+  visit_count Int [default: 0, not null]
+  kind String
+}
+
+Table template_category {
+  id String [pk]
+  name String [unique, not null]
+  created_time DateTime [default: `now()`, not null]
+  created_by String [not null]
+  last_modified_time DateTime
+  last_modified_by String
+  order Float [not null]
+}
+
+Table task {
+  id String [pk]
+  type String [not null]
+  status String [not null]
+  snapshot String
+  created_time DateTime [default: `now()`, not null]
+  last_modified_time DateTime
+  created_by String [not null]
+  last_modified_by String
+}
+
+Table task_run {
+  id String [pk]
+  task_id String [not null]
+  base_id String [not null]
+  status String [not null]
+  snapshot String [not null]
+  depends_on_run_ids String[] [not null]
+  spent Int
+  log String
+  error_msg String
+  started_time DateTime
+  created_time DateTime [default: `now()`, not null]
+  last_modified_time DateTime
+}
+
+Table task_reference {
+  id String [pk]
+  from_field_id String [not null]
+  to_field_id String [not null]
+  created_time DateTime [default: `now()`, not null]
+
+  indexes {
+    (to_field_id, from_field_id) [unique]
+  }
+}
+
+Table waitlist {
+  email String [unique, not null]
+  invite Boolean
+  invite_time DateTime
+  created_time DateTime [default: `now()`, not null]
+}
+
+Table base_node {
+  id String [pk]
+  parent_id String
+  base_id String [not null]
+  resource_type String [not null]
+  resource_id String [not null]
+  order Float [not null]
+  created_time DateTime [default: `now()`, not null]
+  created_by String [not null]
+  last_modified_time DateTime
+  last_modified_by String
+
+  indexes {
+    (base_id, resource_type, resource_id) [unique]
+  }
+}
+
+Table base_node_folder {
+  id String [pk]
+  base_id String [not null]
+  name String [not null]
+  created_time DateTime [default: `now()`, not null]
+  created_by String [not null]
+  last_modified_time DateTime
+  last_modified_by String
+
+  indexes {
+    (base_id, name) [unique]
+  }
+}
+
+Table base_share {
+  id String [pk]
+  base_id String [not null]
+  share_id String [unique, not null]
+  password String
+  node_id String
+  allow_save Boolean
+  allow_copy Boolean
+  allow_edit Boolean
+  enabled Boolean [default: true, not null]
+  created_time DateTime [default: `now()`, not null]
+  created_by String [not null]
+  last_modified_time DateTime
+
+  indexes {
+    (base_id, node_id) [unique]
+  }
+}
+
+Table short_link {
+  id String [pk]
+  code String [unique, not null]
+  type String [not null]
+  resource_id String [not null]
+  created_time DateTime [default: `now()`, not null]
+  created_by String [not null]
+  deleted_time DateTime
+
+  indexes {
+    (type, resource_id) [unique]
+  }
+}
+
+Ref space_data_db_binding_space_id_fk: space_data_db_binding.space_id - space.id [delete: cascade]
+
+Ref space_data_db_binding_data_db_connection_id_fk: space_data_db_binding.data_db_connection_id > data_db_connection.id
+
+Ref space_data_db_migration_job_space_id_fk: space_data_db_migration_job.space_id > space.id [delete: cascade]
+
+Ref space_data_db_migration_job_source_connection_id_fk: space_data_db_migration_job.source_connection_id > data_db_connection.id
+
+Ref space_data_db_migration_job_target_connection_id_fk: space_data_db_migration_job.target_connection_id > data_db_connection.id
+
+Ref base_data_db_move_job_base_id_fk: base_data_db_move_job.base_id > base.id [delete: cascade]
+
+Ref base_data_db_move_job_source_space_id_fk: base_data_db_move_job.source_space_id > space.id [delete: cascade]
+
+Ref base_data_db_move_job_target_space_id_fk: base_data_db_move_job.target_space_id > space.id [delete: cascade]
+
+Ref base_space_id_fk: base.space_id > space.id
+
+Ref table_meta_base_id_fk: table_meta.base_id > base.id
+
+Ref field_table_id_fk: field.table_id > table_meta.id
+
+Ref computed_update_outbox_seed_task_id_fk: computed_update_outbox_seed.task_id > computed_update_outbox.id [delete: cascade]
+
+Ref view_table_id_fk: view.table_id > table_meta.id
+
+Ref account_user_id_fk: account.user_id > users.id [delete: cascade]
+
+Ref oauth_app_authorized_client_id_fk: oauth_app_authorized.client_id > oauth_app.client_id [delete: cascade]
+
+Ref oauth_app_secret_client_id_fk: oauth_app_secret.client_id > oauth_app.client_id [delete: cascade]
+
+Ref oauth_app_token_app_secret_id_fk: oauth_app_token.app_secret_id > oauth_app_secret.id [delete: cascade]
+
+Ref oauth_app_token_client_id_fk: oauth_app_token.client_id > oauth_app.client_id [delete: cascade]
+
+Ref plugin_install_plugin_id_fk: plugin_install.plugin_id > plugin.id [delete: cascade]
+
+Ref plugin_panel_table_id_fk: plugin_panel.table_id > table_meta.id [delete: cascade]
+
+Ref plugin_context_menu_table_id_fk: plugin_context_menu.table_id > table_meta.id [delete: cascade]
+
+Ref user_base_order_user_id_fk: user_base_order.user_id > users.id [delete: cascade]
+
+Ref user_base_order_base_id_fk: user_base_order.base_id > base.id [delete: cascade]
+
+Ref task_run_task_id_fk: task_run.task_id > task.id [delete: cascade]
+
+Ref base_node_parent_id_fk: base_node.parent_id > base_node.id

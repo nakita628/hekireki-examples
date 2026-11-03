@@ -1,0 +1,15 @@
+load("//checks:defs.bzl", "lang_checks")
+
+# py_compile, Django's system checks and mypy --strict with django-stubs for the models of every
+# schema.
+lang_checks(
+    lang = "django",
+    harness = [
+        "app/__init__.py",
+        "mypy.ini",
+        "requirements.txt",
+        "settings.py",
+        "smoke.py",
+        "//checks:common.sh",
+    ],
+)

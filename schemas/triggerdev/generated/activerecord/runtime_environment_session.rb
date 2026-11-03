@@ -1,0 +1,14 @@
+class RuntimeEnvironmentSession < ApplicationRecord
+  self.table_name = "RuntimeEnvironmentSession"
+  self.implicit_order_column = "createdAt"
+
+  attribute :id, default: -> { Cuid.generate }
+  alias_attribute :created_at, :createdAt
+  alias_attribute :updated_at, :updatedAt
+
+  validates :ipAddress, presence: true
+
+  belongs_to :environment, class_name: "RuntimeEnvironment", foreign_key: "environmentId", inverse_of: :sessions
+  has_many :current_environments, class_name: "RuntimeEnvironment", foreign_key: "currentSessionId",
+                                  inverse_of: :current_session, dependent: :nullify
+end

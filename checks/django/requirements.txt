@@ -1,0 +1,8 @@
+# The Django check: django.setup() and the system checks, then mypy --strict with django-stubs.
+Django==5.2.17
+django-stubs==5.2.9
+mypy==1.19.1
+psycopg[binary]==3.2.13
+mysqlclient==2.2.7
+python-ulid==4.0.1
+uuid6==2025.0.1

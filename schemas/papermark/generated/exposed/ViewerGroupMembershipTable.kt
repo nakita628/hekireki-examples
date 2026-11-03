@@ -1,0 +1,36 @@
+package papermark.models
+
+import io.github.thibaultmeyer.cuid.CUID
+import org.jetbrains.exposed.v1.core.ReferenceOption
+import org.jetbrains.exposed.v1.core.dao.id.IdTable
+import java.time.Instant
+import java.time.temporal.ChronoUnit
+
+object ViewerGroupMembershipTable : IdTable<String>("\"ViewerGroupMembership\"") {
+    override val id = text("id").clientDefault { CUID.randomCUID1().toString() }.entityId()
+    val viewerId =
+        reference(
+            "viewerId",
+            ViewerTable,
+            onDelete = ReferenceOption.CASCADE,
+            onUpdate = ReferenceOption.CASCADE,
+            fkName = "\"ViewerGroupMembership_viewerId_fkey\"",
+        )
+    val groupId =
+        reference(
+            "groupId",
+            ViewerGroupTable,
+            onDelete = ReferenceOption.CASCADE,
+            onUpdate = ReferenceOption.CASCADE,
+            fkName = "\"ViewerGroupMembership_groupId_fkey\"",
+        )
+    val createdAt = pgTimestamp("createdAt", 3).databaseDefault("CURRENT_TIMESTAMP") { Instant.now().truncatedTo(ChronoUnit.MILLIS) }
+    val updatedAt = pgTimestamp("updatedAt", 3).clientDefault { Instant.now().truncatedTo(ChronoUnit.MILLIS) }
+    override val primaryKey = PrimaryKey(id, name = "\"ViewerGroupMembership_pkey\"")
+
+    init {
+        index("\"ViewerGroupMembership_viewerId_idx\"", false, viewerId)
+        index("\"ViewerGroupMembership_groupId_idx\"", false, groupId)
+        uniqueIndex("\"ViewerGroupMembership_viewerId_groupId_key\"", viewerId, groupId)
+    }
+}

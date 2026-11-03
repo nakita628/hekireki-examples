@@ -1,0 +1,12 @@
+package triggerdev.models
+
+enum class ProjectAlertType(
+    val dbName: String,
+) {
+    TASK_RUN("TASK_RUN"),
+    TASK_RUN_ATTEMPT("TASK_RUN_ATTEMPT"),
+    DEPLOYMENT_FAILURE("DEPLOYMENT_FAILURE"),
+    DEPLOYMENT_SUCCESS("DEPLOYMENT_SUCCESS"),
+    ERROR_GROUP("ERROR_GROUP"),
+    DASHBOARD_AGENT_WATCH("DASHBOARD_AGENT_WATCH"),
+}

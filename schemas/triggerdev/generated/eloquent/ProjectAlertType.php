@@ -1,0 +1,13 @@
+<?php
+
+namespace App\Models;
+
+enum ProjectAlertType: string
+{
+    case TASK_RUN = 'TASK_RUN';
+    case TASK_RUN_ATTEMPT = 'TASK_RUN_ATTEMPT';
+    case DEPLOYMENT_FAILURE = 'DEPLOYMENT_FAILURE';
+    case DEPLOYMENT_SUCCESS = 'DEPLOYMENT_SUCCESS';
+    case ERROR_GROUP = 'ERROR_GROUP';
+    case DASHBOARD_AGENT_WATCH = 'DASHBOARD_AGENT_WATCH';
+}

@@ -1,0 +1,18 @@
+load("@aspect_rules_js//js:defs.bzl", "js_binary")
+
+package(default_visibility = ["//visibility:public"])
+
+# `prisma generate` with every hekireki generator on PATH; see generate.mjs.
+js_binary(
+    name = "generate",
+    data = [
+        "//:node_modules/hekireki",
+        "//:node_modules/prisma",
+    ],
+    entry_point = "generate.mjs",
+)
+
+exports_files([
+    "check_generated.sh",
+    "write_generated.sh",
+])

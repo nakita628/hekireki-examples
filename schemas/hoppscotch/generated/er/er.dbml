@@ -1,0 +1,346 @@
+Enum WorkspaceType {
+  USER
+  TEAM
+}
+
+Enum ReqType {
+  REST
+  GQL
+}
+
+Enum TeamAccessRole {
+  OWNER
+  VIEWER
+  EDITOR
+}
+
+Enum MockServerAction {
+  CREATED
+  DELETED
+  ACTIVATED
+  DEACTIVATED
+}
+
+Table Team {
+  id String [pk]
+  name String [not null]
+}
+
+Table TeamMember {
+  id String [pk]
+  role TeamAccessRole [not null]
+  userUid String [not null]
+  teamID String [not null]
+
+  indexes {
+    (teamID, userUid) [unique]
+  }
+}
+
+Table TeamInvitation {
+  id String [pk]
+  teamID String [not null]
+  creatorUid String [not null]
+  inviteeEmail String [not null]
+  inviteeRole TeamAccessRole [not null]
+
+  indexes {
+    (teamID, inviteeEmail) [unique]
+  }
+}
+
+Table TeamCollection {
+  id String [pk]
+  parentID String
+  teamID String [not null]
+  title String [not null]
+  orderIndex Int [not null]
+  data Json
+  createdOn DateTime [default: `now()`, not null]
+  updatedOn DateTime [not null]
+
+  indexes {
+    (teamID, parentID, orderIndex) [unique]
+  }
+}
+
+Table TeamRequest {
+  id String [pk]
+  collectionID String [not null]
+  teamID String [not null]
+  title String [not null]
+  request Json [not null]
+  mockExamples Json
+  orderIndex Int [not null]
+  createdOn DateTime [default: `now()`, not null]
+  updatedOn DateTime [not null]
+
+  indexes {
+    (teamID, collectionID, orderIndex) [unique]
+  }
+}
+
+Table TeamEnvironment {
+  id String [pk]
+  teamID String [not null]
+  name String [not null]
+  variables Json [not null]
+}
+
+Table User {
+  uid String [pk]
+  displayName String
+  email String [unique]
+  photoURL String
+  isAdmin Boolean [default: false, not null]
+  refreshToken String
+  currentRESTSession Json
+  currentGQLSession Json
+  createdOn DateTime [default: `now()`, not null]
+  lastLoggedOn DateTime
+  lastActiveOn DateTime
+}
+
+Table Account {
+  id String [pk]
+  userId String [not null]
+  provider String [not null]
+  providerAccountId String [not null]
+  providerRefreshToken String
+  providerAccessToken String
+  providerScope String
+  loggedIn DateTime [default: `now()`, not null]
+
+  indexes {
+    (provider, providerAccountId) [unique]
+  }
+}
+
+Table VerificationToken {
+  deviceIdentifier String [not null]
+  token String [unique, not null]
+  userUid String [not null]
+  expiresOn DateTime [not null]
+
+  indexes {
+    (deviceIdentifier, token) [unique]
+  }
+}
+
+Table UserSettings {
+  id String [pk]
+  userUid String [unique, not null]
+  properties Json [not null]
+  updatedOn DateTime [not null]
+}
+
+Table UserHistory {
+  id String [pk]
+  userUid String [not null]
+  reqType ReqType [not null]
+  request Json [not null]
+  responseMetadata Json [not null]
+  isStarred Boolean [not null]
+  executedOn DateTime [default: `now()`, not null]
+}
+
+Table UserEnvironment {
+  id String [pk]
+  userUid String [not null]
+  name String
+  variables Json [not null]
+  isGlobal Boolean [not null]
+}
+
+Table InvitedUsers {
+  adminUid String [not null]
+  adminEmail String [not null]
+  inviteeEmail String [unique, not null]
+  invitedOn DateTime [default: `now()`, not null]
+}
+
+Table UserRequest {
+  id String [pk]
+  collectionID String [not null]
+  userUid String [not null]
+  title String [not null]
+  request Json [not null]
+  type ReqType [not null]
+  mockExamples Json
+  orderIndex Int [not null]
+  createdOn DateTime [default: `now()`, not null]
+  updatedOn DateTime [not null]
+
+  indexes {
+    (userUid, collectionID, orderIndex) [unique]
+  }
+}
+
+Table UserCollection {
+  id String [pk]
+  parentID String
+  userUid String [not null]
+  title String [not null]
+  type ReqType [not null]
+  orderIndex Int [not null]
+  data Json
+  createdOn DateTime [default: `now()`, not null]
+  updatedOn DateTime [not null]
+
+  indexes {
+    (userUid, parentID, orderIndex) [unique]
+  }
+}
+
+Table MockServer {
+  id String [pk]
+  name String [not null]
+  subdomain String [unique, not null]
+  creatorUid String
+  collectionID String [not null]
+  workspaceType WorkspaceType [not null]
+  workspaceID String [not null]
+  delayInMs Int [default: 0, not null]
+  isPublic Boolean [default: true, not null]
+  isActive Boolean [default: true, not null]
+  hitCount Int [default: 0, not null]
+  lastHitAt DateTime
+  createdOn DateTime [default: `now()`, not null]
+  updatedOn DateTime [not null]
+  deletedAt DateTime
+}
+
+Table MockServerLog {
+  id String [pk]
+  mockServerID String [not null]
+  requestMethod String [not null]
+  requestPath String [not null]
+  requestHeaders Json [not null]
+  requestBody Json
+  requestQuery Json
+  responseStatus Int [not null]
+  responseHeaders Json [not null]
+  responseBody Json
+  responseTime Int [not null]
+  ipAddress String
+  userAgent String
+  executedAt DateTime [default: `now()`, not null]
+}
+
+Table MockServerActivity {
+  id String [pk]
+  mockServerID String [not null]
+  action MockServerAction [not null]
+  performedBy String
+  performedAt DateTime [default: `now()`, not null]
+}
+
+Table Shortcode {
+  id String [pk]
+  request Json [not null]
+  creatorUid String
+  embedProperties Json
+  createdOn DateTime [default: `now()`, not null]
+  updatedOn DateTime [default: `now()`, not null]
+
+  indexes {
+    (id, creatorUid) [unique]
+  }
+}
+
+Table InfraConfig {
+  id String [pk]
+  name String [unique, not null]
+  value String
+  isEncrypted Boolean [default: false, not null]
+  lastSyncedEnvFileValue String
+  createdOn DateTime [default: `now()`, not null]
+  updatedOn DateTime [not null]
+}
+
+Table PersonalAccessToken {
+  id String [pk]
+  userUid String [not null]
+  label String [not null]
+  token String [unique, not null]
+  expiresOn DateTime
+  createdOn DateTime [default: `now()`, not null]
+  updatedOn DateTime [not null]
+}
+
+Table InfraToken {
+  id String [pk]
+  creatorUid String [not null]
+  label String [not null]
+  token String [unique, not null]
+  expiresOn DateTime
+  createdOn DateTime [default: `now()`, not null]
+  updatedOn DateTime [default: `now()`, not null]
+}
+
+Table PublishedDocs {
+  id String [pk]
+  slug String [not null]
+  title String [not null]
+  collectionID String [not null]
+  creatorUid String [not null]
+  version String [not null]
+  autoSync Boolean [not null]
+  documentTree Json
+  workspaceType WorkspaceType [not null]
+  workspaceID String [not null]
+  environmentID String
+  environmentName String
+  environmentVariables Json
+  metadata Json
+  createdOn DateTime [default: `now()`, not null]
+  updatedOn DateTime [not null]
+
+  indexes {
+    (slug, version) [unique]
+  }
+}
+
+Ref TeamMember_teamID_fk: TeamMember.teamID > Team.id [delete: cascade]
+
+Ref TeamInvitation_teamID_fk: TeamInvitation.teamID > Team.id [delete: cascade]
+
+Ref TeamCollection_parentID_fk: TeamCollection.parentID > TeamCollection.id [delete: cascade]
+
+Ref TeamCollection_teamID_fk: TeamCollection.teamID > Team.id [delete: cascade]
+
+Ref TeamRequest_collectionID_fk: TeamRequest.collectionID > TeamCollection.id [delete: cascade]
+
+Ref TeamRequest_teamID_fk: TeamRequest.teamID > Team.id [delete: cascade]
+
+Ref TeamEnvironment_teamID_fk: TeamEnvironment.teamID > Team.id [delete: cascade]
+
+Ref Account_userId_fk: Account.userId > User.uid [delete: cascade]
+
+Ref VerificationToken_userUid_fk: VerificationToken.userUid > User.uid [delete: cascade]
+
+Ref UserSettings_userUid_fk: UserSettings.userUid - User.uid [delete: cascade]
+
+Ref UserHistory_userUid_fk: UserHistory.userUid > User.uid [delete: cascade]
+
+Ref UserEnvironment_userUid_fk: UserEnvironment.userUid > User.uid [delete: cascade]
+
+Ref InvitedUsers_adminUid_fk: InvitedUsers.adminUid > User.uid [delete: cascade]
+
+Ref UserRequest_collectionID_fk: UserRequest.collectionID > UserCollection.id [delete: cascade]
+
+Ref UserRequest_userUid_fk: UserRequest.userUid > User.uid [delete: cascade]
+
+Ref UserCollection_parentID_fk: UserCollection.parentID > UserCollection.id [delete: cascade]
+
+Ref UserCollection_userUid_fk: UserCollection.userUid > User.uid [delete: cascade]
+
+Ref MockServer_creatorUid_fk: MockServer.creatorUid > User.uid [delete: set null]
+
+Ref MockServerLog_mockServerID_fk: MockServerLog.mockServerID > MockServer.id [delete: cascade]
+
+Ref MockServerActivity_mockServerID_fk: MockServerActivity.mockServerID > MockServer.id [delete: cascade]
+
+Ref Shortcode_creatorUid_fk: Shortcode.creatorUid > User.uid
+
+Ref PersonalAccessToken_userUid_fk: PersonalAccessToken.userUid > User.uid [delete: cascade]

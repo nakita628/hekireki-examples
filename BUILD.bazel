@@ -1,0 +1,6 @@
+load("@npm//:defs.bzl", "npm_link_all_packages")
+
+# Links every package of pnpm-lock.yaml under //:node_modules/<name>.
+npm_link_all_packages(name = "node_modules")
+
+exports_files([".npmrc", "pnpm-lock.yaml", "package.json"])

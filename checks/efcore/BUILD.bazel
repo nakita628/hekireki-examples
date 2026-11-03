@@ -1,0 +1,10 @@
+load("//checks:defs.bzl", "lang_checks")
+
+# dotnet build against EF Core for the entities and DbContext of every schema.
+lang_checks(
+    lang = "efcore",
+    harness = [
+        "Check.csproj",
+        "//checks:common.sh",
+    ],
+)

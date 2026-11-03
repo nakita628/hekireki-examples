@@ -1,0 +1,155 @@
+// Taxonomy: shadcn's Next.js 13 app-directory example: NextAuth's tables and a Post.
+//
+// Imported from https://github.com/shadcn-ui/taxonomy/blob/03ef292d26f1f96dfbd9d2773284c370e3fec7e4/prisma/schema.prisma
+// (MIT license) by tools/import/import-schema.mjs, which dropped the original
+// generator blocks and the datasource's connection URLs and added the hekireki generators below.
+// The models, enums and `///` comments are the project's own, as they are at that commit.
+
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "mysql"
+}
+
+// hekireki: every ORM generator, and the ER diagram as Mermaid, DBML and SVG. Every output is
+// under generated/, which the Bazel target //schemas/taxonomy:generate writes and
+// //schemas/taxonomy:generate.test holds the committed copy to.
+
+generator Hekireki-Drizzle {
+  provider = "hekireki-drizzle"
+  output   = "generated/drizzle/schema.ts"
+}
+
+generator Hekireki-Kysely {
+  provider = "hekireki-kysely"
+  output   = "generated/kysely/types.ts"
+}
+
+generator Hekireki-SQLAlchemy {
+  provider = "hekireki-sqlalchemy"
+  output   = "generated/sqlalchemy"
+}
+
+generator Hekireki-Django {
+  provider = "hekireki-django"
+  output   = "generated/django"
+}
+
+generator Hekireki-GORM {
+  provider = "hekireki-gorm"
+  output   = "generated/gorm"
+  package  = "model"
+}
+
+generator Hekireki-SeaORM {
+  provider = "hekireki-sea-orm"
+  output   = "generated/sea-orm"
+}
+
+generator Hekireki-Ecto {
+  provider = "hekireki-ecto"
+  output   = "generated/ecto"
+  app      = "Taxonomy"
+}
+
+generator Hekireki-ActiveRecord {
+  provider = "hekireki-activerecord"
+  output   = "generated/activerecord"
+}
+
+generator Hekireki-EFCore {
+  provider  = "hekireki-efcore"
+  output    = "generated/efcore"
+  namespace = "Taxonomy.Models"
+  context   = "TaxonomyContext"
+}
+
+generator Hekireki-Eloquent {
+  provider  = "hekireki-eloquent"
+  output    = "generated/eloquent"
+  namespace = "App\\Models"
+}
+
+// hekireki-exposed is left out: it supports postgresql only, and this datasource is mysql.
+
+generator Hekireki-ER {
+  provider = "hekireki-er"
+  outputs  = ["generated/er/er.md", "generated/er/er.dbml", "generated/er/er.svg"]
+}
+
+model Account {
+  id                String   @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?  @db.Text
+  access_token      String?  @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?  @db.Text
+  session_state     String?
+  createdAt         DateTime @default(now()) @map(name: "created_at")
+  updatedAt         DateTime @default(now()) @map(name: "updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map(name: "accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map(name: "sessions")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  createdAt     DateTime  @default(now()) @map(name: "created_at")
+  updatedAt     DateTime  @default(now()) @map(name: "updated_at")
+
+  accounts Account[]
+  sessions Session[]
+  Post     Post[]
+
+  stripeCustomerId       String?   @unique @map(name: "stripe_customer_id")
+  stripeSubscriptionId   String?   @unique @map(name: "stripe_subscription_id")
+  stripePriceId          String?   @map(name: "stripe_price_id")
+  stripeCurrentPeriodEnd DateTime? @map(name: "stripe_current_period_end")
+
+  @@map(name: "users")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map(name: "verification_tokens")
+}
+
+model Post {
+  id        String   @id @default(cuid())
+  title     String
+  content   Json?
+  published Boolean  @default(false)
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @default(now()) @map(name: "updated_at")
+  authorId  String
+
+  author User @relation(fields: [authorId], references: [id])
+
+  @@map(name: "posts")
+}

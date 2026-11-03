@@ -1,0 +1,301 @@
+Enum Theme {
+  dark
+  light
+  auto
+}
+
+Enum AiTaggingMethod {
+  DISABLED
+  GENERATE
+  EXISTING
+  PREDEFINED
+}
+
+Enum LinksRouteTo {
+  ORIGINAL
+  PDF
+  READABLE
+  MONOLITH
+  SCREENSHOT
+  DETAILS
+}
+
+Enum SubscriptionProvider {
+  STRIPE
+  APPLE
+  GOOGLE
+}
+
+Enum DashboardSectionType {
+  STATS
+  RECENT_LINKS
+  PINNED_LINKS
+  COLLECTION
+}
+
+Enum AppMigrationStatus {
+  APPLIED
+  PENDING
+  FAILED
+}
+
+Table Account {
+  id String [pk]
+  userId Int [not null]
+  type String [not null]
+  provider String [not null]
+  providerAccountId String [not null]
+  refresh_token String
+  access_token String
+  expires_at Int
+  token_type String
+  scope String
+  id_token String
+  session_state String
+
+  indexes {
+    (provider, providerAccountId) [unique]
+  }
+}
+
+Table User {
+  id Int [pk, increment]
+  uuid String [unique, not null]
+  name String
+  username String [unique]
+  email String [unique]
+  emailVerified DateTime
+  unverifiedNewEmail String
+  image String
+  password String
+  locale String [default: 'en', not null]
+  parentSubscriptionId Int
+  collectionOrder Int[] [not null]
+  linksRouteTo LinksRouteTo [default: 'ORIGINAL', not null]
+  aiTaggingMethod AiTaggingMethod [default: 'DISABLED', not null]
+  aiPredefinedTags String[] [not null]
+  aiTagExistingLinks Boolean [default: false, not null]
+  theme Theme [default: 'dark', not null]
+  dismissedAnnouncementId String
+  readableFontFamily String [default: 'sans-serif']
+  readableFontSize String [default: '20px']
+  readableLineHeight String [default: '1.8']
+  readableLineWidth String [default: 'normal']
+  preventDuplicateLinks Boolean [default: false, not null]
+  archiveAsScreenshot Boolean [default: true, not null]
+  archiveAsMonolith Boolean [default: true, not null]
+  archiveAsPDF Boolean [default: true, not null]
+  archiveAsReadable Boolean [default: true, not null]
+  archiveAsWaybackMachine Boolean [default: false, not null]
+  referredBy String
+  lastPickedAt DateTime
+  acceptPromotionalEmails Boolean [default: false, not null]
+  trialEndEmailSent Boolean [default: false, not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+}
+
+Table VerificationToken {
+  identifier String [not null]
+  token String [unique, not null]
+  expires DateTime [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+
+  indexes {
+    (identifier, token) [unique]
+  }
+}
+
+Table PasswordResetToken {
+  identifier String [not null]
+  token String [unique, not null]
+  expires DateTime [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+}
+
+Table Collection {
+  id Int [pk, increment]
+  name String [not null]
+  description String [default: '', not null]
+  icon String
+  iconWeight String
+  color String [default: '#0ea5e9', not null]
+  parentId Int
+  isPublic Boolean [default: false, not null]
+  ownerId Int [not null]
+  createdById Int
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+}
+
+Table UsersAndCollections {
+  userId Int [not null]
+  collectionId Int [not null]
+  canCreate Boolean [not null]
+  canUpdate Boolean [not null]
+  canDelete Boolean [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+
+  indexes {
+    (userId, collectionId) [pk]
+  }
+}
+
+Table Link {
+  id Int [pk, increment]
+  name String [default: '', not null]
+  type String [default: 'url', not null]
+  description String [default: '', not null]
+  createdById Int
+  collectionId Int [not null]
+  icon String
+  iconWeight String
+  color String
+  url String
+  textContent String
+  preview String
+  image String
+  pdf String
+  readable String
+  monolith String
+  clientSide Boolean [default: false, not null]
+  aiTagged Boolean [default: false, not null]
+  metaDescription String
+  indexVersion Int
+  lastPreserved DateTime
+  importDate DateTime
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+}
+
+Table Tag {
+  id Int [pk, increment]
+  name String [not null]
+  ownerId Int [not null]
+  archiveAsScreenshot Boolean
+  archiveAsMonolith Boolean
+  archiveAsPDF Boolean
+  archiveAsReadable Boolean
+  archiveAsWaybackMachine Boolean
+  aiTag Boolean
+  aiGenerated Boolean [default: false, not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+
+  indexes {
+    (name, ownerId) [unique]
+  }
+}
+
+Table Subscription {
+  id Int [pk, increment]
+  active Boolean [not null]
+  provider SubscriptionProvider [not null]
+  currentPeriodStart DateTime [not null]
+  currentPeriodEnd DateTime [not null]
+  quantity Int [default: 1, not null]
+  storeOriginalTransactionId String [unique]
+  storeProductId String
+  googlePurchaseToken String [unique]
+  storeMetadata Json
+  stripeSubscriptionId String [unique]
+  userId Int [unique, not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+}
+
+Table AccessToken {
+  id Int [pk, increment]
+  name String [not null]
+  userId Int [not null]
+  token String [unique, not null]
+  revoked Boolean [default: false, not null]
+  isSession Boolean [default: false, not null]
+  expires DateTime [not null]
+  lastUsedAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+}
+
+Table RssSubscription {
+  id Int [pk, increment]
+  url String [not null]
+  name String [not null]
+  lastBuildDate DateTime
+  collectionId Int [not null]
+  ownerId Int [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+}
+
+Table Highlight {
+  id Int [pk, increment]
+  color String [not null]
+  comment String
+  linkId Int [not null]
+  userId Int [not null]
+  startOffset Int [not null]
+  endOffset Int [not null]
+  text String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+}
+
+Table DashboardSection {
+  id Int [pk, increment]
+  userId Int [not null]
+  collectionId Int
+  type DashboardSectionType [not null]
+  order Int [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+
+  indexes {
+    (userId, collectionId) [unique]
+  }
+}
+
+Table AppMigration {
+  id Int [pk, increment]
+  name String [unique, not null]
+  status AppMigrationStatus [not null]
+  finishedAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Ref Account_userId_fk: Account.userId > User.id [delete: cascade]
+
+Ref User_parentSubscriptionId_fk: User.parentSubscriptionId > Subscription.id
+
+Ref Collection_parentId_fk: Collection.parentId > Collection.id [delete: cascade]
+
+Ref Collection_ownerId_fk: Collection.ownerId > User.id [delete: cascade]
+
+Ref Collection_createdById_fk: Collection.createdById > User.id
+
+Ref UsersAndCollections_userId_fk: UsersAndCollections.userId > User.id [delete: cascade]
+
+Ref UsersAndCollections_collectionId_fk: UsersAndCollections.collectionId > Collection.id [delete: cascade]
+
+Ref Link_createdById_fk: Link.createdById > User.id [delete: cascade]
+
+Ref Link_collectionId_fk: Link.collectionId > Collection.id [delete: cascade]
+
+Ref Tag_ownerId_fk: Tag.ownerId > User.id [delete: cascade]
+
+Ref Subscription_userId_fk: Subscription.userId - User.id [delete: cascade]
+
+Ref AccessToken_userId_fk: AccessToken.userId > User.id [delete: cascade]
+
+Ref RssSubscription_collectionId_fk: RssSubscription.collectionId > Collection.id [delete: cascade]
+
+Ref Highlight_linkId_fk: Highlight.linkId > Link.id [delete: cascade]
+
+Ref Highlight_userId_fk: Highlight.userId > User.id [delete: cascade]
+
+Ref DashboardSection_userId_fk: DashboardSection.userId > User.id [delete: cascade]
+
+Ref DashboardSection_collectionId_fk: DashboardSection.collectionId > Collection.id [delete: cascade]

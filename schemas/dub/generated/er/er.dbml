@@ -1,0 +1,772 @@
+Enum FolderType {
+  default
+  mega
+}
+
+Enum FolderAccessLevel {
+  read
+  write
+}
+
+Enum FolderUserRole {
+  owner
+  editor
+  viewer
+}
+
+Enum InvoiceStatus {
+  processing
+  completed
+  failed
+}
+
+Enum InvoiceType {
+  domainRenewal
+}
+
+Enum PaymentMethod {
+  card
+  ach
+  ach_fast
+  sepa
+  acss
+}
+
+Enum WebhookReceiver {
+  user
+  zapier
+  make
+  slack
+  segment
+}
+
+Enum LinkScope {
+  workspace
+  folders
+  links
+}
+
+Enum PlanPeriod {
+  monthly
+  yearly
+  quarterly
+  biweekly
+}
+
+Enum StripeConnectMode {
+  live
+  test
+  sandbox
+}
+
+Enum WorkspaceRole {
+  owner
+  member
+  viewer
+  billing
+}
+
+Table Customer {
+  id String [pk]
+  name String
+  email String
+  normalizedEmail String
+  avatar String
+  externalId String
+  stripeCustomerId String [unique]
+  linkId String
+  clickId String
+  clickedAt DateTime
+  country String
+  sales Int [default: 0, not null]
+  saleAmount BigInt [default: 0, not null]
+  firstSaleAt DateTime
+  subscriptionCanceledAt DateTime
+  projectId String [not null]
+  projectConnectId String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (projectId, externalId) [unique]
+  }
+}
+
+Table Dashboard {
+  id String [pk]
+  linkId String [unique]
+  folderId String [unique]
+  projectId String
+  userId String
+  doIndex Boolean [default: false, not null]
+  password String
+  showConversions Boolean [default: false, not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table Domain {
+  id String [pk]
+  slug String [unique, not null]
+  verified Boolean [default: false, not null]
+  placeholder String
+  expiredUrl String
+  notFoundUrl String
+  primary Boolean [default: false, not null]
+  archived Boolean [default: false, not null]
+  lastChecked DateTime [default: `now()`, not null]
+  logo String
+  appleAppSiteAssociation Json
+  assetLinks Json
+  deepviewData Json [default: '{}']
+  linkRetentionDays Int
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  projectId String
+}
+
+Table RegisteredDomain {
+  id String [pk]
+  slug String [not null]
+  projectId String [not null]
+  domainId String [unique]
+  autoRenewalDisabledAt DateTime
+  renewalFee Int [default: 1200, not null]
+  expiresAt DateTime [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table DefaultDomains {
+  id String [pk]
+  dubsh Boolean [default: true, not null]
+  chatgpt Boolean [default: true, not null]
+  sptifi Boolean [default: true, not null]
+  gitnew Boolean [default: true, not null]
+  callink Boolean [default: true, not null]
+  amznid Boolean [default: true, not null]
+  ggllink Boolean [default: true, not null]
+  figpage Boolean [default: true, not null]
+  loooooooong Boolean [default: false, not null]
+  projectId String [unique, not null]
+}
+
+Table Folder {
+  id String [pk]
+  name String [not null]
+  description String
+  projectId String [not null]
+  type FolderType [default: 'default', not null]
+  accessLevel FolderAccessLevel
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (name, projectId) [unique]
+  }
+}
+
+Table FolderUser {
+  id String [pk]
+  folderId String [not null]
+  userId String [not null]
+  role FolderUserRole
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (folderId, userId) [unique]
+  }
+}
+
+Table FolderAccessRequest {
+  id String [pk]
+  folderId String [not null]
+  userId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+
+  indexes {
+    (folderId, userId) [unique]
+  }
+}
+
+Table Integration {
+  id String [pk]
+  userId String
+  projectId String [not null]
+  name String [not null]
+  slug String [unique, not null]
+  description String
+  readme String
+  developer String [not null]
+  website String [not null]
+  logo String
+  screenshots Json
+  verified Boolean [default: false, not null]
+  installUrl String
+  guideUrl String
+  category String
+  comingSoon Boolean [default: false, not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table InstalledIntegration {
+  id String [pk]
+  userId String [not null]
+  integrationId String [not null]
+  projectId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  credentials Json
+  settings Json
+
+  indexes {
+    (userId, integrationId, projectId) [unique]
+  }
+}
+
+Table Invoice {
+  id String [pk]
+  workspaceId String [not null]
+  number String [unique]
+  status InvoiceStatus [default: 'processing', not null]
+  type InvoiceType [default: 'domainRenewal', not null]
+  paymentMethod PaymentMethod
+  amount Int [default: 0, not null]
+  fee Int [default: 0, not null]
+  refundedAmount Int [default: 0, not null]
+  total Int [default: 0, not null]
+  receiptUrl String
+  refundReason String
+  failedReason String
+  registeredDomains Json
+  stripeChargeMetadata Json
+  failedAttempts Int [default: 0, not null]
+  createdAt DateTime [default: `now()`, not null]
+  paidAt DateTime
+}
+
+Table jackson_index {
+  id Int [pk, increment]
+  key String [not null]
+  storeKey String [not null]
+}
+
+Table jackson_store {
+  key String [pk]
+  value String [not null]
+  iv String
+  tag String
+  namespace String
+  createdAt DateTime [default: `now()`, not null]
+  modifiedAt DateTime
+}
+
+Table jackson_ttl {
+  key String [pk]
+  expiresAt BigInt [not null]
+}
+
+Table Job {
+  id String [pk]
+  name String [not null]
+  payload Json [not null]
+  options Json
+  scheduledAt DateTime [default: `now()`, not null]
+  attempts Int [default: 0, not null]
+  lastError String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table Link {
+  id String [pk]
+  domain String [not null]
+  key String [not null]
+  url String [not null]
+  shortLink String [unique, not null]
+  archived Boolean [default: false, not null]
+  expiresAt DateTime
+  expiredUrl String
+  disabledAt DateTime
+  password String
+  trackConversion Boolean [default: false, not null]
+  proxy Boolean [default: false, not null]
+  title String
+  description String
+  image String
+  video String
+  utm_source String
+  utm_medium String
+  utm_campaign String
+  utm_term String
+  utm_content String
+  rewrite Boolean [default: false, not null]
+  linkRetentionCleanupDisabledAt DateTime
+  doIndex Boolean [default: false, not null]
+  ios String
+  android String
+  geo Json
+  testVariants Json
+  testStartedAt DateTime
+  testCompletedAt DateTime
+  userId String
+  projectId String
+  folderId String
+  externalId String
+  tenantId String
+  publicStats Boolean [default: false, not null]
+  clicks Int [default: 0, not null]
+  leads Int [default: 0, not null]
+  conversions Int [default: 0, not null]
+  sales Int [default: 0, not null]
+  saleAmount BigInt [default: 0, not null]
+  lastClicked DateTime
+  lastLeadAt DateTime
+  lastConversionAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  comments String
+
+  indexes {
+    (domain, key) [unique]
+    (projectId, externalId) [unique]
+  }
+}
+
+Table YearInReview {
+  id String [pk]
+  year Int [not null]
+  totalLinks Int [not null]
+  totalClicks Int [not null]
+  topLinks Json [not null]
+  topCountries Json [not null]
+  workspaceId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  sentAt DateTime
+}
+
+Table UserNotificationPreferences {
+  id String [pk]
+  userId String [unique, not null]
+  dubLinks Boolean [default: true, not null]
+}
+
+Table NotificationPreference {
+  id String [pk]
+  projectUserId String [unique, not null]
+  linkUsageSummary Boolean [default: true, not null]
+  domainConfigurationUpdates Boolean [default: true, not null]
+}
+
+Table OAuthApp {
+  id String [pk]
+  integrationId String [unique, not null]
+  clientId String [unique, not null]
+  hashedClientSecret String [not null]
+  partialClientSecret String [not null]
+  redirectUris Json [not null]
+  pkce Boolean [default: false, not null]
+}
+
+Table OAuthCode {
+  id String [pk]
+  clientId String [not null]
+  userId String [not null]
+  projectId String [not null]
+  code String [unique, not null]
+  scopes String
+  redirectUri String [not null]
+  codeChallenge String
+  codeChallengeMethod String
+  expiresAt DateTime [not null]
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Table OAuthRefreshToken {
+  id String [pk]
+  installationId String [not null]
+  accessTokenId String [not null]
+  hashedRefreshToken String [unique, not null]
+  expiresAt DateTime [not null]
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Table User {
+  id String [pk]
+  name String
+  email String [unique]
+  emailVerified DateTime
+  image String
+  isMachine Boolean [default: false, not null]
+  createdAt DateTime [default: `now()`, not null]
+  passwordHash String
+  invalidLoginAttempts Int [default: 0, not null]
+  lockedAt DateTime
+  defaultWorkspace String
+  source String
+  sentMail Boolean [default: false, not null]
+}
+
+Table Account {
+  id String [pk]
+  userId String [not null]
+  type String [not null]
+  provider String [not null]
+  providerAccountId String [not null]
+  refresh_token String
+  refresh_token_expires_in Int
+  access_token String
+  expires_at Int
+  token_type String
+  scope String
+  id_token String
+  session_state String
+
+  indexes {
+    (provider, providerAccountId) [unique]
+  }
+}
+
+Table Session {
+  id String [pk]
+  sessionToken String [unique, not null]
+  userId String [not null]
+  expires DateTime [not null]
+}
+
+Table Tag {
+  id String [pk]
+  name String [not null]
+  color String [default: 'blue', not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  projectId String
+
+  indexes {
+    (name, projectId) [unique]
+  }
+}
+
+Table LinkTag {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  linkId String [not null]
+  tagId String [not null]
+
+  indexes {
+    (linkId, tagId) [unique]
+  }
+}
+
+Table Token {
+  id String [pk]
+  name String [not null]
+  hashedKey String [unique, not null]
+  partialKey String [not null]
+  expires DateTime
+  lastUsed DateTime
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  userId String [not null]
+}
+
+Table RestrictedToken {
+  id String [pk]
+  name String [not null]
+  hashedKey String [unique, not null]
+  partialKey String [not null]
+  scopes String
+  expires DateTime
+  lastUsed DateTime
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  userId String [not null]
+  projectId String [not null]
+  installationId String
+}
+
+Table VerificationToken {
+  identifier String [not null]
+  token String [unique, not null]
+  expires DateTime [not null]
+
+  indexes {
+    (identifier, token) [unique]
+  }
+}
+
+Table EmailVerificationToken {
+  identifier String [not null]
+  token String [unique, not null]
+  expires DateTime [not null]
+
+  indexes {
+    (identifier, token) [unique]
+  }
+}
+
+Table PasswordResetToken {
+  identifier String [not null]
+  token String [unique, not null]
+  expires DateTime [not null]
+
+  indexes {
+    (identifier, token) [unique]
+  }
+}
+
+Table UtmTemplate {
+  id String [pk]
+  name String [not null]
+  utm_source String
+  utm_medium String
+  utm_campaign String
+  utm_term String
+  utm_content String
+  ref String
+  userId String
+  projectId String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (projectId, name) [unique]
+  }
+}
+
+Table Webhook {
+  id String [pk]
+  projectId String [not null]
+  installationId String
+  receiver WebhookReceiver [default: 'user', not null]
+  name String [not null]
+  url String [not null]
+  secret String [not null]
+  triggers Json [not null]
+  linkScope LinkScope
+  consecutiveFailures Int [default: 0, not null]
+  lastFailedAt DateTime
+  disabledAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table LinkWebhook {
+  id String [pk]
+  linkId String [not null]
+  webhookId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+
+  indexes {
+    (linkId, webhookId) [unique]
+  }
+}
+
+Table FolderWebhook {
+  id String [pk]
+  folderId String [not null]
+  webhookId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+
+  indexes {
+    (folderId, webhookId) [unique]
+  }
+}
+
+Table Project {
+  id String [pk]
+  name String [not null]
+  slug String [unique, not null]
+  logo String
+  inviteCode String [unique]
+  plan String [default: 'free', not null]
+  planTier Int [default: 1, not null]
+  planPeriod PlanPeriod
+  stripeId String [unique]
+  billingCycleStart Int [not null]
+  billingCycleEndsAt DateTime
+  trialEndsAt DateTime
+  subscriptionCanceledAt DateTime
+  paymentFailedAt DateTime
+  invoicePrefix String [unique]
+  stripeConnectId String
+  stripeConnectMode StripeConnectMode
+  shopifyStoreId String [unique]
+  totalLinks Int [default: 0, not null]
+  totalClicks Int [default: 0, not null]
+  usage Int [default: 0, not null]
+  usageLimit Int [default: 1000, not null]
+  linksUsage Int [default: 0, not null]
+  linksLimit Int [default: 25, not null]
+  domainsLimit Int [default: 3, not null]
+  tagsLimit Int [default: 5, not null]
+  foldersUsage Int [default: 0, not null]
+  foldersLimit Int [default: 0, not null]
+  usersLimit Int [default: 1, not null]
+  aiUsage Int [default: 0, not null]
+  aiLimit Int [default: 10, not null]
+  store Json
+  siteVisitTrackingSettings Json
+  allowedHostnames Json
+  publishableKey String [unique]
+  conversionEnabled Boolean [default: false, not null]
+  webhookEnabled Boolean [default: false, not null]
+  dotLinkClaimed Boolean [default: false, not null]
+  ssoEmailDomain String [unique]
+  ssoEnforcedAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  usageLastChecked DateTime [default: `now()`, not null]
+  disabledAt DateTime
+
+  indexes {
+    (stripeConnectId, stripeConnectMode) [unique]
+  }
+}
+
+Table ProjectInvite {
+  email String [not null]
+  expires DateTime [not null]
+  projectId String [not null]
+  role WorkspaceRole [default: 'member', not null]
+  createdAt DateTime [default: `now()`, not null]
+
+  indexes {
+    (email, projectId) [unique]
+  }
+}
+
+Table ProjectUsers {
+  id String [pk]
+  role WorkspaceRole [default: 'member', not null]
+  userId String [not null]
+  projectId String [not null]
+  workspacePreferences Json
+  defaultFolderId String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (userId, projectId) [unique]
+  }
+}
+
+Table SentEmail {
+  id String [pk]
+  type String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  projectId String
+}
+
+Ref Customer_projectId_fk: Customer.projectId > Project.id
+
+Ref Customer_linkId_fk: Customer.linkId > Link.id
+
+Ref Dashboard_linkId_fk: Dashboard.linkId - Link.id [delete: cascade, update: cascade]
+
+Ref Dashboard_folderId_fk: Dashboard.folderId - Folder.id [delete: cascade, update: cascade]
+
+Ref Dashboard_projectId_fk: Dashboard.projectId > Project.id [delete: cascade, update: cascade]
+
+Ref Dashboard_userId_fk: Dashboard.userId > User.id [delete: cascade, update: cascade]
+
+Ref Domain_projectId_fk: Domain.projectId > Project.id [delete: cascade]
+
+Ref RegisteredDomain_projectId_fk: RegisteredDomain.projectId > Project.id
+
+Ref RegisteredDomain_domainId_fk: RegisteredDomain.domainId - Domain.id [delete: set null]
+
+Ref DefaultDomains_projectId_fk: DefaultDomains.projectId > Project.id [delete: cascade]
+
+Ref Folder_projectId_fk: Folder.projectId > Project.id
+
+Ref FolderUser_folderId_fk: FolderUser.folderId > Folder.id [delete: cascade]
+
+Ref FolderUser_userId_fk: FolderUser.userId > User.id [delete: cascade]
+
+Ref FolderAccessRequest_folderId_fk: FolderAccessRequest.folderId > Folder.id [delete: cascade]
+
+Ref FolderAccessRequest_userId_fk: FolderAccessRequest.userId > User.id [delete: cascade]
+
+Ref Integration_userId_fk: Integration.userId > User.id [delete: set null]
+
+Ref Integration_projectId_fk: Integration.projectId > Project.id [delete: cascade]
+
+Ref InstalledIntegration_userId_fk: InstalledIntegration.userId > User.id [delete: cascade]
+
+Ref InstalledIntegration_integrationId_fk: InstalledIntegration.integrationId > Integration.id [delete: cascade]
+
+Ref InstalledIntegration_projectId_fk: InstalledIntegration.projectId > Project.id [delete: cascade]
+
+Ref Invoice_workspaceId_fk: Invoice.workspaceId > Project.id
+
+Ref Link_userId_fk: Link.userId > User.id
+
+Ref Link_projectId_fk: Link.projectId > Project.id [delete: cascade, update: cascade]
+
+Ref Link_folderId_fk: Link.folderId > Folder.id [delete: set null, update: cascade]
+
+Ref Link_domain_fk: Link.domain > Domain.slug
+
+Ref YearInReview_workspaceId_fk: YearInReview.workspaceId > Project.id [delete: cascade]
+
+Ref UserNotificationPreferences_userId_fk: UserNotificationPreferences.userId - User.id [delete: cascade]
+
+Ref NotificationPreference_projectUserId_fk: NotificationPreference.projectUserId - ProjectUsers.id [delete: cascade]
+
+Ref OAuthApp_integrationId_fk: OAuthApp.integrationId - Integration.id [delete: cascade]
+
+Ref OAuthCode_clientId_fk: OAuthCode.clientId > OAuthApp.clientId [delete: cascade]
+
+Ref OAuthCode_userId_fk: OAuthCode.userId > User.id [delete: cascade]
+
+Ref OAuthCode_projectId_fk: OAuthCode.projectId > Project.id [delete: cascade]
+
+Ref OAuthRefreshToken_accessTokenId_fk: OAuthRefreshToken.accessTokenId > RestrictedToken.id [delete: cascade]
+
+Ref OAuthRefreshToken_installationId_fk: OAuthRefreshToken.installationId > InstalledIntegration.id [delete: cascade]
+
+Ref Account_userId_fk: Account.userId > User.id [delete: cascade]
+
+Ref Session_userId_fk: Session.userId > User.id [delete: cascade]
+
+Ref Tag_projectId_fk: Tag.projectId > Project.id [delete: cascade, update: cascade]
+
+Ref LinkTag_linkId_fk: LinkTag.linkId > Link.id [delete: cascade, update: cascade]
+
+Ref LinkTag_tagId_fk: LinkTag.tagId > Tag.id [delete: cascade, update: cascade]
+
+Ref Token_userId_fk: Token.userId > User.id [delete: cascade]
+
+Ref RestrictedToken_userId_fk: RestrictedToken.userId > User.id [delete: cascade]
+
+Ref RestrictedToken_projectId_fk: RestrictedToken.projectId > Project.id [delete: cascade]
+
+Ref RestrictedToken_installationId_fk: RestrictedToken.installationId > InstalledIntegration.id [delete: cascade]
+
+Ref UtmTemplate_userId_fk: UtmTemplate.userId > User.id
+
+Ref UtmTemplate_projectId_fk: UtmTemplate.projectId > Project.id [delete: cascade, update: cascade]
+
+Ref Webhook_projectId_fk: Webhook.projectId > Project.id [delete: cascade]
+
+Ref Webhook_installationId_fk: Webhook.installationId > InstalledIntegration.id [delete: cascade]
+
+Ref LinkWebhook_linkId_fk: LinkWebhook.linkId > Link.id [delete: cascade, update: cascade]
+
+Ref LinkWebhook_webhookId_fk: LinkWebhook.webhookId > Webhook.id [delete: cascade, update: cascade]
+
+Ref FolderWebhook_folderId_fk: FolderWebhook.folderId > Folder.id [delete: cascade, update: cascade]
+
+Ref FolderWebhook_webhookId_fk: FolderWebhook.webhookId > Webhook.id [delete: cascade, update: cascade]
+
+Ref ProjectInvite_projectId_fk: ProjectInvite.projectId > Project.id [delete: cascade]
+
+Ref ProjectUsers_userId_fk: ProjectUsers.userId > User.id [delete: cascade]
+
+Ref ProjectUsers_projectId_fk: ProjectUsers.projectId > Project.id [delete: cascade]
+
+Ref SentEmail_projectId_fk: SentEmail.projectId > Project.id [delete: cascade]

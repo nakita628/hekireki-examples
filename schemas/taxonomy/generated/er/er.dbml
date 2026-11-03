@@ -1,0 +1,67 @@
+Table accounts {
+  id String [pk]
+  userId String [not null]
+  type String [not null]
+  provider String [not null]
+  providerAccountId String [not null]
+  refresh_token String
+  access_token String
+  expires_at Int
+  token_type String
+  scope String
+  id_token String
+  session_state String
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+
+  indexes {
+    (provider, providerAccountId) [unique]
+  }
+}
+
+Table sessions {
+  id String [pk]
+  sessionToken String [unique, not null]
+  userId String [not null]
+  expires DateTime [not null]
+}
+
+Table users {
+  id String [pk]
+  name String
+  email String [unique]
+  emailVerified DateTime
+  image String
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+  stripe_customer_id String [unique]
+  stripe_subscription_id String [unique]
+  stripe_price_id String
+  stripe_current_period_end DateTime
+}
+
+Table verification_tokens {
+  identifier String [not null]
+  token String [unique, not null]
+  expires DateTime [not null]
+
+  indexes {
+    (identifier, token) [unique]
+  }
+}
+
+Table posts {
+  id String [pk]
+  title String [not null]
+  content Json
+  published Boolean [default: false, not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+  authorId String [not null]
+}
+
+Ref accounts_userId_fk: accounts.userId > users.id [delete: cascade]
+
+Ref sessions_userId_fk: sessions.userId > users.id [delete: cascade]
+
+Ref posts_authorId_fk: posts.authorId > users.id

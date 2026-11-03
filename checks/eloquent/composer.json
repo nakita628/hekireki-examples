@@ -1,0 +1,10 @@
+{
+  "description": "The Eloquent check: every generated model is loaded against the real Eloquent.",
+  "require": {
+    "php": ">=8.2",
+    "illuminate/database": "~12.0"
+  },
+  "config": {
+    "sort-packages": true
+  }
+}

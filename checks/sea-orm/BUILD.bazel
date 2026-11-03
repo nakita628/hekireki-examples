@@ -1,0 +1,11 @@
+load("//checks:defs.bzl", "lang_checks")
+
+# rustfmt and cargo check against SeaORM for the entities of every schema.
+lang_checks(
+    lang = "sea-orm",
+    harness = [
+        "Cargo.toml",
+        "src/lib.rs",
+        "//checks:common.sh",
+    ],
+)

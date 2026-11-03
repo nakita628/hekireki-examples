@@ -1,0 +1,29 @@
+"""hekireki-examples: a Bazel monorepo that runs hekireki over well-known Prisma schemas.
+
+Each package under `schemas/` holds one public schema.prisma (annotated with `///` doc comments)
+and generates every ORM model plus the ER diagram from it; `checks/` compiles what came out with
+the language's own toolchain.
+"""
+
+module(name = "hekireki_examples", version = "0.0.0")
+
+bazel_dep(name = "aspect_rules_js", version = "3.5.2")
+bazel_dep(name = "aspect_bazel_lib", version = "2.22.5")
+bazel_dep(name = "rules_nodejs", version = "6.7.7")
+bazel_dep(name = "bazel_skylib", version = "1.9.2")
+bazel_dep(name = "rules_shell", version = "0.8.0")
+
+node = use_extension("@rules_nodejs//nodejs:extensions.bzl", "node")
+node.toolchain(node_version = "24.16.0")
+
+pnpm = use_extension("@aspect_rules_js//npm:extensions.bzl", "pnpm")
+use_repo(pnpm, "pnpm")
+
+npm = use_extension("@aspect_rules_js//npm:extensions.bzl", "npm")
+npm.npm_translate_lock(
+    name = "npm",
+    npmrc = "//:.npmrc",
+    pnpm_lock = "//:pnpm-lock.yaml",
+    verify_node_modules_ignored = "//:.bazelignore",
+)
+use_repo(npm, "npm")

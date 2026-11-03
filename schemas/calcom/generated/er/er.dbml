@@ -1,0 +1,2271 @@
+Enum SchedulingType {
+  roundRobin
+  collective
+  managed
+}
+
+Enum PeriodType {
+  unlimited
+  rolling
+  rolling_window
+  range
+}
+
+Enum CreationSource {
+  api_v1
+  api_v2
+  webapp
+}
+
+Enum CancellationReasonRequirement {
+  MANDATORY_BOTH
+  MANDATORY_HOST_ONLY
+  MANDATORY_ATTENDEE_ONLY
+  OPTIONAL_BOTH
+}
+
+Enum IdentityProvider {
+  CAL
+  GOOGLE
+  SAML
+  AZUREAD
+}
+
+Enum UserPermissionRole {
+  USER
+  ADMIN
+}
+
+Enum CreditUsageType {
+  SMS
+  CAL_AI_PHONE_CALL
+}
+
+Enum CreditType {
+  MONTHLY
+  ADDITIONAL
+}
+
+Enum MembershipRole {
+  MEMBER
+  ADMIN
+  OWNER
+}
+
+Enum BookingStatus {
+  cancelled
+  accepted
+  rejected
+  pending
+  awaiting_host
+}
+
+Enum EventTypeCustomInputType {
+  text
+  textLong
+  number
+  bool
+  radio
+  phone
+}
+
+Enum ReminderType {
+  PENDING_BOOKING_CONFIRMATION
+}
+
+Enum PaymentOption {
+  ON_BOOKING
+  HOLD
+}
+
+Enum WebhookTriggerEvents {
+  BOOKING_CREATED
+  BOOKING_PAYMENT_INITIATED
+  BOOKING_PAID
+  BOOKING_RESCHEDULED
+  BOOKING_REQUESTED
+  BOOKING_CANCELLED
+  BOOKING_REJECTED
+  BOOKING_NO_SHOW_UPDATED
+  FORM_SUBMITTED
+  MEETING_ENDED
+  MEETING_STARTED
+  RECORDING_READY
+  RECORDING_TRANSCRIPTION_GENERATED
+  OOO_CREATED
+  AFTER_HOSTS_CAL_VIDEO_NO_SHOW
+  AFTER_GUESTS_CAL_VIDEO_NO_SHOW
+  FORM_SUBMITTED_NO_EVENT
+  DELEGATION_CREDENTIAL_ERROR
+  WRONG_ASSIGNMENT_REPORT
+}
+
+Enum AppCategories {
+  calendar
+  messaging
+  other
+  payment
+  video
+  web3
+  automation
+  analytics
+  conferencing
+  crm
+}
+
+Enum TimeUnit {
+  day
+  hour
+  minute
+}
+
+Enum FeatureType {
+  RELEASE
+  EXPERIMENT
+  OPERATIONAL
+  KILL_SWITCH
+  PERMISSION
+}
+
+Enum RRResetInterval {
+  MONTH
+  DAY
+}
+
+Enum RRTimestampBasis {
+  CREATED_AT
+  START_TIME
+}
+
+Enum OAuthClientType {
+  confidential
+  public
+}
+
+Enum OAuthClientStatus {
+  pending
+  approved
+  rejected
+}
+
+Enum AccessScope {
+  READ_BOOKING
+  READ_PROFILE
+}
+
+Enum RedirectType {
+  user-event-type
+  team-event-type
+  user
+  team
+}
+
+Enum SMSLockState {
+  LOCKED
+  UNLOCKED
+  REVIEW_NEEDED
+}
+
+Enum AttributeType {
+  TEXT
+  NUMBER
+  SINGLE_SELECT
+  MULTI_SELECT
+}
+
+Enum AssignmentReasonEnum {
+  REASSIGNED
+  RR_REASSIGNED
+  REROUTED
+  SALESFORCE_ASSIGNMENT
+}
+
+Enum EventTypeAutoTranslatedField {
+  DESCRIPTION
+  TITLE
+}
+
+Enum WatchlistType {
+  EMAIL
+  DOMAIN
+  USERNAME
+}
+
+Enum WatchlistAction {
+  REPORT
+  BLOCK
+  ALERT
+}
+
+Enum WatchlistSource {
+  MANUAL
+  FREE_DOMAIN_POLICY
+  SIGNUP
+}
+
+Enum BookingReportReason {
+  SPAM
+  dont_know_person
+  OTHER
+}
+
+Enum BookingReportStatus {
+  PENDING
+  DISMISSED
+  BLOCKED
+}
+
+Enum SystemReportStatus {
+  PENDING
+  BLOCKED
+  DISMISSED
+}
+
+Enum WrongAssignmentReportStatus {
+  PENDING
+  REVIEWED
+  RESOLVED
+  DISMISSED
+}
+
+Enum BillingPeriod {
+  MONTHLY
+  ANNUALLY
+}
+
+Enum BillingMode {
+  SEATS
+  ACTIVE_USERS
+}
+
+Enum FilterSegmentScope {
+  USER
+  TEAM
+}
+
+Enum RoleType {
+  SYSTEM
+  CUSTOM
+}
+
+Enum BookingAuditType {
+  record_created
+  record_updated
+  record_deleted
+}
+
+Enum BookingAuditAction {
+  created
+  cancelled
+  accepted
+  rejected
+  pending
+  awaiting_host
+  rescheduled
+  attendee_added
+  attendee_removed
+  reassignment
+  location_changed
+  no_show_updated
+  reschedule_requested
+  seat_booked
+  seat_rescheduled
+}
+
+Enum BookingAuditSource {
+  api_v1
+  api_v2
+  webapp
+  webhook
+  system
+  magic_link
+  unknown
+}
+
+Enum AuditActorType {
+  user
+  guest
+  attendee
+  system
+  app
+}
+
+Enum PhoneNumberSubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELLED
+  INCOMPLETE
+  INCOMPLETE_EXPIRED
+  TRIALING
+  UNPAID
+}
+
+Enum SeatChangeType {
+  ADDITION
+  REMOVAL
+}
+
+Enum ProrationStatus {
+  PENDING
+  INVOICE_CREATED
+  CHARGED
+  FAILED
+  CANCELLED
+}
+
+Enum CalendarCacheEventStatus {
+  confirmed
+  tentative
+  cancelled
+}
+
+Table Host {
+  userId Int [not null]
+  eventTypeId Int [not null]
+  isFixed Boolean [default: false, not null]
+  priority Int
+  weight Int
+  weightAdjustment Int
+  scheduleId Int
+  createdAt DateTime [default: `now()`, not null]
+  groupId String
+  memberId Int
+
+  indexes {
+    (userId, eventTypeId) [pk]
+  }
+}
+
+Table HostGroup {
+  id String [pk]
+  name String [not null]
+  eventTypeId Int
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table HostLocation {
+  id String [pk]
+  userId Int [not null]
+  eventTypeId Int [not null]
+  type String [not null]
+  credentialId Int
+  link String
+  address String
+  phoneNumber String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (userId, eventTypeId) [unique]
+  }
+}
+
+Table CalVideoSettings {
+  eventTypeId Int [pk]
+  disableRecordingForOrganizer Boolean [default: false, not null]
+  disableRecordingForGuests Boolean [default: false, not null]
+  enableAutomaticTranscription Boolean [default: false, not null]
+  enableAutomaticRecordingForOrganizer Boolean [default: false, not null]
+  redirectUrlOnExit String
+  disableTranscriptionForGuests Boolean [default: false, not null]
+  disableTranscriptionForOrganizer Boolean [default: false, not null]
+  requireEmailForGuests Boolean [default: false, not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table VideoCallGuest {
+  id String [pk]
+  bookingUid String [not null]
+  email String [not null]
+  name String [not null]
+  joinedAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (bookingUid, email) [unique]
+  }
+}
+
+Table EventType {
+  id Int [pk, increment]
+  title String [not null, note: '@zod.string.min(1)']
+  slug String [not null, note: '@zod.import(["import { eventTypeSlug } from \'../../zod-utils\'"]).custom.use(eventTypeSlug)']
+  description String
+  interfaceLanguage String
+  position Int [default: 0, not null]
+  locations Json [note: '@zod.import(["import { eventTypeLocations } from \'../../zod-utils\'"]).custom.use(eventTypeLocations)']
+  length Int [not null, note: '@zod.number.min(1)']
+  offsetStart Int [default: 0, not null]
+  hidden Boolean [default: false, not null]
+  userId Int
+  profileId Int
+  teamId Int
+  useEventLevelSelectedCalendars Boolean [default: false, not null]
+  eventName String
+  parentId Int
+  bookingFields Json [note: '@zod.import(["import { eventTypeBookingFields } from \'../../zod-utils\'"]).custom.use(eventTypeBookingFields)']
+  timeZone String
+  periodType PeriodType [default: 'unlimited', not null]
+  periodStartDate DateTime [note: '@zod.import(["import { coerceToDate } from \'../../zod-utils\'"]).custom.use(coerceToDate)']
+  periodEndDate DateTime [note: '@zod.import(["import { coerceToDate } from \'../../zod-utils\'"]).custom.use(coerceToDate)']
+  periodDays Int
+  periodCountCalendarDays Boolean
+  lockTimeZoneToggleOnBookingPage Boolean [default: false, not null]
+  lockedTimeZone String
+  requiresConfirmation Boolean [default: false, not null]
+  requiresConfirmationWillBlockSlot Boolean [default: false, not null]
+  requiresConfirmationForFreeEmail Boolean [default: false, not null]
+  requiresBookerEmailVerification Boolean [default: false, not null]
+  canSendCalVideoTranscriptionEmails Boolean [default: true, not null]
+  autoTranslateDescriptionEnabled Boolean [default: false, not null]
+  autoTranslateInstantMeetingTitleEnabled Boolean [default: true, not null]
+  recurringEvent Json [note: '@zod.import(["import { recurringEventType } from \'../../zod-utils\'"]).custom.use(recurringEventType)']
+  disableGuests Boolean [default: false, not null]
+  hideCalendarNotes Boolean [default: false, not null]
+  hideCalendarEventDetails Boolean [default: false, not null]
+  minimumBookingNotice Int [default: 120, not null, note: '@zod.number.min(0)']
+  beforeEventBuffer Int [default: 0, not null]
+  afterEventBuffer Int [default: 0, not null]
+  seatsPerTimeSlot Int
+  onlyShowFirstAvailableSlot Boolean [default: false, not null]
+  showOptimizedSlots Boolean [default: false]
+  disableCancelling Boolean [default: false]
+  disableRescheduling Boolean [default: false]
+  minimumRescheduleNotice Int [note: '@zod.number.min(0)']
+  seatsShowAttendees Boolean [default: false]
+  seatsShowAvailabilityCount Boolean [default: true]
+  schedulingType SchedulingType
+  scheduleId Int
+  allowReschedulingCancelledBookings Boolean [default: false]
+  price Int [default: 0, not null]
+  currency String [default: 'usd', not null]
+  slotInterval Int
+  metadata Json [note: '@zod.import(["import { EventTypeMetaDataSchema } from \'../../zod-utils\'"]).custom.use(EventTypeMetaDataSchema)']
+  successRedirectUrl String [note: '@zod.import(["import { successRedirectUrl } from \'../../zod-utils\'"]).custom.use(successRedirectUrl)']
+  forwardParamsSuccessRedirect Boolean [default: true]
+  bookingLimits Json [note: '@zod.import(["import { intervalLimitsType } from \'../../zod-utils\'"]).custom.use(intervalLimitsType)']
+  durationLimits Json [note: '@zod.import(["import { intervalLimitsType } from \'../../zod-utils\'"]).custom.use(intervalLimitsType)']
+  isInstantEvent Boolean [default: false, not null]
+  instantMeetingExpiryTimeOffsetInSeconds Int [default: 90, not null]
+  instantMeetingScheduleId Int
+  instantMeetingParameters String[] [not null]
+  assignAllTeamMembers Boolean [default: false, not null]
+  assignRRMembersUsingSegment Boolean [default: false, not null]
+  rrSegmentQueryValue Json [note: '@zod.import(["import { rrSegmentQueryValueSchema } from \'../../zod-utils\'"]).custom.use(rrSegmentQueryValueSchema)']
+  useEventTypeDestinationCalendarEmail Boolean [default: false, not null]
+  isRRWeightsEnabled Boolean [default: false, not null]
+  maxLeadThreshold Int
+  includeNoShowInRRCalculation Boolean [default: false, not null]
+  allowReschedulingPastBookings Boolean [default: false, not null]
+  hideOrganizerEmail Boolean [default: false, not null]
+  maxActiveBookingsPerBooker Int
+  maxActiveBookingPerBookerOfferReschedule Boolean [default: false, not null]
+  customReplyToEmail String [note: '@zod.import(["import { emailSchema } from \'../../zod-utils\'"]).custom.use(emailSchema)']
+  eventTypeColor Json [note: '@zod.import(["import { eventTypeColor } from \'../../zod-utils\'"]).custom.use(eventTypeColor)']
+  rescheduleWithSameRoundRobinHost Boolean [default: false, not null]
+  secondaryEmailId Int
+  useBookerTimezone Boolean [default: false, not null]
+  restrictionScheduleId Int
+  bookingRequiresAuthentication Boolean [default: false, not null]
+  rrHostSubsetEnabled Boolean [default: false, not null]
+  requiresCancellationReason CancellationReasonRequirement [default: 'MANDATORY_HOST_ONLY']
+  enablePerHostLocations Boolean [default: false, not null]
+  createdAt DateTime [default: `now()`]
+  updatedAt DateTime
+
+  indexes {
+    (userId, slug) [unique]
+    (teamId, slug) [unique]
+    (userId, parentId) [unique]
+  }
+}
+
+Table Credential {
+  id Int [pk, increment]
+  type String [not null]
+  key Json [not null]
+  encryptedKey String
+  userId Int
+  teamId Int
+  appId String
+  subscriptionId String
+  paymentStatus String
+  billingCycleStart Int
+  invalid Boolean [default: false]
+  delegationCredentialId String
+}
+
+Table DestinationCalendar {
+  id Int [pk, increment]
+  integration String [not null]
+  externalId String [not null]
+  primaryEmail String [note: '@zod.import(["import { emailSchema } from \'../../zod-utils\'"]).custom.use(emailSchema)']
+  userId Int [unique]
+  eventTypeId Int [unique]
+  credentialId Int
+  createdAt DateTime [default: `now()`]
+  updatedAt DateTime
+  delegationCredentialId String
+  customCalendarReminder Int
+}
+
+Table UserPassword {
+  hash String [not null]
+  userId Int [unique, not null]
+}
+
+Table TravelSchedule {
+  id Int [pk, increment]
+  userId Int [not null]
+  timeZone String [not null]
+  startDate DateTime [not null]
+  endDate DateTime
+  prevTimeZone String
+}
+
+Table users {
+  id Int [pk, increment]
+  uuid String [unique, not null]
+  username String
+  name String
+  email String [unique, not null, note: '@zod.import(["import { emailSchema } from \'../../zod-utils\'"]).custom.use(emailSchema)']
+  emailVerified DateTime
+  bio String
+  avatarUrl String
+  timeZone String [default: 'Europe/London', not null]
+  weekStart String [default: 'Sunday', not null]
+  bufferTime Int [default: 0, not null]
+  hideBranding Boolean [default: false, not null]
+  theme String
+  appTheme String
+  created DateTime [default: `now()`, not null]
+  trialEndsAt DateTime
+  lastActiveAt DateTime
+  defaultScheduleId Int
+  completedOnboarding Boolean [default: false, not null]
+  locale String
+  timeFormat Int [default: 12]
+  twoFactorSecret String
+  twoFactorEnabled Boolean [default: false, not null]
+  backupCodes String
+  identityProvider IdentityProvider [default: 'CAL', not null]
+  identityProviderId String
+  invitedTo Int
+  brandColor String
+  darkBrandColor String
+  allowDynamicBooking Boolean [default: true]
+  allowSEOIndexing Boolean [default: true]
+  receiveMonthlyDigestEmail Boolean [default: true]
+  requiresBookerEmailVerification Boolean [default: false]
+  metadata Json [note: '@zod.import(["import { userMetadata } from \'../../zod-utils\'"]).custom.use(userMetadata)']
+  verified Boolean [default: false]
+  role UserPermissionRole [default: 'USER', not null]
+  organizationId Int
+  locked Boolean [default: false, not null]
+  movedToProfileId Int [unique]
+  isPlatformManaged Boolean [default: false, not null]
+  smsLockState SMSLockState [default: 'UNLOCKED', not null]
+  smsLockReviewedByAdmin Boolean [default: false, not null]
+  referralLinkId String
+  creationSource CreationSource
+  autoOptInFeatures Boolean [default: false, not null]
+
+  indexes {
+    (email, username) [unique]
+    (username, organizationId) [unique]
+  }
+}
+
+Table NotificationsSubscriptions {
+  id Int [pk, increment]
+  userId Int [not null]
+  subscription String [not null]
+}
+
+Table Profile {
+  id Int [pk, increment]
+  uid String [not null]
+  userId Int [not null]
+  organizationId Int [not null]
+  username String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (userId, organizationId) [unique]
+    (username, organizationId) [unique]
+  }
+}
+
+Table Team {
+  id Int [pk, increment]
+  name String [not null, note: '@zod.string.min(1)']
+  slug String [note: '@zod.string.min(1)']
+  logoUrl String
+  calVideoLogo String
+  appLogo String
+  appIconLogo String
+  bio String
+  hideBranding Boolean [default: false, not null]
+  hideTeamProfileLink Boolean [default: false, not null]
+  isPrivate Boolean [default: false, not null]
+  hideBookATeamMember Boolean [default: false, not null]
+  createdAt DateTime [default: `now()`, not null]
+  metadata Json [note: '@zod.import(["import { teamMetadataSchema } from \'../../zod-utils\'"]).custom.use(teamMetadataSchema)']
+  theme String
+  rrResetInterval RRResetInterval [default: 'MONTH']
+  rrTimestampBasis RRTimestampBasis [default: 'CREATED_AT', not null]
+  brandColor String
+  darkBrandColor String
+  bannerUrl String
+  parentId Int
+  timeFormat Int
+  timeZone String [default: 'Europe/London', not null]
+  weekStart String [default: 'Sunday', not null]
+  isOrganization Boolean [default: false, not null]
+  pendingPayment Boolean [default: false, not null]
+  isPlatform Boolean [default: false, not null]
+  createdByOAuthClientId String
+  smsLockState SMSLockState [default: 'UNLOCKED', not null]
+  smsLockReviewedByAdmin Boolean [default: false, not null]
+  bookingLimits Json [note: '@zod.import(["import { intervalLimitsType } from \'../../zod-utils\'"]).custom.use(intervalLimitsType)']
+  includeManagedEventsInLimits Boolean [default: false, not null]
+  autoOptInFeatures Boolean [default: false, not null]
+
+  indexes {
+    (slug, parentId) [unique]
+  }
+}
+
+Table CreditBalance {
+  id String [pk]
+  teamId Int [unique]
+  userId Int [unique]
+  additionalCredits Int [default: 0, not null]
+  limitReachedAt DateTime
+  warningSentAt DateTime
+}
+
+Table CreditPurchaseLog {
+  id String [pk]
+  creditBalanceId String [not null]
+  credits Int [not null]
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Table CreditExpenseLog {
+  id String [pk]
+  creditBalanceId String [not null]
+  bookingUid String
+  credits Int
+  creditType CreditType [not null]
+  date DateTime [not null]
+  smsSid String
+  smsSegments Int
+  phoneNumber String
+  email String
+  callDuration Int
+  creditFor CreditUsageType
+  externalRef String [unique]
+}
+
+Table OrganizationSettings {
+  id Int [pk, increment]
+  organizationId Int [unique, not null]
+  isOrganizationConfigured Boolean [default: false, not null]
+  isOrganizationVerified Boolean [default: false, not null]
+  orgAutoAcceptEmail String [not null]
+  lockEventTypeCreationForUsers Boolean [default: false, not null]
+  adminGetsNoSlotsNotification Boolean [default: false, not null]
+  isAdminReviewed Boolean [default: false, not null]
+  isAdminAPIEnabled Boolean [default: false, not null]
+  allowSEOIndexing Boolean [default: false, not null]
+  orgProfileRedirectsToVerifiedDomain Boolean [default: false, not null]
+  disablePhoneOnlySMSNotifications Boolean [default: false, not null]
+  disableAutofillOnBookingPage Boolean [default: false, not null]
+  orgAutoJoinOnSignup Boolean [default: true, not null]
+  disableAttendeeConfirmationEmail Boolean [default: false, not null]
+  disableAttendeeCancellationEmail Boolean [default: false, not null]
+  disableAttendeeRescheduledEmail Boolean [default: false, not null]
+  disableAttendeeRequestEmail Boolean [default: false, not null]
+  disableAttendeeReassignedEmail Boolean [default: false, not null]
+  disableAttendeeAwaitingPaymentEmail Boolean [default: false, not null]
+  disableAttendeeRescheduleRequestEmail Boolean [default: false, not null]
+  disableAttendeeLocationChangeEmail Boolean [default: false, not null]
+  disableAttendeeNewEventEmail Boolean [default: false, not null]
+}
+
+Table Membership {
+  id Int [pk, increment]
+  teamId Int [not null]
+  userId Int [not null]
+  accepted Boolean [default: false, not null]
+  role MembershipRole [not null]
+  customRoleId String
+  createdAt DateTime [default: `now()`]
+  updatedAt DateTime
+
+  indexes {
+    (userId, teamId) [unique]
+  }
+}
+
+Table VerificationToken {
+  id Int [pk, increment]
+  identifier String [not null]
+  token String [unique, not null]
+  expires DateTime [not null]
+  expiresInDays Int
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  teamId Int
+  secondaryEmailId Int
+
+  indexes {
+    (identifier, token) [unique]
+  }
+}
+
+Table InstantMeetingToken {
+  id Int [pk, increment]
+  token String [unique, not null]
+  expires DateTime [not null]
+  teamId Int [not null]
+  bookingId Int [unique]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table BookingReference {
+  id Int [pk, increment]
+  type String [not null, note: '@zod.string.min(1)']
+  uid String [not null, note: '@zod.string.min(1)']
+  meetingId String
+  thirdPartyRecurringEventId String
+  meetingPassword String
+  meetingUrl String
+  bookingId Int
+  externalCalendarId String
+  deleted Boolean
+  credentialId Int
+  delegationCredentialId String
+}
+
+Table Attendee {
+  id Int [pk, increment]
+  email String [not null]
+  name String [not null]
+  timeZone String [not null]
+  phoneNumber String
+  locale String [default: 'en']
+  bookingId Int
+  noShow Boolean [default: false]
+}
+
+Table Booking {
+  id Int [pk, increment]
+  uid String [unique, not null]
+  idempotencyKey String [unique]
+  userId Int
+  userPrimaryEmail String [note: '@zod.import(["import { emailSchema } from \'../../zod-utils\'"]).custom.use(emailSchema)']
+  eventTypeId Int
+  title String [not null]
+  description String
+  customInputs Json
+  responses Json [note: '@zod.import(["import { bookingResponses } from \'../../zod-utils\'"]).custom.use(bookingResponses)']
+  startTime DateTime [not null]
+  endTime DateTime [not null]
+  location String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime
+  status BookingStatus [default: 'accepted', not null]
+  paid Boolean [default: false, not null]
+  destinationCalendarId Int
+  cancellationReason String
+  rejectionReason String
+  reassignReason String
+  reassignById Int
+  dynamicEventSlugRef String
+  dynamicGroupSlugRef String
+  rescheduled Boolean
+  fromReschedule String
+  recurringEventId String
+  smsReminderNumber String
+  scheduledJobs String[] [not null]
+  metadata Json [note: '@zod.import(["import { bookingMetadataSchema } from \'../../zod-utils\'"]).custom.use(bookingMetadataSchema)']
+  isRecorded Boolean [default: false, not null]
+  iCalUID String [default: '']
+  iCalSequence Int [default: 0, not null]
+  rating Int
+  ratingFeedback String
+  noShowHost Boolean [default: false]
+  oneTimePassword String [unique]
+  cancelledBy String [note: '@zod.import(["import { emailSchema } from \'../../zod-utils\'"]).custom.use(emailSchema)']
+  rescheduledBy String [note: '@zod.import(["import { emailSchema } from \'../../zod-utils\'"]).custom.use(emailSchema)']
+  creationSource CreationSource
+}
+
+Table Tracking {
+  id Int [pk, increment]
+  bookingId Int [unique, not null]
+  utm_source String
+  utm_medium String
+  utm_campaign String
+  utm_term String
+  utm_content String
+}
+
+Table Schedule {
+  id Int [pk, increment]
+  userId Int [not null]
+  name String [not null]
+  timeZone String
+}
+
+Table Availability {
+  id Int [pk, increment]
+  userId Int
+  eventTypeId Int
+  days Int[] [not null]
+  startTime DateTime [not null]
+  endTime DateTime [not null]
+  date DateTime
+  scheduleId Int
+}
+
+Table SelectedCalendar {
+  id String [pk]
+  userId Int [not null]
+  integration String [not null]
+  externalId String [not null]
+  credentialId Int
+  createdAt DateTime [default: `now()`]
+  updatedAt DateTime
+  googleChannelId String
+  googleChannelKind String
+  googleChannelResourceId String
+  googleChannelResourceUri String
+  googleChannelExpiration String
+  channelId String
+  channelKind String
+  channelResourceId String
+  channelResourceUri String
+  channelExpiration DateTime
+  syncSubscribedAt DateTime
+  syncSubscribedErrorAt DateTime
+  syncSubscribedErrorCount Int [default: 0, not null]
+  syncToken String
+  syncedAt DateTime
+  syncErrorAt DateTime
+  syncErrorCount Int [default: 0]
+  delegationCredentialId String
+  error String
+  lastErrorAt DateTime
+  watchAttempts Int [default: 0, not null]
+  unwatchAttempts Int [default: 0, not null]
+  maxAttempts Int [default: 3, not null]
+  eventTypeId Int
+
+  indexes {
+    (userId, integration, externalId, eventTypeId) [unique]
+    (googleChannelId, eventTypeId) [unique]
+  }
+}
+
+Table EventTypeCustomInput {
+  id Int [pk, increment]
+  eventTypeId Int [not null]
+  label String [not null]
+  type EventTypeCustomInputType [not null]
+  options Json [note: '@zod.import(["import { customInputOptionSchema } from \'../../zod-utils\'"]).custom.use(customInputOptionSchema)']
+  required Boolean [not null]
+  placeholder String [default: '', not null]
+}
+
+Table ResetPasswordRequest {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  email String [not null]
+  expires DateTime [not null]
+}
+
+Table ReminderMail {
+  id Int [pk, increment]
+  referenceId Int [not null]
+  reminderType ReminderType [not null]
+  elapsedMinutes Int [not null]
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Table Payment {
+  id Int [pk, increment]
+  uid String [unique, not null]
+  appId String
+  bookingId Int [not null]
+  amount Int [not null]
+  fee Int [not null]
+  currency String [not null]
+  success Boolean [not null]
+  refunded Boolean [not null]
+  data Json [not null]
+  externalId String [unique, not null]
+  paymentOption PaymentOption [default: 'ON_BOOKING']
+}
+
+Table Webhook {
+  id String [pk]
+  userId Int
+  teamId Int
+  eventTypeId Int
+  platformOAuthClientId String
+  subscriberUrl String [not null, note: '@zod.string.url()']
+  payloadTemplate String
+  createdAt DateTime [default: `now()`, not null]
+  active Boolean [default: true, not null]
+  eventTriggers WebhookTriggerEvents[] [not null]
+  appId String
+  secret String
+  platform Boolean [default: false, not null]
+  time Int
+  timeUnit TimeUnit
+  version String [default: '2021-10-20', not null]
+
+  indexes {
+    (userId, subscriberUrl) [unique]
+    (platformOAuthClientId, subscriberUrl) [unique]
+  }
+}
+
+Table ApiKey {
+  id String [pk]
+  userId Int [not null]
+  teamId Int
+  note String
+  createdAt DateTime [default: `now()`, not null]
+  expiresAt DateTime
+  lastUsedAt DateTime
+  hashedKey String [unique, not null]
+  appId String
+}
+
+Table RateLimit {
+  id String [pk]
+  name String [not null]
+  apiKeyId String [not null]
+  ttl Int [not null]
+  limit Int [not null]
+  blockDuration Int [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table HashedLink {
+  id Int [pk, increment]
+  link String [unique, not null]
+  eventTypeId Int [not null]
+  expiresAt DateTime
+  maxUsageCount Int [default: 1, not null]
+  usageCount Int [default: 0, not null]
+}
+
+Table Account {
+  id String [pk]
+  userId Int [not null]
+  type String [not null]
+  provider String [not null]
+  providerAccountId String [not null]
+  providerEmail String
+  refresh_token String
+  access_token String
+  expires_at Int
+  token_type String
+  scope String
+  id_token String
+  session_state String
+
+  indexes {
+    (provider, providerAccountId) [unique]
+  }
+}
+
+Table Session {
+  id String [pk]
+  sessionToken String [unique, not null]
+  userId Int [not null]
+  expires DateTime [not null]
+}
+
+Table App {
+  slug String [pk]
+  dirName String [unique, not null]
+  keys Json
+  categories AppCategories[] [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  enabled Boolean [default: false, not null]
+}
+
+Table Feedback {
+  id Int [pk, increment]
+  date DateTime [default: `now()`, not null]
+  userId Int [not null]
+  rating String [not null]
+  comment String
+}
+
+Table Deployment {
+  id Int [pk, default: 1, note: 'This is a single row table, so we use a fixed id']
+  logo String
+  theme Json [note: '@zod.import(["import { DeploymentTheme } from \'../../zod-utils\'"]).custom.use(DeploymentTheme)']
+  licenseKey String
+  signatureTokenEncrypted String
+  agreedLicenseAt DateTime
+}
+
+Table WebhookScheduledTriggers {
+  id Int [pk, increment]
+  jobName String
+  subscriberUrl String [not null]
+  payload String [not null]
+  startAfter DateTime [not null]
+  retryCount Int [default: 0, not null]
+  createdAt DateTime [default: `now()`]
+  appId String
+  webhookId String
+  bookingId Int
+}
+
+Table BookingSeat {
+  id Int [pk, increment]
+  referenceUid String [unique, not null]
+  bookingId Int [not null]
+  attendeeId Int [unique, not null]
+  data Json [note: '@zod.import(["import { bookingSeatDataSchema } from \'../../zod-utils\'"]).custom.use(bookingSeatDataSchema)']
+  metadata Json
+}
+
+Table VerifiedNumber {
+  id Int [pk, increment]
+  userId Int
+  teamId Int
+  phoneNumber String [not null]
+}
+
+Table VerifiedEmail {
+  id Int [pk, increment]
+  userId Int
+  teamId Int
+  email String [not null]
+}
+
+Table Feature {
+  slug String [pk]
+  enabled Boolean [default: false, not null]
+  description String
+  type FeatureType [default: 'RELEASE']
+  stale Boolean [default: false]
+  lastUsedAt DateTime
+  createdAt DateTime [default: `now()`]
+  updatedAt DateTime [default: `now()`]
+  updatedBy Int
+}
+
+Table UserFeatures {
+  userId Int [not null]
+  featureId String [not null]
+  enabled Boolean [not null]
+  assignedAt DateTime [default: `now()`, not null]
+  assignedBy String [not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (userId, featureId) [pk]
+  }
+}
+
+Table TeamFeatures {
+  teamId Int [not null]
+  featureId String [not null]
+  enabled Boolean [not null]
+  assignedAt DateTime [default: `now()`, not null]
+  assignedBy String [not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (teamId, featureId) [pk]
+  }
+}
+
+Table SelectedSlots {
+  id Int [pk, increment]
+  eventTypeId Int [not null]
+  userId Int [not null]
+  slotUtcStartDate DateTime [not null]
+  slotUtcEndDate DateTime [not null]
+  uid String [not null]
+  releaseAt DateTime [not null]
+  isSeat Boolean [default: false, not null]
+
+  indexes {
+    (userId, slotUtcStartDate, slotUtcEndDate, uid) [unique]
+  }
+}
+
+Table OAuthClient {
+  clientId String [pk]
+  redirectUri String [not null]
+  clientSecret String
+  clientType OAuthClientType [default: 'confidential', not null]
+  name String [not null]
+  purpose String
+  logo String
+  websiteUrl String
+  rejectionReason String
+  isTrusted Boolean [default: false, not null]
+  status OAuthClientStatus [default: 'approved', not null]
+  userId Int
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Table AccessCode {
+  id Int [pk, increment]
+  code String [not null]
+  clientId String
+  expiresAt DateTime [not null]
+  scopes AccessScope[] [not null]
+  userId Int
+  teamId Int
+  codeChallenge String
+  codeChallengeMethod String [default: 'S256']
+}
+
+Table BookingDenormalized {
+  id Int [pk]
+  uid String [not null]
+  eventTypeId Int
+  title String [not null]
+  description String
+  startTime DateTime [not null]
+  endTime DateTime [not null]
+  createdAt DateTime [not null]
+  updatedAt DateTime
+  location String
+  paid Boolean [not null]
+  status BookingStatus [not null]
+  rescheduled Boolean
+  userId Int
+  teamId Int
+  eventLength Int
+  eventParentId Int
+  userEmail String
+  userName String
+  userUsername String
+  ratingFeedback String
+  rating Int
+  noShowHost Boolean
+  isTeamBooking Boolean [not null]
+}
+
+Table CalendarCache {
+  id String
+  key String [not null]
+  value Json [not null]
+  expiresAt DateTime [not null]
+  updatedAt DateTime [default: `now()`, not null]
+  credentialId Int [not null]
+  userId Int
+
+  indexes {
+    (credentialId, key) [pk]
+    (credentialId, key) [unique]
+  }
+}
+
+Table TempOrgRedirect {
+  id Int [pk, increment]
+  from String [not null]
+  fromOrgId Int [not null]
+  type RedirectType [not null]
+  toUrl String [not null]
+  enabled Boolean [default: true, not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (from, type, fromOrgId) [unique]
+  }
+}
+
+Table avatars {
+  teamId Int [default: 0, not null]
+  userId Int [default: 0, not null]
+  data String [not null]
+  objectKey String [unique, not null]
+  isBanner Boolean [default: false, not null]
+
+  indexes {
+    (teamId, userId, isBanner) [unique]
+  }
+}
+
+Table OutOfOfficeEntry {
+  id Int [pk, increment]
+  uuid String [unique, not null]
+  start DateTime [not null]
+  end DateTime [not null]
+  notes String
+  showNotePublicly Boolean [default: false, not null]
+  userId Int [not null]
+  toUserId Int
+  reasonId Int
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table OutOfOfficeReason {
+  id Int [pk, increment]
+  emoji String [not null]
+  reason String [unique, not null]
+  enabled Boolean [default: true, not null]
+  userId Int
+}
+
+Table UserHolidaySettings {
+  id Int [pk, increment]
+  userId Int [unique, not null]
+  countryCode String
+  disabledIds String[] [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table HolidayCache {
+  id String [pk]
+  countryCode String [not null]
+  calendarId String [not null]
+  eventId String [not null]
+  name String [not null]
+  date DateTime [not null]
+  year Int [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (countryCode, eventId) [unique]
+  }
+}
+
+Table PlatformOAuthClient {
+  id String [pk]
+  name String [not null]
+  secret String [not null]
+  permissions Int [not null]
+  logo String
+  redirectUris String[] [not null]
+  organizationId Int [not null]
+  bookingRedirectUri String
+  bookingCancelRedirectUri String
+  bookingRescheduleRedirectUri String
+  areEmailsEnabled Boolean [default: false, not null]
+  areDefaultEventTypesEnabled Boolean [default: true, not null]
+  areCalendarEventsEnabled Boolean [default: true, not null]
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Table PlatformAuthorizationToken {
+  id String [pk]
+  platformOAuthClientId String [not null]
+  userId Int [not null]
+  createdAt DateTime [default: `now()`, not null]
+
+  indexes {
+    (userId, platformOAuthClientId) [unique]
+  }
+}
+
+Table AccessToken {
+  id Int [pk, increment]
+  secret String [unique, not null]
+  createdAt DateTime [default: `now()`, not null]
+  expiresAt DateTime [not null]
+  platformOAuthClientId String [not null]
+  userId Int [not null]
+}
+
+Table RefreshToken {
+  id Int [pk, increment]
+  secret String [unique, not null]
+  createdAt DateTime [default: `now()`, not null]
+  expiresAt DateTime [not null]
+  platformOAuthClientId String [not null]
+  userId Int [not null]
+}
+
+Table DSyncData {
+  id Int [pk, increment]
+  directoryId String [unique, not null]
+  tenant String [not null]
+  organizationId Int [unique]
+}
+
+Table DSyncTeamGroupMapping {
+  id Int [pk, increment]
+  organizationId Int [not null]
+  teamId Int [not null]
+  directoryId String [not null]
+  groupName String [not null]
+
+  indexes {
+    (teamId, groupName) [unique]
+  }
+}
+
+Table SecondaryEmail {
+  id Int [pk, increment]
+  userId Int [not null]
+  email String [unique, not null]
+  emailVerified DateTime
+
+  indexes {
+    (userId, email) [unique]
+  }
+}
+
+Table Task {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  scheduledAt DateTime [default: `now()`, not null]
+  succeededAt DateTime
+  type String [not null]
+  payload String [not null]
+  attempts Int [default: 0, not null]
+  maxAttempts Int [default: 3, not null]
+  lastError String
+  lastFailedAttemptAt DateTime
+  referenceUid String
+
+  indexes {
+    (referenceUid, type) [unique]
+  }
+}
+
+Table ManagedOrganization {
+  managedOrganizationId Int [unique, not null]
+  managerOrganizationId Int [not null]
+  createdAt DateTime [default: `now()`, not null]
+
+  indexes {
+    (managerOrganizationId, managedOrganizationId) [unique]
+  }
+}
+
+Table PlatformBilling {
+  id Int [pk]
+  customerId String [not null]
+  subscriptionId String
+  priceId String
+  plan String [default: 'none', not null]
+  billingCycleStart Int
+  billingCycleEnd Int
+  overdue Boolean [default: false]
+  managerBillingId Int
+}
+
+Table AttributeOption {
+  id String [pk]
+  attributeId String [not null]
+  value String [not null]
+  slug String [not null]
+  isGroup Boolean [default: false, not null]
+  contains String[] [not null]
+}
+
+Table Attribute {
+  id String [pk]
+  teamId Int [not null]
+  type AttributeType [not null]
+  name String [not null]
+  slug String [not null]
+  enabled Boolean [default: true, not null]
+  usersCanEditRelation Boolean [default: false, not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  isWeightsEnabled Boolean [default: false, not null]
+  isLocked Boolean [default: false, not null]
+
+  indexes {
+    (teamId, slug) [unique]
+  }
+}
+
+Table AttributeToUser {
+  id String [pk]
+  memberId Int [not null]
+  attributeOptionId String [not null]
+  weight Int
+  createdAt DateTime [default: `now()`, not null]
+  createdById Int
+  createdByDSyncId String
+  updatedAt DateTime
+  updatedById Int
+  updatedByDSyncId String
+
+  indexes {
+    (memberId, attributeOptionId) [unique]
+  }
+}
+
+Table AssignmentReason {
+  id Int [pk, increment]
+  createdAt DateTime [default: `now()`, not null]
+  bookingId Int [not null]
+  reasonEnum AssignmentReasonEnum [not null]
+  reasonString String [not null]
+}
+
+Table DelegationCredential {
+  id String [pk]
+  workspacePlatformId Int [not null]
+  serviceAccountKey Json [not null, note: '@zod.import(["import { serviceAccountKeySchema } from \'../../zod-utils\'"]).custom.use(serviceAccountKeySchema)']
+  enabled Boolean [default: false, not null]
+  lastEnabledAt DateTime
+  lastDisabledAt DateTime
+  organizationId Int [not null]
+  domain String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (organizationId, domain) [unique]
+  }
+}
+
+Table WorkspacePlatform {
+  id Int [pk, increment]
+  slug String [unique, not null, note: '@zod.string.min(1)']
+  name String [not null, note: '@zod.string.min(1)']
+  description String [not null]
+  defaultServiceAccountKey Json [not null, note: '@zod.import(["import { serviceAccountKeySchema } from \'../../zod-utils\'"]).custom.use(serviceAccountKeySchema)']
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  enabled Boolean [default: false, not null]
+}
+
+Table EventTypeTranslation {
+  uid String [pk]
+  eventTypeId Int [not null]
+  field EventTypeAutoTranslatedField [not null]
+  sourceLocale String [not null]
+  targetLocale String [not null]
+  translatedText String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  createdBy Int [not null]
+  updatedAt DateTime [not null]
+  updatedBy Int
+
+  indexes {
+    (eventTypeId, field, targetLocale) [unique]
+  }
+}
+
+Table Watchlist {
+  id String [pk]
+  type WatchlistType [not null]
+  value String [not null]
+  description String
+  isGlobal Boolean [default: false, not null]
+  organizationId Int
+  action WatchlistAction [default: 'REPORT', not null]
+  source WatchlistSource [default: 'MANUAL', not null]
+  lastUpdatedAt DateTime [default: `now()`, not null]
+
+  indexes {
+    (type, value, organizationId) [unique]
+  }
+}
+
+Table WatchlistAudit {
+  id String [pk]
+  type WatchlistType [not null]
+  value String [not null]
+  description String
+  action WatchlistAction [default: 'REPORT', not null]
+  changedAt DateTime [default: `now()`, not null]
+  changedByUserId Int
+  watchlistId String
+}
+
+Table WatchlistEventAudit {
+  id String [pk]
+  watchlistId String [not null]
+  eventTypeId Int [not null]
+  actionTaken WatchlistAction [not null]
+  timestamp DateTime [default: `now()`, not null]
+}
+
+Table BookingReport {
+  id String [pk]
+  bookingUid String [unique, not null]
+  bookerEmail String [not null]
+  reportedById Int
+  organizationId Int
+  reason BookingReportReason [not null]
+  description String
+  cancelled Boolean [default: false, not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  status BookingReportStatus [default: 'PENDING', not null]
+  systemStatus SystemReportStatus [default: 'PENDING', not null]
+  watchlistId String
+  globalWatchlistId String
+}
+
+Table WrongAssignmentReport {
+  id String [pk]
+  bookingUid String [unique, not null]
+  reportedById Int
+  correctAssignee String
+  additionalNotes String [not null]
+  teamId Int
+  status WrongAssignmentReportStatus [default: 'PENDING', not null]
+  reviewedById Int
+  reviewedAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table OrganizationOnboarding {
+  id String [pk]
+  createdById Int [not null]
+  createdAt DateTime [default: `now()`, not null]
+  orgOwnerEmail String [unique, not null]
+  error String
+  updatedAt DateTime [not null]
+  organizationId Int [unique]
+  billingPeriod BillingPeriod [not null]
+  pricePerSeat Float [not null]
+  seats Int [not null]
+  isPlatform Boolean [default: false, not null]
+  name String [not null]
+  slug String [not null]
+  logo String
+  bio String
+  brandColor String
+  bannerUrl String
+  isDomainConfigured Boolean [default: false, not null]
+  stripeCustomerId String [unique]
+  stripeSubscriptionId String
+  stripeSubscriptionItemId String
+  invitedMembers Json [default: '[]', not null, note: '@zod.import(["import { orgOnboardingInvitedMembersSchema } from \'../../zod-utils\'"]).custom.use(orgOnboardingInvitedMembersSchema)']
+  teams Json [default: '[]', not null, note: '@zod.import(["import { orgOnboardingTeamsSchema } from \'../../zod-utils\'"]).custom.use(orgOnboardingTeamsSchema)']
+  isComplete Boolean [default: false, not null]
+}
+
+Table InternalNotePreset {
+  id Int [pk, increment]
+  name String [not null]
+  cancellationReason String
+  teamId Int [not null]
+  createdAt DateTime [default: `now()`, not null]
+
+  indexes {
+    (teamId, name) [unique]
+  }
+}
+
+Table FilterSegment {
+  id Int [pk, increment]
+  name String [not null]
+  tableIdentifier String [not null]
+  scope FilterSegmentScope [not null]
+  activeFilters Json
+  sorting Json
+  columnVisibility Json
+  columnSizing Json
+  perPage Int [not null]
+  searchTerm String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  userId Int [not null]
+  teamId Int
+}
+
+Table UserFilterSegmentPreference {
+  id Int [pk, increment]
+  userId Int [not null]
+  tableIdentifier String [not null]
+  segmentId Int
+  systemSegmentId String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (userId, tableIdentifier) [unique]
+  }
+}
+
+Table BookingInternalNote {
+  id Int [pk, increment]
+  notePresetId Int
+  text String
+  bookingId Int [not null]
+  createdById Int [not null]
+  createdAt DateTime [default: `now()`, not null]
+
+  indexes {
+    (bookingId, notePresetId) [unique]
+  }
+}
+
+Table Role {
+  id String [pk]
+  name String [not null]
+  color String
+  description String
+  teamId Int
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  type RoleType [default: 'CUSTOM', not null]
+
+  indexes {
+    (name, teamId) [unique]
+  }
+}
+
+Table RolePermission {
+  id String [pk]
+  roleId String [not null]
+  resource String [not null]
+  action String [not null]
+  createdAt DateTime [default: `now()`, not null]
+
+  indexes {
+    (roleId, resource, action) [unique]
+  }
+}
+
+Table AuditActor {
+  id String [pk]
+  type AuditActorType [not null]
+  userUuid String [unique]
+  attendeeId Int [unique]
+  credentialId Int [unique]
+  email String [unique]
+  phone String [unique]
+  name String
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Table BookingAudit {
+  id String [pk]
+  bookingUid String [not null]
+  actorId String [not null]
+  type BookingAuditType [not null]
+  action BookingAuditAction [not null]
+  timestamp DateTime [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  source BookingAuditSource [not null]
+  operationId String [not null]
+  data Json
+  context Json
+}
+
+Table Agent {
+  id String [pk]
+  name String [not null]
+  userId Int
+  teamId Int
+  providerAgentId String [unique, not null]
+  inboundEventTypeId Int
+  outboundEventTypeId Int
+  enabled Boolean [default: true, not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table CalAiPhoneNumber {
+  id Int [pk, increment]
+  userId Int
+  teamId Int
+  phoneNumber String [unique, not null]
+  provider String [not null]
+  providerPhoneNumberId String [unique]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  stripeCustomerId String
+  stripeSubscriptionId String [unique]
+  subscriptionStatus PhoneNumberSubscriptionStatus
+  inboundAgentId String
+  outboundAgentId String
+}
+
+Table TeamBilling {
+  id String [pk]
+  teamId Int [unique, not null]
+  subscriptionId String [unique, not null]
+  subscriptionItemId String [not null]
+  customerId String [not null]
+  status String [not null]
+  planName String [not null]
+  subscriptionStart DateTime
+  subscriptionTrialEnd DateTime
+  subscriptionEnd DateTime
+  billingPeriod BillingPeriod
+  billingMode BillingMode [default: 'SEATS', not null]
+  pricePerSeat Int
+  paidSeats Int
+  highWaterMark Int
+  highWaterMarkPeriodStart DateTime
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table OrganizationBilling {
+  id String [pk]
+  teamId Int [unique, not null]
+  subscriptionId String [unique, not null]
+  subscriptionItemId String [not null]
+  customerId String [not null]
+  status String [not null]
+  planName String [not null]
+  subscriptionStart DateTime
+  subscriptionTrialEnd DateTime
+  subscriptionEnd DateTime
+  billingPeriod BillingPeriod
+  billingMode BillingMode [default: 'SEATS', not null]
+  pricePerSeat Int
+  paidSeats Int
+  highWaterMark Int
+  highWaterMarkPeriodStart DateTime
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table SeatChangeLog {
+  id String [pk]
+  teamId Int [not null]
+  changeType SeatChangeType [not null]
+  seatCount Int [not null]
+  userId Int
+  triggeredBy Int
+  changeDate DateTime [default: `now()`, not null]
+  monthKey String [not null]
+  operationId String
+  processedInProrationId String
+  metadata Json
+  createdAt DateTime [default: `now()`, not null]
+  teamBillingId String
+  organizationBillingId String
+
+  indexes {
+    (teamId, operationId) [unique]
+  }
+}
+
+Table MonthlyProration {
+  id String [pk]
+  teamId Int [not null]
+  monthKey String [not null]
+  periodStart DateTime [not null]
+  periodEnd DateTime [not null]
+  seatsAtStart Int [not null]
+  seatsAdded Int [not null]
+  seatsRemoved Int [not null]
+  netSeatIncrease Int [not null]
+  seatsAtEnd Int [not null]
+  subscriptionId String [not null]
+  subscriptionItemId String [not null]
+  customerId String [not null]
+  subscriptionStart DateTime [not null]
+  subscriptionEnd DateTime [not null]
+  remainingDays Int [not null]
+  pricePerSeat Int [not null]
+  proratedAmount Int [not null]
+  invoiceItemId String
+  invoiceId String
+  invoiceUrl String
+  status ProrationStatus [default: 'PENDING', not null]
+  chargedAt DateTime
+  failedAt DateTime
+  failureReason String
+  retryCount Int [default: 0, not null]
+  metadata Json
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  teamBillingId String
+  organizationBillingId String
+
+  indexes {
+    (teamId, monthKey) [unique]
+  }
+}
+
+Table CalendarCacheEvent {
+  id String [pk]
+  selectedCalendarId String [not null]
+  externalId String [not null]
+  externalEtag String [not null]
+  iCalUID String
+  iCalSequence Int [default: 0, not null]
+  summary String
+  description String
+  location String
+  start DateTime [not null]
+  end DateTime [not null]
+  isAllDay Boolean [default: false, not null]
+  timeZone String
+  status CalendarCacheEventStatus [default: 'confirmed', not null]
+  recurringEventId String
+  originalStartTime DateTime
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  externalCreatedAt DateTime
+  externalUpdatedAt DateTime
+
+  indexes {
+    (selectedCalendarId, externalId) [unique]
+  }
+}
+
+Table IntegrationAttributeSync {
+  id String [pk]
+  organizationId Int [not null]
+  name String [not null]
+  integration String [not null]
+  credentialId Int
+  enabled Boolean [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table AttributeSyncRule {
+  id String [pk]
+  integrationAttributeSyncId String [unique, not null]
+  rule Json [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table AttributeSyncFieldMapping {
+  id String [pk]
+  integrationFieldName String [not null]
+  attributeId String [not null]
+  enabled Boolean [not null]
+  integrationAttributeSyncId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (integrationAttributeSyncId, attributeId) [unique]
+  }
+}
+
+Table BookingTimeStatus {
+  id Int [unique, not null]
+  uid String
+  eventTypeId Int
+  title String
+  description String
+  startTime DateTime
+  endTime DateTime
+  createdAt DateTime
+  location String
+  paid Boolean
+  status BookingStatus
+  rescheduled Boolean
+  userId Int
+  teamId Int
+  eventLength Int
+  timeStatus String
+  eventParentId Int
+  userEmail String
+  username String
+  ratingFeedback String
+  rating Int
+  noShowHost Boolean
+  isTeamBooking Boolean [not null]
+}
+
+Table BookingTimeStatusDenormalized {
+  id Int [unique, not null]
+  uid String [not null]
+  eventTypeId Int
+  title String [not null]
+  description String
+  startTime DateTime [not null]
+  endTime DateTime [not null]
+  createdAt DateTime [not null]
+  updatedAt DateTime
+  location String
+  paid Boolean [not null]
+  status BookingStatus [not null]
+  rescheduled Boolean
+  userId Int
+  teamId Int
+  eventLength Int
+  eventParentId Int
+  userEmail String
+  userName String
+  userUsername String
+  ratingFeedback String
+  rating Int
+  noShowHost Boolean
+  isTeamBooking Boolean [not null]
+  timeStatus String
+}
+
+Ref Host_userId_fk: Host.userId > users.id [delete: cascade]
+
+Ref Host_eventTypeId_fk: Host.eventTypeId > EventType.id [delete: cascade]
+
+Ref Host_scheduleId_fk: Host.scheduleId > Schedule.id
+
+Ref Host_groupId_fk: Host.groupId > HostGroup.id
+
+Ref Host_memberId_fk: Host.memberId > Membership.id [delete: cascade]
+
+Ref HostGroup_eventTypeId_fk: HostGroup.eventTypeId > EventType.id [delete: cascade]
+
+Ref HostLocation_(userId, eventTypeId)_fk: HostLocation.(userId, eventTypeId) - Host.(userId, eventTypeId) [delete: cascade]
+
+Ref HostLocation_credentialId_fk: HostLocation.credentialId > Credential.id [delete: set null]
+
+Ref CalVideoSettings_eventTypeId_fk: CalVideoSettings.eventTypeId - EventType.id [delete: cascade]
+
+Ref EventType_userId_fk: EventType.userId > users.id [delete: cascade]
+
+Ref EventType_profileId_fk: EventType.profileId > Profile.id
+
+Ref EventType_teamId_fk: EventType.teamId > Team.id [delete: cascade]
+
+Ref EventType_parentId_fk: EventType.parentId > EventType.id [delete: cascade]
+
+Ref EventType_scheduleId_fk: EventType.scheduleId > Schedule.id
+
+Ref EventType_instantMeetingScheduleId_fk: EventType.instantMeetingScheduleId > Schedule.id
+
+Ref EventType_secondaryEmailId_fk: EventType.secondaryEmailId > SecondaryEmail.id [delete: cascade]
+
+Ref EventType_restrictionScheduleId_fk: EventType.restrictionScheduleId > Schedule.id
+
+Ref Credential_userId_fk: Credential.userId > users.id [delete: cascade]
+
+Ref Credential_teamId_fk: Credential.teamId > Team.id [delete: cascade]
+
+Ref Credential_appId_fk: Credential.appId > App.slug [delete: cascade]
+
+Ref Credential_delegationCredentialId_fk: Credential.delegationCredentialId > DelegationCredential.id [delete: cascade]
+
+Ref DestinationCalendar_userId_fk: DestinationCalendar.userId - users.id [delete: cascade]
+
+Ref DestinationCalendar_eventTypeId_fk: DestinationCalendar.eventTypeId - EventType.id [delete: cascade]
+
+Ref DestinationCalendar_credentialId_fk: DestinationCalendar.credentialId > Credential.id [delete: cascade]
+
+Ref DestinationCalendar_delegationCredentialId_fk: DestinationCalendar.delegationCredentialId > DelegationCredential.id [delete: cascade]
+
+Ref UserPassword_userId_fk: UserPassword.userId - users.id [delete: cascade]
+
+Ref TravelSchedule_userId_fk: TravelSchedule.userId > users.id [delete: cascade]
+
+Ref users_organizationId_fk: users.organizationId > Team.id [delete: set null]
+
+Ref users_movedToProfileId_fk: users.movedToProfileId - Profile.id [delete: set null]
+
+Ref NotificationsSubscriptions_userId_fk: NotificationsSubscriptions.userId > users.id [delete: cascade]
+
+Ref Profile_userId_fk: Profile.userId > users.id [delete: cascade]
+
+Ref Profile_organizationId_fk: Profile.organizationId > Team.id [delete: cascade]
+
+Ref Team_parentId_fk: Team.parentId > Team.id [delete: cascade]
+
+Ref Team_createdByOAuthClientId_fk: Team.createdByOAuthClientId > PlatformOAuthClient.id [delete: cascade]
+
+Ref CreditBalance_teamId_fk: CreditBalance.teamId - Team.id [delete: cascade]
+
+Ref CreditBalance_userId_fk: CreditBalance.userId - users.id [delete: cascade]
+
+Ref CreditPurchaseLog_creditBalanceId_fk: CreditPurchaseLog.creditBalanceId > CreditBalance.id [delete: cascade]
+
+Ref CreditExpenseLog_creditBalanceId_fk: CreditExpenseLog.creditBalanceId > CreditBalance.id [delete: cascade]
+
+Ref CreditExpenseLog_bookingUid_fk: CreditExpenseLog.bookingUid > Booking.uid [delete: cascade]
+
+Ref OrganizationSettings_organizationId_fk: OrganizationSettings.organizationId - Team.id [delete: cascade]
+
+Ref Membership_customRoleId_fk: Membership.customRoleId > Role.id
+
+Ref Membership_teamId_fk: Membership.teamId > Team.id [delete: cascade]
+
+Ref Membership_userId_fk: Membership.userId > users.id [delete: cascade]
+
+Ref VerificationToken_teamId_fk: VerificationToken.teamId > Team.id
+
+Ref VerificationToken_secondaryEmailId_fk: VerificationToken.secondaryEmailId > SecondaryEmail.id
+
+Ref InstantMeetingToken_teamId_fk: InstantMeetingToken.teamId > Team.id [delete: cascade]
+
+Ref InstantMeetingToken_bookingId_fk: InstantMeetingToken.bookingId - Booking.id [delete: cascade]
+
+Ref BookingReference_bookingId_fk: BookingReference.bookingId > Booking.id [delete: cascade]
+
+Ref BookingReference_credentialId_fk: BookingReference.credentialId > Credential.id [delete: set null]
+
+Ref BookingReference_delegationCredentialId_fk: BookingReference.delegationCredentialId > DelegationCredential.id [delete: set null]
+
+Ref Attendee_bookingId_fk: Attendee.bookingId > Booking.id [delete: cascade]
+
+Ref Booking_userId_fk: Booking.userId > users.id [delete: cascade]
+
+Ref Booking_eventTypeId_fk: Booking.eventTypeId > EventType.id
+
+Ref Booking_destinationCalendarId_fk: Booking.destinationCalendarId > DestinationCalendar.id
+
+Ref Booking_reassignById_fk: Booking.reassignById > users.id
+
+Ref Tracking_bookingId_fk: Tracking.bookingId - Booking.id [delete: cascade]
+
+Ref Schedule_userId_fk: Schedule.userId > users.id [delete: cascade]
+
+Ref Availability_userId_fk: Availability.userId > users.id [delete: cascade]
+
+Ref Availability_eventTypeId_fk: Availability.eventTypeId > EventType.id
+
+Ref Availability_scheduleId_fk: Availability.scheduleId > Schedule.id
+
+Ref SelectedCalendar_userId_fk: SelectedCalendar.userId > users.id [delete: cascade]
+
+Ref SelectedCalendar_credentialId_fk: SelectedCalendar.credentialId > Credential.id [delete: cascade]
+
+Ref SelectedCalendar_delegationCredentialId_fk: SelectedCalendar.delegationCredentialId > DelegationCredential.id [delete: cascade]
+
+Ref SelectedCalendar_eventTypeId_fk: SelectedCalendar.eventTypeId > EventType.id
+
+Ref EventTypeCustomInput_eventTypeId_fk: EventTypeCustomInput.eventTypeId > EventType.id [delete: cascade]
+
+Ref Payment_appId_fk: Payment.appId > App.slug [delete: cascade]
+
+Ref Payment_bookingId_fk: Payment.bookingId > Booking.id [delete: cascade]
+
+Ref Webhook_userId_fk: Webhook.userId > users.id [delete: cascade]
+
+Ref Webhook_teamId_fk: Webhook.teamId > Team.id [delete: cascade]
+
+Ref Webhook_eventTypeId_fk: Webhook.eventTypeId > EventType.id [delete: cascade]
+
+Ref Webhook_platformOAuthClientId_fk: Webhook.platformOAuthClientId > PlatformOAuthClient.id [delete: cascade]
+
+Ref Webhook_appId_fk: Webhook.appId > App.slug [delete: cascade]
+
+Ref ApiKey_userId_fk: ApiKey.userId > users.id [delete: cascade]
+
+Ref ApiKey_teamId_fk: ApiKey.teamId > Team.id [delete: cascade]
+
+Ref ApiKey_appId_fk: ApiKey.appId > App.slug [delete: cascade]
+
+Ref RateLimit_apiKeyId_fk: RateLimit.apiKeyId > ApiKey.id [delete: cascade]
+
+Ref HashedLink_eventTypeId_fk: HashedLink.eventTypeId > EventType.id [delete: cascade]
+
+Ref Account_userId_fk: Account.userId > users.id [delete: cascade]
+
+Ref Session_userId_fk: Session.userId > users.id [delete: cascade]
+
+Ref Feedback_userId_fk: Feedback.userId > users.id [delete: cascade]
+
+Ref WebhookScheduledTriggers_webhookId_fk: WebhookScheduledTriggers.webhookId > Webhook.id [delete: cascade]
+
+Ref WebhookScheduledTriggers_bookingId_fk: WebhookScheduledTriggers.bookingId > Booking.id [delete: cascade]
+
+Ref BookingSeat_bookingId_fk: BookingSeat.bookingId > Booking.id [delete: cascade]
+
+Ref BookingSeat_attendeeId_fk: BookingSeat.attendeeId - Attendee.id [delete: cascade]
+
+Ref VerifiedNumber_userId_fk: VerifiedNumber.userId > users.id [delete: cascade]
+
+Ref VerifiedNumber_teamId_fk: VerifiedNumber.teamId > Team.id [delete: cascade]
+
+Ref VerifiedEmail_userId_fk: VerifiedEmail.userId > users.id [delete: cascade]
+
+Ref VerifiedEmail_teamId_fk: VerifiedEmail.teamId > Team.id [delete: cascade]
+
+Ref UserFeatures_userId_fk: UserFeatures.userId > users.id [delete: cascade]
+
+Ref UserFeatures_featureId_fk: UserFeatures.featureId > Feature.slug [delete: cascade]
+
+Ref TeamFeatures_teamId_fk: TeamFeatures.teamId > Team.id [delete: cascade]
+
+Ref TeamFeatures_featureId_fk: TeamFeatures.featureId > Feature.slug [delete: cascade]
+
+Ref OAuthClient_userId_fk: OAuthClient.userId > users.id [delete: set null]
+
+Ref AccessCode_clientId_fk: AccessCode.clientId > OAuthClient.clientId [delete: cascade]
+
+Ref AccessCode_userId_fk: AccessCode.userId > users.id [delete: cascade]
+
+Ref AccessCode_teamId_fk: AccessCode.teamId > Team.id [delete: cascade]
+
+Ref CalendarCache_credentialId_fk: CalendarCache.credentialId > Credential.id [delete: cascade]
+
+Ref OutOfOfficeEntry_userId_fk: OutOfOfficeEntry.userId > users.id [delete: cascade]
+
+Ref OutOfOfficeEntry_toUserId_fk: OutOfOfficeEntry.toUserId > users.id [delete: cascade]
+
+Ref OutOfOfficeEntry_reasonId_fk: OutOfOfficeEntry.reasonId > OutOfOfficeReason.id [delete: set null]
+
+Ref OutOfOfficeReason_userId_fk: OutOfOfficeReason.userId > users.id [delete: cascade]
+
+Ref UserHolidaySettings_userId_fk: UserHolidaySettings.userId - users.id [delete: cascade]
+
+Ref PlatformOAuthClient_organizationId_fk: PlatformOAuthClient.organizationId > Team.id [delete: cascade]
+
+Ref PlatformAuthorizationToken_userId_fk: PlatformAuthorizationToken.userId > users.id [delete: cascade]
+
+Ref PlatformAuthorizationToken_platformOAuthClientId_fk: PlatformAuthorizationToken.platformOAuthClientId > PlatformOAuthClient.id [delete: cascade]
+
+Ref AccessToken_userId_fk: AccessToken.userId > users.id [delete: cascade]
+
+Ref AccessToken_platformOAuthClientId_fk: AccessToken.platformOAuthClientId > PlatformOAuthClient.id [delete: cascade]
+
+Ref RefreshToken_userId_fk: RefreshToken.userId > users.id [delete: cascade]
+
+Ref RefreshToken_platformOAuthClientId_fk: RefreshToken.platformOAuthClientId > PlatformOAuthClient.id [delete: cascade]
+
+Ref DSyncData_organizationId_fk: DSyncData.organizationId - OrganizationSettings.organizationId [delete: cascade]
+
+Ref DSyncTeamGroupMapping_teamId_fk: DSyncTeamGroupMapping.teamId > Team.id [delete: cascade]
+
+Ref DSyncTeamGroupMapping_directoryId_fk: DSyncTeamGroupMapping.directoryId > DSyncData.directoryId [delete: cascade]
+
+Ref SecondaryEmail_userId_fk: SecondaryEmail.userId > users.id [delete: cascade]
+
+Ref ManagedOrganization_managedOrganizationId_fk: ManagedOrganization.managedOrganizationId - Team.id [delete: cascade]
+
+Ref ManagedOrganization_managerOrganizationId_fk: ManagedOrganization.managerOrganizationId > Team.id [delete: cascade]
+
+Ref PlatformBilling_managerBillingId_fk: PlatformBilling.managerBillingId > PlatformBilling.id
+
+Ref PlatformBilling_id_fk: PlatformBilling.id - Team.id [delete: cascade]
+
+Ref AttributeOption_attributeId_fk: AttributeOption.attributeId > Attribute.id [delete: cascade]
+
+Ref Attribute_teamId_fk: Attribute.teamId > Team.id [delete: cascade]
+
+Ref AttributeToUser_memberId_fk: AttributeToUser.memberId > Membership.id [delete: cascade]
+
+Ref AttributeToUser_attributeOptionId_fk: AttributeToUser.attributeOptionId > AttributeOption.id [delete: cascade]
+
+Ref AttributeToUser_createdById_fk: AttributeToUser.createdById > users.id [delete: set null]
+
+Ref AttributeToUser_createdByDSyncId_fk: AttributeToUser.createdByDSyncId > DSyncData.directoryId [delete: set null]
+
+Ref AttributeToUser_updatedById_fk: AttributeToUser.updatedById > users.id [delete: set null]
+
+Ref AttributeToUser_updatedByDSyncId_fk: AttributeToUser.updatedByDSyncId > DSyncData.directoryId [delete: set null]
+
+Ref AssignmentReason_bookingId_fk: AssignmentReason.bookingId > Booking.id [delete: cascade]
+
+Ref DelegationCredential_workspacePlatformId_fk: DelegationCredential.workspacePlatformId > WorkspacePlatform.id [delete: cascade]
+
+Ref DelegationCredential_organizationId_fk: DelegationCredential.organizationId > Team.id [delete: cascade]
+
+Ref EventTypeTranslation_eventTypeId_fk: EventTypeTranslation.eventTypeId > EventType.id [delete: cascade]
+
+Ref EventTypeTranslation_createdBy_fk: EventTypeTranslation.createdBy > users.id
+
+Ref EventTypeTranslation_updatedBy_fk: EventTypeTranslation.updatedBy > users.id [delete: set null]
+
+Ref WatchlistAudit_watchlistId_fk: WatchlistAudit.watchlistId > Watchlist.id [delete: set null]
+
+Ref BookingReport_bookingUid_fk: BookingReport.bookingUid - Booking.uid [delete: cascade]
+
+Ref BookingReport_reportedById_fk: BookingReport.reportedById > users.id [delete: set null]
+
+Ref BookingReport_organizationId_fk: BookingReport.organizationId > Team.id [delete: cascade]
+
+Ref BookingReport_watchlistId_fk: BookingReport.watchlistId > Watchlist.id [delete: set null]
+
+Ref BookingReport_globalWatchlistId_fk: BookingReport.globalWatchlistId > Watchlist.id [delete: set null]
+
+Ref WrongAssignmentReport_bookingUid_fk: WrongAssignmentReport.bookingUid > Booking.uid [delete: cascade]
+
+Ref WrongAssignmentReport_reportedById_fk: WrongAssignmentReport.reportedById > users.id [delete: set null]
+
+Ref WrongAssignmentReport_teamId_fk: WrongAssignmentReport.teamId > Team.id [delete: set null]
+
+Ref WrongAssignmentReport_reviewedById_fk: WrongAssignmentReport.reviewedById > users.id [delete: set null]
+
+Ref OrganizationOnboarding_createdById_fk: OrganizationOnboarding.createdById > users.id [delete: cascade]
+
+Ref OrganizationOnboarding_organizationId_fk: OrganizationOnboarding.organizationId - Team.id [delete: cascade]
+
+Ref InternalNotePreset_teamId_fk: InternalNotePreset.teamId > Team.id [delete: cascade]
+
+Ref FilterSegment_userId_fk: FilterSegment.userId > users.id [delete: cascade]
+
+Ref FilterSegment_teamId_fk: FilterSegment.teamId > Team.id [delete: cascade]
+
+Ref UserFilterSegmentPreference_userId_fk: UserFilterSegmentPreference.userId > users.id [delete: cascade]
+
+Ref UserFilterSegmentPreference_segmentId_fk: UserFilterSegmentPreference.segmentId > FilterSegment.id [delete: cascade]
+
+Ref BookingInternalNote_notePresetId_fk: BookingInternalNote.notePresetId > InternalNotePreset.id [delete: cascade]
+
+Ref BookingInternalNote_bookingId_fk: BookingInternalNote.bookingId > Booking.id [delete: cascade]
+
+Ref BookingInternalNote_createdById_fk: BookingInternalNote.createdById > users.id
+
+Ref Role_teamId_fk: Role.teamId > Team.id [delete: cascade]
+
+Ref RolePermission_roleId_fk: RolePermission.roleId > Role.id [delete: cascade]
+
+Ref BookingAudit_actorId_fk: BookingAudit.actorId > AuditActor.id [delete: restrict]
+
+Ref Agent_userId_fk: Agent.userId > users.id [delete: cascade]
+
+Ref Agent_teamId_fk: Agent.teamId > Team.id [delete: cascade]
+
+Ref CalAiPhoneNumber_userId_fk: CalAiPhoneNumber.userId > users.id [delete: cascade]
+
+Ref CalAiPhoneNumber_teamId_fk: CalAiPhoneNumber.teamId > Team.id [delete: cascade]
+
+Ref CalAiPhoneNumber_inboundAgentId_fk: CalAiPhoneNumber.inboundAgentId > Agent.id [delete: set null]
+
+Ref CalAiPhoneNumber_outboundAgentId_fk: CalAiPhoneNumber.outboundAgentId > Agent.id [delete: set null]
+
+Ref TeamBilling_teamId_fk: TeamBilling.teamId - Team.id [delete: cascade]
+
+Ref OrganizationBilling_teamId_fk: OrganizationBilling.teamId - Team.id [delete: cascade]
+
+Ref SeatChangeLog_teamId_fk: SeatChangeLog.teamId > Team.id [delete: cascade]
+
+Ref SeatChangeLog_processedInProrationId_fk: SeatChangeLog.processedInProrationId > MonthlyProration.id
+
+Ref SeatChangeLog_teamBillingId_fk: SeatChangeLog.teamBillingId > TeamBilling.id
+
+Ref SeatChangeLog_organizationBillingId_fk: SeatChangeLog.organizationBillingId > OrganizationBilling.id
+
+Ref MonthlyProration_teamId_fk: MonthlyProration.teamId > Team.id [delete: cascade]
+
+Ref MonthlyProration_teamBillingId_fk: MonthlyProration.teamBillingId > TeamBilling.id
+
+Ref MonthlyProration_organizationBillingId_fk: MonthlyProration.organizationBillingId > OrganizationBilling.id
+
+Ref CalendarCacheEvent_selectedCalendarId_fk: CalendarCacheEvent.selectedCalendarId > SelectedCalendar.id [delete: cascade]
+
+Ref IntegrationAttributeSync_organizationId_fk: IntegrationAttributeSync.organizationId > Team.id [delete: cascade]
+
+Ref IntegrationAttributeSync_credentialId_fk: IntegrationAttributeSync.credentialId > Credential.id [delete: cascade]
+
+Ref AttributeSyncRule_integrationAttributeSyncId_fk: AttributeSyncRule.integrationAttributeSyncId - IntegrationAttributeSync.id [delete: cascade]
+
+Ref AttributeSyncFieldMapping_attributeId_fk: AttributeSyncFieldMapping.attributeId > Attribute.id [delete: cascade]
+
+Ref AttributeSyncFieldMapping_integrationAttributeSyncId_fk: AttributeSyncFieldMapping.integrationAttributeSyncId > IntegrationAttributeSync.id [delete: cascade]
