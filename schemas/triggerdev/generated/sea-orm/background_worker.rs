@@ -138,7 +138,11 @@ impl Related<super::background_worker_file::Entity> for Entity {
         super::background_worker_to_background_worker_file::Relation::BackgroundWorkerFile.def()
     }
     fn via() -> Option<RelationDef> {
-        Some(super::background_worker_to_background_worker_file::Relation::BackgroundWorker.def().rev())
+        Some(
+            super::background_worker_to_background_worker_file::Relation::BackgroundWorker
+                .def()
+                .rev(),
+        )
     }
 }
 
@@ -147,7 +151,11 @@ impl Related<super::task_queue::Entity> for Entity {
         super::background_worker_to_task_queue::Relation::TaskQueue.def()
     }
     fn via() -> Option<RelationDef> {
-        Some(super::background_worker_to_task_queue::Relation::BackgroundWorker.def().rev())
+        Some(
+            super::background_worker_to_task_queue::Relation::BackgroundWorker
+                .def()
+                .rev(),
+        )
     }
 }
 

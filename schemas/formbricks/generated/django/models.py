@@ -856,7 +856,7 @@ class Organization(models.Model):
 
 
 class OrganizationBilling(models.Model):
-    organization = models.OneToOneField("Organization", on_delete=models.CASCADE, related_name="billing")
+    organization = models.OneToOneField("Organization", on_delete=models.CASCADE, related_name="billing", primary_key=True)
     stripe_customer_id = models.TextField(null=True, unique=True)
     limits = models.JSONField()
     usage_cycle_anchor = UtcDateTimeField(null=True)
@@ -988,6 +988,19 @@ class Session(models.Model):
         db_table = "Session"
         indexes = [
             models.Index(fields=["user"]),
+        ]
+
+
+class VerificationToken(models.Model):
+    pk = models.CompositePrimaryKey("identifier", "token")
+    identifier = models.TextField()
+    token = models.TextField()
+    expires = UtcDateTimeField()
+
+    class Meta:
+        db_table = "VerificationToken"
+        constraints = [
+            models.UniqueConstraint(fields=["identifier", "token"], name="VerificationToken_identifier_token_key"),
         ]
 
 
@@ -1729,7 +1742,7 @@ class RetentionNotice(models.Model):
 
 
 class RetentionSurveyRestore(models.Model):
-    survey = models.OneToOneField("Survey", on_delete=models.CASCADE, related_name="retention_restore", db_column="surveyId")
+    survey = models.OneToOneField("Survey", on_delete=models.CASCADE, related_name="retention_restore", primary_key=True, db_column="surveyId")
     restored_at = UtcDateTimeField(db_column="restoredAt")
 
     class Meta:

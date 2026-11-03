@@ -44,7 +44,7 @@ pub enum Relation {
     #[sea_orm(
         has_many = "super::team::Entity",
         from = "Column::Id",
-        to = "super::team::Column::CreatedByOAuthClientId"
+        to = "super::team::Column::CreatedByOauthClientId"
     )]
     Teams,
     #[sea_orm(has_many = "super::access_token::Entity")]
@@ -92,7 +92,11 @@ impl Related<super::user::Entity> for Entity {
         super::platform_oauth_client_to_user::Relation::User.def()
     }
     fn via() -> Option<RelationDef> {
-        Some(super::platform_oauth_client_to_user::Relation::PlatformOAuthClient.def().rev())
+        Some(
+            super::platform_oauth_client_to_user::Relation::PlatformOAuthClient
+                .def()
+                .rev(),
+        )
     }
 }
 

@@ -5,8 +5,7 @@ class AvatarImage < ApplicationRecord
 
   validates :bytes, presence: true
 
-  has_many :team, class_name: "Team", foreign_key: "avatarImageId", inverse_of: :avatar_image, dependent: :nullify
-  has_many :user, class_name: "User", foreign_key: "avatarImageId", inverse_of: :avatar_image, dependent: :nullify
-  has_many :organisation, class_name: "Organisation", foreign_key: "avatarImageId", inverse_of: :avatar_image,
-                          dependent: :nullify
+  has_many :team, foreign_key: "avatarImageId", inverse_of: :avatar_image, dependent: :nullify
+  has_many :user, foreign_key: "avatarImageId", inverse_of: :avatar_image, dependent: :nullify
+  has_many :organisation, foreign_key: "avatarImageId", inverse_of: :avatar_image, dependent: :nullify
 end

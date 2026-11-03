@@ -5,7 +5,7 @@ from typing import Any, TypeVar
 
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
-from django.contrib.postgres.indexes import BrinIndex, GinIndex
+from django.contrib.postgres.indexes import BTreeIndex, BrinIndex, GinIndex
 from django.db import models
 from django.db.backends.base.base import BaseDatabaseWrapper
 from django.utils import timezone
@@ -702,6 +702,21 @@ class SecretReference(models.Model):
 
     class Meta:
         db_table = "SecretReference"
+
+
+class SecretStore(models.Model):
+    key = models.TextField(primary_key=True, default=None)
+    value = models.JSONField()
+    version = models.TextField(default="1")
+    created_at = UtcDateTimeField(db_column="createdAt", default=timezone.now)
+    updated_at = UtcDateTimeField(db_column="updatedAt", auto_now=True)
+    objects = AutoNowQuerySet.as_manager()
+
+    class Meta:
+        db_table = "SecretStore"
+        indexes = [
+            BTreeIndex(fields=["key"]),
+        ]
 
 
 class OidcSigningKey(models.Model):
@@ -1894,7 +1909,7 @@ class TaskSchedule(models.Model):
     generator_expression = models.TextField(db_column="generatorExpression")
     generator_description = models.TextField(db_column="generatorDescription", default="")
     generator_type = models.TextField(choices=ScheduleGeneratorType.choices, db_column="generatorType", default=ScheduleGeneratorType.CRON)
-    timezone = models.TextField(default="UTC")
+    timezone_field = models.TextField(db_column="timezone", default="UTC")
     window_duration_seconds = models.IntegerField(null=True, db_column="windowDurationSeconds")
     window_percentage = models.IntegerField(null=True, db_column="windowPercentage")
     default_window_duration_seconds = models.IntegerField(null=True, db_column="defaultWindowDurationSeconds")

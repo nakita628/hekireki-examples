@@ -79,6 +79,18 @@ class User(models.Model):
         db_table = "users"
 
 
+class VerificationToken(models.Model):
+    identifier = models.TextField()
+    token = models.TextField(primary_key=True, default=None)
+    expires = UtcDateTimeField()
+
+    class Meta:
+        db_table = "verification_tokens"
+        constraints = [
+            models.UniqueConstraint(fields=["identifier", "token"], name="verification_tokens_identifier_token_key"),
+        ]
+
+
 class Post(models.Model):
     id = models.TextField(primary_key=True, default=None)
     title = models.TextField()

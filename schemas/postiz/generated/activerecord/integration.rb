@@ -20,10 +20,13 @@ class Integration < ApplicationRecord
 
   belongs_to :customer, foreign_key: "customerId", optional: true, inverse_of: :integrations
   belongs_to :organization, foreign_key: "organizationId", inverse_of: :integration
-  has_many :exising_plug_data, foreign_key: "integrationId", inverse_of: :integration, dependent: :restrict_with_error
+  has_many :exising_plug_data, class_name: "ExisingPlugData", foreign_key: "integrationId", inverse_of: :integration,
+                               dependent: :restrict_with_error
   has_many :webhooks, class_name: "IntegrationsWebhooks", foreign_key: "integrationId", inverse_of: :integration,
                       dependent: :restrict_with_error
-  has_many :order_items, foreign_key: "integrationId", inverse_of: :integration, dependent: :restrict_with_error
-  has_many :plugs, foreign_key: "integrationId", inverse_of: :integration, dependent: :restrict_with_error
+  has_many :order_items, class_name: "OrderItems", foreign_key: "integrationId", inverse_of: :integration,
+                         dependent: :restrict_with_error
+  has_many :plugs, class_name: "Plugs", foreign_key: "integrationId", inverse_of: :integration,
+                   dependent: :restrict_with_error
   has_many :posts, foreign_key: "integrationId", inverse_of: :integration, dependent: :restrict_with_error
 end

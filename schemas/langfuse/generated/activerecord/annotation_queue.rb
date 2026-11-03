@@ -7,8 +7,6 @@ class AnnotationQueue < ApplicationRecord
   validates :name, presence: true, uniqueness: { scope: :project_id }
 
   belongs_to :project, inverse_of: :annotation_queue
-  has_many :annotation_queue_item, class_name: "AnnotationQueueItem", foreign_key: "queue_id", inverse_of: :queue,
-                                   dependent: :destroy
-  has_many :annotation_queue_assignment, class_name: "AnnotationQueueAssignment", foreign_key: "queue_id",
-                                         inverse_of: :queue, dependent: :destroy
+  has_many :annotation_queue_item, foreign_key: "queue_id", inverse_of: :queue, dependent: :destroy
+  has_many :annotation_queue_assignment, foreign_key: "queue_id", inverse_of: :queue, dependent: :destroy
 end

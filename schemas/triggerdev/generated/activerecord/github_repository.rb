@@ -15,6 +15,5 @@ class GithubRepository < ApplicationRecord
 
   belongs_to :installation, class_name: "GithubAppInstallation", foreign_key: "installationId",
                             inverse_of: :repositories
-  has_many :connected_github_repository, class_name: "ConnectedGithubRepository", foreign_key: "repositoryId",
-                                         inverse_of: :repository, dependent: :destroy
+  has_many :connected_github_repository, foreign_key: "repositoryId", inverse_of: :repository, dependent: :destroy
 end

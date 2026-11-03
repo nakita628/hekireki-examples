@@ -8,5 +8,5 @@ class Automation < ApplicationRecord
   belongs_to :trigger, inverse_of: :automations
   belongs_to :action, inverse_of: :automations
   belongs_to :project, inverse_of: :automation
-  has_many :automation_execution, class_name: "AutomationExecution", inverse_of: :automation, dependent: :destroy
+  has_many :automation_execution, dependent: :destroy
 end

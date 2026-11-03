@@ -83,7 +83,7 @@ pub enum Relation {
     Parent,
     #[sea_orm(
         belongs_to = "super::platform_oauth_client::Entity",
-        from = "Column::CreatedByOAuthClientId",
+        from = "Column::CreatedByOauthClientId",
         to = "super::platform_oauth_client::Column::Id",
         on_delete = "Cascade"
     )]

@@ -138,6 +138,20 @@ class User(Base):
     evaluator_versions_created: Mapped[list["EvaluatorVersion"]] = relationship(back_populates="created_by_user")
     evaluation_rules_created: Mapped[list["EvaluationRule"]] = relationship(back_populates="created_by_user")
 
+class VerificationToken(Base):
+    __tablename__ = "verification_tokens"
+
+    identifier: Mapped[str]
+    token: Mapped[str] = mapped_column()
+    expires: Mapped[datetime]
+
+    __table_args__ = (
+        Index("verification_tokens_token_key", "token", unique=True),
+        Index("verification_tokens_identifier_token_key", "identifier", "token", unique=True),
+    )
+
+    __mapper_args__ = {"primary_key": [token]}
+
 class Organization(Base):
     __tablename__ = "organizations"
 
@@ -186,7 +200,7 @@ class Project(Base):
         Index("projects_org_id_idx", "org_id"),
     )
 
-    home_dashboard: Mapped[Optional["Dashboard"]] = relationship(back_populates="home_dashboard_projects")
+    home_dashboard: Mapped[Optional["Dashboard"]] = relationship(foreign_keys=[home_dashboard_id], back_populates="home_dashboard_projects")
     organization: Mapped["Organization"] = relationship(back_populates="projects")
     project_members: Mapped[list["ProjectMembership"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="project")
     api_keys: Mapped[list["ApiKey"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="project")
@@ -222,7 +236,7 @@ class Project(Base):
     llm_schema: Mapped[list["LlmSchema"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="project")
     llm_tool: Mapped[list["LlmTool"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="project")
     prompt_protected_labels: Mapped[list["PromptProtectedLabels"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="project")
-    dashboard: Mapped[list["Dashboard"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="project")
+    dashboard: Mapped[list["Dashboard"]] = relationship(foreign_keys="Dashboard.project_id", cascade="all, delete", passive_deletes=True, back_populates="project")
     dashboard_widget: Mapped[list["DashboardWidget"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="project")
     table_view_preset: Mapped[list["TableViewPreset"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="project")
     actions: Mapped[list["Action"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="project")
@@ -306,17 +320,11 @@ class RoleAssignment(Base):
     updated_at: Mapped[datetime] = mapped_column(default=utc_now, server_default=text("CURRENT_TIMESTAMP"), onupdate=utc_now)
 
     __table_args__ = (
-        Index("role_assignments_owner_org_id_idx", "deprecatedOwnerOrgId"),
-        Index("role_assignments_owner_project_id_idx", "deprecatedOwnerProjectId"),
         Index("role_assignments_org_id_idx", "org_id"),
         Index("role_assignments_project_id_idx", "project_id"),
         Index("role_assignments_principal_id_idx", "principal_id"),
         Index("role_assignments_user_id_idx", "user_id"),
         Index("role_assignments_api_key_id_idx", "api_key_id"),
-        Index("role_assignments_user_org_role_key", "deprecatedPrincipalUserId", "deprecatedOwnerOrgId", "system_role", unique=True),
-        Index("role_assignments_user_project_role_key", "deprecatedPrincipalUserId", "deprecatedOwnerProjectId", "system_role", unique=True),
-        Index("role_assignments_api_key_org_role_key", "deprecatedPrincipalApiKeyId", "deprecatedOwnerOrgId", "system_role", unique=True),
-        Index("role_assignments_api_key_project_role_key", "deprecatedPrincipalApiKeyId", "deprecatedOwnerProjectId", "system_role", unique=True),
         Index("role_assignments_owner_id_principal_id_role_id_key", "owner_id", "principal_id", "role_id", unique=True),
     )
 
@@ -1508,6 +1516,32 @@ class BatchAction(Base):
 
     project: Mapped["Project"] = relationship(back_populates="batch_action")
 
+class Media(Base):
+    __tablename__ = "media"
+
+    id: Mapped[str] = mapped_column()
+    sha256_hash: Mapped[str] = mapped_column("sha_256_hash", CHAR(44))
+    project_id: Mapped[str] = mapped_column(ForeignKey("projects.id", ondelete="CASCADE", onupdate="CASCADE", name="media_project_id_fkey"))
+    created_at: Mapped[datetime] = mapped_column(default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
+    updated_at: Mapped[datetime] = mapped_column(default=utc_now, server_default=text("CURRENT_TIMESTAMP"), onupdate=utc_now)
+    uploaded_at: Mapped[Optional[datetime]]
+    upload_http_status: Mapped[Optional[int]]
+    upload_http_error: Mapped[Optional[str]]
+    bucket_path: Mapped[str]
+    bucket_name: Mapped[str]
+    content_type: Mapped[str]
+    content_length: Mapped[int] = mapped_column(BigInteger)
+
+    __table_args__ = (
+        Index("media_project_id_created_at_idx", "project_id", "created_at"),
+        Index("media_project_id_id_key", "project_id", "id", unique=True),
+        Index("media_project_id_sha_256_hash_key", "project_id", "sha_256_hash", unique=True),
+    )
+
+    __mapper_args__ = {"primary_key": [project_id, id]}
+
+    project: Mapped["Project"] = relationship(back_populates="media")
+
 class TraceMedia(Base):
     __tablename__ = "trace_media"
 
@@ -1564,6 +1598,26 @@ class DatasetItemMedia(Base):
         Index("dataset_item_media_item_version_field_path_key", "project_id", "dataset_item_id", "dataset_item_valid_from", "field", "json_path", unique=True),
     )
 
+class BillingMeterBackup(Base):
+    __tablename__ = "billing_meter_backups"
+
+    stripe_customer_id: Mapped[str] = mapped_column()
+    meter_id: Mapped[str] = mapped_column()
+    start_time: Mapped[datetime] = mapped_column()
+    end_time: Mapped[datetime] = mapped_column()
+    aggregated_value: Mapped[int]
+    event_name: Mapped[str]
+    org_id: Mapped[str]
+    created_at: Mapped[datetime] = mapped_column(default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
+    updated_at: Mapped[datetime] = mapped_column(default=utc_now, server_default=text("CURRENT_TIMESTAMP"), onupdate=utc_now)
+
+    __table_args__ = (
+        Index("billing_meter_backups_stripe_customer_id_meter_id_start_tim_idx", "stripe_customer_id", "meter_id", "start_time", "end_time"),
+        Index("billing_meter_backups_stripe_customer_id_meter_id_start_tim_key", "stripe_customer_id", "meter_id", "start_time", "end_time", unique=True),
+    )
+
+    __mapper_args__ = {"primary_key": [stripe_customer_id, meter_id, start_time, end_time]}
+
 class LlmSchema(Base):
     __tablename__ = "llm_schemas"
 
@@ -1614,8 +1668,8 @@ class Dashboard(Base):
 
     created_by_user: Mapped[Optional["User"]] = relationship(foreign_keys=[created_by], back_populates="dashboard_created")
     updated_by_user: Mapped[Optional["User"]] = relationship(foreign_keys=[updated_by], back_populates="dashboard_updated")
-    project: Mapped[Optional["Project"]] = relationship(back_populates="dashboard")
-    home_dashboard_projects: Mapped[list["Project"]] = relationship(back_populates="home_dashboard")
+    project: Mapped[Optional["Project"]] = relationship(foreign_keys=[project_id], back_populates="dashboard")
+    home_dashboard_projects: Mapped[list["Project"]] = relationship(foreign_keys="Project.home_dashboard_id", back_populates="home_dashboard")
 
 class DashboardWidget(Base):
     __tablename__ = "dashboard_widgets"

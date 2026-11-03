@@ -65,6 +65,21 @@ class Account(Base):
 
     user: Mapped["User"] = relationship(back_populates="accounts")
 
+class Session(Base):
+    __tablename__ = "Session"
+
+    session_token: Mapped[str] = mapped_column("sessionToken")
+    user_id: Mapped[str] = mapped_column("userId", ForeignKey("User.id", ondelete="CASCADE", onupdate="CASCADE", name="Session_userId_fkey"))
+    expires: Mapped[datetime]
+
+    __table_args__ = (
+        Index("Session_sessionToken_key", "sessionToken", unique=True),
+    )
+
+    __mapper_args__ = {"primary_key": [session_token]}
+
+    user: Mapped["User"] = relationship(back_populates="sessions")
+
 class VerificationToken(Base):
     __tablename__ = "VerificationToken"
 

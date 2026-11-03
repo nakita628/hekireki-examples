@@ -14,6 +14,7 @@ class Orders < ApplicationRecord
   belongs_to :seller, class_name: "User", foreign_key: "sellerId", inverse_of: :order_seller
   has_many :orders_items, class_name: "OrderItems", foreign_key: "orderId", inverse_of: :order,
                           dependent: :restrict_with_error
-  has_many :payout_problems, foreign_key: "orderId", inverse_of: :order, dependent: :restrict_with_error
+  has_many :payout_problems, class_name: "PayoutProblems", foreign_key: "orderId", inverse_of: :order,
+                             dependent: :restrict_with_error
   has_many :posts, foreign_key: "submittedForOrderId", inverse_of: :submitted_for_order, dependent: :nullify
 end

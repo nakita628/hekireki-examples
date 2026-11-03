@@ -31,8 +31,8 @@ type Customer struct {
 	ProjectConnectID       *string   `gorm:"column:projectConnectId" json:"projectConnectId"`
 	CreatedAt              DateTime  `gorm:"column:createdAt;index:Customer_projectId_createdAt_idx;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt              DateTime  `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Project                Project
-	Link                   Link
+	Project                *Project
+	Link                   *Link
 }
 
 func (Customer) TableName() string {
@@ -69,10 +69,10 @@ type Dashboard struct {
 	ShowConversions bool     `gorm:"column:showConversions;default:false;not null" json:"showConversions"`
 	CreatedAt       DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt       DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Link            Link
-	Folder          Folder
-	Project         Project
-	User            User
+	Link            *Link
+	Folder          *Folder
+	Project         *Project
+	User            *User
 }
 
 func (Dashboard) TableName() string {
@@ -116,7 +116,7 @@ type Domain struct {
 	CreatedAt               DateTime       `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt               DateTime       `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
 	ProjectID               *string        `gorm:"column:projectId;index:Domain_projectId_idx" json:"projectId"`
-	Project                 Project
+	Project                 *Project
 	Links                   []Link            `gorm:"foreignKey:Domain;references:Slug"`
 	RegisteredDomain        *RegisteredDomain `gorm:"foreignKey:DomainID;constraint:OnDelete:SET NULL"`
 }
@@ -160,8 +160,8 @@ type RegisteredDomain struct {
 	ExpiresAt             DateTime  `gorm:"column:expiresAt;index:RegisteredDomain_expiresAt_idx;not null" json:"expiresAt"`
 	CreatedAt             DateTime  `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt             DateTime  `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Project               Project
-	Domain                Domain
+	Project               *Project
+	Domain                *Domain
 }
 
 func (RegisteredDomain) TableName() string {
@@ -202,7 +202,7 @@ type DefaultDomains struct {
 	Figpage     *bool  `gorm:"column:figpage;default:true;not null" json:"figpage"`
 	Loooooooong bool   `gorm:"column:loooooooong;default:false;not null" json:"loooooooong"`
 	ProjectID   string `gorm:"column:projectId;uniqueIndex;not null" json:"projectId"`
-	Project     Project
+	Project     *Project
 }
 
 func (DefaultDomains) TableName() string {
@@ -225,7 +225,7 @@ type Folder struct {
 	AccessLevel    *string  `gorm:"column:accessLevel" json:"accessLevel"`
 	CreatedAt      DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt      DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Project        Project
+	Project        *Project
 	Links          []Link                `gorm:"foreignKey:FolderID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
 	Users          []FolderUser          `gorm:"foreignKey:FolderID;constraint:OnDelete:CASCADE"`
 	AccessRequests []FolderAccessRequest `gorm:"foreignKey:FolderID;constraint:OnDelete:CASCADE"`
@@ -263,8 +263,8 @@ type FolderUser struct {
 	Role      *string  `gorm:"column:role" json:"role"`
 	CreatedAt DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Folder    Folder
-	User      User
+	Folder    *Folder
+	User      *User
 }
 
 func (FolderUser) TableName() string {
@@ -298,8 +298,8 @@ type FolderAccessRequest struct {
 	FolderID  string   `gorm:"column:folderId;uniqueIndex:FolderAccessRequest_folderId_userId_key;not null" json:"folderId"`
 	UserID    string   `gorm:"column:userId;uniqueIndex:FolderAccessRequest_folderId_userId_key;index:FolderAccessRequest_userId_idx;not null" json:"userId"`
 	CreatedAt DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
-	Folder    Folder
-	User      User
+	Folder    *Folder
+	User      *User
 }
 
 func (FolderAccessRequest) TableName() string {
@@ -336,8 +336,8 @@ type Integration struct {
 	ComingSoon    bool           `gorm:"column:comingSoon;default:false;not null" json:"comingSoon"`
 	CreatedAt     DateTime       `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt     DateTime       `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	User          User
-	Project       Project
+	User          *User
+	Project       *Project
 	Installations []InstalledIntegration `gorm:"foreignKey:IntegrationID;constraint:OnDelete:CASCADE"`
 	OAuthApp      *OAuthApp              `gorm:"foreignKey:IntegrationID;constraint:OnDelete:CASCADE"`
 }
@@ -377,9 +377,9 @@ type InstalledIntegration struct {
 	UpdatedAt     DateTime       `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
 	Credentials   datatypes.JSON `gorm:"column:credentials" json:"credentials"`
 	Settings      datatypes.JSON `gorm:"column:settings" json:"settings"`
-	User          User
-	Integration   Integration
-	Project       Project
+	User          *User
+	Integration   *Integration
+	Project       *Project
 	RefreshTokens []OAuthRefreshToken `gorm:"foreignKey:InstallationID;constraint:OnDelete:CASCADE"`
 	AccessTokens  []RestrictedToken   `gorm:"foreignKey:InstallationID;constraint:OnDelete:CASCADE"`
 	Webhooks      []Webhook           `gorm:"foreignKey:InstallationID;constraint:OnDelete:CASCADE"`
@@ -430,7 +430,7 @@ type Invoice struct {
 	FailedAttempts       int            `gorm:"column:failedAttempts;default:0;not null" json:"failedAttempts"`
 	CreatedAt            DateTime       `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	PaidAt               *DateTime      `gorm:"column:paidAt" json:"paidAt"`
-	Workspace            Project        `gorm:"foreignKey:WorkspaceID"`
+	Workspace            *Project       `gorm:"foreignKey:WorkspaceID"`
 }
 
 func (Invoice) TableName() string {
@@ -572,10 +572,10 @@ type Link struct {
 	CreatedAt                      DateTime       `gorm:"column:createdAt;index:Link_projectId_folderId_archived_createdAt_idx;index:Link_domain_createdAt_idx;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt                      DateTime       `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
 	Comments                       *string        `gorm:"column:comments;type:text" json:"comments"`
-	User                           User
-	Project                        Project
-	Folder                         Folder
-	ShortDomain                    Domain        `gorm:"foreignKey:Domain;references:Slug"`
+	User                           *User
+	Project                        *Project
+	Folder                         *Folder
+	ShortDomain                    *Domain       `gorm:"foreignKey:Domain;references:Slug"`
 	Tags                           []LinkTag     `gorm:"foreignKey:LinkID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 	Webhooks                       []LinkWebhook `gorm:"foreignKey:LinkID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 	Customers                      []Customer    `gorm:"foreignKey:LinkID"`
@@ -615,7 +615,7 @@ type YearInReview struct {
 	WorkspaceID  string         `gorm:"column:workspaceId;index:YearInReview_workspaceId_idx;not null" json:"workspaceId"`
 	CreatedAt    DateTime       `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	SentAt       *DateTime      `gorm:"column:sentAt" json:"sentAt"`
-	Workspace    Project        `gorm:"foreignKey:WorkspaceID"`
+	Workspace    *Project       `gorm:"foreignKey:WorkspaceID"`
 }
 
 func (YearInReview) TableName() string {
@@ -637,7 +637,7 @@ type UserNotificationPreferences struct {
 	ID       string `gorm:"column:id;primaryKey" json:"id"`
 	UserID   string `gorm:"column:userId;uniqueIndex;not null" json:"userId"`
 	DubLinks *bool  `gorm:"column:dubLinks;default:true;not null" json:"dubLinks"`
-	User     User
+	User     *User
 }
 
 func (UserNotificationPreferences) TableName() string {
@@ -652,11 +652,11 @@ func (m *UserNotificationPreferences) BeforeCreate(_ *gorm.DB) error {
 }
 
 type NotificationPreference struct {
-	ID                         string       `gorm:"column:id;primaryKey" json:"id"`
-	ProjectUserID              string       `gorm:"column:projectUserId;uniqueIndex;not null" json:"projectUserId"`
-	LinkUsageSummary           *bool        `gorm:"column:linkUsageSummary;default:true;not null" json:"linkUsageSummary"`
-	DomainConfigurationUpdates *bool        `gorm:"column:domainConfigurationUpdates;default:true;not null" json:"domainConfigurationUpdates"`
-	ProjectUser                ProjectUsers `gorm:"foreignKey:ProjectUserID"`
+	ID                         string        `gorm:"column:id;primaryKey" json:"id"`
+	ProjectUserID              string        `gorm:"column:projectUserId;uniqueIndex;not null" json:"projectUserId"`
+	LinkUsageSummary           *bool         `gorm:"column:linkUsageSummary;default:true;not null" json:"linkUsageSummary"`
+	DomainConfigurationUpdates *bool         `gorm:"column:domainConfigurationUpdates;default:true;not null" json:"domainConfigurationUpdates"`
+	ProjectUser                *ProjectUsers `gorm:"foreignKey:ProjectUserID"`
 }
 
 func (NotificationPreference) TableName() string {
@@ -678,7 +678,7 @@ type OAuthApp struct {
 	PartialClientSecret string         `gorm:"column:partialClientSecret;not null" json:"partialClientSecret"`
 	RedirectUris        datatypes.JSON `gorm:"column:redirectUris;not null" json:"redirectUris"`
 	Pkce                bool           `gorm:"column:pkce;default:false;not null" json:"pkce"`
-	Integration         Integration
+	Integration         *Integration
 	OAuthCodes          []OAuthCode `gorm:"foreignKey:ClientID;references:ClientID;constraint:OnDelete:CASCADE"`
 }
 
@@ -687,20 +687,20 @@ func (OAuthApp) TableName() string {
 }
 
 type OAuthCode struct {
-	ID                  string   `gorm:"column:id;primaryKey" json:"id"`
-	ClientID            string   `gorm:"column:clientId;index:OAuthCode_clientId_idx;not null" json:"clientId"`
-	UserID              string   `gorm:"column:userId;index:OAuthCode_userId_idx;not null" json:"userId"`
-	ProjectID           string   `gorm:"column:projectId;index:OAuthCode_projectId_idx;not null" json:"projectId"`
-	Code                string   `gorm:"column:code;uniqueIndex;not null" json:"code"`
-	Scopes              *string  `gorm:"column:scopes;type:text" json:"scopes"`
-	RedirectURI         string   `gorm:"column:redirectUri;not null" json:"redirectUri"`
-	CodeChallenge       *string  `gorm:"column:codeChallenge" json:"codeChallenge"`
-	CodeChallengeMethod *string  `gorm:"column:codeChallengeMethod" json:"codeChallengeMethod"`
-	ExpiresAt           DateTime `gorm:"column:expiresAt;not null" json:"expiresAt"`
-	CreatedAt           DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
-	OAuthApp            OAuthApp `gorm:"foreignKey:ClientID;references:ClientID"`
-	User                User
-	Project             Project
+	ID                  string    `gorm:"column:id;primaryKey" json:"id"`
+	ClientID            string    `gorm:"column:clientId;index:OAuthCode_clientId_idx;not null" json:"clientId"`
+	UserID              string    `gorm:"column:userId;index:OAuthCode_userId_idx;not null" json:"userId"`
+	ProjectID           string    `gorm:"column:projectId;index:OAuthCode_projectId_idx;not null" json:"projectId"`
+	Code                string    `gorm:"column:code;uniqueIndex;not null" json:"code"`
+	Scopes              *string   `gorm:"column:scopes;type:text" json:"scopes"`
+	RedirectURI         string    `gorm:"column:redirectUri;not null" json:"redirectUri"`
+	CodeChallenge       *string   `gorm:"column:codeChallenge" json:"codeChallenge"`
+	CodeChallengeMethod *string   `gorm:"column:codeChallengeMethod" json:"codeChallengeMethod"`
+	ExpiresAt           DateTime  `gorm:"column:expiresAt;not null" json:"expiresAt"`
+	CreatedAt           DateTime  `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
+	OAuthApp            *OAuthApp `gorm:"foreignKey:ClientID;references:ClientID"`
+	User                *User
+	Project             *Project
 }
 
 func (OAuthCode) TableName() string {
@@ -719,14 +719,14 @@ func (m *OAuthCode) BeforeCreate(tx *gorm.DB) error {
 }
 
 type OAuthRefreshToken struct {
-	ID                   string               `gorm:"column:id;primaryKey" json:"id"`
-	InstallationID       string               `gorm:"column:installationId;index:OAuthRefreshToken_installationId_idx;not null" json:"installationId"`
-	AccessTokenID        string               `gorm:"column:accessTokenId;index:OAuthRefreshToken_accessTokenId_idx;not null" json:"accessTokenId"`
-	HashedRefreshToken   string               `gorm:"column:hashedRefreshToken;uniqueIndex;not null" json:"hashedRefreshToken"`
-	ExpiresAt            DateTime             `gorm:"column:expiresAt;not null" json:"expiresAt"`
-	CreatedAt            DateTime             `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
-	AccessToken          RestrictedToken      `gorm:"foreignKey:AccessTokenID"`
-	InstalledIntegration InstalledIntegration `gorm:"foreignKey:InstallationID"`
+	ID                   string                `gorm:"column:id;primaryKey" json:"id"`
+	InstallationID       string                `gorm:"column:installationId;index:OAuthRefreshToken_installationId_idx;not null" json:"installationId"`
+	AccessTokenID        string                `gorm:"column:accessTokenId;index:OAuthRefreshToken_accessTokenId_idx;not null" json:"accessTokenId"`
+	HashedRefreshToken   string                `gorm:"column:hashedRefreshToken;uniqueIndex;not null" json:"hashedRefreshToken"`
+	ExpiresAt            DateTime              `gorm:"column:expiresAt;not null" json:"expiresAt"`
+	CreatedAt            DateTime              `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
+	AccessToken          *RestrictedToken      `gorm:"foreignKey:AccessTokenID"`
+	InstalledIntegration *InstalledIntegration `gorm:"foreignKey:InstallationID"`
 }
 
 func (OAuthRefreshToken) TableName() string {
@@ -803,7 +803,7 @@ type Account struct {
 	Scope                 *string `gorm:"column:scope" json:"scope"`
 	IDToken               *string `gorm:"column:id_token;type:text" json:"id_token"`
 	SessionState          *string `gorm:"column:session_state" json:"session_state"`
-	User                  User
+	User                  *User
 }
 
 func (Account) TableName() string {
@@ -822,7 +822,7 @@ type Session struct {
 	SessionToken string   `gorm:"column:sessionToken;uniqueIndex;not null" json:"sessionToken"`
 	UserID       string   `gorm:"column:userId;index:Session_userId_idx;not null" json:"userId"`
 	Expires      DateTime `gorm:"column:expires;not null" json:"expires"`
-	User         User
+	User         *User
 }
 
 func (Session) TableName() string {
@@ -843,7 +843,7 @@ type Tag struct {
 	CreatedAt DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
 	ProjectID *string  `gorm:"column:projectId;uniqueIndex:Tag_name_projectId_key;index:Tag_projectId_idx" json:"projectId"`
-	Project   Project
+	Project   *Project
 	Links     []LinkTag `gorm:"foreignKey:TagID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 }
 
@@ -876,8 +876,8 @@ type LinkTag struct {
 	UpdatedAt DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
 	LinkID    string   `gorm:"column:linkId;uniqueIndex:LinkTag_linkId_tagId_key;not null" json:"linkId"`
 	TagID     string   `gorm:"column:tagId;uniqueIndex:LinkTag_linkId_tagId_key;index:LinkTag_tagId_idx;not null" json:"tagId"`
-	Link      Link
-	Tag       Tag
+	Link      *Link
+	Tag       *Tag
 }
 
 func (LinkTag) TableName() string {
@@ -916,7 +916,7 @@ type Token struct {
 	CreatedAt  DateTime  `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt  DateTime  `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
 	UserID     string    `gorm:"column:userId;index:Token_userId_idx;not null" json:"userId"`
-	User       User
+	User       *User
 }
 
 func (Token) TableName() string {
@@ -958,10 +958,10 @@ type RestrictedToken struct {
 	UserID               string    `gorm:"column:userId;index:RestrictedToken_userId_idx;not null" json:"userId"`
 	ProjectID            string    `gorm:"column:projectId;index:RestrictedToken_projectId_idx;not null" json:"projectId"`
 	InstallationID       *string   `gorm:"column:installationId;index:RestrictedToken_installationId_idx" json:"installationId"`
-	User                 User
-	Project              Project
-	InstalledIntegration InstalledIntegration `gorm:"foreignKey:InstallationID"`
-	RefreshTokens        []OAuthRefreshToken  `gorm:"foreignKey:AccessTokenID;constraint:OnDelete:CASCADE"`
+	User                 *User
+	Project              *Project
+	InstalledIntegration *InstalledIntegration `gorm:"foreignKey:InstallationID"`
+	RefreshTokens        []OAuthRefreshToken   `gorm:"foreignKey:AccessTokenID;constraint:OnDelete:CASCADE"`
 }
 
 func (RestrictedToken) TableName() string {
@@ -990,6 +990,36 @@ func (*RestrictedToken) BeforeUpdate(tx *gorm.DB) error {
 	return nil
 }
 
+type VerificationToken struct {
+	Identifier string   `gorm:"column:identifier;uniqueIndex:VerificationToken_identifier_token_key;not null" json:"identifier"`
+	Token      string   `gorm:"column:token;primaryKey;uniqueIndex;uniqueIndex:VerificationToken_identifier_token_key" json:"token"`
+	Expires    DateTime `gorm:"column:expires;not null" json:"expires"`
+}
+
+func (VerificationToken) TableName() string {
+	return "VerificationToken"
+}
+
+type EmailVerificationToken struct {
+	Identifier string   `gorm:"column:identifier;uniqueIndex:EmailVerificationToken_identifier_token_key;not null" json:"identifier"`
+	Token      string   `gorm:"column:token;primaryKey;uniqueIndex;uniqueIndex:EmailVerificationToken_identifier_token_key" json:"token"`
+	Expires    DateTime `gorm:"column:expires;not null" json:"expires"`
+}
+
+func (EmailVerificationToken) TableName() string {
+	return "EmailVerificationToken"
+}
+
+type PasswordResetToken struct {
+	Identifier string   `gorm:"column:identifier;uniqueIndex:PasswordResetToken_identifier_token_key;not null" json:"identifier"`
+	Token      string   `gorm:"column:token;primaryKey;uniqueIndex;uniqueIndex:PasswordResetToken_identifier_token_key" json:"token"`
+	Expires    DateTime `gorm:"column:expires;not null" json:"expires"`
+}
+
+func (PasswordResetToken) TableName() string {
+	return "PasswordResetToken"
+}
+
 type UtmTemplate struct {
 	ID          string   `gorm:"column:id;primaryKey" json:"id"`
 	Name        string   `gorm:"column:name;uniqueIndex:UtmTemplate_projectId_name_key;not null" json:"name"`
@@ -1003,8 +1033,8 @@ type UtmTemplate struct {
 	ProjectID   *string  `gorm:"column:projectId;uniqueIndex:UtmTemplate_projectId_name_key" json:"projectId"`
 	CreatedAt   DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt   DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	User        User
-	Project     Project
+	User        *User
+	Project     *Project
 }
 
 func (UtmTemplate) TableName() string {
@@ -1045,10 +1075,10 @@ type Webhook struct {
 	DisabledAt           *DateTime      `gorm:"column:disabledAt" json:"disabledAt"`
 	CreatedAt            DateTime       `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt            DateTime       `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Project              Project
-	InstalledIntegration InstalledIntegration `gorm:"foreignKey:InstallationID"`
-	Links                []LinkWebhook        `gorm:"foreignKey:WebhookID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	Folders              []FolderWebhook      `gorm:"foreignKey:WebhookID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	Project              *Project
+	InstalledIntegration *InstalledIntegration `gorm:"foreignKey:InstallationID"`
+	Links                []LinkWebhook         `gorm:"foreignKey:WebhookID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	Folders              []FolderWebhook       `gorm:"foreignKey:WebhookID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 }
 
 func (Webhook) TableName() string {
@@ -1079,8 +1109,8 @@ type LinkWebhook struct {
 	LinkID    string   `gorm:"column:linkId;uniqueIndex:LinkWebhook_linkId_webhookId_key;not null" json:"linkId"`
 	WebhookID string   `gorm:"column:webhookId;uniqueIndex:LinkWebhook_linkId_webhookId_key;index:LinkWebhook_webhookId_idx;not null" json:"webhookId"`
 	CreatedAt DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
-	Link      Link
-	Webhook   Webhook
+	Link      *Link
+	Webhook   *Webhook
 }
 
 func (LinkWebhook) TableName() string {
@@ -1103,8 +1133,8 @@ type FolderWebhook struct {
 	FolderID  string   `gorm:"column:folderId;uniqueIndex:FolderWebhook_folderId_webhookId_key;not null" json:"folderId"`
 	WebhookID string   `gorm:"column:webhookId;uniqueIndex:FolderWebhook_folderId_webhookId_key;index:FolderWebhook_webhookId_idx;not null" json:"webhookId"`
 	CreatedAt DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
-	Folder    Folder
-	Webhook   Webhook
+	Folder    *Folder
+	Webhook   *Webhook
 }
 
 func (FolderWebhook) TableName() string {
@@ -1214,6 +1244,27 @@ func (*Project) BeforeUpdate(tx *gorm.DB) error {
 	return nil
 }
 
+type ProjectInvite struct {
+	Email     string   `gorm:"column:email;primaryKey;uniqueIndex:ProjectInvite_email_projectId_key" json:"email"`
+	Expires   DateTime `gorm:"column:expires;not null" json:"expires"`
+	ProjectID string   `gorm:"column:projectId;primaryKey;uniqueIndex:ProjectInvite_email_projectId_key;index:ProjectInvite_projectId_idx" json:"projectId"`
+	Role      string   `gorm:"column:role;default:'member';not null" json:"role"`
+	CreatedAt DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
+	Project   *Project
+}
+
+func (ProjectInvite) TableName() string {
+	return "ProjectInvite"
+}
+
+func (m *ProjectInvite) BeforeCreate(tx *gorm.DB) error {
+	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
+	if m.CreatedAt.IsZero() {
+		m.CreatedAt = DateTime{Time: now}
+	}
+	return nil
+}
+
 type ProjectUsers struct {
 	ID                     string         `gorm:"column:id;primaryKey" json:"id"`
 	Role                   string         `gorm:"column:role;default:'member';not null" json:"role"`
@@ -1223,8 +1274,8 @@ type ProjectUsers struct {
 	DefaultFolderID        *string        `gorm:"column:defaultFolderId" json:"defaultFolderId"`
 	CreatedAt              DateTime       `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt              DateTime       `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	User                   User
-	Project                Project
+	User                   *User
+	Project                *Project
 	NotificationPreference *NotificationPreference `gorm:"foreignKey:ProjectUserID;constraint:OnDelete:CASCADE"`
 }
 
@@ -1259,7 +1310,7 @@ type SentEmail struct {
 	Type      string   `gorm:"column:type;not null" json:"type"`
 	CreatedAt DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	ProjectID *string  `gorm:"column:projectId;index:SentEmail_projectId_idx" json:"projectId"`
-	Project   Project
+	Project   *Project
 }
 
 func (SentEmail) TableName() string {

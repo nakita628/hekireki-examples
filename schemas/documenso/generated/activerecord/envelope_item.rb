@@ -8,5 +8,5 @@ class EnvelopeItem < ApplicationRecord
 
   belongs_to :document_data, foreign_key: "documentDataId", inverse_of: :envelope_item
   belongs_to :envelope, foreign_key: "envelopeId", inverse_of: :envelope_items
-  has_many :field, class_name: "Field", foreign_key: "envelopeItemId", inverse_of: :envelope_item, dependent: :destroy
+  has_many :field, foreign_key: "envelopeItemId", inverse_of: :envelope_item, dependent: :destroy
 end

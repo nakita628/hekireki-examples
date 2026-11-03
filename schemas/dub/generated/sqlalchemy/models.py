@@ -748,6 +748,51 @@ class RestrictedToken(Base):
     installed_integration: Mapped[Optional["InstalledIntegration"]] = relationship(back_populates="access_tokens")
     refresh_tokens: Mapped[list["OAuthRefreshToken"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="access_token")
 
+class VerificationToken(Base):
+    __tablename__ = "VerificationToken"
+
+    identifier: Mapped[str]
+    token: Mapped[str] = mapped_column()
+    expires: Mapped[datetime]
+
+    __table_args__ = (
+        Index("VerificationToken_token_key", "token", unique=True),
+        Index("VerificationToken_identifier_token_key", "identifier", "token", unique=True),
+        {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_unicode_ci"},
+    )
+
+    __mapper_args__ = {"primary_key": [token]}
+
+class EmailVerificationToken(Base):
+    __tablename__ = "EmailVerificationToken"
+
+    identifier: Mapped[str]
+    token: Mapped[str] = mapped_column()
+    expires: Mapped[datetime]
+
+    __table_args__ = (
+        Index("EmailVerificationToken_token_key", "token", unique=True),
+        Index("EmailVerificationToken_identifier_token_key", "identifier", "token", unique=True),
+        {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_unicode_ci"},
+    )
+
+    __mapper_args__ = {"primary_key": [token]}
+
+class PasswordResetToken(Base):
+    __tablename__ = "PasswordResetToken"
+
+    identifier: Mapped[str]
+    token: Mapped[str] = mapped_column()
+    expires: Mapped[datetime]
+
+    __table_args__ = (
+        Index("PasswordResetToken_token_key", "token", unique=True),
+        Index("PasswordResetToken_identifier_token_key", "identifier", "token", unique=True),
+        {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_unicode_ci"},
+    )
+
+    __mapper_args__ = {"primary_key": [token]}
+
 class UtmTemplate(Base):
     __tablename__ = "UtmTemplate"
 
@@ -917,6 +962,25 @@ class Project(Base):
     dashboards: Mapped[list["Dashboard"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="project")
     utm_templates: Mapped[list["UtmTemplate"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="project")
     year_in_reviews: Mapped[list["YearInReview"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="workspace")
+
+class ProjectInvite(Base):
+    __tablename__ = "ProjectInvite"
+
+    email: Mapped[str] = mapped_column()
+    expires: Mapped[datetime]
+    project_id: Mapped[str] = mapped_column("projectId", ForeignKey("Project.id", ondelete="CASCADE", onupdate="CASCADE", name="ProjectInvite_projectId_fkey"))
+    role: Mapped[str] = mapped_column(Enum("owner", "member", "viewer", "billing", name="WorkspaceRole"), default="member", server_default=text("'member'"))
+    created_at: Mapped[datetime] = mapped_column("createdAt", default=utc_now, server_default=text("CURRENT_TIMESTAMP(3)"))
+
+    __table_args__ = (
+        Index("ProjectInvite_projectId_idx", "projectId"),
+        Index("ProjectInvite_email_projectId_key", "email", "projectId", unique=True),
+        {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_unicode_ci"},
+    )
+
+    __mapper_args__ = {"primary_key": [email, project_id]}
+
+    project: Mapped["Project"] = relationship(back_populates="invites")
 
 class ProjectUsers(Base):
     __tablename__ = "ProjectUsers"

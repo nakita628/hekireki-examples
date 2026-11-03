@@ -194,7 +194,7 @@ class User(models.Model):
     audience = models.IntegerField(default=0)
     picture = models.ForeignKey("Media", on_delete=models.SET_NULL, related_name="user_picture", db_column="pictureId", null=True, db_index=False)
     provider_id = models.TextField(null=True, db_column="providerId")
-    timezone = models.IntegerField()
+    timezone_field = models.IntegerField(db_column="timezone")
     timezone_name = models.TextField(null=True, db_column="timezoneName")
     created_at = UtcDateTimeField(db_column="createdAt", default=timezone.now)
     updated_at = UtcDateTimeField(db_column="updatedAt", auto_now=True)
@@ -1071,6 +1071,27 @@ class MastraTraces(models.Model):
         db_table = "mastra_traces"
         indexes = [
             models.Index(fields=["name", "-start_time"]),
+        ]
+
+
+class MastraWorkflowSnapshot(models.Model):
+    pk = models.CompositePrimaryKey("workflow_name", "run_id")
+    workflow_name = models.TextField()
+    run_id = models.TextField()
+    resource_id = models.TextField(null=True, db_column="resourceId")
+    snapshot = models.TextField()
+    created_at = UtcDateTimeField(db_column="createdAt")
+    updated_at = UtcDateTimeField(db_column="updatedAt")
+    created_at_z = models.DateTimeField(null=True, db_column="createdAtZ", default=timezone.now)
+    updated_at_z = models.DateTimeField(null=True, db_column="updatedAtZ", default=timezone.now)
+
+    class Meta:
+        db_table = "mastra_workflow_snapshot"
+        constraints = [
+            models.UniqueConstraint(fields=["workflow_name", "run_id"], name="public_mastra_workflow_snapshot_workflow_name_run_id_key"),
+        ]
+        indexes = [
+            models.Index(fields=["workflow_name", "-created_at"]),
         ]
 
 

@@ -100,7 +100,7 @@ class AccountBalance(Base):
 
     account_id: Mapped[str] = mapped_column("accountId")
     created_at: Mapped[datetime] = mapped_column("createdAt", default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
-    date: Mapped[datetime] = mapped_column(default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
+    date_: Mapped[datetime] = mapped_column("date", default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
     id: Mapped[str] = mapped_column(primary_key=True, default=lambda: str(uuid_mod.uuid4()))
     updated_at: Mapped[datetime] = mapped_column("updatedAt", default=utc_now, onupdate=utc_now)
     user_id: Mapped[str] = mapped_column("userId")
@@ -185,7 +185,7 @@ class AssetProfileSplit(Base):
     __tablename__ = "AssetProfileSplit"
 
     created_at: Mapped[datetime] = mapped_column("createdAt", default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
-    date: Mapped[datetime]
+    date_: Mapped[datetime] = mapped_column("date")
     denominator: Mapped[int]
     id: Mapped[str] = mapped_column(primary_key=True, default=lambda: str(uuid_mod.uuid4()))
     numerator: Mapped[int]
@@ -221,7 +221,7 @@ class MarketData(Base):
 
     created_at: Mapped[datetime] = mapped_column("createdAt", default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
     data_source: Mapped[str] = mapped_column("dataSource", Enum("ALPHA_VANTAGE", "COINGECKO", "EOD_HISTORICAL_DATA", "FINANCIAL_MODELING_PREP", "GHOSTFOLIO", "GOOGLE_SHEETS", "MANUAL", "RAPID_API", "YAHOO", name="DataSource"))
-    date: Mapped[datetime]
+    date_: Mapped[datetime] = mapped_column("date")
     id: Mapped[str] = mapped_column(primary_key=True, default=lambda: str(uuid_mod.uuid4()))
     is_carried_forward: Mapped[bool] = mapped_column("isCarriedForward", default=False, server_default=text("false"))
     market_price: Mapped[float] = mapped_column("marketPrice")
@@ -243,7 +243,7 @@ class Order(Base):
     comment: Mapped[Optional[str]]
     created_at: Mapped[datetime] = mapped_column("createdAt", default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
     currency: Mapped[Optional[str]]
-    date: Mapped[datetime]
+    date_: Mapped[datetime] = mapped_column("date")
     fee: Mapped[float]
     id: Mapped[str] = mapped_column(primary_key=True, default=lambda: str(uuid_mod.uuid4()))
     quantity: Mapped[float]

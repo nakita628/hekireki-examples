@@ -26,8 +26,8 @@ type Access struct {
 	Type          string         `gorm:"column:type;default:'PRIVATE';not null" json:"type"`
 	UpdatedAt     DateTime       `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
 	UserID        string         `gorm:"column:userId;index:Access_userId_idx;not null" json:"userId"`
-	GranteeUser   User           `gorm:"foreignKey:GranteeUserID"`
-	User          User           `gorm:"foreignKey:UserID"`
+	GranteeUser   *User          `gorm:"foreignKey:GranteeUserID"`
+	User          *User          `gorm:"foreignKey:UserID"`
 }
 
 func (Access) TableName() string {
@@ -65,8 +65,8 @@ type Account struct {
 	PlatformID *string  `gorm:"column:platformId" json:"platformId"`
 	UpdatedAt  DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
 	UserID     string   `gorm:"column:userId;primaryKey;index:Account_userId_idx" json:"userId"`
-	Platform   Platform
-	User       User
+	Platform   *Platform
+	User       *User
 	Activities []Order          `gorm:"foreignKey:AccountID,AccountUserID;references:ID,UserID"`
 	Balances   []AccountBalance `gorm:"foreignKey:AccountID,UserID;references:ID,UserID;constraint:OnDelete:CASCADE"`
 	Tags       []TagsOnAccounts `gorm:"foreignKey:AccountID,UserID;references:ID,UserID;constraint:OnDelete:CASCADE"`
@@ -106,7 +106,7 @@ type AccountBalance struct {
 	UpdatedAt DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
 	UserID    string   `gorm:"column:userId;uniqueIndex:AccountBalance_accountId_userId_date_key;not null" json:"userId"`
 	Value     float64  `gorm:"column:value;not null" json:"value"`
-	Account   Account  `gorm:"foreignKey:AccountID,UserID;references:ID,UserID"`
+	Account   *Account `gorm:"foreignKey:AccountID,UserID;references:ID,UserID"`
 }
 
 func (AccountBalance) TableName() string {
@@ -146,7 +146,7 @@ type Analytics struct {
 	LastRequestClient                   *string  `gorm:"column:lastRequestClient" json:"lastRequestClient"`
 	UpdatedAt                           DateTime `gorm:"column:updatedAt;index:Analytics_updatedAt_idx;autoUpdateTime:false;not null" json:"updatedAt"`
 	UserID                              string   `gorm:"column:userId;primaryKey" json:"userId"`
-	User                                User
+	User                                *User
 }
 
 func (Analytics) TableName() string {
@@ -178,7 +178,7 @@ type APIKey struct {
 	ID        string   `gorm:"column:id;primaryKey;type:char(36)" json:"id"`
 	UpdatedAt DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
 	UserID    string   `gorm:"column:userId;index:ApiKey_userId_idx;not null" json:"userId"`
-	User      User
+	User      *User
 }
 
 func (APIKey) TableName() string {
@@ -217,7 +217,7 @@ type AssetProfileOverrides struct {
 	SymbolProfileID string         `gorm:"column:symbolProfileId;primaryKey" json:"symbolProfileId"`
 	UpdatedAt       DateTime       `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
 	URL             *string        `gorm:"column:url" json:"url"`
-	SymbolProfile   SymbolProfile
+	SymbolProfile   *SymbolProfile
 }
 
 func (AssetProfileOverrides) TableName() string {
@@ -286,7 +286,7 @@ type AssetProfileSplit struct {
 	Numerator       int      `gorm:"column:numerator;not null" json:"numerator"`
 	SymbolProfileID string   `gorm:"column:symbolProfileId;uniqueIndex:AssetProfileSplit_symbolProfileId_date_key;not null" json:"symbolProfileId"`
 	UpdatedAt       DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	SymbolProfile   SymbolProfile
+	SymbolProfile   *SymbolProfile
 }
 
 func (AssetProfileSplit) TableName() string {
@@ -323,7 +323,7 @@ type AuthDevice struct {
 	ID                  string   `gorm:"column:id;primaryKey;type:char(36)" json:"id"`
 	UpdatedAt           DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
 	UserID              string   `gorm:"column:userId;index:AuthDevice_userId_idx;not null" json:"userId"`
-	User                User
+	User                *User
 }
 
 func (AuthDevice) TableName() string {
@@ -393,9 +393,9 @@ type Order struct {
 	UnitPrice       float64  `gorm:"column:unitPrice;not null" json:"unitPrice"`
 	UpdatedAt       DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
 	UserID          string   `gorm:"column:userId;index:Order_userId_date_idx;index:Order_userId_type_date_idx;not null" json:"userId"`
-	Account         Account  `gorm:"foreignKey:AccountID,AccountUserID;references:ID,UserID"`
-	User            User
-	SymbolProfile   SymbolProfile
+	Account         *Account `gorm:"foreignKey:AccountID,AccountUserID;references:ID,UserID"`
+	User            *User
+	SymbolProfile   *SymbolProfile
 	Tags            []Tag `gorm:"many2many:_OrderToTag;joinForeignKey:A;joinReferences:B"`
 }
 
@@ -456,7 +456,7 @@ type Settings struct {
 	Settings  datatypes.JSON `gorm:"column:settings" json:"settings"`
 	UpdatedAt DateTime       `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
 	UserID    string         `gorm:"column:userId;primaryKey" json:"userId"`
-	User      User
+	User      *User
 }
 
 func (Settings) TableName() string {
@@ -504,7 +504,7 @@ type SymbolProfile struct {
 	UpdatedAt              DateTime       `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
 	URL                    *string        `gorm:"column:url" json:"url"`
 	UserID                 *string        `gorm:"column:userId" json:"userId"`
-	User                   User
+	User                   *User
 	Activities             []Order                `gorm:"foreignKey:SymbolProfileID"`
 	AssetProfileSplits     []AssetProfileSplit    `gorm:"foreignKey:SymbolProfileID;constraint:OnDelete:CASCADE"`
 	AssetProfileOverrides  *AssetProfileOverrides `gorm:"foreignKey:SymbolProfileID;constraint:OnDelete:CASCADE"`
@@ -545,7 +545,7 @@ type Subscription struct {
 	StripeCheckoutSessionID *string  `gorm:"column:stripeCheckoutSessionId;uniqueIndex" json:"stripeCheckoutSessionId"`
 	UpdatedAt               DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
 	UserID                  string   `gorm:"column:userId;index:Subscription_userId_idx;not null" json:"userId"`
-	User                    User
+	User                    *User
 }
 
 func (Subscription) TableName() string {
@@ -578,7 +578,7 @@ type Tag struct {
 	ID         string  `gorm:"column:id;primaryKey;type:char(36)" json:"id"`
 	Name       string  `gorm:"column:name;uniqueIndex:Tag_name_userId_key;index:Tag_name_idx;not null" json:"name"`
 	UserID     *string `gorm:"column:userId;uniqueIndex:Tag_name_userId_key" json:"userId"`
-	User       User
+	User       *User
 	Accounts   []TagsOnAccounts `gorm:"foreignKey:TagID;constraint:OnDelete:CASCADE"`
 	Activities []Order          `gorm:"many2many:_OrderToTag;joinForeignKey:B;joinReferences:A"`
 }
@@ -600,8 +600,8 @@ type TagsOnAccounts struct {
 	TagID     string   `gorm:"column:tagId;primaryKey;index:TagsOnAccounts_tagId_idx" json:"tagId"`
 	UpdatedAt DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
 	UserID    string   `gorm:"column:userId;primaryKey" json:"userId"`
-	Account   Account  `gorm:"foreignKey:AccountID,UserID;references:ID,UserID"`
-	Tag       Tag
+	Account   *Account `gorm:"foreignKey:AccountID,UserID;references:ID,UserID"`
+	Tag       *Tag
 }
 
 func (TagsOnAccounts) TableName() string {

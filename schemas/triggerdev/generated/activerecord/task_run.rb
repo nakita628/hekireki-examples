@@ -64,8 +64,7 @@ class TaskRun < ApplicationRecord
                                    dependent: :restrict_with_error
   has_many :batch_items, class_name: "BatchTaskRunItem", foreign_key: "taskRunId", inverse_of: :task_run,
                          dependent: :destroy
-  has_many :checkpoint_restore_event, class_name: "CheckpointRestoreEvent", foreign_key: "runId", inverse_of: :run,
-                                      dependent: :destroy
+  has_many :checkpoint_restore_event, foreign_key: "runId", inverse_of: :run, dependent: :destroy
   has_many :execution_snapshots, class_name: "TaskRunExecutionSnapshot", foreign_key: "runId", inverse_of: :run,
                                  dependent: :restrict_with_error
   has_many :source_bulk_action_items, class_name: "BulkActionItem", foreign_key: "sourceRunId", inverse_of: :source_run,

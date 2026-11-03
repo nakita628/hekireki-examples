@@ -10,6 +10,7 @@ class AttributeSyncFieldMapping < ApplicationRecord
   validates :enabled, inclusion: { in: [ true, false ] }
   validates :integrationAttributeSyncId, uniqueness: { scope: :attributeId }
 
-  belongs_to :attribute, foreign_key: "attributeId", inverse_of: :attribute_sync_field_mappings
+  belongs_to :attribute_sync_field_mapping_attribute, class_name: "Attribute", foreign_key: "attributeId",
+                                                      inverse_of: :attribute_sync_field_mappings
   belongs_to :integration_attribute_sync, foreign_key: "integrationAttributeSyncId", inverse_of: :sync_field_mappings
 end

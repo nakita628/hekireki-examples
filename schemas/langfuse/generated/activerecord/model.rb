@@ -8,6 +8,6 @@ class Model < ApplicationRecord
   validates :match_pattern, presence: true
 
   belongs_to :project, optional: true, inverse_of: :model
-  has_many :price, class_name: "Price", inverse_of: :model, dependent: :destroy
+  has_many :price, dependent: :destroy
   has_many :pricing_tiers, dependent: :destroy
 end

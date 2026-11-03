@@ -366,7 +366,7 @@ class RuntimeEnvironment(Base):
     organization: Mapped["Organization"] = relationship(back_populates="environments")
     project: Mapped["Project"] = relationship(back_populates="environments")
     org_member: Mapped[Optional["OrgMember"]] = relationship(back_populates="environments")
-    current_session: Mapped[Optional["RuntimeEnvironmentSession"]] = relationship(back_populates="current_environments")
+    current_session: Mapped[Optional["RuntimeEnvironmentSession"]] = relationship(foreign_keys=[current_session_id], back_populates="current_environments")
     child_environments: Mapped[list["RuntimeEnvironment"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="parent_environment")
     background_workers: Mapped[list["BackgroundWorker"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="runtime_environment")
     background_worker_tasks: Mapped[list["BackgroundWorkerTask"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="runtime_environment")
@@ -380,7 +380,7 @@ class RuntimeEnvironment(Base):
     checkpoint_restore_event: Mapped[list["CheckpointRestoreEvent"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="runtime_environment")
     task_schedule_instances: Mapped[list["TaskScheduleInstance"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="environment")
     alerts: Mapped[list["ProjectAlert"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="environment")
-    sessions: Mapped[list["RuntimeEnvironmentSession"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="environment")
+    sessions: Mapped[list["RuntimeEnvironmentSession"]] = relationship(foreign_keys="RuntimeEnvironmentSession.environment_id", cascade="all, delete", passive_deletes=True, back_populates="environment")
     task_run_number_counter: Mapped[list["TaskRunNumberCounter"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="environment")
     task_run_checkpoints: Mapped[list["TaskRunCheckpoint"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="runtime_environment")
     waitpoints: Mapped[list["Waitpoint"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="environment")
@@ -463,8 +463,8 @@ class Project(Base):
     )
 
     organization: Mapped["Organization"] = relationship(back_populates="projects")
-    default_worker_group: Mapped[Optional["WorkerInstanceGroup"]] = relationship(back_populates="default_for_projects")
-    worker_groups: Mapped[list["WorkerInstanceGroup"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="project")
+    default_worker_group: Mapped[Optional["WorkerInstanceGroup"]] = relationship(foreign_keys=[default_worker_group_id], back_populates="default_for_projects")
+    worker_groups: Mapped[list["WorkerInstanceGroup"]] = relationship(foreign_keys="WorkerInstanceGroup.project_id", cascade="all, delete", passive_deletes=True, back_populates="project")
     workers: Mapped[list["WorkerInstance"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="project")
     environments: Mapped[list["RuntimeEnvironment"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="project")
     background_workers: Mapped[list["BackgroundWorker"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="project")
@@ -514,6 +514,22 @@ class SecretReference(Base):
     environment_variable_values: Mapped[list["EnvironmentVariableValue"]] = relationship(back_populates="value_reference")
     organization_integration: Mapped[list["OrganizationIntegration"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="token_reference")
     user: Mapped[list["User"]] = relationship(back_populates="mfa_secret_reference")
+
+class SecretStore(Base):
+    __tablename__ = "SecretStore"
+
+    key: Mapped[str] = mapped_column()
+    value: Mapped[dict[str, Any]] = mapped_column(JSONB)
+    version: Mapped[str] = mapped_column(default="1", server_default=text("'1'"))
+    created_at: Mapped[datetime] = mapped_column("createdAt", default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
+    updated_at: Mapped[datetime] = mapped_column("updatedAt", default=utc_now, onupdate=utc_now)
+
+    __table_args__ = (
+        Index("SecretStore_key_key", "key", unique=True),
+        Index("SecretStore_key_idx", "key"),
+    )
+
+    __mapper_args__ = {"primary_key": [key]}
 
 class OidcSigningKey(Base):
     __tablename__ = "OidcSigningKey"
@@ -1055,9 +1071,9 @@ class TaskRun(Base):
     locked_to_version: Mapped[Optional["BackgroundWorker"]] = relationship(back_populates="locked_runs")
     root_task_run: Mapped[Optional["TaskRun"]] = relationship(remote_side=[id], foreign_keys=[root_task_run_id], back_populates="descendant_runs")
     parent_task_run: Mapped[Optional["TaskRun"]] = relationship(remote_side=[id], foreign_keys=[parent_task_run_id], back_populates="child_runs")
-    parent_task_run_attempt: Mapped[Optional["TaskRunAttempt"]] = relationship(back_populates="child_runs")
+    parent_task_run_attempt: Mapped[Optional["TaskRunAttempt"]] = relationship(foreign_keys=[parent_task_run_attempt_id], back_populates="child_runs")
     batch: Mapped[Optional["BatchTaskRun"]] = relationship(back_populates="runs")
-    attempts: Mapped[list["TaskRunAttempt"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="task_run")
+    attempts: Mapped[list["TaskRunAttempt"]] = relationship(foreign_keys="TaskRunAttempt.task_run_id", cascade="all, delete", passive_deletes=True, back_populates="task_run")
     checkpoints: Mapped[list["Checkpoint"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="run")
     blocked_by_waitpoints: Mapped[list["TaskRunWaitpoint"]] = relationship(passive_deletes="all", back_populates="task_run")
     batch_items: Mapped[list["BatchTaskRunItem"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="task_run")
@@ -1307,10 +1323,10 @@ class WorkerInstanceGroup(Base):
 
     token: Mapped["WorkerGroupToken"] = relationship(back_populates="worker_group")
     organization: Mapped[Optional["Organization"]] = relationship(back_populates="worker_groups")
-    project: Mapped[Optional["Project"]] = relationship(back_populates="worker_groups")
+    project: Mapped[Optional["Project"]] = relationship(foreign_keys=[project_id], back_populates="worker_groups")
     workers: Mapped[list["WorkerInstance"]] = relationship(passive_deletes="all", back_populates="worker_group")
     background_workers: Mapped[list["BackgroundWorker"]] = relationship(back_populates="worker_group")
-    default_for_projects: Mapped[list["Project"]] = relationship(back_populates="default_worker_group")
+    default_for_projects: Mapped[list["Project"]] = relationship(foreign_keys="Project.default_worker_group_id", back_populates="default_worker_group")
 
 class WorkerGroupToken(Base):
     __tablename__ = "WorkerGroupToken"
@@ -1414,7 +1430,7 @@ class TaskRunAttempt(Base):
         Index("TaskRunAttempt_taskRunId_number_key", "taskRunId", "number", unique=True),
     )
 
-    task_run: Mapped["TaskRun"] = relationship(back_populates="attempts")
+    task_run: Mapped["TaskRun"] = relationship(foreign_keys=[task_run_id], back_populates="attempts")
     background_worker: Mapped["BackgroundWorker"] = relationship(back_populates="attempts")
     background_worker_task: Mapped["BackgroundWorkerTask"] = relationship(back_populates="attempts")
     runtime_environment: Mapped["RuntimeEnvironment"] = relationship(back_populates="task_run_attempts")
@@ -1424,7 +1440,7 @@ class TaskRunAttempt(Base):
     checkpoints: Mapped[list["Checkpoint"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="attempt")
     batch_task_run_items: Mapped[list["BatchTaskRunItem"]] = relationship(back_populates="task_run_attempt")
     checkpoint_restore_event: Mapped[list["CheckpointRestoreEvent"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="attempt")
-    child_runs: Mapped[list["TaskRun"]] = relationship(back_populates="parent_task_run_attempt")
+    child_runs: Mapped[list["TaskRun"]] = relationship(foreign_keys="TaskRun.parent_task_run_attempt_id", back_populates="parent_task_run_attempt")
 
 class TaskEvent(Base):
     __tablename__ = "TaskEvent"
@@ -1808,7 +1824,7 @@ class TaskSchedule(Base):
     generator_expression: Mapped[str] = mapped_column("generatorExpression")
     generator_description: Mapped[str] = mapped_column("generatorDescription", default="", server_default=text("''"))
     generator_type: Mapped[str] = mapped_column("generatorType", Enum("CRON", name="ScheduleGeneratorType"), default="CRON", server_default=text("'CRON'"))
-    timezone: Mapped[str] = mapped_column(default="UTC", server_default=text("'UTC'"))
+    timezone_: Mapped[str] = mapped_column("timezone", default="UTC", server_default=text("'UTC'"))
     window_duration_seconds: Mapped[Optional[int]] = mapped_column("windowDurationSeconds")
     window_percentage: Mapped[Optional[int]] = mapped_column("windowPercentage")
     default_window_duration_seconds: Mapped[Optional[int]] = mapped_column("defaultWindowDurationSeconds")
@@ -1864,8 +1880,8 @@ class RuntimeEnvironmentSession(Base):
     updated_at: Mapped[datetime] = mapped_column("updatedAt", default=utc_now, onupdate=utc_now)
     disconnected_at: Mapped[Optional[datetime]] = mapped_column("disconnectedAt")
 
-    environment: Mapped["RuntimeEnvironment"] = relationship(back_populates="sessions")
-    current_environments: Mapped[list["RuntimeEnvironment"]] = relationship(back_populates="current_session")
+    environment: Mapped["RuntimeEnvironment"] = relationship(foreign_keys=[environment_id], back_populates="sessions")
+    current_environments: Mapped[list["RuntimeEnvironment"]] = relationship(foreign_keys="RuntimeEnvironment.current_session_id", back_populates="current_session")
 
 class ProjectAlertChannel(Base):
     __tablename__ = "ProjectAlertChannel"

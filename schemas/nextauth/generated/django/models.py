@@ -58,6 +58,15 @@ class Account(models.Model):
         db_table = "Account"
 
 
+class Session(models.Model):
+    session_token = models.TextField(primary_key=True, db_column="sessionToken", default=None)
+    user = models.ForeignKey("User", on_delete=models.CASCADE, related_name="sessions", db_column="userId", db_index=False)
+    expires = UtcDateTimeField()
+
+    class Meta:
+        db_table = "Session"
+
+
 class VerificationToken(models.Model):
     pk = models.CompositePrimaryKey("identifier", "token")
     identifier = models.TextField()

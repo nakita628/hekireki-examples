@@ -26,7 +26,7 @@ type Account struct {
 	SessionState      *string  `gorm:"column:session_state" json:"session_state"`
 	CreatedAt         DateTime `gorm:"column:created_at;autoCreateTime:false;not null" json:"created_at"`
 	UpdatedAt         DateTime `gorm:"column:updated_at;autoUpdateTime:false;not null" json:"updated_at"`
-	User              User
+	User              *User
 }
 
 func (Account) TableName() string {
@@ -52,7 +52,7 @@ type Session struct {
 	SessionToken string   `gorm:"column:sessionToken;uniqueIndex;not null" json:"sessionToken"`
 	UserID       string   `gorm:"column:userId;not null" json:"userId"`
 	Expires      DateTime `gorm:"column:expires;not null" json:"expires"`
-	User         User
+	User         *User
 }
 
 func (Session) TableName() string {
@@ -101,6 +101,16 @@ func (m *User) BeforeCreate(tx *gorm.DB) error {
 	return nil
 }
 
+type VerificationToken struct {
+	Identifier string   `gorm:"column:identifier;uniqueIndex:verification_tokens_identifier_token_key;not null" json:"identifier"`
+	Token      string   `gorm:"column:token;primaryKey;uniqueIndex;uniqueIndex:verification_tokens_identifier_token_key" json:"token"`
+	Expires    DateTime `gorm:"column:expires;not null" json:"expires"`
+}
+
+func (VerificationToken) TableName() string {
+	return "verification_tokens"
+}
+
 type Post struct {
 	ID        string         `gorm:"column:id;primaryKey" json:"id"`
 	Title     string         `gorm:"column:title;not null" json:"title"`
@@ -109,7 +119,7 @@ type Post struct {
 	CreatedAt DateTime       `gorm:"column:created_at;autoCreateTime:false;not null" json:"created_at"`
 	UpdatedAt DateTime       `gorm:"column:updated_at;autoUpdateTime:false;not null" json:"updated_at"`
 	AuthorID  string         `gorm:"column:authorId;not null" json:"authorId"`
-	Author    User           `gorm:"foreignKey:AuthorID"`
+	Author    *User          `gorm:"foreignKey:AuthorID"`
 }
 
 func (Post) TableName() string {

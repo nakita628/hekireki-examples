@@ -10,6 +10,6 @@ class Errors < ApplicationRecord
   validates :message, presence: true
   validates :platform, presence: true
 
-  belongs_to :organization, foreign_key: "organizationId", inverse_of: :errors
-  belongs_to :post, foreign_key: "postId", inverse_of: :errors
+  belongs_to :organization, foreign_key: "organizationId", inverse_of: :organization_errors
+  belongs_to :post, foreign_key: "postId", inverse_of: :post_errors
 end

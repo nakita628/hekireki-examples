@@ -13,7 +13,8 @@ class User < ApplicationRecord
 
   has_many :accounts, foreign_key: "userId", inverse_of: :user, dependent: :destroy
   has_many :api_tokens, foreign_key: "ownerId", inverse_of: :owner, dependent: :destroy
-  has_many :collaborators_on_typebots, foreign_key: "userId", inverse_of: :user, dependent: :destroy
+  has_many :collaborators_on_typebots, class_name: "CollaboratorsOnTypebots", foreign_key: "userId", inverse_of: :user,
+                                       dependent: :destroy
   has_many :workspaces, class_name: "MemberInWorkspace", foreign_key: "userId", inverse_of: :user, dependent: :destroy
   has_many :sessions, foreign_key: "userId", inverse_of: :user, dependent: :destroy
   has_many :banned_ips, foreign_key: "userId", inverse_of: :user, dependent: :restrict_with_error

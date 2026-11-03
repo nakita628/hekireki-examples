@@ -172,6 +172,24 @@ class Space(Base):
     workspace: Mapped["Workspace"] = relationship(back_populates="spaces")
     typebots: Mapped[list["Typebot"]] = relationship(back_populates="space")
 
+class MemberInWorkspace(Base):
+    __tablename__ = "MemberInWorkspace"
+
+    created_at: Mapped[datetime] = mapped_column("createdAt", default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
+    updated_at: Mapped[datetime] = mapped_column("updatedAt", default=utc_now, server_default=text("CURRENT_TIMESTAMP"), onupdate=utc_now)
+    user_id: Mapped[str] = mapped_column("userId", ForeignKey("User.id", ondelete="CASCADE", onupdate="CASCADE", name="MemberInWorkspace_userId_fkey"))
+    workspace_id: Mapped[str] = mapped_column("workspaceId", ForeignKey("Workspace.id", ondelete="CASCADE", onupdate="CASCADE", name="MemberInWorkspace_workspaceId_fkey"))
+    role: Mapped[str] = mapped_column(Enum("ADMIN", "MEMBER", "GUEST", name="WorkspaceRole"))
+
+    __table_args__ = (
+        Index("MemberInWorkspace_userId_workspaceId_key", "userId", "workspaceId", unique=True),
+    )
+
+    __mapper_args__ = {"primary_key": [user_id, workspace_id]}
+
+    user: Mapped["User"] = relationship(back_populates="workspaces")
+    workspace: Mapped["Workspace"] = relationship(back_populates="members")
+
 class WorkspaceInvitation(Base):
     __tablename__ = "WorkspaceInvitation"
 
@@ -218,6 +236,22 @@ class UserCredentials(Base):
     iv: Mapped[str]
 
     user: Mapped["User"] = relationship(back_populates="credentials")
+
+class VerificationToken(Base):
+    __tablename__ = "VerificationToken"
+
+    identifier: Mapped[str]
+    token: Mapped[str] = mapped_column()
+    value: Mapped[Optional[str]]
+    failed_attempts: Mapped[int] = mapped_column("failedAttempts", default=0, server_default=text("0"))
+    expires: Mapped[datetime]
+
+    __table_args__ = (
+        Index("VerificationToken_token_key", "token", unique=True),
+        Index("VerificationToken_identifier_token_key", "identifier", "token", unique=True),
+    )
+
+    __mapper_args__ = {"primary_key": [token]}
 
 class DashboardFolder(Base):
     __tablename__ = "DashboardFolder"
@@ -278,6 +312,41 @@ class Typebot(Base):
     banned_ips: Mapped[list["BannedIp"]] = relationship(passive_deletes="all", back_populates="responsible_typebot")
     published_typebot: Mapped[Optional["PublicTypebot"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="typebot")
 
+class Invitation(Base):
+    __tablename__ = "Invitation"
+
+    created_at: Mapped[datetime] = mapped_column("createdAt", default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
+    updated_at: Mapped[datetime] = mapped_column("updatedAt", default=utc_now, server_default=text("CURRENT_TIMESTAMP"), onupdate=utc_now)
+    email: Mapped[str] = mapped_column()
+    typebot_id: Mapped[str] = mapped_column("typebotId", ForeignKey("Typebot.id", ondelete="CASCADE", onupdate="CASCADE", name="Invitation_typebotId_fkey"))
+    type: Mapped[str] = mapped_column(Enum("READ", "WRITE", "FULL_ACCESS", name="CollaborationType"))
+
+    __table_args__ = (
+        Index("Invitation_email_typebotId_key", "email", "typebotId", unique=True),
+    )
+
+    __mapper_args__ = {"primary_key": [email, typebot_id]}
+
+    typebot: Mapped["Typebot"] = relationship(back_populates="invitations")
+
+class CollaboratorsOnTypebots(Base):
+    __tablename__ = "CollaboratorsOnTypebots"
+
+    created_at: Mapped[datetime] = mapped_column("createdAt", default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
+    updated_at: Mapped[datetime] = mapped_column("updatedAt", default=utc_now, server_default=text("CURRENT_TIMESTAMP"), onupdate=utc_now)
+    user_id: Mapped[str] = mapped_column("userId", ForeignKey("User.id", ondelete="CASCADE", onupdate="CASCADE", name="CollaboratorsOnTypebots_userId_fkey"))
+    typebot_id: Mapped[str] = mapped_column("typebotId", ForeignKey("Typebot.id", ondelete="CASCADE", onupdate="CASCADE", name="CollaboratorsOnTypebots_typebotId_fkey"))
+    type: Mapped[str] = mapped_column(Enum("READ", "WRITE", "FULL_ACCESS", name="CollaborationType"))
+
+    __table_args__ = (
+        Index("CollaboratorsOnTypebots_userId_typebotId_key", "userId", "typebotId", unique=True),
+    )
+
+    __mapper_args__ = {"primary_key": [user_id, typebot_id]}
+
+    typebot: Mapped["Typebot"] = relationship(back_populates="collaborators")
+    user: Mapped["User"] = relationship(back_populates="collaborators_on_typebots")
+
 class PublicTypebot(Base):
     __tablename__ = "PublicTypebot"
 
@@ -301,6 +370,24 @@ class PublicTypebot(Base):
 
     typebot: Mapped["Typebot"] = relationship(back_populates="published_typebot")
     media_ids_cache: Mapped[list["RuntimeMediaIdCache"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="public_typebot")
+
+class RuntimeMediaIdCache(Base):
+    __tablename__ = "RuntimeMediaIdCache"
+
+    provider: Mapped[str] = mapped_column(Enum("WHATSAPP", "DIALOG360", name="ChatProvider"))
+    url: Mapped[str] = mapped_column()
+    media_id: Mapped[str] = mapped_column("mediaId")
+    expires_at: Mapped[Optional[datetime]] = mapped_column("expiresAt")
+    public_typebot_id: Mapped[str] = mapped_column("publicTypebotId", ForeignKey("PublicTypebot.id", ondelete="CASCADE", onupdate="CASCADE", name="RuntimeMediaIdCache_publicTypebotId_fkey"))
+
+    __table_args__ = (
+        Index("RuntimeMediaIdCache_expiresAt_idx", "expiresAt"),
+        Index("RuntimeMediaIdCache_publicTypebotId_provider_url_key", "publicTypebotId", "provider", "url", unique=True),
+    )
+
+    __mapper_args__ = {"primary_key": [public_typebot_id, provider, url]}
+
+    public_typebot: Mapped[Optional["PublicTypebot"]] = relationship(back_populates="media_ids_cache")
 
 class Result(Base):
     __tablename__ = "Result"
@@ -326,6 +413,39 @@ class Result(Base):
     edges: Mapped[list["VisitedEdge"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="result")
     set_variable_history: Mapped[list["SetVariableHistoryItem"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="result")
 
+class SetVariableHistoryItem(Base):
+    __tablename__ = "SetVariableHistoryItem"
+
+    result_id: Mapped[str] = mapped_column("resultId", ForeignKey("Result.id", ondelete="CASCADE", onupdate="CASCADE", name="SetVariableHistoryItem_resultId_fkey"))
+    index: Mapped[int] = mapped_column()
+    variable_id: Mapped[str] = mapped_column("variableId")
+    block_id: Mapped[str] = mapped_column("blockId")
+    block_index: Mapped[Optional[int]] = mapped_column("blockIndex")
+    value: Mapped[dict[str, Any]] = mapped_column(JSONB)
+
+    __table_args__ = (
+        Index("SetVariableHistoryItem_resultId_index_key", "resultId", "index", unique=True),
+    )
+
+    __mapper_args__ = {"primary_key": [result_id, index]}
+
+    result: Mapped["Result"] = relationship(back_populates="set_variable_history")
+
+class VisitedEdge(Base):
+    __tablename__ = "VisitedEdge"
+
+    result_id: Mapped[str] = mapped_column("resultId", ForeignKey("Result.id", ondelete="CASCADE", onupdate="CASCADE", name="VisitedEdge_resultId_fkey"))
+    edge_id: Mapped[str] = mapped_column("edgeId")
+    index: Mapped[int] = mapped_column()
+
+    __table_args__ = (
+        Index("VisitedEdge_resultId_index_key", "resultId", "index", unique=True),
+    )
+
+    __mapper_args__ = {"primary_key": [result_id, index]}
+
+    result: Mapped["Result"] = relationship(back_populates="edges")
+
 class Log(Base):
     __tablename__ = "Log"
 
@@ -342,6 +462,24 @@ class Log(Base):
     )
 
     result: Mapped["Result"] = relationship(back_populates="logs")
+
+class Answer(Base):
+    __tablename__ = "Answer"
+
+    created_at: Mapped[datetime] = mapped_column("createdAt", default=utc_now, server_default=text("CURRENT_TIMESTAMP"), onupdate=utc_now)
+    result_id: Mapped[str] = mapped_column("resultId", ForeignKey("Result.id", ondelete="CASCADE", onupdate="CASCADE", name="Answer_resultId_fkey"))
+    block_id: Mapped[str] = mapped_column("blockId")
+    group_id: Mapped[str] = mapped_column("groupId")
+    variable_id: Mapped[Optional[str]] = mapped_column("variableId")
+    content: Mapped[str]
+
+    __table_args__ = (
+        Index("Answer_resultId_blockId_groupId_key", "resultId", "blockId", "groupId", unique=True),
+    )
+
+    __mapper_args__ = {"primary_key": [result_id, block_id, group_id]}
+
+    result: Mapped["Result"] = relationship(back_populates="answers")
 
 class AnswerV2(Base):
     __tablename__ = "AnswerV2"

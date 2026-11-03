@@ -27,7 +27,7 @@ pub enum Relation {
     Owner,
     #[sea_orm(
         belongs_to = "super::platform_oauth_client::Entity",
-        from = "Column::PlatformOAuthClientId",
+        from = "Column::PlatformOauthClientId",
         to = "super::platform_oauth_client::Column::Id",
         on_delete = "Cascade"
     )]

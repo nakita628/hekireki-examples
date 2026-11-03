@@ -138,7 +138,7 @@ class User(Base):
     audience: Mapped[int] = mapped_column(default=0, server_default=text("0"))
     picture_id: Mapped[Optional[str]] = mapped_column("pictureId", ForeignKey("Media.id", ondelete="SET NULL", onupdate="CASCADE", name="User_pictureId_fkey"))
     provider_id: Mapped[Optional[str]] = mapped_column("providerId")
-    timezone: Mapped[int]
+    timezone_: Mapped[int] = mapped_column("timezone")
     timezone_name: Mapped[Optional[str]] = mapped_column("timezoneName")
     created_at: Mapped[datetime] = mapped_column("createdAt", default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
     updated_at: Mapped[datetime] = mapped_column("updatedAt", default=utc_now, onupdate=utc_now)
@@ -238,7 +238,7 @@ class Trending(Base):
     trending_list: Mapped[str] = mapped_column("trendingList")
     language: Mapped[Optional[str]]
     hash: Mapped[str]
-    date: Mapped[datetime]
+    date_: Mapped[datetime] = mapped_column("date")
     created_at: Mapped[datetime] = mapped_column("createdAt", default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
     updated_at: Mapped[datetime] = mapped_column("updatedAt", default=utc_now, onupdate=utc_now)
 
@@ -252,7 +252,7 @@ class TrendingLog(Base):
 
     id: Mapped[str] = mapped_column(primary_key=True, default=lambda: str(uuid_mod.uuid4()))
     language: Mapped[Optional[str]]
-    date: Mapped[datetime]
+    date_: Mapped[datetime] = mapped_column("date")
 
 class ItemUser(Base):
     __tablename__ = "ItemUser"
@@ -278,7 +278,7 @@ class Star(Base):
     forks: Mapped[int]
     total_forks: Mapped[int] = mapped_column("totalForks")
     login: Mapped[str]
-    date: Mapped[date] = mapped_column(Date, default=lambda: utc_now().date(), server_default=text("CURRENT_TIMESTAMP"))
+    date_: Mapped[date] = mapped_column("date", Date, default=lambda: utc_now().date(), server_default=text("CURRENT_TIMESTAMP"))
     created_at: Mapped[datetime] = mapped_column("createdAt", default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
     updated_at: Mapped[datetime] = mapped_column("updatedAt", default=utc_now, onupdate=utc_now)
 
@@ -1042,6 +1042,25 @@ class MastraTraces(Base):
         Index("public_mastra_traces_name_starttime_idx", "name", "startTime"),
     )
 
+class MastraWorkflowSnapshot(Base):
+    __tablename__ = "mastra_workflow_snapshot"
+
+    workflow_name: Mapped[str] = mapped_column()
+    run_id: Mapped[str] = mapped_column()
+    resource_id: Mapped[Optional[str]] = mapped_column("resourceId")
+    snapshot: Mapped[str]
+    created_at: Mapped[datetime] = mapped_column("createdAt", UtcDateTime(precision=6))
+    updated_at: Mapped[datetime] = mapped_column("updatedAt", UtcDateTime(precision=6))
+    created_at_z: Mapped[Optional[datetime]] = mapped_column("createdAtZ", UtcDateTimeTz(precision=6), default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
+    updated_at_z: Mapped[Optional[datetime]] = mapped_column("updatedAtZ", UtcDateTimeTz(precision=6), default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
+
+    __table_args__ = (
+        Index("mastra_workflow_snapshot_name_createdat_idx", "workflow_name", "createdAt"),
+        Index("public_mastra_workflow_snapshot_workflow_name_run_id_key", "workflow_name", "run_id", unique=True),
+    )
+
+    __mapper_args__ = {"primary_key": [workflow_name, run_id]}
+
 class MastraAgentVersions(Base):
     __tablename__ = "mastra_agent_versions"
 
@@ -1383,7 +1402,7 @@ class MastraKnowledgeRecords(Base):
 
     id: Mapped[str] = mapped_column(primary_key=True)
     node: Mapped[str]
-    text: Mapped[str]
+    text_: Mapped[str] = mapped_column("text")
     scope: Mapped[dict[str, Any]] = mapped_column(JSONB)
     scope_key: Mapped[str] = mapped_column("scopeKey")
     source_thread_id: Mapped[str] = mapped_column("sourceThreadId")
@@ -1603,7 +1622,7 @@ class MastraSchedules(Base):
     id: Mapped[str] = mapped_column(primary_key=True)
     target: Mapped[dict[str, Any]] = mapped_column(JSONB)
     cron: Mapped[str]
-    timezone: Mapped[Optional[str]]
+    timezone_: Mapped[Optional[str]] = mapped_column("timezone")
     status: Mapped[str]
     next_fire_at: Mapped[int] = mapped_column(BigInteger)
     last_fire_at: Mapped[Optional[int]] = mapped_column(BigInteger)

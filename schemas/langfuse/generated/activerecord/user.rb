@@ -30,9 +30,9 @@ class User < ApplicationRecord
                                        inverse_of: :created_by_user, dependent: :nullify
   has_many :table_view_preset_updated, class_name: "TableViewPreset", foreign_key: "updated_by",
                                        inverse_of: :updated_by_user, dependent: :nullify
-  has_many :monitors_created, class_name: "Monitor", foreign_key: "created_by", inverse_of: :created_by_user,
+  has_many :monitors_created, class_name: "MonitorRecord", foreign_key: "created_by", inverse_of: :created_by_user,
                               dependent: :nullify
-  has_many :monitors_updated, class_name: "Monitor", foreign_key: "updated_by", inverse_of: :updated_by_user,
+  has_many :monitors_updated, class_name: "MonitorRecord", foreign_key: "updated_by", inverse_of: :updated_by_user,
                               dependent: :nullify
   has_many :topic_configs_created, class_name: "TopicConfig", foreign_key: "created_by", inverse_of: :created_by_user,
                                    dependent: :nullify
@@ -42,7 +42,7 @@ class User < ApplicationRecord
                                        inverse_of: :created_by_user, dependent: :nullify
   has_many :tracing_readiness_updated, class_name: "TracingReadinessSettings", foreign_key: "updated_by",
                                        inverse_of: :updated_by_user, dependent: :nullify
-  has_many :annotation_queue_assignment, class_name: "AnnotationQueueAssignment", inverse_of: :user, dependent: :destroy
+  has_many :annotation_queue_assignment, dependent: :destroy
   has_many :surveys, dependent: :destroy
   has_many :comment_reactions, dependent: :destroy
   has_many :notification_preferences, dependent: :destroy

@@ -47,7 +47,7 @@ class Team < ApplicationRecord
   has_many :dataroom_faq_items, foreign_key: "teamId", inverse_of: :team, dependent: :destroy
   has_many :uploaded_documents, class_name: "DocumentUpload", foreign_key: "teamId", inverse_of: :team,
                                 dependent: :destroy
-  has_many :tag, class_name: "Tag", foreign_key: "teamId", inverse_of: :team, dependent: :destroy
+  has_many :tag, foreign_key: "teamId", inverse_of: :team, dependent: :destroy
   has_many :annotations, class_name: "DocumentAnnotation", foreign_key: "teamId", inverse_of: :team, dependent: :destroy
   has_many :redaction_jobs, class_name: "DocumentRedactionJob", foreign_key: "teamId", inverse_of: :team,
                             dependent: :destroy

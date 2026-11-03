@@ -171,6 +171,23 @@ class Account(Base):
 
     user: Mapped["User"] = relationship(back_populates="provider_accounts")
 
+class VerificationToken(Base):
+    __tablename__ = "VerificationToken"
+
+    device_identifier: Mapped[str] = mapped_column("deviceIdentifier")
+    token: Mapped[str] = mapped_column()
+    user_uid: Mapped[str] = mapped_column("userUid", ForeignKey("User.uid", ondelete="CASCADE", onupdate="CASCADE", name="VerificationToken_userUid_fkey"))
+    expires_on: Mapped[datetime] = mapped_column("expiresOn", UtcDateTimeTz(precision=3))
+
+    __table_args__ = (
+        Index("VerificationToken_token_key", "token", unique=True),
+        Index("VerificationToken_deviceIdentifier_token_key", "deviceIdentifier", "token", unique=True),
+    )
+
+    __mapper_args__ = {"primary_key": [token]}
+
+    user: Mapped["User"] = relationship(back_populates="verification_tokens")
+
 class UserSettings(Base):
     __tablename__ = "UserSettings"
 
@@ -208,6 +225,22 @@ class UserEnvironment(Base):
     is_global: Mapped[bool] = mapped_column("isGlobal")
 
     user: Mapped["User"] = relationship(back_populates="environments")
+
+class InvitedUsers(Base):
+    __tablename__ = "InvitedUsers"
+
+    admin_uid: Mapped[str] = mapped_column("adminUid", ForeignKey("User.uid", ondelete="CASCADE", onupdate="CASCADE", name="InvitedUsers_adminUid_fkey"))
+    admin_email: Mapped[str] = mapped_column("adminEmail")
+    invitee_email: Mapped[str] = mapped_column("inviteeEmail")
+    invited_on: Mapped[datetime] = mapped_column("invitedOn", UtcDateTimeTz(precision=3), default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
+
+    __table_args__ = (
+        Index("InvitedUsers_inviteeEmail_key", "inviteeEmail", unique=True),
+    )
+
+    __mapper_args__ = {"primary_key": [invitee_email]}
+
+    user: Mapped["User"] = relationship(back_populates="invited_users")
 
 class UserRequest(Base):
     __tablename__ = "UserRequest"

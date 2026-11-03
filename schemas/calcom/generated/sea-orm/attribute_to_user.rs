@@ -52,7 +52,7 @@ pub enum Relation {
     CreatedBy,
     #[sea_orm(
         belongs_to = "super::dsync_data::Entity",
-        from = "Column::CreatedByDSyncId",
+        from = "Column::CreatedByDsyncId",
         to = "super::dsync_data::Column::DirectoryId",
         on_delete = "SetNull"
     )]
@@ -66,7 +66,7 @@ pub enum Relation {
     UpdatedBy,
     #[sea_orm(
         belongs_to = "super::dsync_data::Entity",
-        from = "Column::UpdatedByDSyncId",
+        from = "Column::UpdatedByDsyncId",
         to = "super::dsync_data::Column::DirectoryId",
         on_delete = "SetNull"
     )]

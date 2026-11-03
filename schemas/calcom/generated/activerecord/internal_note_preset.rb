@@ -6,6 +6,5 @@ class InternalNotePreset < ApplicationRecord
   validates :name, presence: true, uniqueness: { scope: :teamId }
 
   belongs_to :team, foreign_key: "teamId", inverse_of: :internal_note_presets
-  has_many :booking_internal_note, class_name: "BookingInternalNote", foreign_key: "notePresetId",
-                                   inverse_of: :note_preset, dependent: :destroy
+  has_many :booking_internal_note, foreign_key: "notePresetId", inverse_of: :note_preset, dependent: :destroy
 end

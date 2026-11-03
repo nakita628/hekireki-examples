@@ -12,8 +12,6 @@ class SecretReference < ApplicationRecord
 
   has_many :environment_variable_values, foreign_key: "valueReferenceId", inverse_of: :value_reference,
                                          dependent: :nullify
-  has_many :organization_integration, class_name: "OrganizationIntegration", foreign_key: "tokenReferenceId",
-                                      inverse_of: :token_reference, dependent: :destroy
-  has_many :user, class_name: "User", foreign_key: "mfaSecretReferenceId", inverse_of: :mfa_secret_reference,
-                  dependent: :nullify
+  has_many :organization_integration, foreign_key: "tokenReferenceId", inverse_of: :token_reference, dependent: :destroy
+  has_many :user, foreign_key: "mfaSecretReferenceId", inverse_of: :mfa_secret_reference, dependent: :nullify
 end

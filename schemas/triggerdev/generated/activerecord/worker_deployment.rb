@@ -27,7 +27,6 @@ class WorkerDeployment < ApplicationRecord
                         dependent: :destroy
   has_many :alerts, class_name: "ProjectAlert", foreign_key: "workerDeploymentId", inverse_of: :worker_deployment,
                     dependent: :destroy
-  has_many :worker_instance, class_name: "WorkerInstance", foreign_key: "deploymentId", inverse_of: :deployment,
-                             dependent: :nullify
+  has_many :worker_instance, foreign_key: "deploymentId", inverse_of: :deployment, dependent: :nullify
   has_many :integration_deployments, foreign_key: "deploymentId", inverse_of: :worker_deployment, dependent: :nullify
 end

@@ -1,4 +1,5 @@
 import {
+  type PgTableExtraConfigValue,
   boolean,
   foreignKey,
   index,
@@ -138,7 +139,7 @@ export const user = pgTable(
       .$defaultFn(utcNow)
       .$onUpdate(utcNow),
   },
-  (table) => [
+  (table): PgTableExtraConfigValue[] => [
     uniqueIndex('User_uuid_key').on(table.uuid),
     uniqueIndex('User_username_key').on(table.username),
     uniqueIndex('User_email_key').on(table.email),
@@ -391,7 +392,7 @@ export const subscription = pgTable(
       .$defaultFn(utcNow)
       .$onUpdate(utcNow),
   },
-  (table) => [
+  (table): PgTableExtraConfigValue[] => [
     uniqueIndex('Subscription_storeOriginalTransactionId_key').on(table.storeOriginalTransactionId),
     uniqueIndex('Subscription_googlePurchaseToken_key').on(table.googlePurchaseToken),
     uniqueIndex('Subscription_stripeSubscriptionId_key').on(table.stripeSubscriptionId),

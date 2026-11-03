@@ -40,7 +40,7 @@ pub struct Model {
 pub enum Relation {
     #[sea_orm(
         belongs_to = "super::mock_server::Entity",
-        from = "Column::MockServerID",
+        from = "Column::MockServerId",
         to = "super::mock_server::Column::Id",
         on_delete = "Cascade"
     )]

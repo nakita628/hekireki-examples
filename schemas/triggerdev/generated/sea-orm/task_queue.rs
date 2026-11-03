@@ -116,7 +116,11 @@ impl Related<super::background_worker::Entity> for Entity {
         super::background_worker_to_task_queue::Relation::BackgroundWorker.def()
     }
     fn via() -> Option<RelationDef> {
-        Some(super::background_worker_to_task_queue::Relation::TaskQueue.def().rev())
+        Some(
+            super::background_worker_to_task_queue::Relation::TaskQueue
+                .def()
+                .rev(),
+        )
     }
 }
 

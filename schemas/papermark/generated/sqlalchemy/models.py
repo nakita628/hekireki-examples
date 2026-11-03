@@ -105,8 +105,8 @@ class Brand(Base):
         Index("Brand_teamId_name_key", "teamId", "name", unique=True),
     )
 
-    team: Mapped["Team"] = relationship(back_populates="brands")
-    default_for_team: Mapped[list["Team"]] = relationship(back_populates="default_brand")
+    team: Mapped["Team"] = relationship(foreign_keys=[team_id], back_populates="brands")
+    default_for_team: Mapped[list["Team"]] = relationship(foreign_keys="Team.default_brand_id", back_populates="default_brand")
     links: Mapped[list["Link"]] = relationship(back_populates="brand")
     datarooms: Mapped[list["Dataroom"]] = relationship(back_populates="base_brand")
 
@@ -1438,6 +1438,20 @@ class User(Base):
     notification_preferences: Mapped[list["NotificationPreference"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="user")
     referral_invites: Mapped[list["ReferralInvite"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="user")
 
+class VerificationToken(Base):
+    __tablename__ = "VerificationToken"
+
+    identifier: Mapped[str]
+    token: Mapped[str] = mapped_column()
+    expires: Mapped[datetime]
+
+    __table_args__ = (
+        Index("VerificationToken_token_key", "token", unique=True),
+        Index("VerificationToken_identifier_token_key", "identifier", "token", unique=True),
+    )
+
+    __mapper_args__ = {"primary_key": [token]}
+
 class Domain(Base):
     __tablename__ = "Domain"
 
@@ -1563,6 +1577,26 @@ class Reaction(Base):
     )
 
     view: Mapped["View"] = relationship(back_populates="reactions")
+
+class Invitation(Base):
+    __tablename__ = "Invitation"
+
+    email: Mapped[str]
+    expires: Mapped[datetime]
+    team_id: Mapped[str] = mapped_column("teamId", ForeignKey("Team.id", ondelete="CASCADE", onupdate="CASCADE", name="Invitation_teamId_fkey"))
+    created_at: Mapped[datetime] = mapped_column("createdAt", default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
+    token: Mapped[str] = mapped_column()
+    role: Mapped[str] = mapped_column(Enum("ADMIN", "MANAGER", "MEMBER", "DATAROOM_MEMBER", name="Role"), default="MEMBER", server_default=text("'MEMBER'"))
+    dataroom_ids: Mapped[list[str]] = mapped_column("dataroomIds", ARRAY(Text), nullable=True, default=lambda: [], server_default=text("ARRAY[]::text[]"))
+
+    __table_args__ = (
+        Index("Invitation_token_key", "token", unique=True),
+        Index("Invitation_email_teamId_key", "email", "teamId", unique=True),
+    )
+
+    __mapper_args__ = {"primary_key": [token]}
+
+    team: Mapped["Team"] = relationship(back_populates="invitations")
 
 class SentEmail(Base):
     __tablename__ = "SentEmail"
@@ -1916,7 +1950,7 @@ class Team(Base):
     limits: Mapped[Optional[dict[str, Any]]] = mapped_column(JSONB(none_as_null=True))
     enable_excel_advanced_mode: Mapped[bool] = mapped_column("enableExcelAdvancedMode", default=False, server_default=text("false"))
     replicate_dataroom_folders: Mapped[bool] = mapped_column("replicateDataroomFolders", default=True, server_default=text("true"))
-    timezone: Mapped[str] = mapped_column(default="Etc/UTC", server_default=text("'Etc/UTC'"))
+    timezone_: Mapped[str] = mapped_column("timezone", default="Etc/UTC", server_default=text("'Etc/UTC'"))
     sso_enabled: Mapped[bool] = mapped_column("ssoEnabled", default=False, server_default=text("false"))
     sso_email_domain: Mapped[Optional[str]] = mapped_column("ssoEmailDomain")
     sso_enforced_at: Mapped[Optional[datetime]] = mapped_column("ssoEnforcedAt")
@@ -1939,7 +1973,7 @@ class Team(Base):
         Index("Team_defaultBrandId_idx", "defaultBrandId"),
     )
 
-    default_brand: Mapped[Optional["Brand"]] = relationship(back_populates="default_for_team")
+    default_brand: Mapped[Optional["Brand"]] = relationship(foreign_keys=[default_brand_id], back_populates="default_for_team")
     users: Mapped[list["UserTeam"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="team")
     user_datarooms: Mapped[list["UserDataroom"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="team")
     documents: Mapped[list["Document"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="team")
@@ -1947,7 +1981,7 @@ class Team(Base):
     domains: Mapped[list["Domain"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="team")
     invitations: Mapped[list["Invitation"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="team")
     sent_emails: Mapped[list["SentEmail"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="team")
-    brands: Mapped[list["Brand"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="team")
+    brands: Mapped[list["Brand"]] = relationship(foreign_keys="Brand.team_id", cascade="all, delete", passive_deletes=True, back_populates="team")
     datarooms: Mapped[list["Dataroom"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="team")
     agreements: Mapped[list["Agreement"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="team")
     viewer_groups: Mapped[list["ViewerGroup"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="team")

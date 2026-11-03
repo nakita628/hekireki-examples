@@ -20,7 +20,8 @@ class Workspace < ApplicationRecord
 
   belongs_to :organization, foreign_key: "organizationId", inverse_of: :workspaces
   has_many :languages, foreign_key: "workspaceId", inverse_of: :workspace, dependent: :destroy
-  has_many :embedded_data, foreign_key: "workspaceId", inverse_of: :workspace, dependent: :destroy
+  has_many :embedded_data, class_name: "EmbeddedData", foreign_key: "workspaceId", inverse_of: :workspace,
+                           dependent: :destroy
   has_many :workspace_teams, foreign_key: "workspaceId", inverse_of: :workspace, dependent: :destroy
   has_many :feedback_directory_workspaces, foreign_key: "workspaceId", inverse_of: :workspace, dependent: :destroy
   has_many :charts, foreign_key: "workspaceId", inverse_of: :workspace, dependent: :destroy

@@ -509,7 +509,11 @@ impl Related<super::platform_oauth_client::Entity> for Entity {
         super::platform_oauth_client_to_user::Relation::PlatformOAuthClient.def()
     }
     fn via() -> Option<RelationDef> {
-        Some(super::platform_oauth_client_to_user::Relation::User.def().rev())
+        Some(
+            super::platform_oauth_client_to_user::Relation::User
+                .def()
+                .rev(),
+        )
     }
 }
 

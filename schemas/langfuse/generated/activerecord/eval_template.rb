@@ -15,5 +15,5 @@ class EvalTemplate < ApplicationRecord
   validates :source_code, length: { maximum: 262144 }
 
   belongs_to :project, optional: true, inverse_of: :eval_template
-  has_many :job_configuration, class_name: "JobConfiguration", inverse_of: :eval_template, dependent: :nullify
+  has_many :job_configuration, dependent: :nullify
 end

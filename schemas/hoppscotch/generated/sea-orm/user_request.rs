@@ -30,7 +30,7 @@ pub struct Model {
 pub enum Relation {
     #[sea_orm(
         belongs_to = "super::user_collection::Entity",
-        from = "Column::CollectionID",
+        from = "Column::CollectionId",
         to = "super::user_collection::Column::Id",
         on_delete = "Cascade"
     )]

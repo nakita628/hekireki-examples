@@ -7,6 +7,7 @@ class ContactAttribute < ApplicationRecord
   validates :contactId, uniqueness: { scope: :attributeKeyId }
   validates :value, presence: true
 
-  belongs_to :attribute_key, class_name: "ContactAttributeKey", foreign_key: "attributeKeyId", inverse_of: :attributes
-  belongs_to :contact, foreign_key: "contactId", inverse_of: :attributes
+  belongs_to :attribute_key, class_name: "ContactAttributeKey", foreign_key: "attributeKeyId",
+                             inverse_of: :contact_attributes
+  belongs_to :contact, foreign_key: "contactId", inverse_of: :contact_attributes
 end

@@ -88,7 +88,11 @@ impl Related<super::waitpoint::Entity> for Entity {
         super::completed_waitpoints::Relation::Waitpoint.def()
     }
     fn via() -> Option<RelationDef> {
-        Some(super::completed_waitpoints::Relation::TaskRunExecutionSnapshot.def().rev())
+        Some(
+            super::completed_waitpoints::Relation::TaskRunExecutionSnapshot
+                .def()
+                .rev(),
+        )
     }
 }
 

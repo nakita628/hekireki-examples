@@ -8,5 +8,6 @@ class Dataset < ApplicationRecord
 
   belongs_to :project, inverse_of: :dataset
   has_many :dataset_items, foreign_key: %i[dataset_id project_id], inverse_of: :dataset, dependent: :destroy
-  has_many :dataset_runs, foreign_key: %i[dataset_id project_id], inverse_of: :dataset, dependent: :destroy
+  has_many :dataset_runs, class_name: "DatasetRuns", foreign_key: %i[dataset_id project_id], inverse_of: :dataset,
+                          dependent: :destroy
 end

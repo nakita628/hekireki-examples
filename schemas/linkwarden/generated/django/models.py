@@ -145,6 +145,33 @@ class User(models.Model):
         db_table = "User"
 
 
+class VerificationToken(models.Model):
+    identifier = models.TextField()
+    token = models.TextField(primary_key=True, default=None)
+    expires = UtcDateTimeField()
+    created_at = UtcDateTimeField(db_column="createdAt", default=timezone.now)
+    updated_at = UtcDateTimeField(db_column="updatedAt", auto_now=True)
+    objects = AutoNowQuerySet.as_manager()
+
+    class Meta:
+        db_table = "VerificationToken"
+        constraints = [
+            models.UniqueConstraint(fields=["identifier", "token"], name="VerificationToken_identifier_token_key"),
+        ]
+
+
+class PasswordResetToken(models.Model):
+    identifier = models.TextField()
+    token = models.TextField(primary_key=True, default=None)
+    expires = UtcDateTimeField()
+    created_at = UtcDateTimeField(db_column="createdAt", default=timezone.now)
+    updated_at = UtcDateTimeField(db_column="updatedAt", auto_now=True)
+    objects = AutoNowQuerySet.as_manager()
+
+    class Meta:
+        db_table = "PasswordResetToken"
+
+
 class Collection(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.TextField()

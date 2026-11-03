@@ -1,4 +1,5 @@
 import {
+  type PgTableExtraConfigValue,
   bigint,
   boolean,
   customType,
@@ -678,7 +679,7 @@ export const runtimeEnvironment = pgTable(
     tunnelId: text('tunnelId'),
     currentSessionId: text('currentSessionId'),
   },
-  (table) => [
+  (table): PgTableExtraConfigValue[] => [
     uniqueIndex('RuntimeEnvironment_apiKey_key').on(table.apiKey),
     uniqueIndex('RuntimeEnvironment_pkApiKey_key').on(table.pkApiKey),
     index('RuntimeEnvironment_parentEnvironmentId_idx').on(table.parentEnvironmentId),
@@ -827,7 +828,7 @@ export const project = pgTable(
     buildSettings: jsonb('buildSettings'),
     onboardingData: jsonb('onboardingData'),
   },
-  (table) => [
+  (table): PgTableExtraConfigValue[] => [
     uniqueIndex('Project_slug_key').on(table.slug),
     uniqueIndex('Project_externalRef_key').on(table.externalRef),
     foreignKey({
@@ -1653,7 +1654,7 @@ export const taskRun = pgTable(
     realtimeStreams: text('realtimeStreams').array().default([]),
     streamBasinName: text('streamBasinName'),
   },
-  (table) => [
+  (table): PgTableExtraConfigValue[] => [
     uniqueIndex('TaskRun_friendlyId_key').on(table.friendlyId),
     index('TaskRun_parentTaskRunId_idx').on(table.parentTaskRunId),
     index('TaskRun_spanId_idx').on(table.spanId),
@@ -2139,7 +2140,7 @@ export const workerInstanceGroup = pgTable(
       .$defaultFn(utcNow),
     updatedAt: timestamp('updatedAt', { precision: 3 }).notNull().$onUpdate(utcNow),
   },
-  (table) => [
+  (table): PgTableExtraConfigValue[] => [
     uniqueIndex('WorkerInstanceGroup_masterQueue_key').on(table.masterQueue),
     uniqueIndex('WorkerInstanceGroup_tokenId_key').on(table.tokenId),
     foreignKey({
@@ -2319,7 +2320,7 @@ export const taskRunAttempt = pgTable(
     output: text('output'),
     outputType: text('outputType').notNull().default('application/json'),
   },
-  (table) => [
+  (table): PgTableExtraConfigValue[] => [
     uniqueIndex('TaskRunAttempt_friendlyId_key').on(table.friendlyId),
     index('TaskRunAttempt_taskRunId_idx').on(table.taskRunId),
     uniqueIndex('TaskRunAttempt_taskRunId_number_key').on(table.taskRunId, table.number),
@@ -2532,7 +2533,7 @@ export const batchTaskRun = pgTable(
     checkpointEventId: text('checkpointEventId'),
     dependentTaskAttemptId: text('dependentTaskAttemptId'),
   },
-  (table) => [
+  (table): PgTableExtraConfigValue[] => [
     uniqueIndex('BatchTaskRun_friendlyId_key').on(table.friendlyId),
     uniqueIndex('BatchTaskRun_checkpointEventId_key').on(table.checkpointEventId),
     index('BatchTaskRun_dependentTaskAttemptId_idx').on(table.dependentTaskAttemptId),
@@ -2743,7 +2744,7 @@ export const checkpoint = pgTable(
       .$defaultFn(utcNow),
     updatedAt: timestamp('updatedAt', { precision: 3 }).notNull().$onUpdate(utcNow),
   },
-  (table) => [
+  (table): PgTableExtraConfigValue[] => [
     uniqueIndex('Checkpoint_friendlyId_key').on(table.friendlyId),
     index('Checkpoint_attemptId_idx').on(table.attemptId),
     index('Checkpoint_runId_idx').on(table.runId),
@@ -2798,7 +2799,7 @@ export const checkpointRestoreEvent = pgTable(
       .$defaultFn(utcNow),
     updatedAt: timestamp('updatedAt', { precision: 3 }).notNull().$onUpdate(utcNow),
   },
-  (table) => [
+  (table): PgTableExtraConfigValue[] => [
     index('CheckpointRestoreEvent_checkpointId_idx').on(table.checkpointId),
     index('CheckpointRestoreEvent_runId_idx').on(table.runId),
     foreignKey({
@@ -3081,7 +3082,7 @@ export const runtimeEnvironmentSession = pgTable(
     updatedAt: timestamp('updatedAt', { precision: 3 }).notNull().$onUpdate(utcNow),
     disconnectedAt: timestamp('disconnectedAt', { precision: 3 }),
   },
-  (table) => [
+  (table): PgTableExtraConfigValue[] => [
     foreignKey({
       name: 'RuntimeEnvironmentSession_environmentId_fkey',
       columns: [table.environmentId],

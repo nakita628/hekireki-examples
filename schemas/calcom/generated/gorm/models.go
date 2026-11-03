@@ -27,11 +27,11 @@ type Host struct {
 	CreatedAt        DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	GroupID          *string  `gorm:"column:groupId" json:"groupId"`
 	MemberID         *int     `gorm:"column:memberId;index:Host_memberId_idx" json:"memberId"`
-	User             User
-	EventType        EventType
-	Schedule         Schedule
-	Group            HostGroup     `gorm:"foreignKey:GroupID"`
-	Member           Membership    `gorm:"foreignKey:MemberID"`
+	User             *User
+	EventType        *EventType
+	Schedule         *Schedule
+	Group            *HostGroup    `gorm:"foreignKey:GroupID"`
+	Member           *Membership   `gorm:"foreignKey:MemberID"`
 	Location         *HostLocation `gorm:"foreignKey:UserID,EventTypeID;references:UserID,EventTypeID;constraint:OnDelete:CASCADE"`
 }
 
@@ -53,7 +53,7 @@ type HostGroup struct {
 	EventTypeID *int     `gorm:"column:eventTypeId;index:HostGroup_eventTypeId_idx" json:"eventTypeId"`
 	CreatedAt   DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt   DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	EventType   EventType
+	EventType   *EventType
 	Hosts       []Host `gorm:"foreignKey:GroupID"`
 }
 
@@ -94,8 +94,8 @@ type HostLocation struct {
 	PhoneNumber  *string  `gorm:"column:phoneNumber" json:"phoneNumber"`
 	CreatedAt    DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt    DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Host         Host     `gorm:"foreignKey:UserID,EventTypeID;references:UserID,EventTypeID"`
-	Credential   Credential
+	Host         *Host    `gorm:"foreignKey:UserID,EventTypeID;references:UserID,EventTypeID"`
+	Credential   *Credential
 }
 
 func (HostLocation) TableName() string {
@@ -136,7 +136,7 @@ type CalVideoSettings struct {
 	RequireEmailForGuests                bool     `gorm:"column:requireEmailForGuests;default:false;not null" json:"requireEmailForGuests"`
 	CreatedAt                            DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt                            DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	EventType                            EventType
+	EventType                            *EventType
 }
 
 func (CalVideoSettings) TableName() string {
@@ -284,14 +284,14 @@ type EventType struct {
 	EnablePerHostLocations                   bool           `gorm:"column:enablePerHostLocations;default:false;not null" json:"enablePerHostLocations"`
 	CreatedAt                                *DateTime      `gorm:"column:createdAt;autoCreateTime:false" json:"createdAt"`
 	UpdatedAt                                *DateTime      `gorm:"column:updatedAt;autoUpdateTime:false" json:"updatedAt"`
-	Owner                                    User           `gorm:"foreignKey:UserID"`
-	Profile                                  Profile
-	Team                                     Team
+	Owner                                    *User          `gorm:"foreignKey:UserID"`
+	Profile                                  *Profile
+	Team                                     *Team
 	Parent                                   *EventType `gorm:"foreignKey:ParentID"`
-	Schedule                                 Schedule   `gorm:"foreignKey:ScheduleID"`
-	InstantMeetingSchedule                   Schedule   `gorm:"foreignKey:InstantMeetingScheduleID"`
-	SecondaryEmail                           SecondaryEmail
-	RestrictionSchedule                      Schedule               `gorm:"foreignKey:RestrictionScheduleID"`
+	Schedule                                 *Schedule  `gorm:"foreignKey:ScheduleID"`
+	InstantMeetingSchedule                   *Schedule  `gorm:"foreignKey:InstantMeetingScheduleID"`
+	SecondaryEmail                           *SecondaryEmail
+	RestrictionSchedule                      *Schedule              `gorm:"foreignKey:RestrictionScheduleID"`
 	Hosts                                    []Host                 `gorm:"foreignKey:EventTypeID;constraint:OnDelete:CASCADE"`
 	HashedLink                               []HashedLink           `gorm:"foreignKey:EventTypeID;constraint:OnDelete:CASCADE"`
 	Bookings                                 []Booking              `gorm:"foreignKey:EventTypeID"`
@@ -343,10 +343,10 @@ type Credential struct {
 	BillingCycleStart         *int           `gorm:"column:billingCycleStart" json:"billingCycleStart"`
 	Invalid                   *bool          `gorm:"column:invalid;index:Credential_invalid_idx;default:false" json:"invalid"`
 	DelegationCredentialID    *string        `gorm:"column:delegationCredentialId;index:Credential_userId_delegationCredentialId_idx" json:"delegationCredentialId"`
-	User                      User
-	Team                      Team
-	App                       App `gorm:"foreignKey:AppID;references:Slug"`
-	DelegationCredential      DelegationCredential
+	User                      *User
+	Team                      *Team
+	App                       *App `gorm:"foreignKey:AppID;references:Slug"`
+	DelegationCredential      *DelegationCredential
 	DestinationCalendars      []DestinationCalendar      `gorm:"foreignKey:CredentialID;constraint:OnDelete:CASCADE"`
 	SelectedCalendars         []SelectedCalendar         `gorm:"foreignKey:CredentialID;constraint:OnDelete:CASCADE"`
 	CalendarCache             []CalendarCache            `gorm:"foreignKey:CredentialID;constraint:OnDelete:CASCADE"`
@@ -371,10 +371,10 @@ type DestinationCalendar struct {
 	UpdatedAt              *DateTime `gorm:"column:updatedAt;autoUpdateTime:false" json:"updatedAt"`
 	DelegationCredentialID *string   `gorm:"column:delegationCredentialId" json:"delegationCredentialId"`
 	CustomCalendarReminder *int      `gorm:"column:customCalendarReminder" json:"customCalendarReminder"`
-	User                   User
-	EventType              EventType
-	Credential             Credential
-	DelegationCredential   DelegationCredential
+	User                   *User
+	EventType              *EventType
+	Credential             *Credential
+	DelegationCredential   *DelegationCredential
 	Booking                []Booking `gorm:"foreignKey:DestinationCalendarID"`
 }
 
@@ -401,6 +401,16 @@ func (*DestinationCalendar) BeforeUpdate(tx *gorm.DB) error {
 	return nil
 }
 
+type UserPassword struct {
+	Hash   string `gorm:"column:hash;not null" json:"hash"`
+	UserID int    `gorm:"column:userId;primaryKey;uniqueIndex" json:"userId"`
+	User   *User
+}
+
+func (UserPassword) TableName() string {
+	return "UserPassword"
+}
+
 type TravelSchedule struct {
 	ID           int       `gorm:"column:id;primaryKey;autoIncrement" json:"id"`
 	UserID       int       `gorm:"column:userId;not null" json:"userId"`
@@ -408,7 +418,7 @@ type TravelSchedule struct {
 	StartDate    DateTime  `gorm:"column:startDate;index:TravelSchedule_startDate_idx;not null" json:"startDate"`
 	EndDate      *DateTime `gorm:"column:endDate;index:TravelSchedule_endDate_idx" json:"endDate"`
 	PrevTimeZone *string   `gorm:"column:prevTimeZone" json:"prevTimeZone"`
-	User         User
+	User         *User
 }
 
 func (TravelSchedule) TableName() string {
@@ -461,8 +471,8 @@ type User struct {
 	ReferralLinkID                  *string                       `gorm:"column:referralLinkId" json:"referralLinkId"`
 	CreationSource                  *string                       `gorm:"column:creationSource" json:"creationSource"`
 	AutoOptInFeatures               bool                          `gorm:"column:autoOptInFeatures;default:false;not null" json:"autoOptInFeatures"`
-	Organization                    Team                          `gorm:"foreignKey:OrganizationID"`
-	MovedToProfile                  Profile                       `gorm:"foreignKey:MovedToProfileID"`
+	Organization                    *Team                         `gorm:"foreignKey:OrganizationID"`
+	MovedToProfile                  *Profile                      `gorm:"foreignKey:MovedToProfileID"`
 	TravelSchedules                 []TravelSchedule              `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
 	Credentials                     []Credential                  `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
 	Teams                           []Membership                  `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
@@ -532,7 +542,7 @@ type NotificationsSubscriptions struct {
 	ID           int    `gorm:"column:id;primaryKey;autoIncrement" json:"id"`
 	UserID       int    `gorm:"column:userId;index:NotificationsSubscriptions_userId_subscription_idx;not null" json:"userId"`
 	Subscription string `gorm:"column:subscription;index:NotificationsSubscriptions_userId_subscription_idx;not null" json:"subscription"`
-	User         User
+	User         *User
 }
 
 func (NotificationsSubscriptions) TableName() string {
@@ -547,8 +557,8 @@ type Profile struct {
 	Username       string   `gorm:"column:username;uniqueIndex:Profile_username_organizationId_key;not null" json:"username"`
 	CreatedAt      DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt      DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	User           User
-	Organization   Team        `gorm:"foreignKey:OrganizationID"`
+	User           *User
+	Organization   *Team       `gorm:"foreignKey:OrganizationID"`
 	EventTypes     []EventType `gorm:"foreignKey:ProfileID"`
 	MovedFromUser  *User       `gorm:"foreignKey:MovedToProfileID;constraint:OnDelete:SET NULL"`
 }
@@ -611,7 +621,7 @@ type Team struct {
 	IncludeManagedEventsInLimits bool                       `gorm:"column:includeManagedEventsInLimits;default:false;not null" json:"includeManagedEventsInLimits"`
 	AutoOptInFeatures            bool                       `gorm:"column:autoOptInFeatures;default:false;not null" json:"autoOptInFeatures"`
 	Parent                       *Team                      `gorm:"foreignKey:ParentID"`
-	CreatedByOAuthClient         PlatformOAuthClient        `gorm:"foreignKey:CreatedByOAuthClientID"`
+	CreatedByOAuthClient         *PlatformOAuthClient       `gorm:"foreignKey:CreatedByOAuthClientID"`
 	Members                      []Membership               `gorm:"foreignKey:TeamID;constraint:OnDelete:CASCADE"`
 	EventTypes                   []EventType                `gorm:"foreignKey:TeamID;constraint:OnDelete:CASCADE"`
 	VerifiedNumbers              []VerifiedNumber           `gorm:"foreignKey:TeamID;constraint:OnDelete:CASCADE"`
@@ -669,8 +679,8 @@ type CreditBalance struct {
 	AdditionalCredits int       `gorm:"column:additionalCredits;default:0;not null" json:"additionalCredits"`
 	LimitReachedAt    *DateTime `gorm:"column:limitReachedAt" json:"limitReachedAt"`
 	WarningSentAt     *DateTime `gorm:"column:warningSentAt" json:"warningSentAt"`
-	Team              Team
-	User              User
+	Team              *Team
+	User              *User
 	ExpenseLogs       []CreditExpenseLog  `gorm:"foreignKey:CreditBalanceID;constraint:OnDelete:CASCADE"`
 	PurchaseLogs      []CreditPurchaseLog `gorm:"foreignKey:CreditBalanceID;constraint:OnDelete:CASCADE"`
 }
@@ -691,7 +701,7 @@ type CreditPurchaseLog struct {
 	CreditBalanceID string   `gorm:"column:creditBalanceId;not null" json:"creditBalanceId"`
 	Credits         int      `gorm:"column:credits;not null" json:"credits"`
 	CreatedAt       DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
-	CreditBalance   CreditBalance
+	CreditBalance   *CreditBalance
 }
 
 func (CreditPurchaseLog) TableName() string {
@@ -723,8 +733,8 @@ type CreditExpenseLog struct {
 	CallDuration    *int     `gorm:"column:callDuration" json:"callDuration"`
 	CreditFor       *string  `gorm:"column:creditFor" json:"creditFor"`
 	ExternalRef     *string  `gorm:"column:externalRef;uniqueIndex" json:"externalRef"`
-	CreditBalance   CreditBalance
-	Booking         Booking `gorm:"references:UID"`
+	CreditBalance   *CreditBalance
+	Booking         *Booking `gorm:"references:UID"`
 }
 
 func (CreditExpenseLog) TableName() string {
@@ -762,7 +772,7 @@ type OrganizationSettings struct {
 	DisableAttendeeRescheduleRequestEmail bool       `gorm:"column:disableAttendeeRescheduleRequestEmail;default:false;not null" json:"disableAttendeeRescheduleRequestEmail"`
 	DisableAttendeeLocationChangeEmail    bool       `gorm:"column:disableAttendeeLocationChangeEmail;default:false;not null" json:"disableAttendeeLocationChangeEmail"`
 	DisableAttendeeNewEventEmail          bool       `gorm:"column:disableAttendeeNewEventEmail;default:false;not null" json:"disableAttendeeNewEventEmail"`
-	Organization                          Team       `gorm:"foreignKey:OrganizationID"`
+	Organization                          *Team      `gorm:"foreignKey:OrganizationID"`
 	DSyncData                             *DSyncData `gorm:"foreignKey:OrganizationID;references:OrganizationID;constraint:OnDelete:CASCADE"`
 }
 
@@ -779,9 +789,9 @@ type Membership struct {
 	CustomRoleID    *string   `gorm:"column:customRoleId;index:Membership_customRoleId_idx" json:"customRoleId"`
 	CreatedAt       *DateTime `gorm:"column:createdAt;autoCreateTime:false" json:"createdAt"`
 	UpdatedAt       *DateTime `gorm:"column:updatedAt;autoUpdateTime:false" json:"updatedAt"`
-	CustomRole      Role      `gorm:"foreignKey:CustomRoleID"`
-	Team            Team
-	User            User
+	CustomRole      *Role     `gorm:"foreignKey:CustomRoleID"`
+	Team            *Team
+	User            *User
 	AttributeToUser []AttributeToUser `gorm:"foreignKey:MemberID;constraint:OnDelete:CASCADE"`
 	Host            []Host            `gorm:"foreignKey:MemberID;constraint:OnDelete:CASCADE"`
 }
@@ -819,8 +829,8 @@ type VerificationToken struct {
 	UpdatedAt        DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
 	TeamID           *int     `gorm:"column:teamId;index:VerificationToken_teamId_idx" json:"teamId"`
 	SecondaryEmailID *int     `gorm:"column:secondaryEmailId;index:VerificationToken_secondaryEmailId_idx" json:"secondaryEmailId"`
-	Team             Team
-	SecondaryEmail   SecondaryEmail
+	Team             *Team
+	SecondaryEmail   *SecondaryEmail
 }
 
 func (VerificationToken) TableName() string {
@@ -854,8 +864,8 @@ type InstantMeetingToken struct {
 	BookingID *int     `gorm:"column:bookingId;uniqueIndex" json:"bookingId"`
 	CreatedAt DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Team      Team
-	Booking   Booking
+	Team      *Team
+	Booking   *Booking
 }
 
 func (InstantMeetingToken) TableName() string {
@@ -894,9 +904,9 @@ type BookingReference struct {
 	Deleted                    *bool   `gorm:"column:deleted" json:"deleted"`
 	CredentialID               *int    `gorm:"column:credentialId" json:"credentialId"`
 	DelegationCredentialID     *string `gorm:"column:delegationCredentialId" json:"delegationCredentialId"`
-	Booking                    Booking
-	Credential                 Credential
-	DelegationCredential       DelegationCredential
+	Booking                    *Booking
+	Credential                 *Credential
+	DelegationCredential       *DelegationCredential
 }
 
 func (BookingReference) TableName() string {
@@ -912,7 +922,7 @@ type Attendee struct {
 	Locale      *string `gorm:"column:locale;default:'en'" json:"locale"`
 	BookingID   *int    `gorm:"column:bookingId;index:Attendee_bookingId_idx;index:Attendee_email_bookingId_idx" json:"bookingId"`
 	NoShow      *bool   `gorm:"column:noShow;default:false" json:"noShow"`
-	Booking     Booking
+	Booking     *Booking
 	BookingSeat *BookingSeat `gorm:"foreignKey:AttendeeID;constraint:OnDelete:CASCADE"`
 }
 
@@ -961,10 +971,10 @@ type Booking struct {
 	CancelledBy            *string        `gorm:"column:cancelledBy" json:"cancelledBy"`
 	RescheduledBy          *string        `gorm:"column:rescheduledBy" json:"rescheduledBy"`
 	CreationSource         *string        `gorm:"column:creationSource" json:"creationSource"`
-	User                   User           `gorm:"foreignKey:UserID"`
-	EventType              EventType
-	DestinationCalendar    DestinationCalendar
-	ReassignBy             User                       `gorm:"foreignKey:ReassignByID"`
+	User                   *User          `gorm:"foreignKey:UserID"`
+	EventType              *EventType
+	DestinationCalendar    *DestinationCalendar
+	ReassignBy             *User                      `gorm:"foreignKey:ReassignByID"`
 	References             []BookingReference         `gorm:"foreignKey:BookingID;constraint:OnDelete:CASCADE"`
 	Attendees              []Attendee                 `gorm:"foreignKey:BookingID;constraint:OnDelete:CASCADE"`
 	Payment                []Payment                  `gorm:"foreignKey:BookingID;constraint:OnDelete:CASCADE"`
@@ -1014,7 +1024,7 @@ type Tracking struct {
 	UtmCampaign *string `gorm:"column:utm_campaign" json:"utm_campaign"`
 	UtmTerm     *string `gorm:"column:utm_term" json:"utm_term"`
 	UtmContent  *string `gorm:"column:utm_content" json:"utm_content"`
-	Booking     Booking
+	Booking     *Booking
 }
 
 func (Tracking) TableName() string {
@@ -1026,7 +1036,7 @@ type Schedule struct {
 	UserID               int     `gorm:"column:userId;index:Schedule_userId_idx;not null" json:"userId"`
 	Name                 string  `gorm:"column:name;not null" json:"name"`
 	TimeZone             *string `gorm:"column:timeZone" json:"timeZone"`
-	User                 User
+	User                 *User
 	EventType            []EventType    `gorm:"foreignKey:ScheduleID"`
 	InstantMeetingEvents []EventType    `gorm:"foreignKey:InstantMeetingScheduleID"`
 	RestrictionSchedule  []EventType    `gorm:"foreignKey:RestrictionScheduleID"`
@@ -1047,9 +1057,9 @@ type Availability struct {
 	EndTime     TimeOfDay `gorm:"column:endTime;type:time;not null" json:"endTime"`
 	Date        *Date     `gorm:"column:date;type:date" json:"date"`
 	ScheduleID  *int      `gorm:"column:scheduleId;index:Availability_scheduleId_idx" json:"scheduleId"`
-	User        User
-	EventType   EventType
-	Schedule    Schedule
+	User        *User
+	EventType   *EventType
+	Schedule    *Schedule
 }
 
 func (Availability) TableName() string {
@@ -1088,10 +1098,10 @@ type SelectedCalendar struct {
 	UnwatchAttempts          int       `gorm:"column:unwatchAttempts;index:SelectedCalendar_unwatch_idx;default:0;not null" json:"unwatchAttempts"`
 	MaxAttempts              *int      `gorm:"column:maxAttempts;index:SelectedCalendar_watch_idx;index:SelectedCalendar_unwatch_idx;default:3;not null" json:"maxAttempts"`
 	EventTypeID              *int      `gorm:"column:eventTypeId;uniqueIndex:SelectedCalendar_userId_integration_externalId_eventTypeId_key;uniqueIndex:SelectedCalendar_googleChannelId_eventTypeId_key;index:SelectedCalendar_eventTypeId_idx" json:"eventTypeId"`
-	User                     User
-	Credential               Credential
-	DelegationCredential     DelegationCredential
-	EventType                EventType
+	User                     *User
+	Credential               *Credential
+	DelegationCredential     *DelegationCredential
+	EventType                *EventType
 	CalendarCacheEvents      []CalendarCacheEvent `gorm:"foreignKey:SelectedCalendarID;constraint:OnDelete:CASCADE"`
 }
 
@@ -1129,7 +1139,7 @@ type EventTypeCustomInput struct {
 	Options     datatypes.JSON `gorm:"column:options" json:"options"`
 	Required    bool           `gorm:"column:required;not null" json:"required"`
 	Placeholder string         `gorm:"column:placeholder;default:'';not null" json:"placeholder"`
-	EventType   EventType
+	EventType   *EventType
 }
 
 func (EventTypeCustomInput) TableName() string {
@@ -1203,8 +1213,8 @@ type Payment struct {
 	Data          datatypes.JSON `gorm:"column:data;not null" json:"data"`
 	ExternalID    string         `gorm:"column:externalId;uniqueIndex;index:Payment_externalId_idx;not null" json:"externalId"`
 	PaymentOption *string        `gorm:"column:paymentOption;default:'ON_BOOKING'" json:"paymentOption"`
-	App           App            `gorm:"foreignKey:AppID;references:Slug"`
-	Booking       Booking
+	App           *App           `gorm:"foreignKey:AppID;references:Slug"`
+	Booking       *Booking
 }
 
 func (Payment) TableName() string {
@@ -1228,11 +1238,11 @@ type Webhook struct {
 	Time                  *int     `gorm:"column:time" json:"time"`
 	TimeUnit              *string  `gorm:"column:timeUnit" json:"timeUnit"`
 	Version               *string  `gorm:"column:version;default:'2021-10-20';not null" json:"version"`
-	User                  User
-	Team                  Team
-	EventType             EventType
-	PlatformOAuthClient   PlatformOAuthClient
-	App                   App                        `gorm:"foreignKey:AppID;references:Slug"`
+	User                  *User
+	Team                  *Team
+	EventType             *EventType
+	PlatformOAuthClient   *PlatformOAuthClient
+	App                   *App                       `gorm:"foreignKey:AppID;references:Slug"`
 	ScheduledTriggers     []WebhookScheduledTriggers `gorm:"foreignKey:WebhookID;constraint:OnDelete:CASCADE"`
 }
 
@@ -1258,9 +1268,9 @@ type APIKey struct {
 	LastUsedAt *DateTime `gorm:"column:lastUsedAt" json:"lastUsedAt"`
 	HashedKey  string    `gorm:"column:hashedKey;uniqueIndex;not null" json:"hashedKey"`
 	AppID      *string   `gorm:"column:appId" json:"appId"`
-	User       User
-	Team       Team
-	App        App         `gorm:"foreignKey:AppID;references:Slug"`
+	User       *User
+	Team       *Team
+	App        *App        `gorm:"foreignKey:AppID;references:Slug"`
 	RateLimits []RateLimit `gorm:"foreignKey:APIKeyID;constraint:OnDelete:CASCADE"`
 }
 
@@ -1288,7 +1298,7 @@ type RateLimit struct {
 	BlockDuration int      `gorm:"column:blockDuration;not null" json:"blockDuration"`
 	CreatedAt     DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt     DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	APIKey        APIKey
+	APIKey        *APIKey
 }
 
 func (RateLimit) TableName() string {
@@ -1324,7 +1334,7 @@ type HashedLink struct {
 	ExpiresAt     *DateTime `gorm:"column:expiresAt" json:"expiresAt"`
 	MaxUsageCount *int      `gorm:"column:maxUsageCount;default:1;not null" json:"maxUsageCount"`
 	UsageCount    int       `gorm:"column:usageCount;default:0;not null" json:"usageCount"`
-	EventType     EventType
+	EventType     *EventType
 }
 
 func (HashedLink) TableName() string {
@@ -1345,7 +1355,7 @@ type Account struct {
 	Scope             *string `gorm:"column:scope" json:"scope"`
 	IDToken           *string `gorm:"column:id_token;type:text" json:"id_token"`
 	SessionState      *string `gorm:"column:session_state" json:"session_state"`
-	User              User
+	User              *User
 }
 
 func (Account) TableName() string {
@@ -1364,7 +1374,7 @@ type Session struct {
 	SessionToken string   `gorm:"column:sessionToken;uniqueIndex;not null" json:"sessionToken"`
 	UserID       int      `gorm:"column:userId;index:Session_userId_idx;not null" json:"userId"`
 	Expires      DateTime `gorm:"column:expires;not null" json:"expires"`
-	User         User
+	User         *User
 }
 
 func (Session) TableName() string {
@@ -1421,7 +1431,7 @@ type Feedback struct {
 	UserID  int      `gorm:"column:userId;index:Feedback_userId_idx;not null" json:"userId"`
 	Rating  string   `gorm:"column:rating;index:Feedback_rating_idx;not null" json:"rating"`
 	Comment *string  `gorm:"column:comment" json:"comment"`
-	User    User
+	User    *User
 }
 
 func (Feedback) TableName() string {
@@ -1460,8 +1470,8 @@ type WebhookScheduledTriggers struct {
 	AppID         *string   `gorm:"column:appId" json:"appId"`
 	WebhookID     *string   `gorm:"column:webhookId" json:"webhookId"`
 	BookingID     *int      `gorm:"column:bookingId" json:"bookingId"`
-	Webhook       Webhook
-	Booking       Booking
+	Webhook       *Webhook
+	Booking       *Booking
 }
 
 func (WebhookScheduledTriggers) TableName() string {
@@ -1483,8 +1493,8 @@ type BookingSeat struct {
 	AttendeeID   int            `gorm:"column:attendeeId;uniqueIndex;index:BookingSeat_attendeeId_idx;not null" json:"attendeeId"`
 	Data         datatypes.JSON `gorm:"column:data" json:"data"`
 	Metadata     datatypes.JSON `gorm:"column:metadata" json:"metadata"`
-	Booking      Booking
-	Attendee     Attendee
+	Booking      *Booking
+	Attendee     *Attendee
 }
 
 func (BookingSeat) TableName() string {
@@ -1496,8 +1506,8 @@ type VerifiedNumber struct {
 	UserID      *int   `gorm:"column:userId;index:VerifiedNumber_userId_idx" json:"userId"`
 	TeamID      *int   `gorm:"column:teamId;index:VerifiedNumber_teamId_idx" json:"teamId"`
 	PhoneNumber string `gorm:"column:phoneNumber;not null" json:"phoneNumber"`
-	User        User
-	Team        Team
+	User        *User
+	Team        *Team
 }
 
 func (VerifiedNumber) TableName() string {
@@ -1509,8 +1519,8 @@ type VerifiedEmail struct {
 	UserID *int   `gorm:"column:userId;index:VerifiedEmail_userId_idx" json:"userId"`
 	TeamID *int   `gorm:"column:teamId;index:VerifiedEmail_teamId_idx" json:"teamId"`
 	Email  string `gorm:"column:email;not null" json:"email"`
-	User   User
-	Team   Team
+	User   *User
+	Team   *Team
 }
 
 func (VerifiedEmail) TableName() string {
@@ -1561,8 +1571,8 @@ type UserFeatures struct {
 	AssignedAt DateTime `gorm:"column:assignedAt;not null" json:"assignedAt"`
 	AssignedBy string   `gorm:"column:assignedBy;not null" json:"assignedBy"`
 	UpdatedAt  DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	User       User
-	Feature    Feature `gorm:"foreignKey:FeatureID;references:Slug"`
+	User       *User
+	Feature    *Feature `gorm:"foreignKey:FeatureID;references:Slug"`
 }
 
 func (UserFeatures) TableName() string {
@@ -1595,8 +1605,8 @@ type TeamFeatures struct {
 	AssignedAt DateTime `gorm:"column:assignedAt;not null" json:"assignedAt"`
 	AssignedBy string   `gorm:"column:assignedBy;not null" json:"assignedBy"`
 	UpdatedAt  DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Team       Team
-	Feature    Feature `gorm:"foreignKey:FeatureID;references:Slug"`
+	Team       *Team
+	Feature    *Feature `gorm:"foreignKey:FeatureID;references:Slug"`
 }
 
 func (TeamFeatures) TableName() string {
@@ -1651,7 +1661,7 @@ type OAuthClient struct {
 	Status          string   `gorm:"column:status;default:'approved';not null" json:"status"`
 	UserID          *int     `gorm:"column:userId;index:OAuthClient_userId_idx" json:"userId"`
 	CreatedAt       DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
-	User            User
+	User            *User
 	AccessCodes     []AccessCode `gorm:"foreignKey:ClientID;references:ClientID;constraint:OnDelete:CASCADE"`
 }
 
@@ -1668,18 +1678,18 @@ func (m *OAuthClient) BeforeCreate(tx *gorm.DB) error {
 }
 
 type AccessCode struct {
-	ID                  int         `gorm:"column:id;primaryKey;autoIncrement" json:"id"`
-	Code                string      `gorm:"column:code;not null" json:"code"`
-	ClientID            *string     `gorm:"column:clientId" json:"clientId"`
-	ExpiresAt           DateTime    `gorm:"column:expiresAt;not null" json:"expiresAt"`
-	Scopes              []string    `gorm:"column:scopes;serializer:json;not null" json:"scopes"`
-	UserID              *int        `gorm:"column:userId" json:"userId"`
-	TeamID              *int        `gorm:"column:teamId" json:"teamId"`
-	CodeChallenge       *string     `gorm:"column:codeChallenge" json:"codeChallenge"`
-	CodeChallengeMethod *string     `gorm:"column:codeChallengeMethod;default:'S256'" json:"codeChallengeMethod"`
-	Client              OAuthClient `gorm:"foreignKey:ClientID;references:ClientID"`
-	User                User
-	Team                Team
+	ID                  int          `gorm:"column:id;primaryKey;autoIncrement" json:"id"`
+	Code                string       `gorm:"column:code;not null" json:"code"`
+	ClientID            *string      `gorm:"column:clientId" json:"clientId"`
+	ExpiresAt           DateTime     `gorm:"column:expiresAt;not null" json:"expiresAt"`
+	Scopes              []string     `gorm:"column:scopes;serializer:json;not null" json:"scopes"`
+	UserID              *int         `gorm:"column:userId" json:"userId"`
+	TeamID              *int         `gorm:"column:teamId" json:"teamId"`
+	CodeChallenge       *string      `gorm:"column:codeChallenge" json:"codeChallenge"`
+	CodeChallengeMethod *string      `gorm:"column:codeChallengeMethod;default:'S256'" json:"codeChallengeMethod"`
+	Client              *OAuthClient `gorm:"foreignKey:ClientID;references:ClientID"`
+	User                *User
+	Team                *Team
 }
 
 func (AccessCode) TableName() string {
@@ -1725,7 +1735,7 @@ type CalendarCache struct {
 	UpdatedAt    DateTime       `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
 	CredentialID int            `gorm:"column:credentialId;primaryKey;uniqueIndex:CalendarCache_credentialId_key_key" json:"credentialId"`
 	UserID       *int           `gorm:"column:userId;index:CalendarCache_userId_key_idx" json:"userId"`
-	Credential   Credential
+	Credential   *Credential
 }
 
 func (CalendarCache) TableName() string {
@@ -1786,21 +1796,33 @@ func (*TempOrgRedirect) BeforeUpdate(tx *gorm.DB) error {
 	return nil
 }
 
+type Avatar struct {
+	TeamID    int    `gorm:"column:teamId;uniqueIndex:avatars_teamId_userId_isBanner_key;default:0;not null" json:"teamId"`
+	UserID    int    `gorm:"column:userId;uniqueIndex:avatars_teamId_userId_isBanner_key;default:0;not null" json:"userId"`
+	Data      string `gorm:"column:data;not null" json:"data"`
+	ObjectKey string `gorm:"column:objectKey;primaryKey;uniqueIndex" json:"objectKey"`
+	IsBanner  bool   `gorm:"column:isBanner;uniqueIndex:avatars_teamId_userId_isBanner_key;default:false;not null" json:"isBanner"`
+}
+
+func (Avatar) TableName() string {
+	return "avatars"
+}
+
 type OutOfOfficeEntry struct {
-	ID               int               `gorm:"column:id;primaryKey;autoIncrement" json:"id"`
-	UUID             string            `gorm:"column:uuid;uniqueIndex;index:OutOfOfficeEntry_uuid_idx;not null" json:"uuid"`
-	Start            DateTime          `gorm:"column:start;index:OutOfOfficeEntry_start_end_idx;not null" json:"start"`
-	End              DateTime          `gorm:"column:end;index:OutOfOfficeEntry_start_end_idx;not null" json:"end"`
-	Notes            *string           `gorm:"column:notes" json:"notes"`
-	ShowNotePublicly bool              `gorm:"column:showNotePublicly;default:false;not null" json:"showNotePublicly"`
-	UserID           int               `gorm:"column:userId;index:OutOfOfficeEntry_userId_idx;not null" json:"userId"`
-	ToUserID         *int              `gorm:"column:toUserId;index:OutOfOfficeEntry_toUserId_idx" json:"toUserId"`
-	ReasonID         *int              `gorm:"column:reasonId" json:"reasonId"`
-	CreatedAt        DateTime          `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
-	UpdatedAt        DateTime          `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	User             User              `gorm:"foreignKey:UserID"`
-	ToUser           User              `gorm:"foreignKey:ToUserID"`
-	Reason           OutOfOfficeReason `gorm:"foreignKey:ReasonID"`
+	ID               int                `gorm:"column:id;primaryKey;autoIncrement" json:"id"`
+	UUID             string             `gorm:"column:uuid;uniqueIndex;index:OutOfOfficeEntry_uuid_idx;not null" json:"uuid"`
+	Start            DateTime           `gorm:"column:start;index:OutOfOfficeEntry_start_end_idx;not null" json:"start"`
+	End              DateTime           `gorm:"column:end;index:OutOfOfficeEntry_start_end_idx;not null" json:"end"`
+	Notes            *string            `gorm:"column:notes" json:"notes"`
+	ShowNotePublicly bool               `gorm:"column:showNotePublicly;default:false;not null" json:"showNotePublicly"`
+	UserID           int                `gorm:"column:userId;index:OutOfOfficeEntry_userId_idx;not null" json:"userId"`
+	ToUserID         *int               `gorm:"column:toUserId;index:OutOfOfficeEntry_toUserId_idx" json:"toUserId"`
+	ReasonID         *int               `gorm:"column:reasonId" json:"reasonId"`
+	CreatedAt        DateTime           `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
+	UpdatedAt        DateTime           `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
+	User             *User              `gorm:"foreignKey:UserID"`
+	ToUser           *User              `gorm:"foreignKey:ToUserID"`
+	Reason           *OutOfOfficeReason `gorm:"foreignKey:ReasonID"`
 }
 
 func (OutOfOfficeEntry) TableName() string {
@@ -1832,7 +1854,7 @@ type OutOfOfficeReason struct {
 	Reason  string `gorm:"column:reason;uniqueIndex;not null" json:"reason"`
 	Enabled *bool  `gorm:"column:enabled;default:true;not null" json:"enabled"`
 	UserID  *int   `gorm:"column:userId" json:"userId"`
-	User    User
+	User    *User
 	Entries []OutOfOfficeEntry `gorm:"foreignKey:ReasonID;constraint:OnDelete:SET NULL"`
 }
 
@@ -1847,7 +1869,7 @@ type UserHolidaySettings struct {
 	DisabledIds []string `gorm:"column:disabledIds;serializer:json;not null" json:"disabledIds"`
 	CreatedAt   DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt   DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	User        User
+	User        *User
 }
 
 func (UserHolidaySettings) TableName() string {
@@ -1926,7 +1948,7 @@ type PlatformOAuthClient struct {
 	AreDefaultEventTypesEnabled  *bool                        `gorm:"column:areDefaultEventTypesEnabled;default:true;not null" json:"areDefaultEventTypesEnabled"`
 	AreCalendarEventsEnabled     *bool                        `gorm:"column:areCalendarEventsEnabled;default:true;not null" json:"areCalendarEventsEnabled"`
 	CreatedAt                    DateTime                     `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
-	Organization                 Team                         `gorm:"foreignKey:OrganizationID"`
+	Organization                 *Team                        `gorm:"foreignKey:OrganizationID"`
 	Teams                        []Team                       `gorm:"foreignKey:CreatedByOAuthClientID;constraint:OnDelete:CASCADE"`
 	AccessTokens                 []AccessToken                `gorm:"foreignKey:PlatformOAuthClientID;constraint:OnDelete:CASCADE"`
 	RefreshToken                 []RefreshToken               `gorm:"foreignKey:PlatformOAuthClientID;constraint:OnDelete:CASCADE"`
@@ -1951,12 +1973,12 @@ func (m *PlatformOAuthClient) BeforeCreate(tx *gorm.DB) error {
 }
 
 type PlatformAuthorizationToken struct {
-	ID                    string              `gorm:"column:id;primaryKey" json:"id"`
-	PlatformOAuthClientID string              `gorm:"column:platformOAuthClientId;uniqueIndex:PlatformAuthorizationToken_userId_platformOAuthClientId_key;not null" json:"platformOAuthClientId"`
-	UserID                int                 `gorm:"column:userId;uniqueIndex:PlatformAuthorizationToken_userId_platformOAuthClientId_key;not null" json:"userId"`
-	CreatedAt             DateTime            `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
-	Owner                 User                `gorm:"foreignKey:UserID"`
-	Client                PlatformOAuthClient `gorm:"foreignKey:PlatformOAuthClientID"`
+	ID                    string               `gorm:"column:id;primaryKey" json:"id"`
+	PlatformOAuthClientID string               `gorm:"column:platformOAuthClientId;uniqueIndex:PlatformAuthorizationToken_userId_platformOAuthClientId_key;not null" json:"platformOAuthClientId"`
+	UserID                int                  `gorm:"column:userId;uniqueIndex:PlatformAuthorizationToken_userId_platformOAuthClientId_key;not null" json:"userId"`
+	CreatedAt             DateTime             `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
+	Owner                 *User                `gorm:"foreignKey:UserID"`
+	Client                *PlatformOAuthClient `gorm:"foreignKey:PlatformOAuthClientID"`
 }
 
 func (PlatformAuthorizationToken) TableName() string {
@@ -1975,14 +1997,14 @@ func (m *PlatformAuthorizationToken) BeforeCreate(tx *gorm.DB) error {
 }
 
 type AccessToken struct {
-	ID                    int                 `gorm:"column:id;primaryKey;autoIncrement" json:"id"`
-	Secret                string              `gorm:"column:secret;uniqueIndex;not null" json:"secret"`
-	CreatedAt             DateTime            `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
-	ExpiresAt             DateTime            `gorm:"column:expiresAt;not null" json:"expiresAt"`
-	PlatformOAuthClientID string              `gorm:"column:platformOAuthClientId;not null" json:"platformOAuthClientId"`
-	UserID                int                 `gorm:"column:userId;not null" json:"userId"`
-	Owner                 User                `gorm:"foreignKey:UserID"`
-	Client                PlatformOAuthClient `gorm:"foreignKey:PlatformOAuthClientID"`
+	ID                    int                  `gorm:"column:id;primaryKey;autoIncrement" json:"id"`
+	Secret                string               `gorm:"column:secret;uniqueIndex;not null" json:"secret"`
+	CreatedAt             DateTime             `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
+	ExpiresAt             DateTime             `gorm:"column:expiresAt;not null" json:"expiresAt"`
+	PlatformOAuthClientID string               `gorm:"column:platformOAuthClientId;not null" json:"platformOAuthClientId"`
+	UserID                int                  `gorm:"column:userId;not null" json:"userId"`
+	Owner                 *User                `gorm:"foreignKey:UserID"`
+	Client                *PlatformOAuthClient `gorm:"foreignKey:PlatformOAuthClientID"`
 }
 
 func (AccessToken) TableName() string {
@@ -1998,14 +2020,14 @@ func (m *AccessToken) BeforeCreate(tx *gorm.DB) error {
 }
 
 type RefreshToken struct {
-	ID                    int                 `gorm:"column:id;primaryKey;autoIncrement" json:"id"`
-	Secret                string              `gorm:"column:secret;uniqueIndex;not null" json:"secret"`
-	CreatedAt             DateTime            `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
-	ExpiresAt             DateTime            `gorm:"column:expiresAt;not null" json:"expiresAt"`
-	PlatformOAuthClientID string              `gorm:"column:platformOAuthClientId;not null" json:"platformOAuthClientId"`
-	UserID                int                 `gorm:"column:userId;not null" json:"userId"`
-	Owner                 User                `gorm:"foreignKey:UserID"`
-	Client                PlatformOAuthClient `gorm:"foreignKey:PlatformOAuthClientID"`
+	ID                    int                  `gorm:"column:id;primaryKey;autoIncrement" json:"id"`
+	Secret                string               `gorm:"column:secret;uniqueIndex;not null" json:"secret"`
+	CreatedAt             DateTime             `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
+	ExpiresAt             DateTime             `gorm:"column:expiresAt;not null" json:"expiresAt"`
+	PlatformOAuthClientID string               `gorm:"column:platformOAuthClientId;not null" json:"platformOAuthClientId"`
+	UserID                int                  `gorm:"column:userId;not null" json:"userId"`
+	Owner                 *User                `gorm:"foreignKey:UserID"`
+	Client                *PlatformOAuthClient `gorm:"foreignKey:PlatformOAuthClientID"`
 }
 
 func (RefreshToken) TableName() string {
@@ -2025,7 +2047,7 @@ type DSyncData struct {
 	DirectoryID             string                  `gorm:"column:directoryId;uniqueIndex;not null" json:"directoryId"`
 	Tenant                  string                  `gorm:"column:tenant;not null" json:"tenant"`
 	OrganizationID          *int                    `gorm:"column:organizationId;uniqueIndex" json:"organizationId"`
-	Org                     OrganizationSettings    `gorm:"foreignKey:OrganizationID;references:OrganizationID"`
+	Org                     *OrganizationSettings   `gorm:"foreignKey:OrganizationID;references:OrganizationID"`
 	TeamGroupMapping        []DSyncTeamGroupMapping `gorm:"foreignKey:DirectoryID;references:DirectoryID;constraint:OnDelete:CASCADE"`
 	CreatedAttributeToUsers []AttributeToUser       `gorm:"foreignKey:CreatedByDSyncID;references:DirectoryID;constraint:OnDelete:SET NULL"`
 	UpdatedAttributeToUsers []AttributeToUser       `gorm:"foreignKey:UpdatedByDSyncID;references:DirectoryID;constraint:OnDelete:SET NULL"`
@@ -2041,8 +2063,8 @@ type DSyncTeamGroupMapping struct {
 	TeamID         int    `gorm:"column:teamId;uniqueIndex:DSyncTeamGroupMapping_teamId_groupName_key;not null" json:"teamId"`
 	DirectoryID    string `gorm:"column:directoryId;not null" json:"directoryId"`
 	GroupName      string `gorm:"column:groupName;uniqueIndex:DSyncTeamGroupMapping_teamId_groupName_key;not null" json:"groupName"`
-	Team           Team
-	Directory      DSyncData `gorm:"foreignKey:DirectoryID;references:DirectoryID"`
+	Team           *Team
+	Directory      *DSyncData `gorm:"foreignKey:DirectoryID;references:DirectoryID"`
 }
 
 func (DSyncTeamGroupMapping) TableName() string {
@@ -2054,7 +2076,7 @@ type SecondaryEmail struct {
 	UserID             int       `gorm:"column:userId;uniqueIndex:SecondaryEmail_userId_email_key;index:SecondaryEmail_userId_idx;not null" json:"userId"`
 	Email              string    `gorm:"column:email;uniqueIndex;uniqueIndex:SecondaryEmail_userId_email_key;index:SecondaryEmail_email_emailVerified_idx;not null" json:"email"`
 	EmailVerified      *DateTime `gorm:"column:emailVerified;index:SecondaryEmail_email_emailVerified_idx" json:"emailVerified"`
-	User               User
+	User               *User
 	VerificationTokens []VerificationToken `gorm:"foreignKey:SecondaryEmailID"`
 	EventTypes         []EventType         `gorm:"foreignKey:SecondaryEmailID;constraint:OnDelete:CASCADE"`
 }
@@ -2107,6 +2129,26 @@ func (*Task) BeforeUpdate(tx *gorm.DB) error {
 	return nil
 }
 
+type ManagedOrganization struct {
+	ManagedOrganizationID int      `gorm:"column:managedOrganizationId;primaryKey;uniqueIndex;uniqueIndex:ManagedOrganization_managerOrganizationId_managedOrganizationId_key" json:"managedOrganizationId"`
+	ManagerOrganizationID int      `gorm:"column:managerOrganizationId;uniqueIndex:ManagedOrganization_managerOrganizationId_managedOrganizationId_key;index:ManagedOrganization_managerOrganizationId_idx;not null" json:"managerOrganizationId"`
+	CreatedAt             DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
+	ManagedOrganization   *Team    `gorm:"foreignKey:ManagedOrganizationID"`
+	ManagerOrganization   *Team    `gorm:"foreignKey:ManagerOrganizationID"`
+}
+
+func (ManagedOrganization) TableName() string {
+	return "ManagedOrganization"
+}
+
+func (m *ManagedOrganization) BeforeCreate(tx *gorm.DB) error {
+	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
+	if m.CreatedAt.IsZero() {
+		m.CreatedAt = DateTime{Time: now}
+	}
+	return nil
+}
+
 type PlatformBilling struct {
 	ID                int               `gorm:"column:id;primaryKey" json:"id"`
 	CustomerID        string            `gorm:"column:customerId;not null" json:"customerId"`
@@ -2118,7 +2160,7 @@ type PlatformBilling struct {
 	Overdue           *bool             `gorm:"column:overdue;default:false" json:"overdue"`
 	ManagerBillingID  *int              `gorm:"column:managerBillingId" json:"managerBillingId"`
 	ManagerBilling    *PlatformBilling  `gorm:"foreignKey:ManagerBillingID"`
-	Team              Team              `gorm:"foreignKey:ID"`
+	Team              *Team             `gorm:"foreignKey:ID"`
 	ManagedBillings   []PlatformBilling `gorm:"foreignKey:ManagerBillingID"`
 }
 
@@ -2133,7 +2175,7 @@ type AttributeOption struct {
 	Slug          string   `gorm:"column:slug;not null" json:"slug"`
 	IsGroup       bool     `gorm:"column:isGroup;default:false;not null" json:"isGroup"`
 	Contains      []string `gorm:"column:contains;serializer:json;not null" json:"contains"`
-	Attribute     Attribute
+	Attribute     *Attribute
 	AssignedUsers []AttributeToUser `gorm:"foreignKey:AttributeOptionID;constraint:OnDelete:CASCADE"`
 }
 
@@ -2160,7 +2202,7 @@ type Attribute struct {
 	UpdatedAt                  DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
 	IsWeightsEnabled           bool     `gorm:"column:isWeightsEnabled;default:false;not null" json:"isWeightsEnabled"`
 	IsLocked                   bool     `gorm:"column:isLocked;default:false;not null" json:"isLocked"`
-	Team                       Team
+	Team                       *Team
 	Options                    []AttributeOption           `gorm:"foreignKey:AttributeID;constraint:OnDelete:CASCADE"`
 	AttributeSyncFieldMappings []AttributeSyncFieldMapping `gorm:"foreignKey:AttributeID;constraint:OnDelete:CASCADE"`
 }
@@ -2192,22 +2234,22 @@ func (*Attribute) BeforeUpdate(tx *gorm.DB) error {
 }
 
 type AttributeToUser struct {
-	ID                string     `gorm:"column:id;primaryKey;type:char(36)" json:"id"`
-	MemberID          int        `gorm:"column:memberId;uniqueIndex:AttributeToUser_memberId_attributeOptionId_key;not null" json:"memberId"`
-	AttributeOptionID string     `gorm:"column:attributeOptionId;uniqueIndex:AttributeToUser_memberId_attributeOptionId_key;not null" json:"attributeOptionId"`
-	Weight            *int       `gorm:"column:weight" json:"weight"`
-	CreatedAt         DateTime   `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
-	CreatedByID       *int       `gorm:"column:createdById" json:"createdById"`
-	CreatedByDSyncID  *string    `gorm:"column:createdByDSyncId" json:"createdByDSyncId"`
-	UpdatedAt         *DateTime  `gorm:"column:updatedAt;autoUpdateTime:false" json:"updatedAt"`
-	UpdatedByID       *int       `gorm:"column:updatedById" json:"updatedById"`
-	UpdatedByDSyncID  *string    `gorm:"column:updatedByDSyncId" json:"updatedByDSyncId"`
-	Member            Membership `gorm:"foreignKey:MemberID"`
-	AttributeOption   AttributeOption
-	CreatedBy         User      `gorm:"foreignKey:CreatedByID"`
-	CreatedByDSync    DSyncData `gorm:"foreignKey:CreatedByDSyncID;references:DirectoryID"`
-	UpdatedBy         User      `gorm:"foreignKey:UpdatedByID"`
-	UpdatedByDSync    DSyncData `gorm:"foreignKey:UpdatedByDSyncID;references:DirectoryID"`
+	ID                string      `gorm:"column:id;primaryKey;type:char(36)" json:"id"`
+	MemberID          int         `gorm:"column:memberId;uniqueIndex:AttributeToUser_memberId_attributeOptionId_key;not null" json:"memberId"`
+	AttributeOptionID string      `gorm:"column:attributeOptionId;uniqueIndex:AttributeToUser_memberId_attributeOptionId_key;not null" json:"attributeOptionId"`
+	Weight            *int        `gorm:"column:weight" json:"weight"`
+	CreatedAt         DateTime    `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
+	CreatedByID       *int        `gorm:"column:createdById" json:"createdById"`
+	CreatedByDSyncID  *string     `gorm:"column:createdByDSyncId" json:"createdByDSyncId"`
+	UpdatedAt         *DateTime   `gorm:"column:updatedAt;autoUpdateTime:false" json:"updatedAt"`
+	UpdatedByID       *int        `gorm:"column:updatedById" json:"updatedById"`
+	UpdatedByDSyncID  *string     `gorm:"column:updatedByDSyncId" json:"updatedByDSyncId"`
+	Member            *Membership `gorm:"foreignKey:MemberID"`
+	AttributeOption   *AttributeOption
+	CreatedBy         *User      `gorm:"foreignKey:CreatedByID"`
+	CreatedByDSync    *DSyncData `gorm:"foreignKey:CreatedByDSyncID;references:DirectoryID"`
+	UpdatedBy         *User      `gorm:"foreignKey:UpdatedByID"`
+	UpdatedByDSync    *DSyncData `gorm:"foreignKey:UpdatedByDSyncID;references:DirectoryID"`
 }
 
 func (AttributeToUser) TableName() string {
@@ -2242,7 +2284,7 @@ type AssignmentReason struct {
 	BookingID    int      `gorm:"column:bookingId;index:AssignmentReason_bookingId_idx;not null" json:"bookingId"`
 	ReasonEnum   string   `gorm:"column:reasonEnum;not null" json:"reasonEnum"`
 	ReasonString string   `gorm:"column:reasonString;not null" json:"reasonString"`
-	Booking      Booking
+	Booking      *Booking
 }
 
 func (AssignmentReason) TableName() string {
@@ -2268,8 +2310,8 @@ type DelegationCredential struct {
 	Domain              string         `gorm:"column:domain;uniqueIndex:DelegationCredential_organizationId_domain_key;not null" json:"domain"`
 	CreatedAt           DateTime       `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt           DateTime       `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	WorkspacePlatform   WorkspacePlatform
-	Organization        Team                  `gorm:"foreignKey:OrganizationID"`
+	WorkspacePlatform   *WorkspacePlatform
+	Organization        *Team                 `gorm:"foreignKey:OrganizationID"`
 	SelectedCalendars   []SelectedCalendar    `gorm:"foreignKey:DelegationCredentialID;constraint:OnDelete:CASCADE"`
 	DestinationCalendar []DestinationCalendar `gorm:"foreignKey:DelegationCredentialID;constraint:OnDelete:CASCADE"`
 	BookingReferences   []BookingReference    `gorm:"foreignKey:DelegationCredentialID;constraint:OnDelete:SET NULL"`
@@ -2348,9 +2390,9 @@ type EventTypeTranslation struct {
 	CreatedBy      int      `gorm:"column:createdBy;not null" json:"createdBy"`
 	UpdatedAt      DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
 	UpdatedBy      *int     `gorm:"column:updatedBy" json:"updatedBy"`
-	EventType      EventType
-	Creator        User `gorm:"foreignKey:CreatedBy"`
-	Updater        User `gorm:"foreignKey:UpdatedBy"`
+	EventType      *EventType
+	Creator        *User `gorm:"foreignKey:CreatedBy"`
+	Updater        *User `gorm:"foreignKey:UpdatedBy"`
 }
 
 func (EventTypeTranslation) TableName() string {
@@ -2418,7 +2460,7 @@ type WatchlistAudit struct {
 	ChangedAt       DateTime `gorm:"column:changedAt;index:WatchlistAudit_watchlistId_changedAt_idx;not null" json:"changedAt"`
 	ChangedByUserID *int     `gorm:"column:changedByUserId" json:"changedByUserId"`
 	WatchlistID     *string  `gorm:"column:watchlistId;index:WatchlistAudit_watchlistId_changedAt_idx;type:char(36)" json:"watchlistId"`
-	Watchlist       Watchlist
+	Watchlist       *Watchlist
 }
 
 func (WatchlistAudit) TableName() string {
@@ -2460,25 +2502,25 @@ func (m *WatchlistEventAudit) BeforeCreate(tx *gorm.DB) error {
 }
 
 type BookingReport struct {
-	ID                string    `gorm:"column:id;primaryKey;type:char(36)" json:"id"`
-	BookingUID        string    `gorm:"column:bookingUid;uniqueIndex;not null" json:"bookingUid"`
-	BookerEmail       string    `gorm:"column:bookerEmail;index:BookingReport_bookerEmail_idx;not null" json:"bookerEmail"`
-	ReportedByID      *int      `gorm:"column:reportedById;index:BookingReport_reportedById_idx" json:"reportedById"`
-	OrganizationID    *int      `gorm:"column:organizationId;index:BookingReport_organizationId_idx" json:"organizationId"`
-	Reason            string    `gorm:"column:reason;not null" json:"reason"`
-	Description       *string   `gorm:"column:description" json:"description"`
-	Cancelled         bool      `gorm:"column:cancelled;default:false;not null" json:"cancelled"`
-	CreatedAt         DateTime  `gorm:"column:createdAt;index:BookingReport_createdAt_idx;autoCreateTime:false;not null" json:"createdAt"`
-	UpdatedAt         DateTime  `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Status            string    `gorm:"column:status;default:'PENDING';not null" json:"status"`
-	SystemStatus      string    `gorm:"column:systemStatus;index:BookingReport_systemStatus_idx;default:'PENDING';not null" json:"systemStatus"`
-	WatchlistID       *string   `gorm:"column:watchlistId;index:BookingReport_watchlistId_idx;type:char(36)" json:"watchlistId"`
-	GlobalWatchlistID *string   `gorm:"column:globalWatchlistId;index:BookingReport_globalWatchlistId_idx;type:char(36)" json:"globalWatchlistId"`
-	Booking           Booking   `gorm:"references:UID"`
-	ReportedBy        User      `gorm:"foreignKey:ReportedByID"`
-	Organization      Team      `gorm:"foreignKey:OrganizationID"`
-	Watchlist         Watchlist `gorm:"foreignKey:WatchlistID"`
-	GlobalWatchlist   Watchlist `gorm:"foreignKey:GlobalWatchlistID"`
+	ID                string     `gorm:"column:id;primaryKey;type:char(36)" json:"id"`
+	BookingUID        string     `gorm:"column:bookingUid;uniqueIndex;not null" json:"bookingUid"`
+	BookerEmail       string     `gorm:"column:bookerEmail;index:BookingReport_bookerEmail_idx;not null" json:"bookerEmail"`
+	ReportedByID      *int       `gorm:"column:reportedById;index:BookingReport_reportedById_idx" json:"reportedById"`
+	OrganizationID    *int       `gorm:"column:organizationId;index:BookingReport_organizationId_idx" json:"organizationId"`
+	Reason            string     `gorm:"column:reason;not null" json:"reason"`
+	Description       *string    `gorm:"column:description" json:"description"`
+	Cancelled         bool       `gorm:"column:cancelled;default:false;not null" json:"cancelled"`
+	CreatedAt         DateTime   `gorm:"column:createdAt;index:BookingReport_createdAt_idx;autoCreateTime:false;not null" json:"createdAt"`
+	UpdatedAt         DateTime   `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
+	Status            string     `gorm:"column:status;default:'PENDING';not null" json:"status"`
+	SystemStatus      string     `gorm:"column:systemStatus;index:BookingReport_systemStatus_idx;default:'PENDING';not null" json:"systemStatus"`
+	WatchlistID       *string    `gorm:"column:watchlistId;index:BookingReport_watchlistId_idx;type:char(36)" json:"watchlistId"`
+	GlobalWatchlistID *string    `gorm:"column:globalWatchlistId;index:BookingReport_globalWatchlistId_idx;type:char(36)" json:"globalWatchlistId"`
+	Booking           *Booking   `gorm:"references:UID"`
+	ReportedBy        *User      `gorm:"foreignKey:ReportedByID"`
+	Organization      *Team      `gorm:"foreignKey:OrganizationID"`
+	Watchlist         *Watchlist `gorm:"foreignKey:WatchlistID"`
+	GlobalWatchlist   *Watchlist `gorm:"foreignKey:GlobalWatchlistID"`
 }
 
 func (BookingReport) TableName() string {
@@ -2519,10 +2561,10 @@ type WrongAssignmentReport struct {
 	ReviewedAt      *DateTime `gorm:"column:reviewedAt" json:"reviewedAt"`
 	CreatedAt       DateTime  `gorm:"column:createdAt;index:WrongAssignmentReport_createdAt_idx;index:WrongAssignmentReport_teamId_status_createdAt_idx;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt       DateTime  `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Booking         Booking   `gorm:"references:UID"`
-	ReportedBy      User      `gorm:"foreignKey:ReportedByID"`
-	Team            Team
-	ReviewedBy      User `gorm:"foreignKey:ReviewedByID"`
+	Booking         *Booking  `gorm:"references:UID"`
+	ReportedBy      *User     `gorm:"foreignKey:ReportedByID"`
+	Team            *Team
+	ReviewedBy      *User `gorm:"foreignKey:ReviewedByID"`
 }
 
 func (WrongAssignmentReport) TableName() string {
@@ -2576,8 +2618,8 @@ type OrganizationOnboarding struct {
 	InvitedMembers           datatypes.JSON `gorm:"column:invitedMembers;default:'[]';not null" json:"invitedMembers"`
 	Teams                    datatypes.JSON `gorm:"column:teams;default:'[]';not null" json:"teams"`
 	IsComplete               bool           `gorm:"column:isComplete;default:false;not null" json:"isComplete"`
-	CreatedBy                User           `gorm:"foreignKey:CreatedByID"`
-	Organization             Team           `gorm:"foreignKey:OrganizationID"`
+	CreatedBy                *User          `gorm:"foreignKey:CreatedByID"`
+	Organization             *Team          `gorm:"foreignKey:OrganizationID"`
 }
 
 func (OrganizationOnboarding) TableName() string {
@@ -2612,7 +2654,7 @@ type InternalNotePreset struct {
 	CancellationReason  *string  `gorm:"column:cancellationReason" json:"cancellationReason"`
 	TeamID              int      `gorm:"column:teamId;uniqueIndex:InternalNotePreset_teamId_name_key;index:InternalNotePreset_teamId_idx;not null" json:"teamId"`
 	CreatedAt           DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
-	Team                Team
+	Team                *Team
 	BookingInternalNote []BookingInternalNote `gorm:"foreignKey:NotePresetID;constraint:OnDelete:CASCADE"`
 }
 
@@ -2643,8 +2685,8 @@ type FilterSegment struct {
 	UpdatedAt        DateTime       `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
 	UserID           int            `gorm:"column:userId;index:FilterSegment_scope_userId_tableIdentifier_idx;not null" json:"userId"`
 	TeamID           *int           `gorm:"column:teamId;index:FilterSegment_scope_teamId_tableIdentifier_idx" json:"teamId"`
-	User             User
-	Team             Team
+	User             *User
+	Team             *Team
 	UserPreferences  []UserFilterSegmentPreference `gorm:"foreignKey:SegmentID;constraint:OnDelete:CASCADE"`
 }
 
@@ -2679,8 +2721,8 @@ type UserFilterSegmentPreference struct {
 	SystemSegmentID *string  `gorm:"column:systemSegmentId" json:"systemSegmentId"`
 	CreatedAt       DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt       DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	User            User
-	Segment         FilterSegment `gorm:"foreignKey:SegmentID"`
+	User            *User
+	Segment         *FilterSegment `gorm:"foreignKey:SegmentID"`
 }
 
 func (UserFilterSegmentPreference) TableName() string {
@@ -2707,15 +2749,15 @@ func (*UserFilterSegmentPreference) BeforeUpdate(tx *gorm.DB) error {
 }
 
 type BookingInternalNote struct {
-	ID           int                `gorm:"column:id;primaryKey;autoIncrement" json:"id"`
-	NotePresetID *int               `gorm:"column:notePresetId;uniqueIndex:BookingInternalNote_bookingId_notePresetId_key" json:"notePresetId"`
-	Text         *string            `gorm:"column:text" json:"text"`
-	BookingID    int                `gorm:"column:bookingId;uniqueIndex:BookingInternalNote_bookingId_notePresetId_key;index:BookingInternalNote_bookingId_idx;not null" json:"bookingId"`
-	CreatedByID  int                `gorm:"column:createdById;not null" json:"createdById"`
-	CreatedAt    DateTime           `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
-	NotePreset   InternalNotePreset `gorm:"foreignKey:NotePresetID"`
-	Booking      Booking
-	CreatedBy    User `gorm:"foreignKey:CreatedByID"`
+	ID           int                 `gorm:"column:id;primaryKey;autoIncrement" json:"id"`
+	NotePresetID *int                `gorm:"column:notePresetId;uniqueIndex:BookingInternalNote_bookingId_notePresetId_key" json:"notePresetId"`
+	Text         *string             `gorm:"column:text" json:"text"`
+	BookingID    int                 `gorm:"column:bookingId;uniqueIndex:BookingInternalNote_bookingId_notePresetId_key;index:BookingInternalNote_bookingId_idx;not null" json:"bookingId"`
+	CreatedByID  int                 `gorm:"column:createdById;not null" json:"createdById"`
+	CreatedAt    DateTime            `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
+	NotePreset   *InternalNotePreset `gorm:"foreignKey:NotePresetID"`
+	Booking      *Booking
+	CreatedBy    *User `gorm:"foreignKey:CreatedByID"`
 }
 
 func (BookingInternalNote) TableName() string {
@@ -2739,7 +2781,7 @@ type Role struct {
 	CreatedAt   DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt   DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
 	Type        string   `gorm:"column:type;default:'CUSTOM';not null" json:"type"`
-	Team        Team
+	Team        *Team
 	Permissions []RolePermission `gorm:"foreignKey:RoleID;constraint:OnDelete:CASCADE"`
 	Memberships []Membership     `gorm:"foreignKey:CustomRoleID"`
 }
@@ -2776,7 +2818,7 @@ type RolePermission struct {
 	Resource  string   `gorm:"column:resource;uniqueIndex:RolePermission_roleId_resource_action_key;not null" json:"resource"`
 	Action    string   `gorm:"column:action;uniqueIndex:RolePermission_roleId_resource_action_key;index:RolePermission_action_idx;not null" json:"action"`
 	CreatedAt DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
-	Role      Role
+	Role      *Role
 }
 
 func (RolePermission) TableName() string {
@@ -2835,7 +2877,7 @@ type BookingAudit struct {
 	OperationID string         `gorm:"column:operationId;index:BookingAudit_operationId_idx;not null" json:"operationId"`
 	Data        datatypes.JSON `gorm:"column:data" json:"data"`
 	Context     datatypes.JSON `gorm:"column:context" json:"context"`
-	Actor       AuditActor     `gorm:"foreignKey:ActorID"`
+	Actor       *AuditActor    `gorm:"foreignKey:ActorID"`
 }
 
 func (BookingAudit) TableName() string {
@@ -2875,8 +2917,8 @@ type Agent struct {
 	Enabled              *bool    `gorm:"column:enabled;default:true;not null" json:"enabled"`
 	CreatedAt            DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt            DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	User                 User
-	Team                 Team
+	User                 *User
+	Team                 *Team
 	InboundPhoneNumbers  []CalAiPhoneNumber `gorm:"foreignKey:InboundAgentID;constraint:OnDelete:SET NULL"`
 	OutboundPhoneNumbers []CalAiPhoneNumber `gorm:"foreignKey:OutboundAgentID;constraint:OnDelete:SET NULL"`
 }
@@ -2921,10 +2963,10 @@ type CalAiPhoneNumber struct {
 	SubscriptionStatus    *string  `gorm:"column:subscriptionStatus" json:"subscriptionStatus"`
 	InboundAgentID        *string  `gorm:"column:inboundAgentId;index:CalAiPhoneNumber_inboundAgentId_idx" json:"inboundAgentId"`
 	OutboundAgentID       *string  `gorm:"column:outboundAgentId;index:CalAiPhoneNumber_outboundAgentId_idx" json:"outboundAgentId"`
-	User                  User
-	Team                  Team
-	InboundAgent          Agent `gorm:"foreignKey:InboundAgentID"`
-	OutboundAgent         Agent `gorm:"foreignKey:OutboundAgentID"`
+	User                  *User
+	Team                  *Team
+	InboundAgent          *Agent `gorm:"foreignKey:InboundAgentID"`
+	OutboundAgent         *Agent `gorm:"foreignKey:OutboundAgentID"`
 }
 
 func (CalAiPhoneNumber) TableName() string {
@@ -2969,7 +3011,7 @@ type TeamBilling struct {
 	HighWaterMarkPeriodStart *DateTime `gorm:"column:highWaterMarkPeriodStart" json:"highWaterMarkPeriodStart"`
 	CreatedAt                DateTime  `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt                DateTime  `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Team                     Team
+	Team                     *Team
 	MonthlyProrations        []MonthlyProration `gorm:"foreignKey:TeamBillingID"`
 	SeatChangeLogs           []SeatChangeLog    `gorm:"foreignKey:TeamBillingID"`
 }
@@ -3019,7 +3061,7 @@ type OrganizationBilling struct {
 	HighWaterMarkPeriodStart *DateTime `gorm:"column:highWaterMarkPeriodStart" json:"highWaterMarkPeriodStart"`
 	CreatedAt                DateTime  `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt                DateTime  `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Team                     Team
+	Team                     *Team
 	MonthlyProrations        []MonthlyProration `gorm:"foreignKey:OrganizationBillingID"`
 	SeatChangeLogs           []SeatChangeLog    `gorm:"foreignKey:OrganizationBillingID"`
 }
@@ -3065,10 +3107,10 @@ type SeatChangeLog struct {
 	CreatedAt              DateTime       `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	TeamBillingID          *string        `gorm:"column:teamBillingId" json:"teamBillingId"`
 	OrganizationBillingID  *string        `gorm:"column:organizationBillingId" json:"organizationBillingId"`
-	Team                   Team
-	Proration              MonthlyProration `gorm:"foreignKey:ProcessedInProrationID"`
-	TeamBilling            TeamBilling
-	OrganizationBilling    OrganizationBilling
+	Team                   *Team
+	Proration              *MonthlyProration `gorm:"foreignKey:ProcessedInProrationID"`
+	TeamBilling            *TeamBilling
+	OrganizationBilling    *OrganizationBilling
 }
 
 func (SeatChangeLog) TableName() string {
@@ -3121,9 +3163,9 @@ type MonthlyProration struct {
 	UpdatedAt             DateTime       `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
 	TeamBillingID         *string        `gorm:"column:teamBillingId" json:"teamBillingId"`
 	OrganizationBillingID *string        `gorm:"column:organizationBillingId" json:"organizationBillingId"`
-	Team                  Team
-	TeamBilling           TeamBilling
-	OrganizationBilling   OrganizationBilling
+	Team                  *Team
+	TeamBilling           *TeamBilling
+	OrganizationBilling   *OrganizationBilling
 	SeatChanges           []SeatChangeLog `gorm:"foreignKey:ProcessedInProrationID"`
 }
 
@@ -3174,7 +3216,7 @@ type CalendarCacheEvent struct {
 	UpdatedAt          DateTime  `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
 	ExternalCreatedAt  *DateTime `gorm:"column:externalCreatedAt" json:"externalCreatedAt"`
 	ExternalUpdatedAt  *DateTime `gorm:"column:externalUpdatedAt" json:"externalUpdatedAt"`
-	SelectedCalendar   SelectedCalendar
+	SelectedCalendar   *SelectedCalendar
 }
 
 func (CalendarCacheEvent) TableName() string {
@@ -3212,8 +3254,8 @@ type IntegrationAttributeSync struct {
 	Enabled           bool     `gorm:"column:enabled;not null" json:"enabled"`
 	CreatedAt         DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt         DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Organization      Team     `gorm:"foreignKey:OrganizationID"`
-	Credential        Credential
+	Organization      *Team    `gorm:"foreignKey:OrganizationID"`
+	Credential        *Credential
 	SyncFieldMappings []AttributeSyncFieldMapping `gorm:"foreignKey:IntegrationAttributeSyncID;constraint:OnDelete:CASCADE"`
 	AttributeSyncRule *AttributeSyncRule          `gorm:"foreignKey:IntegrationAttributeSyncID;constraint:OnDelete:CASCADE"`
 }
@@ -3250,7 +3292,7 @@ type AttributeSyncRule struct {
 	Rule                       datatypes.JSON `gorm:"column:rule;not null" json:"rule"`
 	CreatedAt                  DateTime       `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt                  DateTime       `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	IntegrationAttributeSync   IntegrationAttributeSync
+	IntegrationAttributeSync   *IntegrationAttributeSync
 }
 
 func (AttributeSyncRule) TableName() string {
@@ -3287,8 +3329,8 @@ type AttributeSyncFieldMapping struct {
 	IntegrationAttributeSyncID string   `gorm:"column:integrationAttributeSyncId;uniqueIndex:AttributeSyncFieldMapping_integrationAttributeSyncId_attributeId_key;index:AttributeSyncFieldMapping_integrationAttributeSyncId_idx;not null" json:"integrationAttributeSyncId"`
 	CreatedAt                  DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt                  DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Attribute                  Attribute
-	IntegrationAttributeSync   IntegrationAttributeSync
+	Attribute                  *Attribute
+	IntegrationAttributeSync   *IntegrationAttributeSync
 }
 
 func (AttributeSyncFieldMapping) TableName() string {
@@ -3315,6 +3357,68 @@ func (*AttributeSyncFieldMapping) BeforeUpdate(tx *gorm.DB) error {
 		tx.Statement.SetColumn("UpdatedAt", DateTime{Time: now})
 	}
 	return nil
+}
+
+type BookingTimeStatus struct {
+	ID             int       `gorm:"column:id;primaryKey;uniqueIndex" json:"id"`
+	UID            *string   `gorm:"column:uid" json:"uid"`
+	EventTypeID    *int      `gorm:"column:eventTypeId" json:"eventTypeId"`
+	Title          *string   `gorm:"column:title" json:"title"`
+	Description    *string   `gorm:"column:description" json:"description"`
+	StartTime      *DateTime `gorm:"column:startTime" json:"startTime"`
+	EndTime        *DateTime `gorm:"column:endTime" json:"endTime"`
+	CreatedAt      *DateTime `gorm:"column:createdAt;autoCreateTime:false" json:"createdAt"`
+	Location       *string   `gorm:"column:location" json:"location"`
+	Paid           *bool     `gorm:"column:paid" json:"paid"`
+	Status         *string   `gorm:"column:status" json:"status"`
+	Rescheduled    *bool     `gorm:"column:rescheduled" json:"rescheduled"`
+	UserID         *int      `gorm:"column:userId" json:"userId"`
+	TeamID         *int      `gorm:"column:teamId" json:"teamId"`
+	EventLength    *int      `gorm:"column:eventLength" json:"eventLength"`
+	TimeStatus     *string   `gorm:"column:timeStatus" json:"timeStatus"`
+	EventParentID  *int      `gorm:"column:eventParentId" json:"eventParentId"`
+	UserEmail      *string   `gorm:"column:userEmail" json:"userEmail"`
+	Username       *string   `gorm:"column:username" json:"username"`
+	RatingFeedback *string   `gorm:"column:ratingFeedback" json:"ratingFeedback"`
+	Rating         *int      `gorm:"column:rating" json:"rating"`
+	NoShowHost     *bool     `gorm:"column:noShowHost" json:"noShowHost"`
+	IsTeamBooking  bool      `gorm:"column:isTeamBooking;not null" json:"isTeamBooking"`
+}
+
+func (BookingTimeStatus) TableName() string {
+	return "BookingTimeStatus"
+}
+
+type BookingTimeStatusDenormalized struct {
+	ID             int       `gorm:"column:id;primaryKey;uniqueIndex" json:"id"`
+	UID            string    `gorm:"column:uid;not null" json:"uid"`
+	EventTypeID    *int      `gorm:"column:eventTypeId" json:"eventTypeId"`
+	Title          string    `gorm:"column:title;not null" json:"title"`
+	Description    *string   `gorm:"column:description" json:"description"`
+	StartTime      DateTime  `gorm:"column:startTime;not null" json:"startTime"`
+	EndTime        DateTime  `gorm:"column:endTime;not null" json:"endTime"`
+	CreatedAt      DateTime  `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
+	UpdatedAt      *DateTime `gorm:"column:updatedAt;autoUpdateTime:false" json:"updatedAt"`
+	Location       *string   `gorm:"column:location" json:"location"`
+	Paid           bool      `gorm:"column:paid;not null" json:"paid"`
+	Status         string    `gorm:"column:status;not null" json:"status"`
+	Rescheduled    *bool     `gorm:"column:rescheduled" json:"rescheduled"`
+	UserID         *int      `gorm:"column:userId" json:"userId"`
+	TeamID         *int      `gorm:"column:teamId" json:"teamId"`
+	EventLength    *int      `gorm:"column:eventLength" json:"eventLength"`
+	EventParentID  *int      `gorm:"column:eventParentId" json:"eventParentId"`
+	UserEmail      *string   `gorm:"column:userEmail" json:"userEmail"`
+	UserName       *string   `gorm:"column:userName" json:"userName"`
+	UserUsername   *string   `gorm:"column:userUsername" json:"userUsername"`
+	RatingFeedback *string   `gorm:"column:ratingFeedback" json:"ratingFeedback"`
+	Rating         *int      `gorm:"column:rating" json:"rating"`
+	NoShowHost     *bool     `gorm:"column:noShowHost" json:"noShowHost"`
+	IsTeamBooking  bool      `gorm:"column:isTeamBooking;not null" json:"isTeamBooking"`
+	TimeStatus     *string   `gorm:"column:timeStatus" json:"timeStatus"`
+}
+
+func (BookingTimeStatusDenormalized) TableName() string {
+	return "BookingTimeStatusDenormalized"
 }
 
 type DateTime struct{ time.Time }

@@ -44,11 +44,22 @@ type Account struct {
 	Scope             *string `gorm:"column:scope" json:"scope"`
 	IDToken           *string `gorm:"column:id_token" json:"id_token"`
 	SessionState      *string `gorm:"column:session_state" json:"session_state"`
-	User              User
+	User              *User
 }
 
 func (Account) TableName() string {
 	return "Account"
+}
+
+type Session struct {
+	SessionToken string   `gorm:"column:sessionToken;primaryKey;uniqueIndex" json:"sessionToken"`
+	UserID       string   `gorm:"column:userId;not null" json:"userId"`
+	Expires      DateTime `gorm:"column:expires;not null" json:"expires"`
+	User         *User
+}
+
+func (Session) TableName() string {
+	return "Session"
 }
 
 type VerificationToken struct {
@@ -70,7 +81,7 @@ type Authenticator struct {
 	CredentialDeviceType string  `gorm:"column:credentialDeviceType;not null" json:"credentialDeviceType"`
 	CredentialBackedUp   bool    `gorm:"column:credentialBackedUp;not null" json:"credentialBackedUp"`
 	Transports           *string `gorm:"column:transports" json:"transports"`
-	User                 User
+	User                 *User
 }
 
 func (Authenticator) TableName() string {

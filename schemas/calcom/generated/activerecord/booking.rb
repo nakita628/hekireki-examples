@@ -34,13 +34,12 @@ class Booking < ApplicationRecord
   has_many :references, class_name: "BookingReference", foreign_key: "bookingId", inverse_of: :booking,
                         dependent: :destroy
   has_many :attendees, foreign_key: "bookingId", inverse_of: :booking, dependent: :destroy
-  has_many :payment, class_name: "Payment", foreign_key: "bookingId", inverse_of: :booking, dependent: :destroy
+  has_many :payment, foreign_key: "bookingId", inverse_of: :booking, dependent: :destroy
   has_many :seats_references, class_name: "BookingSeat", foreign_key: "bookingId", inverse_of: :booking,
                               dependent: :destroy
   has_many :scheduled_triggers, class_name: "WebhookScheduledTriggers", foreign_key: "bookingId", inverse_of: :booking,
                                 dependent: :destroy
-  has_many :assignment_reason, class_name: "AssignmentReason", foreign_key: "bookingId", inverse_of: :booking,
-                               dependent: :destroy
+  has_many :assignment_reason, foreign_key: "bookingId", inverse_of: :booking, dependent: :destroy
   has_many :internal_note, class_name: "BookingInternalNote", foreign_key: "bookingId", inverse_of: :booking,
                            dependent: :destroy
   has_many :expense_logs, class_name: "CreditExpenseLog", foreign_key: "bookingUid", primary_key: "uid",

@@ -723,6 +723,42 @@ class RestrictedToken(models.Model):
         ]
 
 
+class VerificationToken(models.Model):
+    identifier = models.TextField()
+    token = models.TextField(primary_key=True, default=None)
+    expires = UtcDateTimeField()
+
+    class Meta:
+        db_table = "VerificationToken"
+        constraints = [
+            models.UniqueConstraint(fields=["identifier", "token"], name="VerificationToken_identifier_token_key"),
+        ]
+
+
+class EmailVerificationToken(models.Model):
+    identifier = models.TextField()
+    token = models.TextField(primary_key=True, default=None)
+    expires = UtcDateTimeField()
+
+    class Meta:
+        db_table = "EmailVerificationToken"
+        constraints = [
+            models.UniqueConstraint(fields=["identifier", "token"], name="EmailVerificationToken_identifier_token_key"),
+        ]
+
+
+class PasswordResetToken(models.Model):
+    identifier = models.TextField()
+    token = models.TextField(primary_key=True, default=None)
+    expires = UtcDateTimeField()
+
+    class Meta:
+        db_table = "PasswordResetToken"
+        constraints = [
+            models.UniqueConstraint(fields=["identifier", "token"], name="PasswordResetToken_identifier_token_key"),
+        ]
+
+
 class UtmTemplate(models.Model):
     id = models.TextField(primary_key=True, default=None)
     name = models.TextField()
@@ -860,6 +896,24 @@ class Project(models.Model):
         indexes = [
             models.Index(fields=["usage_last_checked"]),
             models.Index(fields=["trial_ends_at"]),
+        ]
+
+
+class ProjectInvite(models.Model):
+    pk = models.CompositePrimaryKey("email", "project_id")
+    email = models.TextField()
+    expires = UtcDateTimeField()
+    project = models.ForeignKey("Project", on_delete=models.CASCADE, related_name="invites", db_column="projectId", db_index=False)
+    role = models.TextField(choices=WorkspaceRole.choices, default=WorkspaceRole.member)
+    created_at = UtcDateTimeField(db_column="createdAt", default=timezone.now)
+
+    class Meta:
+        db_table = "ProjectInvite"
+        constraints = [
+            models.UniqueConstraint(fields=["email", "project"], name="ProjectInvite_email_projectId_key"),
+        ]
+        indexes = [
+            models.Index(fields=["project"]),
         ]
 
 

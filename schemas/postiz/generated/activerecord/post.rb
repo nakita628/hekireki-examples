@@ -26,9 +26,9 @@ class Post < ApplicationRecord
                                    inverse_of: :posts
   belongs_to :submitted_for_organization, class_name: "Organization", foreign_key: "submittedForOrganizationId",
                                           optional: true, inverse_of: :submitted_post
-  has_many :comments, foreign_key: "postId", inverse_of: :post, dependent: :restrict_with_error
-  has_many :errors, foreign_key: "postId", inverse_of: :post, dependent: :restrict_with_error
-  has_many :payout_problems, foreign_key: "postId", inverse_of: :post, dependent: :nullify
+  has_many :comments, class_name: "Comments", foreign_key: "postId", inverse_of: :post, dependent: :restrict_with_error
+  has_many :post_errors, class_name: "Errors", foreign_key: "postId", inverse_of: :post, dependent: :restrict_with_error
+  has_many :payout_problems, class_name: "PayoutProblems", foreign_key: "postId", inverse_of: :post, dependent: :nullify
   has_many :children_post, class_name: "Post", foreign_key: "parentPostId", inverse_of: :parent_post,
                            dependent: :nullify
   has_many :tags, class_name: "TagsPosts", foreign_key: "postId", inverse_of: :post, dependent: :restrict_with_error

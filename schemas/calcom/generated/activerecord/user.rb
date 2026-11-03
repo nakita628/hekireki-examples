@@ -47,12 +47,12 @@ class User < ApplicationRecord
   has_many :bookings, foreign_key: "userId", inverse_of: :user, dependent: :destroy
   has_many :schedules, foreign_key: "userId", inverse_of: :user, dependent: :destroy
   has_many :selected_calendars, foreign_key: "userId", inverse_of: :user, dependent: :destroy
-  has_many :availability, class_name: "Availability", foreign_key: "userId", inverse_of: :user, dependent: :destroy
+  has_many :availability, foreign_key: "userId", inverse_of: :user, dependent: :destroy
   has_many :webhooks, foreign_key: "userId", inverse_of: :user, dependent: :destroy
   has_many :api_keys, foreign_key: "userId", inverse_of: :user, dependent: :destroy
   has_many :accounts, foreign_key: "userId", inverse_of: :user, dependent: :destroy
   has_many :sessions, foreign_key: "userId", inverse_of: :user, dependent: :destroy
-  has_many :feedback, class_name: "Feedback", foreign_key: "userId", inverse_of: :user, dependent: :destroy
+  has_many :feedback, foreign_key: "userId", inverse_of: :user, dependent: :destroy
   has_many :owned_event_types, class_name: "EventType", foreign_key: "userId", inverse_of: :owner, dependent: :destroy
   has_many :verified_numbers, foreign_key: "userId", inverse_of: :user, dependent: :destroy
   has_many :verified_emails, foreign_key: "userId", inverse_of: :user, dependent: :destroy
@@ -62,14 +62,14 @@ class User < ApplicationRecord
                                dependent: :destroy
   has_many :booking_redirects_to, class_name: "OutOfOfficeEntry", foreign_key: "toUserId", inverse_of: :to_user,
                                   dependent: :destroy
-  has_many :access_token, class_name: "AccessToken", foreign_key: "userId", inverse_of: :owner, dependent: :destroy
-  has_many :refresh_token, class_name: "RefreshToken", foreign_key: "userId", inverse_of: :owner, dependent: :destroy
-  has_many :platform_authorization_token, class_name: "PlatformAuthorizationToken", foreign_key: "userId",
-                                          inverse_of: :owner, dependent: :destroy
+  has_many :access_token, foreign_key: "userId", inverse_of: :owner, dependent: :destroy
+  has_many :refresh_token, foreign_key: "userId", inverse_of: :owner, dependent: :destroy
+  has_many :platform_authorization_token, foreign_key: "userId", inverse_of: :owner, dependent: :destroy
   has_many :profiles, foreign_key: "userId", inverse_of: :user, dependent: :destroy
   has_many :secondary_emails, foreign_key: "userId", inverse_of: :user, dependent: :destroy
   has_many :out_of_office_reasons, foreign_key: "userId", inverse_of: :user, dependent: :destroy
-  has_many :notifications_subscriptions, foreign_key: "userId", inverse_of: :user, dependent: :destroy
+  has_many :notifications_subscriptions, class_name: "NotificationsSubscriptions", foreign_key: "userId",
+                                         inverse_of: :user, dependent: :destroy
   has_many :features, class_name: "UserFeatures", foreign_key: "userId", inverse_of: :user, dependent: :destroy
   has_many :reassigned_bookings, class_name: "Booking", foreign_key: "reassignById", inverse_of: :reassign_by,
                                  dependent: :nullify
@@ -86,8 +86,7 @@ class User < ApplicationRecord
   has_many :wrong_assignment_reports, foreign_key: "reportedById", inverse_of: :reported_by, dependent: :nullify
   has_many :reviewed_wrong_assignment_reports, class_name: "WrongAssignmentReport", foreign_key: "reviewedById",
                                                inverse_of: :reviewed_by, dependent: :nullify
-  has_many :booking_internal_note, class_name: "BookingInternalNote", foreign_key: "createdById",
-                                   inverse_of: :created_by, dependent: :restrict_with_error
+  has_many :booking_internal_note, foreign_key: "createdById", inverse_of: :created_by, dependent: :restrict_with_error
   has_many :created_organization_onboardings, class_name: "OrganizationOnboarding", foreign_key: "createdById",
                                               inverse_of: :created_by, dependent: :destroy
   has_many :filter_segments, foreign_key: "userId", inverse_of: :user, dependent: :destroy
@@ -95,8 +94,9 @@ class User < ApplicationRecord
                                         inverse_of: :user, dependent: :destroy
   has_many :cal_ai_phone_numbers, foreign_key: "userId", inverse_of: :user, dependent: :destroy
   has_many :agents, foreign_key: "userId", inverse_of: :user, dependent: :destroy
-  has_many :o_auth_clients, class_name: "OAuthClient", foreign_key: "userId", inverse_of: :user, dependent: :nullify
+  has_many :o_auth_clients, foreign_key: "userId", inverse_of: :user, dependent: :nullify
   has_and_belongs_to_many :event_types, join_table: "_user_eventtype", foreign_key: "B", association_foreign_key: "A"
-  has_and_belongs_to_many :platform_oauth_clients, join_table: "_PlatformOAuthClientToUser", foreign_key: "B",
+  has_and_belongs_to_many :platform_oauth_clients, class_name: "PlatformOAuthClient",
+                                                   join_table: "_PlatformOAuthClientToUser", foreign_key: "B",
                                                    association_foreign_key: "A"
 end

@@ -14,6 +14,6 @@ class Session < ApplicationRecord
   validates :distinct_id, length: { maximum: 50 }
 
   has_many :website_events, dependent: :restrict_with_error
-  has_many :session_data, dependent: :restrict_with_error
-  has_many :revenue, class_name: "Revenue", inverse_of: :session, dependent: :restrict_with_error
+  has_many :session_data, class_name: "SessionData", inverse_of: :session, dependent: :restrict_with_error
+  has_many :revenue, dependent: :restrict_with_error
 end

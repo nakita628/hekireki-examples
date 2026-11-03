@@ -92,6 +92,21 @@ class User(Base):
     sessions: Mapped[list["Session"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="user")
     post: Mapped[list["Post"]] = relationship(passive_deletes="all", back_populates="author")
 
+class VerificationToken(Base):
+    __tablename__ = "verification_tokens"
+
+    identifier: Mapped[str]
+    token: Mapped[str] = mapped_column()
+    expires: Mapped[datetime]
+
+    __table_args__ = (
+        Index("verification_tokens_token_key", "token", unique=True),
+        Index("verification_tokens_identifier_token_key", "identifier", "token", unique=True),
+        {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_unicode_ci"},
+    )
+
+    __mapper_args__ = {"primary_key": [token]}
+
 class Post(Base):
     __tablename__ = "posts"
 

@@ -14,6 +14,5 @@ class DestinationCalendar < ApplicationRecord
   belongs_to :credential, foreign_key: "credentialId", optional: true, inverse_of: :destination_calendars
   belongs_to :delegation_credential, foreign_key: "delegationCredentialId", optional: true,
                                      inverse_of: :destination_calendar
-  has_many :booking, class_name: "Booking", foreign_key: "destinationCalendarId", inverse_of: :destination_calendar,
-                     dependent: :nullify
+  has_many :booking, foreign_key: "destinationCalendarId", inverse_of: :destination_calendar, dependent: :nullify
 end

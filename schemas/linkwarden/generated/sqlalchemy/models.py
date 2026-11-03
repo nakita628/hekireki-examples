@@ -112,7 +112,7 @@ class User(Base):
         Index("User_email_key", "email", unique=True),
     )
 
-    parent_subscription: Mapped[Optional["Subscription"]] = relationship(back_populates="child_users")
+    parent_subscription: Mapped[Optional["Subscription"]] = relationship(foreign_keys=[parent_subscription_id], back_populates="child_users")
     accounts: Mapped[list["Account"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="user")
     collections: Mapped[list["Collection"]] = relationship(foreign_keys="Collection.owner_id", cascade="all, delete", passive_deletes=True, back_populates="owner")
     tags: Mapped[list["Tag"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="owner")
@@ -122,8 +122,39 @@ class User(Base):
     collections_joined: Mapped[list["UsersAndCollections"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="user")
     access_tokens: Mapped[list["AccessToken"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="user")
     dashboard_sections: Mapped[list["DashboardSection"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="user")
-    subscriptions: Mapped[Optional["Subscription"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="user")
+    subscriptions: Mapped[Optional["Subscription"]] = relationship(foreign_keys="Subscription.user_id", cascade="all, delete", passive_deletes=True, back_populates="user")
     pinned_links: Mapped[list["Link"]] = relationship(secondary=pinned_links, back_populates="pinned_by")
+
+class VerificationToken(Base):
+    __tablename__ = "VerificationToken"
+
+    identifier: Mapped[str]
+    token: Mapped[str] = mapped_column()
+    expires: Mapped[datetime]
+    created_at: Mapped[datetime] = mapped_column("createdAt", default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
+    updated_at: Mapped[datetime] = mapped_column("updatedAt", default=utc_now, server_default=text("CURRENT_TIMESTAMP"), onupdate=utc_now)
+
+    __table_args__ = (
+        Index("VerificationToken_token_key", "token", unique=True),
+        Index("VerificationToken_identifier_token_key", "identifier", "token", unique=True),
+    )
+
+    __mapper_args__ = {"primary_key": [token]}
+
+class PasswordResetToken(Base):
+    __tablename__ = "PasswordResetToken"
+
+    identifier: Mapped[str]
+    token: Mapped[str] = mapped_column()
+    expires: Mapped[datetime]
+    created_at: Mapped[datetime] = mapped_column("createdAt", default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
+    updated_at: Mapped[datetime] = mapped_column("updatedAt", default=utc_now, server_default=text("CURRENT_TIMESTAMP"), onupdate=utc_now)
+
+    __table_args__ = (
+        Index("PasswordResetToken_token_key", "token", unique=True),
+    )
+
+    __mapper_args__ = {"primary_key": [token]}
 
 class Collection(Base):
     __tablename__ = "Collection"
@@ -259,8 +290,8 @@ class Subscription(Base):
         Index("Subscription_userId_key", "userId", unique=True),
     )
 
-    user: Mapped["User"] = relationship(back_populates="subscriptions")
-    child_users: Mapped[list["User"]] = relationship(back_populates="parent_subscription")
+    user: Mapped["User"] = relationship(foreign_keys=[user_id], back_populates="subscriptions")
+    child_users: Mapped[list["User"]] = relationship(foreign_keys="User.parent_subscription_id", back_populates="parent_subscription")
 
 class AccessToken(Base):
     __tablename__ = "AccessToken"
@@ -306,7 +337,7 @@ class Highlight(Base):
     user_id: Mapped[int] = mapped_column("userId", ForeignKey("User.id", ondelete="CASCADE", onupdate="CASCADE", name="Highlight_userId_fkey"))
     start_offset: Mapped[int] = mapped_column("startOffset")
     end_offset: Mapped[int] = mapped_column("endOffset")
-    text: Mapped[str]
+    text_: Mapped[str] = mapped_column("text")
     created_at: Mapped[datetime] = mapped_column("createdAt", default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
     updated_at: Mapped[datetime] = mapped_column("updatedAt", default=utc_now, server_default=text("CURRENT_TIMESTAMP"), onupdate=utc_now)
 

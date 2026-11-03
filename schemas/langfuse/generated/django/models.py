@@ -362,6 +362,18 @@ class User(models.Model):
         db_table = "users"
 
 
+class VerificationToken(models.Model):
+    identifier = models.TextField()
+    token = models.TextField(primary_key=True, default=None)
+    expires = UtcDateTimeField()
+
+    class Meta:
+        db_table = "verification_tokens"
+        constraints = [
+            models.UniqueConstraint(fields=["identifier", "token"], name="verification_tokens_identifier_token_key"),
+        ]
+
+
 class Organization(models.Model):
     id = models.TextField(primary_key=True, default=None)
     name = models.TextField()
@@ -451,15 +463,9 @@ class RoleAssignment(models.Model):
     class Meta:
         db_table = "role_assignments"
         constraints = [
-            models.UniqueConstraint(fields=["deprecated_principal_user_id", "deprecated_owner_org_id", "system_role"], name="role_assignments_user_org_role_key"),
-            models.UniqueConstraint(fields=["deprecated_principal_user_id", "deprecated_owner_project_id", "system_role"], name="role_assignments_user_project_role_key"),
-            models.UniqueConstraint(fields=["deprecated_principal_api_key_id", "deprecated_owner_org_id", "system_role"], name="role_assignments_api_key_org_role_key"),
-            models.UniqueConstraint(fields=["deprecated_principal_api_key_id", "deprecated_owner_project_id", "system_role"], name="role_assignments_api_key_project_role_key"),
             models.UniqueConstraint(fields=["owner_id", "principal_id", "role_id"], name="role_assignments_owner_id_principal_id_role_id_key"),
         ]
         indexes = [
-            models.Index(fields=["deprecated_owner_org_id"]),
-            models.Index(fields=["deprecated_owner_project_id"]),
             models.Index(fields=["organization"]),
             models.Index(fields=["project"]),
             models.Index(fields=["principal_id"]),
@@ -469,7 +475,7 @@ class RoleAssignment(models.Model):
 
 
 class GatewayConfig(models.Model):
-    organization = models.OneToOneField("Organization", on_delete=models.CASCADE, related_name="gateway_config")
+    organization = models.OneToOneField("Organization", on_delete=models.CASCADE, related_name="gateway_config", primary_key=True)
     default_ingestion_project = models.ForeignKey("Project", on_delete=models.SET_NULL, related_name="gateway_configs", null=True, db_index=False)
     ingestion_mode = models.TextField(choices=GatewayIngestionMode.choices, default=GatewayIngestionMode.USAGE)
     created_at = UtcDateTimeField(default=timezone.now)
@@ -506,7 +512,7 @@ class GatewayAiConnection(models.Model):
 
 
 class GatewayApiKeyAssociation(models.Model):
-    api_key = models.OneToOneField("ApiKey", on_delete=models.CASCADE, related_name="gateway_association")
+    api_key = models.OneToOneField("ApiKey", on_delete=models.CASCADE, related_name="gateway_association", primary_key=True)
     metadata = models.JSONField(default=dict)
 
     class Meta:
@@ -1324,7 +1330,7 @@ class EvaluationRule(models.Model):
 
 
 class TracingReadinessSettings(models.Model):
-    project = models.OneToOneField("Project", on_delete=models.CASCADE, related_name="tracing_readiness_settings")
+    project = models.OneToOneField("Project", on_delete=models.CASCADE, related_name="tracing_readiness_settings", primary_key=True)
     created_at = UtcDateTimeField(default=timezone.now)
     updated_at = UtcDateTimeField(auto_now=True)
     created_by_user = models.ForeignKey("User", on_delete=models.SET_NULL, related_name="tracing_readiness_created", db_column="created_by", null=True, db_index=False)
@@ -1468,7 +1474,7 @@ class VerifiedDomain(models.Model):
 
 
 class PosthogIntegration(models.Model):
-    project = models.ForeignKey("Project", on_delete=models.CASCADE, related_name="posthog_integration", db_index=False)
+    project = models.ForeignKey("Project", on_delete=models.CASCADE, related_name="posthog_integration", primary_key=True, db_index=False)
     encrypted_posthog_api_key = models.TextField()
     posthog_host_name = models.TextField()
     last_sync_at = UtcDateTimeField(null=True)
@@ -1484,7 +1490,7 @@ class PosthogIntegration(models.Model):
 
 
 class MixpanelIntegration(models.Model):
-    project = models.ForeignKey("Project", on_delete=models.CASCADE, related_name="mixpanel_integration", db_index=False)
+    project = models.ForeignKey("Project", on_delete=models.CASCADE, related_name="mixpanel_integration", primary_key=True, db_index=False)
     encrypted_mixpanel_project_token = models.TextField()
     mixpanel_region = models.TextField()
     last_sync_at = UtcDateTimeField(null=True)
@@ -1498,7 +1504,7 @@ class MixpanelIntegration(models.Model):
 
 
 class BlobStorageIntegration(models.Model):
-    project = models.ForeignKey("Project", on_delete=models.CASCADE, related_name="blob_storage_integration", db_index=False)
+    project = models.ForeignKey("Project", on_delete=models.CASCADE, related_name="blob_storage_integration", primary_key=True, db_index=False)
     type = models.TextField(choices=BlobStorageIntegrationType.choices)
     bucket_name = models.TextField()
     prefix = models.TextField()
@@ -1532,7 +1538,7 @@ class BlobStorageIntegration(models.Model):
 
 
 class ExternalMediaStorageIntegration(models.Model):
-    project = models.OneToOneField("Project", on_delete=models.CASCADE, related_name="external_media_storage_integration")
+    project = models.OneToOneField("Project", on_delete=models.CASCADE, related_name="external_media_storage_integration", primary_key=True)
     type = models.TextField(choices=ExternalMediaStorageIntegrationType.choices)
     bucket_name = models.TextField()
     prefix = models.TextField(null=True)
@@ -1621,6 +1627,33 @@ class BatchAction(models.Model):
         ]
 
 
+class Media(models.Model):
+    pk = models.CompositePrimaryKey("project_id", "id")
+    id = models.TextField()
+    sha256_hash = models.CharField(max_length=44, db_column="sha_256_hash")
+    project = models.ForeignKey("Project", on_delete=models.CASCADE, related_name="media", db_index=False)
+    created_at = UtcDateTimeField(default=timezone.now)
+    updated_at = UtcDateTimeField(auto_now=True)
+    uploaded_at = UtcDateTimeField(null=True)
+    upload_http_status = models.IntegerField(null=True)
+    upload_http_error = models.TextField(null=True)
+    bucket_path = models.TextField()
+    bucket_name = models.TextField()
+    content_type = models.TextField()
+    content_length = models.BigIntegerField()
+    objects = AutoNowQuerySet.as_manager()
+
+    class Meta:
+        db_table = "media"
+        constraints = [
+            models.UniqueConstraint(fields=["project", "id"], name="media_project_id_id_key"),
+            models.UniqueConstraint(fields=["project", "sha256_hash"], name="media_project_id_sha_256_hash_key"),
+        ]
+        indexes = [
+            models.Index(fields=["project", "created_at"]),
+        ]
+
+
 class TraceMedia(models.Model):
     id = models.TextField(primary_key=True, default=None)
     project_id = models.TextField()
@@ -1686,6 +1719,29 @@ class DatasetItemMedia(models.Model):
         indexes = [
             models.Index(fields=["project_id", "media_id"]),
             models.Index(fields=["project_id", "dataset_id"]),
+        ]
+
+
+class BillingMeterBackup(models.Model):
+    pk = models.CompositePrimaryKey("stripe_customer_id", "meter_id", "start_time", "end_time")
+    stripe_customer_id = models.TextField()
+    meter_id = models.TextField()
+    start_time = UtcDateTimeField()
+    end_time = UtcDateTimeField()
+    aggregated_value = models.IntegerField()
+    event_name = models.TextField()
+    org_id = models.TextField()
+    created_at = UtcDateTimeField(default=timezone.now)
+    updated_at = UtcDateTimeField(auto_now=True)
+    objects = AutoNowQuerySet.as_manager()
+
+    class Meta:
+        db_table = "billing_meter_backups"
+        constraints = [
+            models.UniqueConstraint(fields=["stripe_customer_id", "meter_id", "start_time", "end_time"], name="billing_meter_backups_stripe_customer_id_meter_id_start_time_end_time_key"),
+        ]
+        indexes = [
+            models.Index(fields=["stripe_customer_id", "meter_id", "start_time", "end_time"]),
         ]
 
 

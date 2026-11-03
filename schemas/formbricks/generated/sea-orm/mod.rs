@@ -104,6 +104,7 @@ pub mod team_user;
 pub mod team_user_role;
 pub mod two_factor;
 pub mod user;
+pub mod verification_token;
 pub mod webhook;
 pub mod webhook_source;
 pub mod widget_placement;

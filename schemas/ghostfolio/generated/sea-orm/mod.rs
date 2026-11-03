@@ -27,7 +27,7 @@ pub mod subscription;
 pub mod symbol_profile;
 pub mod tag;
 pub mod tags_on_accounts;
-pub mod type;
+pub mod r#type;
 pub mod user;
 pub mod user_watchlist;
 pub mod view_mode;

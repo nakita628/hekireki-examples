@@ -89,6 +89,7 @@ pub mod runtime_environment_type;
 pub mod schedule_generator_type;
 pub mod schedule_type;
 pub mod secret_reference;
+pub mod secret_store;
 pub mod secret_store_provider;
 pub mod session;
 pub mod session_run;

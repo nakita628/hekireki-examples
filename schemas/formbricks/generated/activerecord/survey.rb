@@ -50,8 +50,8 @@ class Survey < ApplicationRecord
                                dependent: :destroy
   has_many :displays, foreign_key: "surveyId", inverse_of: :survey, dependent: :destroy
   has_many :languages, class_name: "SurveyLanguage", foreign_key: "surveyId", inverse_of: :survey, dependent: :destroy
-  has_many :embedded_data, foreign_key: [ :surveyId, :workspaceId ], primary_key: [ :id, :workspaceId ],
-                           inverse_of: :survey, dependent: :destroy
+  has_many :embedded_data, class_name: "EmbeddedData", foreign_key: [ :surveyId, :workspaceId ],
+                           primary_key: [ :id, :workspaceId ], inverse_of: :survey, dependent: :destroy
   has_many :embedded_data_links, class_name: "SurveyEmbeddedData", foreign_key: [ :surveyId, :workspaceId ],
                                  primary_key: [ :id, :workspaceId ], inverse_of: :survey, dependent: :destroy
   has_many :follow_ups, class_name: "SurveyFollowUp", foreign_key: "surveyId", inverse_of: :survey, dependent: :destroy

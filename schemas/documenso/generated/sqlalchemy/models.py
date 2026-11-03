@@ -306,7 +306,7 @@ class Account(Base):
     __tablename__ = "Account"
 
     id: Mapped[str] = mapped_column(primary_key=True)
-    created_at: Mapped[datetime] = mapped_column("createdAt", default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
+    created_at1: Mapped[datetime] = mapped_column("createdAt", default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
     user_id: Mapped[int] = mapped_column("userId", ForeignKey("User.id", ondelete="CASCADE", onupdate="CASCADE", name="Account_userId_fkey"))
     type: Mapped[str]
     provider: Mapped[str]
@@ -496,7 +496,7 @@ class DocumentMeta(Base):
     id: Mapped[str] = mapped_column(primary_key=True)
     subject: Mapped[Optional[str]]
     message: Mapped[Optional[str]]
-    timezone: Mapped[Optional[str]] = mapped_column(default="Etc/UTC", server_default=text("'Etc/UTC'"))
+    timezone_: Mapped[Optional[str]] = mapped_column("timezone", default="Etc/UTC", server_default=text("'Etc/UTC'"))
     date_format: Mapped[Optional[str]] = mapped_column("dateFormat", default="yyyy-MM-dd hh:mm a", server_default=text("'yyyy-MM-dd hh:mm a'"))
     redirect_url: Mapped[Optional[str]] = mapped_column("redirectUrl")
     signing_order: Mapped[str] = mapped_column("signingOrder", Enum("PARALLEL", "SEQUENTIAL", name="DocumentSigningOrder"), default="PARALLEL", server_default=text("'PARALLEL'"))
@@ -1003,7 +1003,7 @@ class AvatarImage(Base):
     __tablename__ = "AvatarImage"
 
     id: Mapped[str] = mapped_column(primary_key=True)
-    bytes: Mapped[str]
+    bytes_: Mapped[str] = mapped_column("bytes")
 
     team: Mapped[list["Team"]] = relationship(back_populates="avatar_image")
     user: Mapped[list["User"]] = relationship(back_populates="avatar_image")

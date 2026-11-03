@@ -18,7 +18,8 @@ class Workspace < ApplicationRecord
   validates :stripeId, uniqueness: { allow_nil: true }
 
   has_one :claimable_custom_plan, foreign_key: "workspaceId", inverse_of: :workspace, dependent: :destroy
-  has_many :credentials, foreign_key: "workspaceId", inverse_of: :workspace, dependent: :destroy
+  has_many :credentials, class_name: "Credentials", foreign_key: "workspaceId", inverse_of: :workspace,
+                         dependent: :destroy
   has_many :custom_domains, foreign_key: "workspaceId", inverse_of: :workspace, dependent: :destroy
   has_many :folders, class_name: "DashboardFolder", foreign_key: "workspaceId", inverse_of: :workspace,
                      dependent: :destroy

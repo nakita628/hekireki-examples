@@ -9,7 +9,7 @@ pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: String,
     #[sea_orm(column_name = "createdAt")]
-    pub created_at: DateTime,
+    pub created_at1: DateTime,
     #[sea_orm(column_name = "userId")]
     pub user_id: i32,
     pub r#type: String,
@@ -55,8 +55,8 @@ impl ActiveModelBehavior for ActiveModel {
         C: ConnectionTrait,
     {
         let now = chrono::Utc::now().trunc_subsecs(3);
-        if insert && self.created_at.is_not_set() {
-            self.created_at = Set(now.naive_utc());
+        if insert && self.created_at1.is_not_set() {
+            self.created_at1 = Set(now.naive_utc());
         }
         Ok(self)
     }

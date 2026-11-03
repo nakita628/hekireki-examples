@@ -13,7 +13,6 @@ class TableMeta < ApplicationRecord
   belongs_to :base, inverse_of: :tables
   has_many :fields, foreign_key: "table_id", inverse_of: :table, dependent: :restrict_with_error
   has_many :views, foreign_key: "table_id", inverse_of: :table, dependent: :restrict_with_error
-  has_many :plugin_panel, class_name: "PluginPanel", foreign_key: "table_id", inverse_of: :table, dependent: :destroy
-  has_many :plugin_context_menu, class_name: "PluginContextMenu", foreign_key: "table_id", inverse_of: :table,
-                                 dependent: :destroy
+  has_many :plugin_panel, foreign_key: "table_id", inverse_of: :table, dependent: :destroy
+  has_many :plugin_context_menu, foreign_key: "table_id", inverse_of: :table, dependent: :destroy
 end

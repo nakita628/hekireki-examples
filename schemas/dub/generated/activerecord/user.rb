@@ -19,7 +19,7 @@ class User < ApplicationRecord
   has_many :dashboards, foreign_key: "userId", inverse_of: :user, dependent: :destroy
   has_many :tokens, foreign_key: "userId", inverse_of: :user, dependent: :destroy
   has_many :restricted_tokens, foreign_key: "userId", inverse_of: :user, dependent: :destroy
-  has_many :o_auth_codes, class_name: "OAuthCode", foreign_key: "userId", inverse_of: :user, dependent: :destroy
+  has_many :o_auth_codes, foreign_key: "userId", inverse_of: :user, dependent: :destroy
   has_many :integrations, foreign_key: "userId", inverse_of: :user, dependent: :nullify
   has_many :installed_integrations, foreign_key: "userId", inverse_of: :user, dependent: :destroy
   has_many :folders, class_name: "FolderUser", foreign_key: "userId", inverse_of: :user, dependent: :destroy

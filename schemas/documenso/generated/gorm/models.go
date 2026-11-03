@@ -29,7 +29,7 @@ type User struct {
 	TwoFactorSecret      *string   `gorm:"column:twoFactorSecret" json:"twoFactorSecret"`
 	TwoFactorEnabled     bool      `gorm:"column:twoFactorEnabled;default:false;not null" json:"twoFactorEnabled"`
 	TwoFactorBackupCodes *string   `gorm:"column:twoFactorBackupCodes" json:"twoFactorBackupCodes"`
-	AvatarImage          AvatarImage
+	AvatarImage          *AvatarImage
 	Accounts             []Account              `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
 	Sessions             []Session              `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
 	PasswordResetTokens  []PasswordResetToken   `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
@@ -76,7 +76,7 @@ type TeamProfile struct {
 	Enabled bool    `gorm:"column:enabled;default:false;not null" json:"enabled"`
 	TeamID  int     `gorm:"column:teamId;uniqueIndex;not null" json:"teamId"`
 	Bio     *string `gorm:"column:bio" json:"bio"`
-	Team    Team
+	Team    *Team
 }
 
 func (TeamProfile) TableName() string {
@@ -97,7 +97,7 @@ type UserSecurityAuditLog struct {
 	Type      string   `gorm:"column:type;not null" json:"type"`
 	UserAgent *string  `gorm:"column:userAgent" json:"userAgent"`
 	IPAddress *string  `gorm:"column:ipAddress" json:"ipAddress"`
-	User      User
+	User      *User
 }
 
 func (UserSecurityAuditLog) TableName() string {
@@ -118,7 +118,7 @@ type PasswordResetToken struct {
 	CreatedAt DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	Expiry    DateTime `gorm:"column:expiry;not null" json:"expiry"`
 	UserID    int      `gorm:"column:userId;not null" json:"userId"`
-	User      User
+	User      *User
 }
 
 func (PasswordResetToken) TableName() string {
@@ -146,7 +146,7 @@ type Passkey struct {
 	CredentialDeviceType string    `gorm:"column:credentialDeviceType;not null" json:"credentialDeviceType"`
 	CredentialBackedUp   bool      `gorm:"column:credentialBackedUp;not null" json:"credentialBackedUp"`
 	Transports           []string  `gorm:"column:transports;serializer:json;not null" json:"transports"`
-	User                 User
+	User                 *User
 }
 
 func (Passkey) TableName() string {
@@ -199,7 +199,7 @@ type VerificationToken struct {
 	CreatedAt   DateTime       `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	Metadata    datatypes.JSON `gorm:"column:metadata" json:"metadata"`
 	UserID      int            `gorm:"column:userId;not null" json:"userId"`
-	User        User
+	User        *User
 }
 
 func (VerificationToken) TableName() string {
@@ -227,8 +227,8 @@ type Webhook struct {
 	UpdatedAt     DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
 	UserID        int      `gorm:"column:userId;not null" json:"userId"`
 	TeamID        int      `gorm:"column:teamId;not null" json:"teamId"`
-	User          User
-	Team          Team
+	User          *User
+	Team          *Team
 	WebhookCalls  []WebhookCall `gorm:"foreignKey:WebhookID;constraint:OnDelete:CASCADE"`
 }
 
@@ -269,7 +269,7 @@ type WebhookCall struct {
 	ResponseBody    datatypes.JSON `gorm:"column:responseBody" json:"responseBody"`
 	CreatedAt       DateTime       `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	WebhookID       string         `gorm:"column:webhookId;not null" json:"webhookId"`
-	Webhook         Webhook
+	Webhook         *Webhook
 }
 
 func (WebhookCall) TableName() string {
@@ -297,8 +297,8 @@ type APIToken struct {
 	LastUsedAt *DateTime `gorm:"column:lastUsedAt" json:"lastUsedAt"`
 	UserID     *int      `gorm:"column:userId" json:"userId"`
 	TeamID     int       `gorm:"column:teamId;not null" json:"teamId"`
-	User       User
-	Team       Team
+	User       *User
+	Team       *Team
 }
 
 func (APIToken) TableName() string {
@@ -324,7 +324,7 @@ type Subscription struct {
 	CancelAtPeriodEnd bool      `gorm:"column:cancelAtPeriodEnd;default:false;not null" json:"cancelAtPeriodEnd"`
 	CustomerID        string    `gorm:"column:customerId;not null" json:"customerId"`
 	OrganisationID    string    `gorm:"column:organisationId;uniqueIndex;index:Subscription_organisationId_idx;not null" json:"organisationId"`
-	Organisation      Organisation
+	Organisation      *Organisation
 }
 
 func (Subscription) TableName() string {
@@ -368,7 +368,7 @@ type SubscriptionClaim struct {
 	APIRateLimits      datatypes.JSON `gorm:"column:apiRateLimits;not null" json:"apiRateLimits"`
 	APIQuota           *int           `gorm:"column:apiQuota" json:"apiQuota"`
 	EmailTransportID   *string        `gorm:"column:emailTransportId" json:"emailTransportId"`
-	EmailTransport     EmailTransport
+	EmailTransport     *EmailTransport
 }
 
 func (SubscriptionClaim) TableName() string {
@@ -414,7 +414,7 @@ type OrganisationClaim struct {
 	APIRateLimits               datatypes.JSON `gorm:"column:apiRateLimits;not null" json:"apiRateLimits"`
 	APIQuota                    *int           `gorm:"column:apiQuota" json:"apiQuota"`
 	EmailTransportID            *string        `gorm:"column:emailTransportId" json:"emailTransportId"`
-	EmailTransport              EmailTransport
+	EmailTransport              *EmailTransport
 	Organisation                *Organisation `gorm:"foreignKey:OrganisationClaimID"`
 }
 
@@ -451,7 +451,7 @@ type OrganisationMonthlyStat struct {
 	EmailCount     int      `gorm:"column:emailCount;default:0;not null" json:"emailCount"`
 	APICount       int      `gorm:"column:apiCount;default:0;not null" json:"apiCount"`
 	EmailReports   int      `gorm:"column:emailReports;default:0;not null" json:"emailReports"`
-	Organisation   Organisation
+	Organisation   *Organisation
 }
 
 func (OrganisationMonthlyStat) TableName() string {
@@ -494,7 +494,7 @@ type Account struct {
 	IDToken           *string  `gorm:"column:id_token;type:text" json:"id_token"`
 	SessionState      *string  `gorm:"column:session_state" json:"session_state"`
 	Password          *string  `gorm:"column:password" json:"password"`
-	User              User
+	User              *User
 }
 
 func (Account) TableName() string {
@@ -522,7 +522,7 @@ type Session struct {
 	CreatedAt    DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt    DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
 	IsEmbed      bool     `gorm:"column:isEmbed;default:false;not null" json:"isEmbed"`
-	User         User
+	User         *User
 }
 
 func (Session) TableName() string {
@@ -582,8 +582,8 @@ type Folder struct {
 	UpdatedAt  DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
 	Visibility string   `gorm:"column:visibility;default:'EVERYONE';not null" json:"visibility"`
 	Type       string   `gorm:"column:type;index:Folder_type_idx;not null" json:"type"`
-	User       User
-	Team       Team
+	User       *User
+	Team       *Team
 	Parent     *Folder    `gorm:"foreignKey:ParentID"`
 	Envelopes  []Envelope `gorm:"foreignKey:FolderID;constraint:OnDelete:SET NULL"`
 	Subfolders []Folder   `gorm:"foreignKey:ParentID;constraint:OnDelete:CASCADE"`
@@ -642,10 +642,10 @@ type Envelope struct {
 	TeamID                  int            `gorm:"column:teamId;index:Envelope_teamId_idx;not null" json:"teamId"`
 	FolderID                *string        `gorm:"column:folderId;index:Envelope_folderId_idx" json:"folderId"`
 	DocumentMetaID          string         `gorm:"column:documentMetaId;uniqueIndex;not null" json:"documentMetaId"`
-	User                    User
-	Team                    Team
-	Folder                  Folder
-	DocumentMeta            DocumentMeta
+	User                    *User
+	Team                    *Team
+	Folder                  *Folder
+	DocumentMeta            *DocumentMeta
 	EnvelopeItems           []EnvelopeItem       `gorm:"foreignKey:EnvelopeID;constraint:OnDelete:CASCADE"`
 	Recipients              []Recipient          `gorm:"foreignKey:EnvelopeID;constraint:OnDelete:CASCADE"`
 	Fields                  []Field              `gorm:"foreignKey:EnvelopeID;constraint:OnDelete:CASCADE"`
@@ -684,8 +684,8 @@ type EnvelopeItem struct {
 	Order          int    `gorm:"column:order;not null" json:"order"`
 	DocumentDataID string `gorm:"column:documentDataId;uniqueIndex;not null" json:"documentDataId"`
 	EnvelopeID     string `gorm:"column:envelopeId;index:EnvelopeItem_envelopeId_idx;not null" json:"envelopeId"`
-	DocumentData   DocumentData
-	Envelope       Envelope
+	DocumentData   *DocumentData
+	Envelope       *Envelope
 	Field          []Field `gorm:"foreignKey:EnvelopeItemID;constraint:OnDelete:CASCADE"`
 }
 
@@ -704,7 +704,7 @@ type DocumentAuditLog struct {
 	UserID     *int           `gorm:"column:userId" json:"userId"`
 	UserAgent  *string        `gorm:"column:userAgent" json:"userAgent"`
 	IPAddress  *string        `gorm:"column:ipAddress" json:"ipAddress"`
-	Envelope   Envelope
+	Envelope   *Envelope
 }
 
 func (DocumentAuditLog) TableName() string {
@@ -782,7 +782,7 @@ type EnvelopeAttachment struct {
 	CreatedAt  DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt  DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
 	EnvelopeID string   `gorm:"column:envelopeId;index:EnvelopeAttachment_envelopeId_idx;not null" json:"envelopeId"`
-	Envelope   Envelope
+	Envelope   *Envelope
 }
 
 func (EnvelopeAttachment) TableName() string {
@@ -833,7 +833,7 @@ type Recipient struct {
 	ReadStatus           string         `gorm:"column:readStatus;default:'NOT_OPENED';not null" json:"readStatus"`
 	SigningStatus        string         `gorm:"column:signingStatus;index:Recipient_email_signingStatus_envelopeId_role_idx;default:'NOT_SIGNED';not null" json:"signingStatus"`
 	SendStatus           string         `gorm:"column:sendStatus;default:'NOT_SENT';not null" json:"sendStatus"`
-	Envelope             Envelope
+	Envelope             *Envelope
 	Fields               []Field        `gorm:"foreignKey:RecipientID;constraint:OnDelete:CASCADE"`
 	Signatures           []Signature    `gorm:"foreignKey:RecipientID;constraint:OnDelete:CASCADE"`
 	CscCredential        *CscCredential `gorm:"foreignKey:RecipientID;constraint:OnDelete:CASCADE"`
@@ -859,9 +859,9 @@ type Field struct {
 	CustomText     string         `gorm:"column:customText;not null" json:"customText"`
 	Inserted       bool           `gorm:"column:inserted;not null" json:"inserted"`
 	FieldMeta      datatypes.JSON `gorm:"column:fieldMeta" json:"fieldMeta"`
-	EnvelopeItem   EnvelopeItem
-	Envelope       Envelope
-	Recipient      Recipient
+	EnvelopeItem   *EnvelopeItem
+	Envelope       *Envelope
+	Recipient      *Recipient
 	Signature      *Signature `gorm:"foreignKey:FieldID;constraint:OnDelete:CASCADE"`
 }
 
@@ -883,8 +883,8 @@ type Signature struct {
 	FieldID                int      `gorm:"column:fieldId;uniqueIndex;not null" json:"fieldId"`
 	SignatureImageAsBase64 *string  `gorm:"column:signatureImageAsBase64" json:"signatureImageAsBase64"`
 	TypedSignature         *string  `gorm:"column:typedSignature" json:"typedSignature"`
-	Recipient              Recipient
-	Field                  Field
+	Recipient              *Recipient
+	Field                  *Field
 }
 
 func (Signature) TableName() string {
@@ -914,7 +914,7 @@ type CscCredential struct {
 	RecipientID            int       `gorm:"column:recipientId;uniqueIndex;not null" json:"recipientId"`
 	CreatedAt              DateTime  `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt              DateTime  `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Recipient              Recipient
+	Recipient              *Recipient
 }
 
 func (CscCredential) TableName() string {
@@ -952,7 +952,7 @@ type CscSession struct {
 	SadExpiresAt *DateTime      `gorm:"column:sadExpiresAt" json:"sadExpiresAt"`
 	CreatedAt    DateTime       `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	RecipientID  int            `gorm:"column:recipientId;uniqueIndex;not null" json:"recipientId"`
-	Recipient    Recipient
+	Recipient    *Recipient
 }
 
 func (CscSession) TableName() string {
@@ -977,7 +977,7 @@ type DocumentShareLink struct {
 	EnvelopeID string   `gorm:"column:envelopeId;uniqueIndex:DocumentShareLink_envelopeId_email_key;not null" json:"envelopeId"`
 	CreatedAt  DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt  DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Envelope   Envelope
+	Envelope   *Envelope
 }
 
 func (DocumentShareLink) TableName() string {
@@ -1016,11 +1016,11 @@ type Organisation struct {
 	OwnerUserID                        int      `gorm:"column:ownerUserId;index:Organisation_ownerUserId_idx;not null" json:"ownerUserId"`
 	OrganisationGlobalSettingsID       string   `gorm:"column:organisationGlobalSettingsId;uniqueIndex;not null" json:"organisationGlobalSettingsId"`
 	OrganisationAuthenticationPortalID string   `gorm:"column:organisationAuthenticationPortalId;uniqueIndex;not null" json:"organisationAuthenticationPortalId"`
-	OrganisationClaim                  OrganisationClaim
-	AvatarImage                        AvatarImage
-	Owner                              User `gorm:"foreignKey:OwnerUserID"`
-	OrganisationGlobalSettings         OrganisationGlobalSettings
-	OrganisationAuthenticationPortal   OrganisationAuthenticationPortal
+	OrganisationClaim                  *OrganisationClaim
+	AvatarImage                        *AvatarImage
+	Owner                              *User `gorm:"foreignKey:OwnerUserID"`
+	OrganisationGlobalSettings         *OrganisationGlobalSettings
+	OrganisationAuthenticationPortal   *OrganisationAuthenticationPortal
 	Members                            []OrganisationMember       `gorm:"foreignKey:OrganisationID;constraint:OnDelete:CASCADE"`
 	Invites                            []OrganisationMemberInvite `gorm:"foreignKey:OrganisationID;constraint:OnDelete:CASCADE"`
 	Groups                             []OrganisationGroup        `gorm:"foreignKey:OrganisationID;constraint:OnDelete:CASCADE"`
@@ -1061,8 +1061,8 @@ type OrganisationMember struct {
 	UpdatedAt                DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
 	UserID                   int      `gorm:"column:userId;uniqueIndex:OrganisationMember_userId_organisationId_key;not null" json:"userId"`
 	OrganisationID           string   `gorm:"column:organisationId;uniqueIndex:OrganisationMember_userId_organisationId_key;index:OrganisationMember_organisationId_idx;not null" json:"organisationId"`
-	User                     User
-	Organisation             Organisation
+	User                     *User
+	Organisation             *Organisation
 	OrganisationGroupMembers []OrganisationGroupMember `gorm:"foreignKey:OrganisationMemberID;constraint:OnDelete:CASCADE"`
 }
 
@@ -1097,7 +1097,7 @@ type OrganisationMemberInvite struct {
 	Status           string   `gorm:"column:status;default:'PENDING';not null" json:"status"`
 	OrganisationID   string   `gorm:"column:organisationId;not null" json:"organisationId"`
 	OrganisationRole string   `gorm:"column:organisationRole;not null" json:"organisationRole"`
-	Organisation     Organisation
+	Organisation     *Organisation
 }
 
 func (OrganisationMemberInvite) TableName() string {
@@ -1118,7 +1118,7 @@ type OrganisationGroup struct {
 	Type                     string  `gorm:"column:type;not null" json:"type"`
 	OrganisationRole         string  `gorm:"column:organisationRole;not null" json:"organisationRole"`
 	OrganisationID           string  `gorm:"column:organisationId;index:OrganisationGroup_organisationId_idx;not null" json:"organisationId"`
-	Organisation             Organisation
+	Organisation             *Organisation
 	OrganisationGroupMembers []OrganisationGroupMember `gorm:"foreignKey:GroupID;constraint:OnDelete:CASCADE"`
 	TeamGroups               []TeamGroup               `gorm:"foreignKey:OrganisationGroupID;constraint:OnDelete:CASCADE"`
 }
@@ -1128,11 +1128,11 @@ func (OrganisationGroup) TableName() string {
 }
 
 type OrganisationGroupMember struct {
-	ID                   string            `gorm:"column:id;primaryKey" json:"id"`
-	GroupID              string            `gorm:"column:groupId;uniqueIndex:OrganisationGroupMember_organisationMemberId_groupId_key;index:OrganisationGroupMember_groupId_idx;not null" json:"groupId"`
-	OrganisationMemberID string            `gorm:"column:organisationMemberId;uniqueIndex:OrganisationGroupMember_organisationMemberId_groupId_key;index:OrganisationGroupMember_organisationMemberId_idx;not null" json:"organisationMemberId"`
-	Group                OrganisationGroup `gorm:"foreignKey:GroupID"`
-	OrganisationMember   OrganisationMember
+	ID                   string             `gorm:"column:id;primaryKey" json:"id"`
+	GroupID              string             `gorm:"column:groupId;uniqueIndex:OrganisationGroupMember_organisationMemberId_groupId_key;index:OrganisationGroupMember_groupId_idx;not null" json:"groupId"`
+	OrganisationMemberID string             `gorm:"column:organisationMemberId;uniqueIndex:OrganisationGroupMember_organisationMemberId_groupId_key;index:OrganisationGroupMember_organisationMemberId_idx;not null" json:"organisationMemberId"`
+	Group                *OrganisationGroup `gorm:"foreignKey:GroupID"`
+	OrganisationMember   *OrganisationMember
 }
 
 func (OrganisationGroupMember) TableName() string {
@@ -1144,8 +1144,8 @@ type TeamGroup struct {
 	OrganisationGroupID string `gorm:"column:organisationGroupId;uniqueIndex:TeamGroup_teamId_organisationGroupId_key;index:TeamGroup_organisationGroupId_idx;not null" json:"organisationGroupId"`
 	TeamRole            string `gorm:"column:teamRole;not null" json:"teamRole"`
 	TeamID              int    `gorm:"column:teamId;uniqueIndex:TeamGroup_teamId_organisationGroupId_key;index:TeamGroup_teamId_idx;not null" json:"teamId"`
-	OrganisationGroup   OrganisationGroup
-	Team                Team
+	OrganisationGroup   *OrganisationGroup
+	Team                *Team
 }
 
 func (TeamGroup) TableName() string {
@@ -1153,33 +1153,33 @@ func (TeamGroup) TableName() string {
 }
 
 type OrganisationGlobalSettings struct {
-	ID                        string            `gorm:"column:id;primaryKey" json:"id"`
-	DocumentVisibility        string            `gorm:"column:documentVisibility;default:'EVERYONE';not null" json:"documentVisibility"`
-	DocumentLanguage          *string           `gorm:"column:documentLanguage;default:'en';not null" json:"documentLanguage"`
-	IncludeSenderDetails      *bool             `gorm:"column:includeSenderDetails;default:true;not null" json:"includeSenderDetails"`
-	IncludeSigningCertificate *bool             `gorm:"column:includeSigningCertificate;default:true;not null" json:"includeSigningCertificate"`
-	IncludeAuditLog           bool              `gorm:"column:includeAuditLog;default:false;not null" json:"includeAuditLog"`
-	DocumentTimezone          *string           `gorm:"column:documentTimezone" json:"documentTimezone"`
-	DocumentDateFormat        *string           `gorm:"column:documentDateFormat;default:'yyyy-MM-dd hh:mm a';not null" json:"documentDateFormat"`
-	DelegateDocumentOwnership bool              `gorm:"column:delegateDocumentOwnership;default:false;not null" json:"delegateDocumentOwnership"`
-	TypedSignatureEnabled     *bool             `gorm:"column:typedSignatureEnabled;default:true;not null" json:"typedSignatureEnabled"`
-	UploadSignatureEnabled    *bool             `gorm:"column:uploadSignatureEnabled;default:true;not null" json:"uploadSignatureEnabled"`
-	DrawSignatureEnabled      *bool             `gorm:"column:drawSignatureEnabled;default:true;not null" json:"drawSignatureEnabled"`
-	DefaultRecipients         datatypes.JSON    `gorm:"column:defaultRecipients" json:"defaultRecipients"`
-	EmailID                   *string           `gorm:"column:emailId" json:"emailId"`
-	EmailReplyTo              *string           `gorm:"column:emailReplyTo" json:"emailReplyTo"`
-	EmailDocumentSettings     datatypes.JSON    `gorm:"column:emailDocumentSettings;not null" json:"emailDocumentSettings"`
-	BrandingEnabled           bool              `gorm:"column:brandingEnabled;default:false;not null" json:"brandingEnabled"`
-	BrandingLogo              string            `gorm:"column:brandingLogo;default:'';not null" json:"brandingLogo"`
-	BrandingURL               string            `gorm:"column:brandingUrl;default:'';not null" json:"brandingUrl"`
-	BrandingCompanyDetails    string            `gorm:"column:brandingCompanyDetails;default:'';not null" json:"brandingCompanyDetails"`
-	BrandingColors            datatypes.JSON    `gorm:"column:brandingColors" json:"brandingColors"`
-	BrandingCSS               string            `gorm:"column:brandingCss;default:'';not null" json:"brandingCss"`
-	EnvelopeExpirationPeriod  datatypes.JSON    `gorm:"column:envelopeExpirationPeriod" json:"envelopeExpirationPeriod"`
-	ReminderSettings          datatypes.JSON    `gorm:"column:reminderSettings" json:"reminderSettings"`
-	AiFeaturesEnabled         bool              `gorm:"column:aiFeaturesEnabled;default:false;not null" json:"aiFeaturesEnabled"`
-	Email                     OrganisationEmail `gorm:"foreignKey:EmailID"`
-	Organisation              *Organisation     `gorm:"foreignKey:OrganisationGlobalSettingsID"`
+	ID                        string             `gorm:"column:id;primaryKey" json:"id"`
+	DocumentVisibility        string             `gorm:"column:documentVisibility;default:'EVERYONE';not null" json:"documentVisibility"`
+	DocumentLanguage          *string            `gorm:"column:documentLanguage;default:'en';not null" json:"documentLanguage"`
+	IncludeSenderDetails      *bool              `gorm:"column:includeSenderDetails;default:true;not null" json:"includeSenderDetails"`
+	IncludeSigningCertificate *bool              `gorm:"column:includeSigningCertificate;default:true;not null" json:"includeSigningCertificate"`
+	IncludeAuditLog           bool               `gorm:"column:includeAuditLog;default:false;not null" json:"includeAuditLog"`
+	DocumentTimezone          *string            `gorm:"column:documentTimezone" json:"documentTimezone"`
+	DocumentDateFormat        *string            `gorm:"column:documentDateFormat;default:'yyyy-MM-dd hh:mm a';not null" json:"documentDateFormat"`
+	DelegateDocumentOwnership bool               `gorm:"column:delegateDocumentOwnership;default:false;not null" json:"delegateDocumentOwnership"`
+	TypedSignatureEnabled     *bool              `gorm:"column:typedSignatureEnabled;default:true;not null" json:"typedSignatureEnabled"`
+	UploadSignatureEnabled    *bool              `gorm:"column:uploadSignatureEnabled;default:true;not null" json:"uploadSignatureEnabled"`
+	DrawSignatureEnabled      *bool              `gorm:"column:drawSignatureEnabled;default:true;not null" json:"drawSignatureEnabled"`
+	DefaultRecipients         datatypes.JSON     `gorm:"column:defaultRecipients" json:"defaultRecipients"`
+	EmailID                   *string            `gorm:"column:emailId" json:"emailId"`
+	EmailReplyTo              *string            `gorm:"column:emailReplyTo" json:"emailReplyTo"`
+	EmailDocumentSettings     datatypes.JSON     `gorm:"column:emailDocumentSettings;not null" json:"emailDocumentSettings"`
+	BrandingEnabled           bool               `gorm:"column:brandingEnabled;default:false;not null" json:"brandingEnabled"`
+	BrandingLogo              string             `gorm:"column:brandingLogo;default:'';not null" json:"brandingLogo"`
+	BrandingURL               string             `gorm:"column:brandingUrl;default:'';not null" json:"brandingUrl"`
+	BrandingCompanyDetails    string             `gorm:"column:brandingCompanyDetails;default:'';not null" json:"brandingCompanyDetails"`
+	BrandingColors            datatypes.JSON     `gorm:"column:brandingColors" json:"brandingColors"`
+	BrandingCSS               string             `gorm:"column:brandingCss;default:'';not null" json:"brandingCss"`
+	EnvelopeExpirationPeriod  datatypes.JSON     `gorm:"column:envelopeExpirationPeriod" json:"envelopeExpirationPeriod"`
+	ReminderSettings          datatypes.JSON     `gorm:"column:reminderSettings" json:"reminderSettings"`
+	AiFeaturesEnabled         bool               `gorm:"column:aiFeaturesEnabled;default:false;not null" json:"aiFeaturesEnabled"`
+	Email                     *OrganisationEmail `gorm:"foreignKey:EmailID"`
+	Organisation              *Organisation      `gorm:"foreignKey:OrganisationGlobalSettingsID"`
 }
 
 func (OrganisationGlobalSettings) TableName() string {
@@ -1187,33 +1187,33 @@ func (OrganisationGlobalSettings) TableName() string {
 }
 
 type TeamGlobalSettings struct {
-	ID                        string            `gorm:"column:id;primaryKey" json:"id"`
-	DocumentVisibility        *string           `gorm:"column:documentVisibility" json:"documentVisibility"`
-	DocumentLanguage          *string           `gorm:"column:documentLanguage" json:"documentLanguage"`
-	DocumentTimezone          *string           `gorm:"column:documentTimezone" json:"documentTimezone"`
-	DocumentDateFormat        *string           `gorm:"column:documentDateFormat" json:"documentDateFormat"`
-	DelegateDocumentOwnership *bool             `gorm:"column:delegateDocumentOwnership" json:"delegateDocumentOwnership"`
-	IncludeSenderDetails      *bool             `gorm:"column:includeSenderDetails" json:"includeSenderDetails"`
-	IncludeSigningCertificate *bool             `gorm:"column:includeSigningCertificate" json:"includeSigningCertificate"`
-	IncludeAuditLog           *bool             `gorm:"column:includeAuditLog" json:"includeAuditLog"`
-	TypedSignatureEnabled     *bool             `gorm:"column:typedSignatureEnabled" json:"typedSignatureEnabled"`
-	UploadSignatureEnabled    *bool             `gorm:"column:uploadSignatureEnabled" json:"uploadSignatureEnabled"`
-	DrawSignatureEnabled      *bool             `gorm:"column:drawSignatureEnabled" json:"drawSignatureEnabled"`
-	DefaultRecipients         datatypes.JSON    `gorm:"column:defaultRecipients" json:"defaultRecipients"`
-	EmailID                   *string           `gorm:"column:emailId" json:"emailId"`
-	EmailReplyTo              *string           `gorm:"column:emailReplyTo" json:"emailReplyTo"`
-	EmailDocumentSettings     datatypes.JSON    `gorm:"column:emailDocumentSettings" json:"emailDocumentSettings"`
-	BrandingEnabled           *bool             `gorm:"column:brandingEnabled" json:"brandingEnabled"`
-	BrandingLogo              *string           `gorm:"column:brandingLogo" json:"brandingLogo"`
-	BrandingURL               *string           `gorm:"column:brandingUrl" json:"brandingUrl"`
-	BrandingCompanyDetails    *string           `gorm:"column:brandingCompanyDetails" json:"brandingCompanyDetails"`
-	BrandingColors            datatypes.JSON    `gorm:"column:brandingColors" json:"brandingColors"`
-	BrandingCSS               *string           `gorm:"column:brandingCss" json:"brandingCss"`
-	EnvelopeExpirationPeriod  datatypes.JSON    `gorm:"column:envelopeExpirationPeriod" json:"envelopeExpirationPeriod"`
-	ReminderSettings          datatypes.JSON    `gorm:"column:reminderSettings" json:"reminderSettings"`
-	AiFeaturesEnabled         *bool             `gorm:"column:aiFeaturesEnabled" json:"aiFeaturesEnabled"`
-	Email                     OrganisationEmail `gorm:"foreignKey:EmailID"`
-	Team                      *Team             `gorm:"foreignKey:TeamGlobalSettingsID;constraint:OnDelete:CASCADE"`
+	ID                        string             `gorm:"column:id;primaryKey" json:"id"`
+	DocumentVisibility        *string            `gorm:"column:documentVisibility" json:"documentVisibility"`
+	DocumentLanguage          *string            `gorm:"column:documentLanguage" json:"documentLanguage"`
+	DocumentTimezone          *string            `gorm:"column:documentTimezone" json:"documentTimezone"`
+	DocumentDateFormat        *string            `gorm:"column:documentDateFormat" json:"documentDateFormat"`
+	DelegateDocumentOwnership *bool              `gorm:"column:delegateDocumentOwnership" json:"delegateDocumentOwnership"`
+	IncludeSenderDetails      *bool              `gorm:"column:includeSenderDetails" json:"includeSenderDetails"`
+	IncludeSigningCertificate *bool              `gorm:"column:includeSigningCertificate" json:"includeSigningCertificate"`
+	IncludeAuditLog           *bool              `gorm:"column:includeAuditLog" json:"includeAuditLog"`
+	TypedSignatureEnabled     *bool              `gorm:"column:typedSignatureEnabled" json:"typedSignatureEnabled"`
+	UploadSignatureEnabled    *bool              `gorm:"column:uploadSignatureEnabled" json:"uploadSignatureEnabled"`
+	DrawSignatureEnabled      *bool              `gorm:"column:drawSignatureEnabled" json:"drawSignatureEnabled"`
+	DefaultRecipients         datatypes.JSON     `gorm:"column:defaultRecipients" json:"defaultRecipients"`
+	EmailID                   *string            `gorm:"column:emailId" json:"emailId"`
+	EmailReplyTo              *string            `gorm:"column:emailReplyTo" json:"emailReplyTo"`
+	EmailDocumentSettings     datatypes.JSON     `gorm:"column:emailDocumentSettings" json:"emailDocumentSettings"`
+	BrandingEnabled           *bool              `gorm:"column:brandingEnabled" json:"brandingEnabled"`
+	BrandingLogo              *string            `gorm:"column:brandingLogo" json:"brandingLogo"`
+	BrandingURL               *string            `gorm:"column:brandingUrl" json:"brandingUrl"`
+	BrandingCompanyDetails    *string            `gorm:"column:brandingCompanyDetails" json:"brandingCompanyDetails"`
+	BrandingColors            datatypes.JSON     `gorm:"column:brandingColors" json:"brandingColors"`
+	BrandingCSS               *string            `gorm:"column:brandingCss" json:"brandingCss"`
+	EnvelopeExpirationPeriod  datatypes.JSON     `gorm:"column:envelopeExpirationPeriod" json:"envelopeExpirationPeriod"`
+	ReminderSettings          datatypes.JSON     `gorm:"column:reminderSettings" json:"reminderSettings"`
+	AiFeaturesEnabled         *bool              `gorm:"column:aiFeaturesEnabled" json:"aiFeaturesEnabled"`
+	Email                     *OrganisationEmail `gorm:"foreignKey:EmailID"`
+	Team                      *Team              `gorm:"foreignKey:TeamGlobalSettingsID;constraint:OnDelete:CASCADE"`
 }
 
 func (TeamGlobalSettings) TableName() string {
@@ -1228,9 +1228,9 @@ type Team struct {
 	AvatarImageID        *string  `gorm:"column:avatarImageId" json:"avatarImageId"`
 	OrganisationID       string   `gorm:"column:organisationId;index:Team_organisationId_idx;not null" json:"organisationId"`
 	TeamGlobalSettingsID string   `gorm:"column:teamGlobalSettingsId;uniqueIndex;not null" json:"teamGlobalSettingsId"`
-	AvatarImage          AvatarImage
-	Organisation         Organisation
-	TeamGlobalSettings   TeamGlobalSettings
+	AvatarImage          *AvatarImage
+	Organisation         *Organisation
+	TeamGlobalSettings   *TeamGlobalSettings
 	Envelopes            []Envelope             `gorm:"foreignKey:TeamID;constraint:OnDelete:CASCADE"`
 	Folders              []Folder               `gorm:"foreignKey:TeamID;constraint:OnDelete:CASCADE"`
 	APITokens            []APIToken             `gorm:"foreignKey:TeamID;constraint:OnDelete:CASCADE"`
@@ -1258,7 +1258,7 @@ type TeamEmail struct {
 	CreatedAt DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	Name      string   `gorm:"column:name;not null" json:"name"`
 	Email     string   `gorm:"column:email;uniqueIndex;not null" json:"email"`
-	Team      Team
+	Team      *Team
 }
 
 func (TeamEmail) TableName() string {
@@ -1281,7 +1281,7 @@ type TeamEmailVerification struct {
 	Completed bool     `gorm:"column:completed;default:false;not null" json:"completed"`
 	ExpiresAt DateTime `gorm:"column:expiresAt;not null" json:"expiresAt"`
 	CreatedAt DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
-	Team      Team
+	Team      *Team
 }
 
 func (TeamEmailVerification) TableName() string {
@@ -1303,7 +1303,7 @@ type TemplateDirectLink struct {
 	CreatedAt                 DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	Enabled                   bool     `gorm:"column:enabled;not null" json:"enabled"`
 	DirectTemplateRecipientID int      `gorm:"column:directTemplateRecipientId;not null" json:"directTemplateRecipientId"`
-	Envelope                  Envelope
+	Envelope                  *Envelope
 }
 
 func (TemplateDirectLink) TableName() string {
@@ -1327,7 +1327,7 @@ type SiteSettings struct {
 	Data                 datatypes.JSON `gorm:"column:data;not null" json:"data"`
 	LastModifiedByUserID *int           `gorm:"column:lastModifiedByUserId" json:"lastModifiedByUserId"`
 	LastModifiedAt       DateTime       `gorm:"column:lastModifiedAt;not null" json:"lastModifiedAt"`
-	LastModifiedByUser   User           `gorm:"foreignKey:LastModifiedByUserID"`
+	LastModifiedByUser   *User          `gorm:"foreignKey:LastModifiedByUserID"`
 }
 
 func (SiteSettings) TableName() string {
@@ -1395,7 +1395,7 @@ type BackgroundJobTask struct {
 	UpdatedAt     DateTime       `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
 	CompletedAt   *DateTime      `gorm:"column:completedAt" json:"completedAt"`
 	JobID         string         `gorm:"column:jobId;not null" json:"jobId"`
-	BackgroundJob BackgroundJob  `gorm:"foreignKey:JobID"`
+	BackgroundJob *BackgroundJob `gorm:"foreignKey:JobID"`
 }
 
 func (BackgroundJobTask) TableName() string {
@@ -1451,7 +1451,7 @@ type EmailDomain struct {
 	PrivateKey     string    `gorm:"column:privateKey;not null" json:"privateKey"`
 	LastVerifiedAt *DateTime `gorm:"column:lastVerifiedAt" json:"lastVerifiedAt"`
 	OrganisationID string    `gorm:"column:organisationId;not null" json:"organisationId"`
-	Organisation   Organisation
+	Organisation   *Organisation
 	Emails         []OrganisationEmail `gorm:"foreignKey:EmailDomainID;constraint:OnDelete:CASCADE"`
 }
 
@@ -1486,8 +1486,8 @@ type OrganisationEmail struct {
 	EmailName                  string   `gorm:"column:emailName;not null" json:"emailName"`
 	EmailDomainID              string   `gorm:"column:emailDomainId;not null" json:"emailDomainId"`
 	OrganisationID             string   `gorm:"column:organisationId;not null" json:"organisationId"`
-	EmailDomain                EmailDomain
-	Organisation               Organisation
+	EmailDomain                *EmailDomain
+	Organisation               *Organisation
 	OrganisationGlobalSettings []OrganisationGlobalSettings `gorm:"foreignKey:EmailID"`
 	TeamGlobalSettings         []TeamGlobalSettings         `gorm:"foreignKey:EmailID"`
 }
@@ -1584,7 +1584,7 @@ type EmbedSignature struct {
 	OrganisationID string   `gorm:"column:organisationId;index:EmbedSignature_organisationId_idx;not null" json:"organisationId"`
 	RecipientID    int      `gorm:"column:recipientId;index:EmbedSignature_recipientId_idx;not null" json:"recipientId"`
 	Signature      string   `gorm:"column:signature;not null" json:"signature"`
-	Organisation   Organisation
+	Organisation   *Organisation
 }
 
 func (EmbedSignature) TableName() string {

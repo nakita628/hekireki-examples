@@ -646,10 +646,6 @@ public partial class LangfuseContext : DbContext
 
             entity.ToTable("role_assignments");
 
-            entity.HasIndex(e => e.deprecatedOwnerOrgId, "role_assignments_owner_org_id_idx");
-
-            entity.HasIndex(e => e.deprecatedOwnerProjectId, "role_assignments_owner_project_id_idx");
-
             entity.HasIndex(e => e.OrgId, "role_assignments_org_id_idx");
 
             entity.HasIndex(e => e.ProjectId, "role_assignments_project_id_idx");
@@ -659,14 +655,6 @@ public partial class LangfuseContext : DbContext
             entity.HasIndex(e => e.UserId, "role_assignments_user_id_idx");
 
             entity.HasIndex(e => e.ApiKeyId, "role_assignments_api_key_id_idx");
-
-            entity.HasIndex(e => new { e.deprecatedPrincipalUserId, e.deprecatedOwnerOrgId, e.SystemRole }, "role_assignments_user_org_role_key").IsUnique();
-
-            entity.HasIndex(e => new { e.deprecatedPrincipalUserId, e.deprecatedOwnerProjectId, e.SystemRole }, "role_assignments_user_project_role_key").IsUnique();
-
-            entity.HasIndex(e => new { e.deprecatedPrincipalApiKeyId, e.deprecatedOwnerOrgId, e.SystemRole }, "role_assignments_api_key_org_role_key").IsUnique();
-
-            entity.HasIndex(e => new { e.deprecatedPrincipalApiKeyId, e.deprecatedOwnerProjectId, e.SystemRole }, "role_assignments_api_key_project_role_key").IsUnique();
 
             entity.HasIndex(e => new { e.OwnerId, e.PrincipalId, e.RoleId }, "role_assignments_owner_id_principal_id_role_id_key").IsUnique();
 

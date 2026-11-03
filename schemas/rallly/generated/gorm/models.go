@@ -30,8 +30,8 @@ type Subscription struct {
 	CancelAtPeriodEnd  bool     `gorm:"column:cancel_at_period_end;default:false;not null" json:"cancel_at_period_end"`
 	UserID             string   `gorm:"column:user_id;index:subscriptions_user_id_idx;not null" json:"user_id"`
 	SpaceID            string   `gorm:"column:space_id;index:subscriptions_space_id_idx;not null" json:"space_id"`
-	User               User
-	Space              Space
+	User               *User
+	Space              *Space
 }
 
 func (Subscription) TableName() string {
@@ -53,7 +53,7 @@ type PaymentMethod struct {
 	Data      datatypes.JSON `gorm:"column:data;not null" json:"data"`
 	CreatedAt DateTime       `gorm:"column:created_at;autoCreateTime:false;not null" json:"created_at"`
 	UpdatedAt DateTime       `gorm:"column:updated_at;autoUpdateTime:false;not null" json:"updated_at"`
-	User      User
+	User      *User
 }
 
 func (PaymentMethod) TableName() string {
@@ -90,8 +90,8 @@ type NonprofitApplication struct {
 	Reason           *string  `gorm:"column:reason" json:"reason"`
 	Model            *string  `gorm:"column:model" json:"model"`
 	CreatedAt        DateTime `gorm:"column:created_at;index:nonprofit_applications_space_id_created_at_idx;autoCreateTime:false;not null" json:"created_at"`
-	Space            Space
-	User             User
+	Space            *Space
+	User             *User
 }
 
 func (NonprofitApplication) TableName() string {
@@ -123,7 +123,7 @@ type QueuedEmail struct {
 	LastError *string   `gorm:"column:last_error" json:"last_error"`
 	CreatedAt DateTime  `gorm:"column:created_at;index:queued_emails_status_created_at_idx;autoCreateTime:false;not null" json:"created_at"`
 	UpdatedAt DateTime  `gorm:"column:updated_at;index:queued_emails_status_updated_at_idx;autoUpdateTime:false;not null" json:"updated_at"`
-	User      User
+	User      *User
 }
 
 func (QueuedEmail) TableName() string {
@@ -165,8 +165,8 @@ type EventType struct {
 	UpdatedAt       DateTime       `gorm:"column:updated_at;autoUpdateTime:false;not null" json:"updated_at"`
 	Deleted         bool           `gorm:"column:deleted;default:false;not null" json:"deleted"`
 	DeletedAt       *DateTime      `gorm:"column:deleted_at" json:"deleted_at"`
-	Space           Space
-	Host            User             `gorm:"foreignKey:HostID"`
+	Space           *Space
+	Host            *User            `gorm:"foreignKey:HostID"`
 	Slots           []SheetSlot      `gorm:"foreignKey:EventTypeID;constraint:OnDelete:RESTRICT"`
 	ScheduledEvents []ScheduledEvent `gorm:"foreignKey:EventTypeID;constraint:OnDelete:SET NULL"`
 }
@@ -219,10 +219,10 @@ type ScheduledEvent struct {
 	Sequence         int            `gorm:"column:sequence;default:0;not null" json:"sequence"`
 	UID              string         `gorm:"column:uid;uniqueIndex;not null" json:"uid"`
 	HideAttendees    bool           `gorm:"column:hide_attendees;default:false;not null" json:"hide_attendees"`
-	User             User
-	Space            Space
-	EventType        EventType
-	SheetSlot        SheetSlot
+	User             *User
+	Space            *Space
+	EventType        *EventType
+	SheetSlot        *SheetSlot
 	RescheduledDates []RescheduledEventDate `gorm:"foreignKey:ScheduledEventID;constraint:OnDelete:CASCADE"`
 	Invites          []ScheduledEventInvite `gorm:"foreignKey:ScheduledEventID;constraint:OnDelete:CASCADE"`
 	Polls            []Poll                 `gorm:"foreignKey:ScheduledEventID;constraint:OnDelete:SET NULL"`
@@ -261,7 +261,7 @@ type RescheduledEventDate struct {
 	End              DateTime `gorm:"column:end;not null" json:"end"`
 	AllDay           bool     `gorm:"column:all_day;default:false;not null" json:"all_day"`
 	CreatedAt        DateTime `gorm:"column:created_at;autoCreateTime:false;not null" json:"created_at"`
-	ScheduledEvent   ScheduledEvent
+	ScheduledEvent   *ScheduledEvent
 }
 
 func (RescheduledEventDate) TableName() string {
@@ -291,8 +291,8 @@ type ScheduledEventInvite struct {
 	Status           string   `gorm:"column:status;default:'pending';not null" json:"status"`
 	CreatedAt        DateTime `gorm:"column:created_at;autoCreateTime:false;not null" json:"created_at"`
 	UpdatedAt        DateTime `gorm:"column:updated_at;autoUpdateTime:false;not null" json:"updated_at"`
-	ScheduledEvent   ScheduledEvent
-	User             User `gorm:"foreignKey:InviteeID"`
+	ScheduledEvent   *ScheduledEvent
+	User             *User `gorm:"foreignKey:InviteeID"`
 }
 
 func (ScheduledEventInvite) TableName() string {
@@ -371,7 +371,7 @@ type Credential struct {
 	ExpiresAt               *DateTime `gorm:"column:expires_at;index:credential_expiry_idx" json:"expires_at"`
 	CreatedAt               DateTime  `gorm:"column:created_at;autoCreateTime:false;not null" json:"created_at"`
 	UpdatedAt               DateTime  `gorm:"column:updated_at;autoUpdateTime:false;not null" json:"updated_at"`
-	User                    User
+	User                    *User
 	CalendarConnections     []CalendarConnection     `gorm:"foreignKey:CredentialID;constraint:OnDelete:CASCADE"`
 	ConferencingConnections []ConferencingConnection `gorm:"foreignKey:CredentialID;constraint:OnDelete:CASCADE"`
 }
@@ -413,8 +413,8 @@ type CalendarConnection struct {
 	CreatedAt         DateTime `gorm:"column:created_at;autoCreateTime:false;not null" json:"created_at"`
 	UpdatedAt         DateTime `gorm:"column:updated_at;autoUpdateTime:false;not null" json:"updated_at"`
 	CredentialID      string   `gorm:"column:credential_id;not null" json:"credential_id"`
-	Credential        Credential
-	User              User
+	Credential        *Credential
+	User              *User
 	ProviderCalendars []ProviderCalendar `gorm:"foreignKey:CalendarConnectionID;constraint:OnDelete:CASCADE"`
 }
 
@@ -458,7 +458,7 @@ type ProviderCalendar struct {
 	LastSyncedAt           DateTime       `gorm:"column:last_synced_at;index:sync_time_idx;not null" json:"last_synced_at"`
 	CreatedAt              DateTime       `gorm:"column:created_at;autoCreateTime:false;not null" json:"created_at"`
 	UpdatedAt              DateTime       `gorm:"column:updated_at;autoUpdateTime:false;not null" json:"updated_at"`
-	CalendarConnection     CalendarConnection
+	CalendarConnection     *CalendarConnection
 	UserDefaultDestination []User `gorm:"foreignKey:DefaultDestinationCalendarID;constraint:OnDelete:SET NULL"`
 }
 
@@ -502,8 +502,8 @@ type ConferencingConnection struct {
 	CreatedAt         DateTime `gorm:"column:created_at;autoCreateTime:false;not null" json:"created_at"`
 	UpdatedAt         DateTime `gorm:"column:updated_at;autoUpdateTime:false;not null" json:"updated_at"`
 	CredentialID      string   `gorm:"column:credential_id;not null" json:"credential_id"`
-	Credential        Credential
-	User              User
+	Credential        *Credential
+	User              *User
 }
 
 func (ConferencingConnection) TableName() string {
@@ -570,7 +570,7 @@ type LicenseValidation struct {
 	Fingerprint *string  `gorm:"column:fingerprint" json:"fingerprint"`
 	ValidatedAt DateTime `gorm:"column:validated_at;not null" json:"validated_at"`
 	UserAgent   *string  `gorm:"column:user_agent" json:"user_agent"`
-	License     License
+	License     *License
 }
 
 func (LicenseValidation) TableName() string {
@@ -623,7 +623,7 @@ type UserNotificationPreferences struct {
 	Prefs     datatypes.JSON `gorm:"column:prefs;default:'{}';not null" json:"prefs"`
 	CreatedAt DateTime       `gorm:"column:created_at;autoCreateTime:false;not null" json:"created_at"`
 	UpdatedAt DateTime       `gorm:"column:updated_at;autoUpdateTime:false;not null" json:"updated_at"`
-	User      User
+	User      *User
 }
 
 func (UserNotificationPreferences) TableName() string {
@@ -677,9 +677,9 @@ type Poll struct {
 	AllowTentativeVotes     *bool          `gorm:"column:allow_tentative_votes;default:true;not null" json:"allow_tentative_votes"`
 	Muted                   bool           `gorm:"column:muted;default:false;not null" json:"muted"`
 	SpaceID                 *string        `gorm:"column:space_id;index:polls_space_id_idx" json:"space_id"`
-	User                    User
-	ScheduledEvent          ScheduledEvent
-	Space                   Space
+	User                    *User
+	ScheduledEvent          *ScheduledEvent
+	Space                   *Space
 	Options                 []Option       `gorm:"foreignKey:PollID;constraint:OnDelete:CASCADE"`
 	Participants            []Participant  `gorm:"foreignKey:PollID;constraint:OnDelete:CASCADE"`
 	Comments                []Comment      `gorm:"foreignKey:PollID;constraint:OnDelete:CASCADE"`
@@ -723,8 +723,8 @@ type Participant struct {
 	TimeZone  *string   `gorm:"column:time_zone" json:"time_zone"`
 	CreatedAt DateTime  `gorm:"column:created_at;autoCreateTime:false;not null" json:"created_at"`
 	UpdatedAt *DateTime `gorm:"column:updated_at;autoUpdateTime:false" json:"updated_at"`
-	Poll      Poll
-	User      User
+	Poll      *Poll
+	User      *User
 	Votes     []Vote      `gorm:"foreignKey:ParticipantID;constraint:OnDelete:CASCADE"`
 	Invite    *PollInvite `gorm:"foreignKey:ParticipantID;constraint:OnDelete:SET NULL"`
 }
@@ -766,8 +766,8 @@ type PollInvite struct {
 	ParticipantID *string   `gorm:"column:participant_id;uniqueIndex" json:"participant_id"`
 	CreatedAt     DateTime  `gorm:"column:created_at;autoCreateTime:false;not null" json:"created_at"`
 	UpdatedAt     DateTime  `gorm:"column:updated_at;autoUpdateTime:false;not null" json:"updated_at"`
-	Poll          Poll
-	Participant   Participant
+	Poll          *Poll
+	Participant   *Participant
 }
 
 func (PollInvite) TableName() string {
@@ -806,7 +806,7 @@ type PollActivity struct {
 	OptionID      *string        `gorm:"column:option_id;index:poll_activities_poll_id_option_id_idx" json:"option_id"`
 	Payload       datatypes.JSON `gorm:"column:payload;default:'{}';not null" json:"payload"`
 	CreatedAt     DateTime       `gorm:"column:created_at;index:poll_activities_poll_id_created_at_idx;autoCreateTime:false;not null" json:"created_at"`
-	Poll          Poll
+	Poll          *Poll
 }
 
 func (PollActivity) TableName() string {
@@ -830,7 +830,7 @@ type Option struct {
 	Duration  int      `gorm:"column:duration_minutes;default:0;not null" json:"duration_minutes"`
 	PollID    string   `gorm:"column:poll_id;index:options_poll_id_idx;not null" json:"poll_id"`
 	CreatedAt DateTime `gorm:"column:created_at;autoCreateTime:false;not null" json:"created_at"`
-	Poll      Poll
+	Poll      *Poll
 	Votes     []Vote `gorm:"foreignKey:OptionID;constraint:OnDelete:CASCADE"`
 }
 
@@ -857,9 +857,9 @@ type Vote struct {
 	Type          string    `gorm:"column:type;default:'yes';not null" json:"type"`
 	CreatedAt     DateTime  `gorm:"column:created_at;autoCreateTime:false;not null" json:"created_at"`
 	UpdatedAt     *DateTime `gorm:"column:updated_at;autoUpdateTime:false" json:"updated_at"`
-	Participant   Participant
-	Option        Option
-	Poll          Poll
+	Participant   *Participant
+	Option        *Option
+	Poll          *Poll
 }
 
 func (Vote) TableName() string {
@@ -896,8 +896,8 @@ type Comment struct {
 	UserID     *string   `gorm:"column:user_id;index:comments_user_id_idx" json:"user_id"`
 	CreatedAt  DateTime  `gorm:"column:created_at;autoCreateTime:false;not null" json:"created_at"`
 	UpdatedAt  *DateTime `gorm:"column:updated_at;autoUpdateTime:false" json:"updated_at"`
-	Poll       Poll
-	User       User
+	Poll       *Poll
+	User       *User
 }
 
 func (Comment) TableName() string {
@@ -971,8 +971,8 @@ type Sheet struct {
 	UpdatedAt   DateTime  `gorm:"column:updated_at;autoUpdateTime:false;not null" json:"updated_at"`
 	Deleted     bool      `gorm:"column:deleted;default:false;not null" json:"deleted"`
 	DeletedAt   *DateTime `gorm:"column:deleted_at" json:"deleted_at"`
-	Space       Space
-	Host        User        `gorm:"foreignKey:HostID"`
+	Space       *Space
+	Host        *User       `gorm:"foreignKey:HostID"`
 	Slots       []SheetSlot `gorm:"foreignKey:SheetID;constraint:OnDelete:CASCADE"`
 }
 
@@ -1009,8 +1009,8 @@ type SheetSlot struct {
 	StartTime      DateTime `gorm:"column:start_time;index:sheet_slots_sheet_id_start_time_idx;not null" json:"start_time"`
 	CreatedAt      DateTime `gorm:"column:created_at;autoCreateTime:false;not null" json:"created_at"`
 	UpdatedAt      DateTime `gorm:"column:updated_at;autoUpdateTime:false;not null" json:"updated_at"`
-	Sheet          Sheet
-	EventType      EventType
+	Sheet          *Sheet
+	EventType      *EventType
 	ScheduledEvent *ScheduledEvent `gorm:"foreignKey:SheetSlotID;constraint:OnDelete:SET NULL"`
 }
 
@@ -1055,7 +1055,7 @@ type Space struct {
 	NonprofitDiscountGrantedAt *DateTime              `gorm:"column:nonprofit_discount_granted_at" json:"nonprofit_discount_granted_at"`
 	CreatedAt                  DateTime               `gorm:"column:created_at;autoCreateTime:false;not null" json:"created_at"`
 	UpdatedAt                  DateTime               `gorm:"column:updated_at;autoUpdateTime:false;not null" json:"updated_at"`
-	Owner                      User                   `gorm:"foreignKey:OwnerID"`
+	Owner                      *User                  `gorm:"foreignKey:OwnerID"`
 	Polls                      []Poll                 `gorm:"foreignKey:SpaceID;constraint:OnDelete:SET NULL"`
 	ScheduledEvents            []ScheduledEvent       `gorm:"foreignKey:SpaceID;constraint:OnDelete:CASCADE"`
 	EventTypes                 []EventType            `gorm:"foreignKey:SpaceID;constraint:OnDelete:CASCADE"`
@@ -1102,8 +1102,8 @@ type SpaceMember struct {
 	UpdatedAt      DateTime `gorm:"column:updated_at;autoUpdateTime:false;not null" json:"updated_at"`
 	Role           string   `gorm:"column:role;default:'MEMBER';not null" json:"role"`
 	LastSelectedAt DateTime `gorm:"column:last_selected_at;not null" json:"last_selected_at"`
-	Space          Space
-	User           User
+	Space          *Space
+	User           *User
 }
 
 func (SpaceMember) TableName() string {
@@ -1143,8 +1143,8 @@ type SpaceMemberInvite struct {
 	UpdatedAt DateTime `gorm:"column:updated_at;autoUpdateTime:false;not null" json:"updated_at"`
 	Role      string   `gorm:"column:role;default:'MEMBER';not null" json:"role"`
 	InviterID string   `gorm:"column:inviter_id;not null" json:"inviter_id"`
-	InvitedBy User     `gorm:"foreignKey:InviterID"`
-	Space     Space
+	InvitedBy *User    `gorm:"foreignKey:InviterID"`
+	Space     *Space
 }
 
 func (SpaceMemberInvite) TableName() string {
@@ -1184,7 +1184,7 @@ type SpaceAPIKey struct {
 	RevokedAt  *DateTime `gorm:"column:revoked_at;index:space_api_key_revoked_idx" json:"revoked_at"`
 	CreatedAt  DateTime  `gorm:"column:created_at;autoCreateTime:false;not null" json:"created_at"`
 	UpdatedAt  DateTime  `gorm:"column:updated_at;autoUpdateTime:false;not null" json:"updated_at"`
-	Space      Space
+	Space      *Space
 }
 
 func (SpaceAPIKey) TableName() string {
@@ -1227,7 +1227,7 @@ type SpaceWebhook struct {
 	ConsecutiveFailures int       `gorm:"column:consecutive_failures;default:0;not null" json:"consecutive_failures"`
 	CreatedAt           DateTime  `gorm:"column:created_at;autoCreateTime:false;not null" json:"created_at"`
 	UpdatedAt           DateTime  `gorm:"column:updated_at;autoUpdateTime:false;not null" json:"updated_at"`
-	Space               Space
+	Space               *Space
 	Deliveries          []WebhookDelivery `gorm:"foreignKey:WebhookID;constraint:OnDelete:CASCADE"`
 }
 
@@ -1273,7 +1273,7 @@ type WebhookDelivery struct {
 	LastError          *string        `gorm:"column:last_error" json:"last_error"`
 	CreatedAt          DateTime       `gorm:"column:created_at;autoCreateTime:false;not null" json:"created_at"`
 	UpdatedAt          DateTime       `gorm:"column:updated_at;autoUpdateTime:false;not null" json:"updated_at"`
-	Webhook            SpaceWebhook   `gorm:"foreignKey:WebhookID"`
+	Webhook            *SpaceWebhook  `gorm:"foreignKey:WebhookID"`
 }
 
 func (WebhookDelivery) TableName() string {
@@ -1320,7 +1320,7 @@ type Account struct {
 	Password              *string   `gorm:"column:password" json:"password"`
 	CreatedAt             DateTime  `gorm:"column:created_at;autoCreateTime:false;not null" json:"created_at"`
 	UpdatedAt             DateTime  `gorm:"column:updated_at;autoUpdateTime:false;not null" json:"updated_at"`
-	User                  User
+	User                  *User
 }
 
 func (Account) TableName() string {
@@ -1374,7 +1374,7 @@ type User struct {
 	JobTitle                     *string                      `gorm:"column:job_title" json:"job_title"`
 	ReviewRequestedAt            *DateTime                    `gorm:"column:review_requested_at" json:"review_requested_at"`
 	DefaultDestinationCalendarID *string                      `gorm:"column:default_destination_calendar_id" json:"default_destination_calendar_id"`
-	DefaultDestinationCalendar   ProviderCalendar             `gorm:"foreignKey:DefaultDestinationCalendarID"`
+	DefaultDestinationCalendar   *ProviderCalendar            `gorm:"foreignKey:DefaultDestinationCalendarID"`
 	Comments                     []Comment                    `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
 	Polls                        []Poll                       `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
 	QueuedEmails                 []QueuedEmail                `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
@@ -1437,8 +1437,8 @@ type Session struct {
 	UserAgent          *string  `gorm:"column:user_agent" json:"user_agent"`
 	UserID             string   `gorm:"column:user_id;not null" json:"user_id"`
 	ImpersonatedBy     *string  `gorm:"column:impersonated_by" json:"impersonated_by"`
-	User               User     `gorm:"foreignKey:UserID"`
-	ImpersonatedByUser User     `gorm:"foreignKey:ImpersonatedBy"`
+	User               *User    `gorm:"foreignKey:UserID"`
+	ImpersonatedByUser *User    `gorm:"foreignKey:ImpersonatedBy"`
 }
 
 func (Session) TableName() string {

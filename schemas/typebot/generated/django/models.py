@@ -188,6 +188,22 @@ class Space(models.Model):
         ]
 
 
+class MemberInWorkspace(models.Model):
+    pk = models.CompositePrimaryKey("user_id", "workspace_id")
+    created_at = UtcDateTimeField(db_column="createdAt", default=timezone.now)
+    updated_at = UtcDateTimeField(db_column="updatedAt", auto_now=True)
+    user = models.ForeignKey("User", on_delete=models.CASCADE, related_name="workspaces", db_column="userId", db_index=False)
+    workspace = models.ForeignKey("Workspace", on_delete=models.CASCADE, related_name="members", db_column="workspaceId", db_index=False)
+    role = models.TextField(choices=WorkspaceRole.choices)
+    objects = AutoNowQuerySet.as_manager()
+
+    class Meta:
+        db_table = "MemberInWorkspace"
+        constraints = [
+            models.UniqueConstraint(fields=["user", "workspace"], name="MemberInWorkspace_userId_workspaceId_key"),
+        ]
+
+
 class WorkspaceInvitation(models.Model):
     id = models.TextField(primary_key=True, default=None)
     created_at = UtcDateTimeField(db_column="createdAt", default=timezone.now)
@@ -234,6 +250,20 @@ class UserCredentials(models.Model):
 
     class Meta:
         db_table = "UserCredentials"
+
+
+class VerificationToken(models.Model):
+    identifier = models.TextField()
+    token = models.TextField(primary_key=True, default=None)
+    value = models.TextField(null=True)
+    failed_attempts = models.IntegerField(db_column="failedAttempts", default=0)
+    expires = UtcDateTimeField()
+
+    class Meta:
+        db_table = "VerificationToken"
+        constraints = [
+            models.UniqueConstraint(fields=["identifier", "token"], name="VerificationToken_identifier_token_key"),
+        ]
 
 
 class DashboardFolder(models.Model):
@@ -283,6 +313,38 @@ class Typebot(models.Model):
         ]
 
 
+class Invitation(models.Model):
+    pk = models.CompositePrimaryKey("email", "typebot_id")
+    created_at = UtcDateTimeField(db_column="createdAt", default=timezone.now)
+    updated_at = UtcDateTimeField(db_column="updatedAt", auto_now=True)
+    email = models.TextField()
+    typebot = models.ForeignKey("Typebot", on_delete=models.CASCADE, related_name="invitations", db_column="typebotId", db_index=False)
+    type = models.TextField(choices=CollaborationType.choices)
+    objects = AutoNowQuerySet.as_manager()
+
+    class Meta:
+        db_table = "Invitation"
+        constraints = [
+            models.UniqueConstraint(fields=["email", "typebot"], name="Invitation_email_typebotId_key"),
+        ]
+
+
+class CollaboratorsOnTypebots(models.Model):
+    pk = models.CompositePrimaryKey("user_id", "typebot_id")
+    created_at = UtcDateTimeField(db_column="createdAt", default=timezone.now)
+    updated_at = UtcDateTimeField(db_column="updatedAt", auto_now=True)
+    user = models.ForeignKey("User", on_delete=models.CASCADE, related_name="collaborators_on_typebots", db_column="userId", db_index=False)
+    typebot = models.ForeignKey("Typebot", on_delete=models.CASCADE, related_name="collaborators", db_column="typebotId", db_index=False)
+    type = models.TextField(choices=CollaborationType.choices)
+    objects = AutoNowQuerySet.as_manager()
+
+    class Meta:
+        db_table = "CollaboratorsOnTypebots"
+        constraints = [
+            models.UniqueConstraint(fields=["user", "typebot"], name="CollaboratorsOnTypebots_userId_typebotId_key"),
+        ]
+
+
 class PublicTypebot(models.Model):
     id = models.TextField(primary_key=True, default=None)
     version = models.TextField(null=True)
@@ -304,6 +366,24 @@ class PublicTypebot(models.Model):
         ]
 
 
+class RuntimeMediaIdCache(models.Model):
+    pk = models.CompositePrimaryKey("public_typebot_id", "provider", "url")
+    provider = models.TextField(choices=ChatProvider.choices)
+    url = models.TextField()
+    media_id = models.TextField(db_column="mediaId")
+    expires_at = UtcDateTimeField(null=True, db_column="expiresAt")
+    public_typebot = models.ForeignKey("PublicTypebot", on_delete=models.CASCADE, related_name="media_ids_cache", db_column="publicTypebotId", null=True, db_index=False)
+
+    class Meta:
+        db_table = "RuntimeMediaIdCache"
+        constraints = [
+            models.UniqueConstraint(fields=["public_typebot", "provider", "url"], name="RuntimeMediaIdCache_publicTypebotId_provider_url_key"),
+        ]
+        indexes = [
+            models.Index(fields=["expires_at"]),
+        ]
+
+
 class Result(models.Model):
     id = models.TextField(primary_key=True, default=None)
     created_at = UtcDateTimeField(db_column="createdAt", default=timezone.now)
@@ -322,6 +402,35 @@ class Result(models.Model):
         ]
 
 
+class SetVariableHistoryItem(models.Model):
+    pk = models.CompositePrimaryKey("result_id", "index")
+    result = models.ForeignKey("Result", on_delete=models.CASCADE, related_name="set_variable_history", db_column="resultId", db_index=False)
+    index = models.IntegerField()
+    variable_id = models.TextField(db_column="variableId")
+    block_id = models.TextField(db_column="blockId")
+    block_index = models.IntegerField(null=True, db_column="blockIndex")
+    value = models.JSONField()
+
+    class Meta:
+        db_table = "SetVariableHistoryItem"
+        constraints = [
+            models.UniqueConstraint(fields=["result", "index"], name="SetVariableHistoryItem_resultId_index_key"),
+        ]
+
+
+class VisitedEdge(models.Model):
+    pk = models.CompositePrimaryKey("result_id", "index")
+    result = models.ForeignKey("Result", on_delete=models.CASCADE, related_name="edges", db_column="resultId", db_index=False)
+    edge_id = models.TextField(db_column="edgeId")
+    index = models.IntegerField()
+
+    class Meta:
+        db_table = "VisitedEdge"
+        constraints = [
+            models.UniqueConstraint(fields=["result", "index"], name="VisitedEdge_resultId_index_key"),
+        ]
+
+
 class Log(models.Model):
     id = models.TextField(primary_key=True, default=None)
     created_at = UtcDateTimeField(db_column="createdAt", default=timezone.now)
@@ -335,6 +444,23 @@ class Log(models.Model):
         db_table = "Log"
         indexes = [
             models.Index(fields=["result"]),
+        ]
+
+
+class Answer(models.Model):
+    pk = models.CompositePrimaryKey("result_id", "block_id", "group_id")
+    created_at = UtcDateTimeField(db_column="createdAt", auto_now=True)
+    result = models.ForeignKey("Result", on_delete=models.CASCADE, related_name="answers", db_column="resultId", db_index=False)
+    block_id = models.TextField(db_column="blockId")
+    group_id = models.TextField(db_column="groupId")
+    variable_id = models.TextField(null=True, db_column="variableId")
+    content = models.TextField()
+    objects = AutoNowQuerySet.as_manager()
+
+    class Meta:
+        db_table = "Answer"
+        constraints = [
+            models.UniqueConstraint(fields=["result", "block_id", "group_id"], name="Answer_resultId_blockId_groupId_key"),
         ]
 
 

@@ -67,7 +67,7 @@ type APIKey struct {
 	KeyPrefix  string    `gorm:"column:key_prefix;type:varchar(20);not null" json:"key_prefix"`
 	LastUsedAt *DateTime `gorm:"column:last_used_at;type:timestamptz(6)" json:"last_used_at"`
 	CreatedAt  *DateTime `gorm:"column:created_at;type:timestamptz(6);autoCreateTime:false" json:"created_at"`
-	User       User
+	User       *User
 }
 
 func (APIKey) TableName() string {
@@ -144,9 +144,9 @@ type Website struct {
 	DeletedAt           *DateTime      `gorm:"column:deleted_at;type:timestamptz(6)" json:"deleted_at"`
 	RecorderEnabled     bool           `gorm:"column:recorder_enabled;default:false;not null" json:"recorder_enabled"`
 	ReplayConfig        datatypes.JSON `gorm:"column:replay_config" json:"replay_config"`
-	User                User           `gorm:"foreignKey:UserID"`
-	CreateUser          User           `gorm:"foreignKey:CreatedBy"`
-	Team                Team
+	User                *User          `gorm:"foreignKey:UserID"`
+	CreateUser          *User          `gorm:"foreignKey:CreatedBy"`
+	Team                *Team
 	Annotations         []Annotation         `gorm:"foreignKey:WebsiteID"`
 	EventData           []EventData          `gorm:"foreignKey:WebsiteID"`
 	Reports             []Report             `gorm:"foreignKey:WebsiteID"`
@@ -213,7 +213,7 @@ type WebsiteEvent struct {
 	Cls            *float64  `gorm:"column:cls;type:decimal(10,4)" json:"cls"`
 	Fcp            *float64  `gorm:"column:fcp;type:decimal(10,1)" json:"fcp"`
 	Ttfb           *float64  `gorm:"column:ttfb;type:decimal(10,1)" json:"ttfb"`
-	Session        Session
+	Session        *Session
 	EventData      []EventData `gorm:"foreignKey:WebsiteEventID"`
 }
 
@@ -239,8 +239,8 @@ type EventData struct {
 	DateValue      *DateTime `gorm:"column:date_value;type:timestamptz(6)" json:"date_value"`
 	DataType       int       `gorm:"column:data_type;not null" json:"data_type"`
 	CreatedAt      *DateTime `gorm:"column:created_at;index:event_data_created_at_idx;index:event_data_website_id_created_at_idx;index:event_data_website_id_created_at_data_key_idx;type:timestamptz(6);autoCreateTime:false" json:"created_at"`
-	Website        Website
-	WebsiteEvent   WebsiteEvent
+	Website        *Website
+	WebsiteEvent   *WebsiteEvent
 }
 
 func (EventData) TableName() string {
@@ -266,8 +266,8 @@ type SessionData struct {
 	DataType    int       `gorm:"column:data_type;not null" json:"data_type"`
 	DistinctID  *string   `gorm:"column:distinct_id;type:varchar(50)" json:"distinct_id"`
 	CreatedAt   *DateTime `gorm:"column:created_at;index:session_data_created_at_idx;index:session_data_session_id_created_at_idx;index:session_data_website_id_created_at_data_key_idx;type:timestamptz(6);autoCreateTime:false" json:"created_at"`
-	Website     Website
-	Session     Session
+	Website     *Website
+	Session     *Session
 }
 
 func (SessionData) TableName() string {
@@ -328,8 +328,8 @@ type TeamUser struct {
 	Role      string    `gorm:"column:role;type:varchar(50);not null" json:"role"`
 	CreatedAt *DateTime `gorm:"column:created_at;type:timestamptz(6);autoCreateTime:false" json:"created_at"`
 	UpdatedAt *DateTime `gorm:"column:updated_at;type:timestamptz(6);autoUpdateTime:false" json:"updated_at"`
-	Team      Team
-	User      User
+	Team      *Team
+	User      *User
 }
 
 func (TeamUser) TableName() string {
@@ -365,8 +365,8 @@ type Report struct {
 	Parameters  datatypes.JSON `gorm:"column:parameters;not null" json:"parameters"`
 	CreatedAt   *DateTime      `gorm:"column:created_at;type:timestamptz(6);autoCreateTime:false" json:"created_at"`
 	UpdatedAt   *DateTime      `gorm:"column:updated_at;type:timestamptz(6);autoUpdateTime:false" json:"updated_at"`
-	User        User
-	Website     Website
+	User        *User
+	Website     *Website
 }
 
 func (Report) TableName() string {
@@ -401,7 +401,7 @@ type Annotation struct {
 	Note      string    `gorm:"column:note;type:varchar(500);not null" json:"note"`
 	CreatedAt *DateTime `gorm:"column:created_at;type:timestamptz(6);autoCreateTime:false" json:"created_at"`
 	UpdatedAt *DateTime `gorm:"column:updated_at;type:timestamptz(6);autoUpdateTime:false" json:"updated_at"`
-	Website   Website
+	Website   *Website
 }
 
 func (Annotation) TableName() string {
@@ -435,7 +435,7 @@ type Segment struct {
 	Parameters datatypes.JSON `gorm:"column:parameters;not null" json:"parameters"`
 	CreatedAt  *DateTime      `gorm:"column:created_at;type:timestamptz(6);autoCreateTime:false" json:"created_at"`
 	UpdatedAt  *DateTime      `gorm:"column:updated_at;type:timestamptz(6);autoUpdateTime:false" json:"updated_at"`
-	Website    Website
+	Website    *Website
 }
 
 func (Segment) TableName() string {
@@ -470,8 +470,8 @@ type Revenue struct {
 	Currency  string    `gorm:"column:currency;type:varchar(10);not null" json:"currency"`
 	Revenue   *float64  `gorm:"column:revenue;type:decimal(19,4)" json:"revenue"`
 	CreatedAt *DateTime `gorm:"column:created_at;index:revenue_website_id_created_at_idx;index:revenue_website_id_session_id_created_at_idx;type:timestamptz(6);autoCreateTime:false" json:"created_at"`
-	Website   Website
-	Session   Session
+	Website   *Website
+	Session   *Session
 }
 
 func (Revenue) TableName() string {
@@ -496,8 +496,8 @@ type Link struct {
 	CreatedAt *DateTime `gorm:"column:created_at;index:link_created_at_idx;type:timestamptz(6);autoCreateTime:false" json:"created_at"`
 	UpdatedAt *DateTime `gorm:"column:updated_at;type:timestamptz(6);autoUpdateTime:false" json:"updated_at"`
 	DeletedAt *DateTime `gorm:"column:deleted_at;type:timestamptz(6)" json:"deleted_at"`
-	User      User
-	Team      Team
+	User      *User
+	Team      *Team
 }
 
 func (Link) TableName() string {
@@ -532,8 +532,8 @@ type Pixel struct {
 	CreatedAt *DateTime `gorm:"column:created_at;index:pixel_created_at_idx;type:timestamptz(6);autoCreateTime:false" json:"created_at"`
 	UpdatedAt *DateTime `gorm:"column:updated_at;type:timestamptz(6);autoUpdateTime:false" json:"updated_at"`
 	DeletedAt *DateTime `gorm:"column:deleted_at;type:timestamptz(6)" json:"deleted_at"`
-	User      User
-	Team      Team
+	User      *User
+	Team      *Team
 }
 
 func (Pixel) TableName() string {
@@ -569,8 +569,8 @@ type Board struct {
 	TeamID      *string        `gorm:"column:team_id;index:board_team_id_idx;type:char(36)" json:"team_id"`
 	CreatedAt   *DateTime      `gorm:"column:created_at;index:board_created_at_idx;type:timestamptz(6);autoCreateTime:false" json:"created_at"`
 	UpdatedAt   *DateTime      `gorm:"column:updated_at;type:timestamptz(6);autoUpdateTime:false" json:"updated_at"`
-	User        User
-	Team        Team
+	User        *User
+	Team        *Team
 }
 
 func (Board) TableName() string {
@@ -641,7 +641,7 @@ type SessionReplay struct {
 	StartedAt  DateTime  `gorm:"column:started_at;type:timestamptz(6);not null" json:"started_at"`
 	EndedAt    DateTime  `gorm:"column:ended_at;type:timestamptz(6);not null" json:"ended_at"`
 	CreatedAt  *DateTime `gorm:"column:created_at;index:session_replay_website_id_created_at_idx;type:timestamptz(6);autoCreateTime:false" json:"created_at"`
-	Website    Website
+	Website    *Website
 }
 
 func (SessionReplay) TableName() string {
@@ -663,7 +663,7 @@ type SessionReplaySaved struct {
 	VisitID   string    `gorm:"column:visit_id;uniqueIndex:session_replay_saved_website_id_visit_id_key;index:session_replay_saved_visit_id_idx;type:char(36);not null" json:"visit_id"`
 	CreatedAt *DateTime `gorm:"column:created_at;index:session_replay_saved_website_id_created_at_idx;type:timestamptz(6);autoCreateTime:false" json:"created_at"`
 	UpdatedAt *DateTime `gorm:"column:updated_at;type:timestamptz(6);autoUpdateTime:false" json:"updated_at"`
-	Website   Website
+	Website   *Website
 }
 
 func (SessionReplaySaved) TableName() string {
@@ -706,7 +706,7 @@ type HeatmapEvent struct {
 	PageH     *int     `gorm:"column:page_h" json:"page_h"`
 	ScrollPct *int     `gorm:"column:scroll_pct" json:"scroll_pct"`
 	CreatedAt DateTime `gorm:"column:created_at;index:heatmap_event_website_id_created_at_idx;index:heatmap_event_website_id_url_path_event_type_created_at_idx;type:timestamptz(6);autoCreateTime:false;not null" json:"created_at"`
-	Website   Website
+	Website   *Website
 }
 
 func (HeatmapEvent) TableName() string {
@@ -728,7 +728,7 @@ type TwoFactorAuth struct {
 	IsEnabled bool     `gorm:"column:is_enabled;default:false;not null" json:"is_enabled"`
 	CreatedAt DateTime `gorm:"column:created_at;type:timestamptz(6);autoCreateTime:false;not null" json:"created_at"`
 	UpdatedAt DateTime `gorm:"column:updated_at;type:timestamptz(6);autoUpdateTime:false;not null" json:"updated_at"`
-	User      User
+	User      *User
 }
 
 func (TwoFactorAuth) TableName() string {
@@ -763,7 +763,7 @@ type TwoFactorBackupCode struct {
 	CodeHash  string   `gorm:"column:code_hash;not null" json:"code_hash"`
 	Used      bool     `gorm:"column:used;default:false;not null" json:"used"`
 	CreatedAt DateTime `gorm:"column:created_at;type:timestamptz(6);autoCreateTime:false;not null" json:"created_at"`
-	User      User
+	User      *User
 }
 
 func (TwoFactorBackupCode) TableName() string {
@@ -786,7 +786,7 @@ type TwoFactorOtpUsed struct {
 	UserID    string   `gorm:"column:user_id;uniqueIndex:two_factor_otp_used_user_id_otp_key;type:char(36);not null" json:"user_id"`
 	Otp       string   `gorm:"column:otp;uniqueIndex:two_factor_otp_used_user_id_otp_key;not null" json:"otp"`
 	ExpiresAt DateTime `gorm:"column:expires_at;type:timestamptz(6);not null" json:"expires_at"`
-	User      User
+	User      *User
 }
 
 func (TwoFactorOtpUsed) TableName() string {
@@ -806,7 +806,7 @@ type TwoFactorRateLimit struct {
 	Attempts    int       `gorm:"column:attempts;default:0;not null" json:"attempts"`
 	LockedUntil *DateTime `gorm:"column:locked_until;type:timestamptz(6)" json:"locked_until"`
 	UpdatedAt   DateTime  `gorm:"column:updated_at;type:timestamptz(6);autoUpdateTime:false;not null" json:"updated_at"`
-	User        User
+	User        *User
 }
 
 func (TwoFactorRateLimit) TableName() string {

@@ -73,7 +73,7 @@ class CreativeDailyStat(Base):
     __tablename__ = "CreativeDailyStat"
 
     creative_id: Mapped[str] = mapped_column("creativeId", ForeignKey("Creative.id", ondelete="CASCADE", onupdate="CASCADE", name="CreativeDailyStat_creativeId_fkey"), primary_key=True)
-    date: Mapped[date] = mapped_column(Date, primary_key=True)
+    date_: Mapped[date] = mapped_column("date", Date, primary_key=True)
     device_type: Mapped[str] = mapped_column("deviceType", Enum("phone", "tablet", "desktop", name="CreativeDeviceType"), primary_key=True)
     impressions: Mapped[int] = mapped_column(default=0, server_default=text("0"))
     clicks: Mapped[int] = mapped_column(default=0, server_default=text("0"))
@@ -84,7 +84,7 @@ class CreativeDailyPageStat(Base):
     __tablename__ = "CreativeDailyPageStat"
 
     creative_id: Mapped[str] = mapped_column("creativeId", ForeignKey("Creative.id", ondelete="CASCADE", onupdate="CASCADE", name="CreativeDailyPageStat_creativeId_fkey"), primary_key=True)
-    date: Mapped[date] = mapped_column(Date, primary_key=True)
+    date_: Mapped[date] = mapped_column("date", Date, primary_key=True)
     page: Mapped[str] = mapped_column(primary_key=True)
     impressions: Mapped[int] = mapped_column(default=0, server_default=text("0"))
     clicks: Mapped[int] = mapped_column(default=0, server_default=text("0"))
@@ -731,6 +731,19 @@ class Session(Base):
     user: Mapped["User"] = relationship(back_populates="sessions")
     oauth_access_tokens: Mapped[list["OauthAccessToken"]] = relationship(back_populates="session")
     oauth_refresh_tokens: Mapped[list["OauthRefreshToken"]] = relationship(back_populates="session")
+
+class VerificationToken(Base):
+    __tablename__ = "VerificationToken"
+
+    identifier: Mapped[str] = mapped_column()
+    token: Mapped[str] = mapped_column()
+    expires: Mapped[datetime]
+
+    __table_args__ = (
+        Index("VerificationToken_identifier_token_key", "identifier", "token", unique=True),
+    )
+
+    __mapper_args__ = {"primary_key": [identifier, token]}
 
 class TwoFactor(Base):
     __tablename__ = "TwoFactor"

@@ -339,6 +339,20 @@ class DestinationCalendar(Base):
     delegation_credential: Mapped[Optional["DelegationCredential"]] = relationship(back_populates="destination_calendar")
     booking: Mapped[list["Booking"]] = relationship(back_populates="destination_calendar")
 
+class UserPassword(Base):
+    __tablename__ = "UserPassword"
+
+    hash: Mapped[str]
+    user_id: Mapped[int] = mapped_column("userId", ForeignKey("users.id", ondelete="CASCADE", onupdate="CASCADE", name="UserPassword_userId_fkey"))
+
+    __table_args__ = (
+        Index("UserPassword_userId_key", "userId", unique=True),
+    )
+
+    __mapper_args__ = {"primary_key": [user_id]}
+
+    user: Mapped["User"] = relationship(back_populates="password")
+
 class TravelSchedule(Base):
     __tablename__ = "TravelSchedule"
 
@@ -418,7 +432,7 @@ class User(Base):
     )
 
     organization: Mapped[Optional["Team"]] = relationship(back_populates="org_users")
-    moved_to_profile: Mapped[Optional["Profile"]] = relationship(back_populates="moved_from_user")
+    moved_to_profile: Mapped[Optional["Profile"]] = relationship(foreign_keys=[moved_to_profile_id], back_populates="moved_from_user")
     travel_schedules: Mapped[list["TravelSchedule"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="user")
     credentials: Mapped[list["Credential"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="user")
     teams: Mapped[list["Membership"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="user")
@@ -441,7 +455,7 @@ class User(Base):
     access_token: Mapped[list["AccessToken"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="owner")
     refresh_token: Mapped[list["RefreshToken"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="owner")
     platform_authorization_token: Mapped[list["PlatformAuthorizationToken"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="owner")
-    profiles: Mapped[list["Profile"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="user")
+    profiles: Mapped[list["Profile"]] = relationship(foreign_keys="Profile.user_id", cascade="all, delete", passive_deletes=True, back_populates="user")
     secondary_emails: Mapped[list["SecondaryEmail"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="user")
     out_of_office_reasons: Mapped[list["OutOfOfficeReason"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="user")
     notifications_subscriptions: Mapped[list["NotificationsSubscriptions"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="user")
@@ -500,10 +514,10 @@ class Profile(Base):
         Index("Profile_username_organizationId_key", "username", "organizationId", unique=True),
     )
 
-    user: Mapped["User"] = relationship(back_populates="profiles")
+    user: Mapped["User"] = relationship(foreign_keys=[user_id], back_populates="profiles")
     organization: Mapped["Team"] = relationship(back_populates="org_profiles")
     event_types: Mapped[list["EventType"]] = relationship(back_populates="profile")
-    moved_from_user: Mapped[Optional["User"]] = relationship(back_populates="moved_to_profile")
+    moved_from_user: Mapped[Optional["User"]] = relationship(foreign_keys="User.moved_to_profile_id", back_populates="moved_to_profile")
 
 class Team(Base):
     __tablename__ = "Team"
@@ -548,7 +562,7 @@ class Team(Base):
     )
 
     parent: Mapped[Optional["Team"]] = relationship(remote_side=[id], back_populates="children")
-    created_by_oauth_client: Mapped[Optional["PlatformOAuthClient"]] = relationship(back_populates="teams")
+    created_by_oauth_client: Mapped[Optional["PlatformOAuthClient"]] = relationship(foreign_keys=[created_by_oauth_client_id], back_populates="teams")
     members: Mapped[list["Membership"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="team")
     event_types: Mapped[list["EventType"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="team")
     verified_numbers: Mapped[list["VerifiedNumber"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="team")
@@ -563,7 +577,7 @@ class Team(Base):
     instant_meeting_tokens: Mapped[list["InstantMeetingToken"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="team")
     org_profiles: Mapped[list["Profile"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="organization")
     dsync_team_group_mapping: Mapped[list["DSyncTeamGroupMapping"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="team")
-    platform_oauth_client: Mapped[list["PlatformOAuthClient"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="organization")
+    platform_oauth_client: Mapped[list["PlatformOAuthClient"]] = relationship(foreign_keys="PlatformOAuthClient.organization_id", cascade="all, delete", passive_deletes=True, back_populates="organization")
     attributes: Mapped[list["Attribute"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="team")
     delegation_credentials: Mapped[list["DelegationCredential"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="organization")
     roles: Mapped[list["Role"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="team")
@@ -624,7 +638,7 @@ class CreditExpenseLog(Base):
     booking_uid: Mapped[Optional[str]] = mapped_column("bookingUid", ForeignKey("Booking.uid", ondelete="CASCADE", onupdate="CASCADE", name="CreditExpenseLog_bookingUid_fkey"))
     credits: Mapped[Optional[int]]
     credit_type: Mapped[str] = mapped_column("creditType", Enum("MONTHLY", "ADDITIONAL", name="CreditType"))
-    date: Mapped[datetime]
+    date_: Mapped[datetime] = mapped_column("date")
     sms_sid: Mapped[Optional[str]] = mapped_column("smsSid")
     sms_segments: Mapped[Optional[int]] = mapped_column("smsSegments")
     phone_number: Mapped[Optional[str]] = mapped_column("phoneNumber")
@@ -916,7 +930,7 @@ class Availability(Base):
     days: Mapped[list[int]] = mapped_column(ARRAY(Integer), nullable=True)
     start_time: Mapped[time_type] = mapped_column("startTime", Time)
     end_time: Mapped[time_type] = mapped_column("endTime", Time)
-    date: Mapped[Optional[date]] = mapped_column(Date)
+    date_: Mapped[Optional[date]] = mapped_column("date", Date)
     schedule_id: Mapped[Optional[int]] = mapped_column("scheduleId", ForeignKey("Schedule.id", ondelete="SET NULL", onupdate="CASCADE", name="Availability_scheduleId_fkey"))
 
     __table_args__ = (
@@ -1207,7 +1221,7 @@ class Feedback(Base):
     __tablename__ = "Feedback"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    date: Mapped[datetime] = mapped_column(default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
+    date_: Mapped[datetime] = mapped_column("date", default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
     user_id: Mapped[int] = mapped_column("userId", ForeignKey("users.id", ondelete="CASCADE", onupdate="CASCADE", name="Feedback_userId_fkey"))
     rating: Mapped[str]
     comment: Mapped[Optional[str]]
@@ -1489,6 +1503,22 @@ class TempOrgRedirect(Base):
         Index("TempOrgRedirect_from_type_fromOrgId_key", "from", "type", "fromOrgId", unique=True),
     )
 
+class Avatar(Base):
+    __tablename__ = "avatars"
+
+    team_id: Mapped[int] = mapped_column("teamId", default=0, server_default=text("0"))
+    user_id: Mapped[int] = mapped_column("userId", default=0, server_default=text("0"))
+    data: Mapped[str]
+    object_key: Mapped[str] = mapped_column("objectKey")
+    is_banner: Mapped[bool] = mapped_column("isBanner", default=False, server_default=text("false"))
+
+    __table_args__ = (
+        Index("avatars_objectKey_key", "objectKey", unique=True),
+        Index("avatars_teamId_userId_isBanner_key", "teamId", "userId", "isBanner", unique=True),
+    )
+
+    __mapper_args__ = {"primary_key": [object_key]}
+
 class OutOfOfficeEntry(Base):
     __tablename__ = "OutOfOfficeEntry"
 
@@ -1556,7 +1586,7 @@ class HolidayCache(Base):
     calendar_id: Mapped[str] = mapped_column("calendarId")
     event_id: Mapped[str] = mapped_column("eventId")
     name: Mapped[str]
-    date: Mapped[datetime]
+    date_: Mapped[datetime] = mapped_column("date")
     year: Mapped[int]
     created_at: Mapped[datetime] = mapped_column("createdAt", default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
     updated_at: Mapped[datetime] = mapped_column("updatedAt", default=utc_now, onupdate=utc_now)
@@ -1585,8 +1615,8 @@ class PlatformOAuthClient(Base):
     are_calendar_events_enabled: Mapped[bool] = mapped_column("areCalendarEventsEnabled", default=True, server_default=text("true"))
     created_at: Mapped[datetime] = mapped_column("createdAt", default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
 
-    organization: Mapped["Team"] = relationship(back_populates="platform_oauth_client")
-    teams: Mapped[list["Team"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="created_by_oauth_client")
+    organization: Mapped["Team"] = relationship(foreign_keys=[organization_id], back_populates="platform_oauth_client")
+    teams: Mapped[list["Team"]] = relationship(foreign_keys="Team.created_by_oauth_client_id", cascade="all, delete", passive_deletes=True, back_populates="created_by_oauth_client")
     access_tokens: Mapped[list["AccessToken"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="client")
     refresh_token: Mapped[list["RefreshToken"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="client")
     authorization_tokens: Mapped[list["PlatformAuthorizationToken"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="client")
@@ -1717,6 +1747,24 @@ class Task(Base):
         Index("Task_scheduledAt_succeededAt_idx", "scheduledAt", "succeededAt"),
         Index("Task_referenceUid_type_key", "referenceUid", "type", unique=True),
     )
+
+class ManagedOrganization(Base):
+    __tablename__ = "ManagedOrganization"
+
+    managed_organization_id: Mapped[int] = mapped_column("managedOrganizationId", ForeignKey("Team.id", ondelete="CASCADE", onupdate="CASCADE", name="ManagedOrganization_managedOrganizationId_fkey"))
+    manager_organization_id: Mapped[int] = mapped_column("managerOrganizationId", ForeignKey("Team.id", ondelete="CASCADE", onupdate="CASCADE", name="ManagedOrganization_managerOrganizationId_fkey"))
+    created_at: Mapped[datetime] = mapped_column("createdAt", default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
+
+    __table_args__ = (
+        Index("ManagedOrganization_managedOrganizationId_key", "managedOrganizationId", unique=True),
+        Index("ManagedOrganization_managerOrganizationId_idx", "managerOrganizationId"),
+        Index("ManagedOrganization_managerOrganizationId_managedOrganizati_key", "managerOrganizationId", "managedOrganizationId", unique=True),
+    )
+
+    __mapper_args__ = {"primary_key": [managed_organization_id]}
+
+    managed_organization: Mapped["Team"] = relationship(foreign_keys=[managed_organization_id], back_populates="managed_organization")
+    manager_organization: Mapped["Team"] = relationship(foreign_keys=[manager_organization_id], back_populates="managed_organizations")
 
 class PlatformBilling(Base):
     __tablename__ = "PlatformBilling"
@@ -2106,7 +2154,7 @@ class BookingInternalNote(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     note_preset_id: Mapped[Optional[int]] = mapped_column("notePresetId", ForeignKey("InternalNotePreset.id", ondelete="CASCADE", onupdate="CASCADE", name="BookingInternalNote_notePresetId_fkey"))
-    text: Mapped[Optional[str]]
+    text_: Mapped[Optional[str]] = mapped_column("text")
     booking_id: Mapped[int] = mapped_column("bookingId", ForeignKey("Booking.id", ondelete="CASCADE", onupdate="CASCADE", name="BookingInternalNote_bookingId_fkey"))
     created_by_id: Mapped[int] = mapped_column("createdById", ForeignKey("users.id", ondelete="RESTRICT", onupdate="CASCADE", name="BookingInternalNote_createdById_fkey"))
     created_at: Mapped[datetime] = mapped_column("createdAt", default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
@@ -2495,3 +2543,71 @@ class AttributeSyncFieldMapping(Base):
 
     attribute: Mapped["Attribute"] = relationship(back_populates="attribute_sync_field_mappings")
     integration_attribute_sync: Mapped["IntegrationAttributeSync"] = relationship(back_populates="sync_field_mappings")
+
+class BookingTimeStatus(Base):
+    __tablename__ = "BookingTimeStatus"
+
+    id: Mapped[int] = mapped_column()
+    uid: Mapped[Optional[str]]
+    event_type_id: Mapped[Optional[int]] = mapped_column("eventTypeId")
+    title: Mapped[Optional[str]]
+    description: Mapped[Optional[str]]
+    start_time: Mapped[Optional[datetime]] = mapped_column("startTime")
+    end_time: Mapped[Optional[datetime]] = mapped_column("endTime")
+    created_at: Mapped[Optional[datetime]] = mapped_column("createdAt")
+    location: Mapped[Optional[str]]
+    paid: Mapped[Optional[bool]]
+    status: Mapped[Optional[str]] = mapped_column(Enum("cancelled", "accepted", "rejected", "pending", "awaiting_host", name="BookingStatus"))
+    rescheduled: Mapped[Optional[bool]]
+    user_id: Mapped[Optional[int]] = mapped_column("userId")
+    team_id: Mapped[Optional[int]] = mapped_column("teamId")
+    event_length: Mapped[Optional[int]] = mapped_column("eventLength")
+    time_status: Mapped[Optional[str]] = mapped_column("timeStatus")
+    event_parent_id: Mapped[Optional[int]] = mapped_column("eventParentId")
+    user_email: Mapped[Optional[str]] = mapped_column("userEmail")
+    username: Mapped[Optional[str]]
+    rating_feedback: Mapped[Optional[str]] = mapped_column("ratingFeedback")
+    rating: Mapped[Optional[int]]
+    no_show_host: Mapped[Optional[bool]] = mapped_column("noShowHost")
+    is_team_booking: Mapped[bool] = mapped_column("isTeamBooking")
+
+    __table_args__ = (
+        Index("BookingTimeStatus_id_key", "id", unique=True),
+    )
+
+    __mapper_args__ = {"primary_key": [id]}
+
+class BookingTimeStatusDenormalized(Base):
+    __tablename__ = "BookingTimeStatusDenormalized"
+
+    id: Mapped[int] = mapped_column()
+    uid: Mapped[str]
+    event_type_id: Mapped[Optional[int]] = mapped_column("eventTypeId")
+    title: Mapped[str]
+    description: Mapped[Optional[str]]
+    start_time: Mapped[datetime] = mapped_column("startTime")
+    end_time: Mapped[datetime] = mapped_column("endTime")
+    created_at: Mapped[datetime] = mapped_column("createdAt")
+    updated_at: Mapped[Optional[datetime]] = mapped_column("updatedAt")
+    location: Mapped[Optional[str]]
+    paid: Mapped[bool]
+    status: Mapped[str] = mapped_column(Enum("cancelled", "accepted", "rejected", "pending", "awaiting_host", name="BookingStatus"))
+    rescheduled: Mapped[Optional[bool]]
+    user_id: Mapped[Optional[int]] = mapped_column("userId")
+    team_id: Mapped[Optional[int]] = mapped_column("teamId")
+    event_length: Mapped[Optional[int]] = mapped_column("eventLength")
+    event_parent_id: Mapped[Optional[int]] = mapped_column("eventParentId")
+    user_email: Mapped[Optional[str]] = mapped_column("userEmail")
+    user_name: Mapped[Optional[str]] = mapped_column("userName")
+    user_username: Mapped[Optional[str]] = mapped_column("userUsername")
+    rating_feedback: Mapped[Optional[str]] = mapped_column("ratingFeedback")
+    rating: Mapped[Optional[int]]
+    no_show_host: Mapped[Optional[bool]] = mapped_column("noShowHost")
+    is_team_booking: Mapped[bool] = mapped_column("isTeamBooking")
+    time_status: Mapped[Optional[str]] = mapped_column("timeStatus")
+
+    __table_args__ = (
+        Index("BookingTimeStatusDenormalized_id_key", "id", unique=True),
+    )
+
+    __mapper_args__ = {"primary_key": [id]}

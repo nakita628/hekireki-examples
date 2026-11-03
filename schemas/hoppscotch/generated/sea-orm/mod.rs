@@ -1,6 +1,7 @@
 pub mod account;
 pub mod infra_config;
 pub mod infra_token;
+pub mod invited_users;
 pub mod mock_server;
 pub mod mock_server_action;
 pub mod mock_server_activity;
@@ -23,4 +24,5 @@ pub mod user_environment;
 pub mod user_history;
 pub mod user_request;
 pub mod user_settings;
+pub mod verification_token;
 pub mod workspace_type;

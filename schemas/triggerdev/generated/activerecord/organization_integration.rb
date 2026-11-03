@@ -16,7 +16,6 @@ class OrganizationIntegration < ApplicationRecord
   belongs_to :organization, foreign_key: "organizationId", inverse_of: :organization_integrations
   has_many :alert_channels, class_name: "ProjectAlertChannel", foreign_key: "integrationId", inverse_of: :integration,
                             dependent: :nullify
-  has_many :organization_project_integration, class_name: "OrganizationProjectIntegration",
-                                              foreign_key: "organizationIntegrationId",
+  has_many :organization_project_integration, foreign_key: "organizationIntegrationId",
                                               inverse_of: :organization_integration, dependent: :destroy
 end

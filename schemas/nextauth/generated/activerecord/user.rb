@@ -8,5 +8,5 @@ class User < ApplicationRecord
 
   has_many :accounts, foreign_key: "userId", inverse_of: :user, dependent: :destroy
   has_many :sessions, foreign_key: "userId", inverse_of: :user, dependent: :destroy
-  has_many :authenticator, class_name: "Authenticator", foreign_key: "userId", inverse_of: :user, dependent: :destroy
+  has_many :authenticator, foreign_key: "userId", inverse_of: :user, dependent: :destroy
 end

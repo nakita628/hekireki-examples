@@ -44,22 +44,20 @@ class RuntimeEnvironment < ApplicationRecord
   has_many :worker_deployment_promotions, foreign_key: "environmentId", inverse_of: :environment, dependent: :destroy
   has_many :task_run_attempts, foreign_key: "runtimeEnvironmentId", inverse_of: :runtime_environment,
                                dependent: :destroy
-  has_many :checkpoint_restore_event, class_name: "CheckpointRestoreEvent", foreign_key: "runtimeEnvironmentId",
-                                      inverse_of: :runtime_environment, dependent: :destroy
+  has_many :checkpoint_restore_event, foreign_key: "runtimeEnvironmentId", inverse_of: :runtime_environment,
+                                      dependent: :destroy
   has_many :task_schedule_instances, foreign_key: "environmentId", inverse_of: :environment, dependent: :destroy
   has_many :alerts, class_name: "ProjectAlert", foreign_key: "environmentId", inverse_of: :environment,
                     dependent: :destroy
   has_many :sessions, class_name: "RuntimeEnvironmentSession", foreign_key: "environmentId", inverse_of: :environment,
                       dependent: :destroy
-  has_many :task_run_number_counter, class_name: "TaskRunNumberCounter", foreign_key: "environmentId",
-                                     inverse_of: :environment, dependent: :destroy
+  has_many :task_run_number_counter, foreign_key: "environmentId", inverse_of: :environment, dependent: :destroy
   has_many :task_run_checkpoints, foreign_key: "runtimeEnvironmentId", inverse_of: :runtime_environment,
                                   dependent: :destroy
   has_many :waitpoints, foreign_key: "environmentId", inverse_of: :environment, dependent: :destroy
   has_many :worker_instances, foreign_key: "environmentId", inverse_of: :environment, dependent: :destroy
   has_many :waitpoint_tags, foreign_key: "environmentId", inverse_of: :environment, dependent: :destroy
-  has_many :bulk_action_group, class_name: "BulkActionGroup", foreign_key: "environmentId", inverse_of: :environment,
-                               dependent: :destroy
+  has_many :bulk_action_group, foreign_key: "environmentId", inverse_of: :environment, dependent: :destroy
   has_many :customer_queries, foreign_key: "environmentId", inverse_of: :environment, dependent: :destroy
   has_many :prompts, foreign_key: "runtimeEnvironmentId", inverse_of: :runtime_environment, dependent: :destroy
   has_many :playground_conversations, foreign_key: "runtimeEnvironmentId", inverse_of: :runtime_environment,

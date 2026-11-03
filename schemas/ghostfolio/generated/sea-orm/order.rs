@@ -1,4 +1,4 @@
-use super::type::Type;
+use super::r#type::Type;
 use chrono::SubsecRound;
 use sea_orm::entity::prelude::*;
 use sea_orm::Set;

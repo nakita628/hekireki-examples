@@ -47,9 +47,10 @@ class Project < ApplicationRecord
   has_many :tags, foreign_key: "projectId", inverse_of: :project, dependent: :destroy
   has_many :invoices, foreign_key: "workspaceId", inverse_of: :workspace, dependent: :restrict_with_error
   has_many :customers, foreign_key: "projectId", inverse_of: :project, dependent: :restrict_with_error
-  has_many :default_domains, foreign_key: "projectId", inverse_of: :project, dependent: :destroy
+  has_many :default_domains, class_name: "DefaultDomains", foreign_key: "projectId", inverse_of: :project,
+                             dependent: :destroy
   has_many :restricted_tokens, foreign_key: "projectId", inverse_of: :project, dependent: :destroy
-  has_many :o_auth_codes, class_name: "OAuthCode", foreign_key: "projectId", inverse_of: :project, dependent: :destroy
+  has_many :o_auth_codes, foreign_key: "projectId", inverse_of: :project, dependent: :destroy
   has_many :integrations, foreign_key: "projectId", inverse_of: :project, dependent: :destroy
   has_many :installed_integrations, foreign_key: "projectId", inverse_of: :project, dependent: :destroy
   has_many :webhooks, foreign_key: "projectId", inverse_of: :project, dependent: :destroy

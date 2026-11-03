@@ -17,8 +17,9 @@ class Attribute < ApplicationRecord
   validates :name, presence: true
   validates :slug, presence: true, uniqueness: { scope: :teamId }
 
-  belongs_to :team, foreign_key: "teamId", inverse_of: :attributes
-  has_many :options, class_name: "AttributeOption", foreign_key: "attributeId", inverse_of: :attribute,
+  belongs_to :team, foreign_key: "teamId", inverse_of: :team_attributes
+  has_many :options, class_name: "AttributeOption", foreign_key: "attributeId", inverse_of: :attribute_option_attribute,
                      dependent: :destroy
-  has_many :attribute_sync_field_mappings, foreign_key: "attributeId", inverse_of: :attribute, dependent: :destroy
+  has_many :attribute_sync_field_mappings, foreign_key: "attributeId",
+                                           inverse_of: :attribute_sync_field_mapping_attribute, dependent: :destroy
 end

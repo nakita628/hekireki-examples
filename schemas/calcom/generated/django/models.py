@@ -432,7 +432,7 @@ class HostLocation(models.Model):
 
 
 class CalVideoSettings(models.Model):
-    event_type = models.OneToOneField("EventType", on_delete=models.CASCADE, related_name="cal_video_settings", db_column="eventTypeId")
+    event_type = models.OneToOneField("EventType", on_delete=models.CASCADE, related_name="cal_video_settings", primary_key=True, db_column="eventTypeId")
     disable_recording_for_organizer = models.BooleanField(db_column="disableRecordingForOrganizer", default=False)
     disable_recording_for_guests = models.BooleanField(db_column="disableRecordingForGuests", default=False)
     enable_automatic_transcription = models.BooleanField(db_column="enableAutomaticTranscription", default=False)
@@ -624,6 +624,14 @@ class DestinationCalendar(models.Model):
             models.Index(fields=["event_type"]),
             models.Index(fields=["credential"]),
         ]
+
+
+class UserPassword(models.Model):
+    hash = models.TextField()
+    user = models.OneToOneField("User", on_delete=models.CASCADE, related_name="password", primary_key=True, db_column="userId")
+
+    class Meta:
+        db_table = "UserPassword"
 
 
 class TravelSchedule(models.Model):
@@ -1601,6 +1609,20 @@ class TempOrgRedirect(models.Model):
         ]
 
 
+class Avatar(models.Model):
+    team_id = models.IntegerField(db_column="teamId", default=0)
+    user_id = models.IntegerField(db_column="userId", default=0)
+    data = models.TextField()
+    object_key = models.TextField(primary_key=True, db_column="objectKey", default=None)
+    is_banner = models.BooleanField(db_column="isBanner", default=False)
+
+    class Meta:
+        db_table = "avatars"
+        constraints = [
+            models.UniqueConstraint(fields=["team_id", "user_id", "is_banner"], name="avatars_teamId_userId_isBanner_key"),
+        ]
+
+
 class OutOfOfficeEntry(models.Model):
     id = models.AutoField(primary_key=True)
     uuid = models.TextField(unique=True)
@@ -1798,8 +1820,23 @@ class Task(models.Model):
         ]
 
 
+class ManagedOrganization(models.Model):
+    managed_organization = models.OneToOneField("Team", on_delete=models.CASCADE, related_name="managed_organization", primary_key=True, db_column="managedOrganizationId")
+    manager_organization = models.ForeignKey("Team", on_delete=models.CASCADE, related_name="managed_organizations", db_column="managerOrganizationId", db_index=False)
+    created_at = UtcDateTimeField(db_column="createdAt", default=timezone.now)
+
+    class Meta:
+        db_table = "ManagedOrganization"
+        constraints = [
+            models.UniqueConstraint(fields=["manager_organization", "managed_organization"], name="ManagedOrganization_managerOrganizationId_managedOrganizationId_key"),
+        ]
+        indexes = [
+            models.Index(fields=["manager_organization"]),
+        ]
+
+
 class PlatformBilling(models.Model):
-    team = models.OneToOneField("Team", on_delete=models.CASCADE, related_name="platform_billing", db_column="id")
+    team = models.OneToOneField("Team", on_delete=models.CASCADE, related_name="platform_billing", primary_key=True, db_column="id")
     customer_id = models.TextField(db_column="customerId")
     subscription_id = models.TextField(null=True, db_column="subscriptionId")
     price_id = models.TextField(null=True, db_column="priceId")
@@ -2516,6 +2553,66 @@ class AttributeSyncFieldMapping(models.Model):
         indexes = [
             models.Index(fields=["integration_attribute_sync"]),
         ]
+
+
+class BookingTimeStatus(models.Model):
+    id = models.IntegerField(primary_key=True)
+    uid = models.TextField(null=True)
+    event_type_id = models.IntegerField(null=True, db_column="eventTypeId")
+    title = models.TextField(null=True)
+    description = models.TextField(null=True)
+    start_time = UtcDateTimeField(null=True, db_column="startTime")
+    end_time = UtcDateTimeField(null=True, db_column="endTime")
+    created_at = UtcDateTimeField(null=True, db_column="createdAt")
+    location = models.TextField(null=True)
+    paid = models.BooleanField(null=True)
+    status = models.TextField(choices=BookingStatus.choices, null=True)
+    rescheduled = models.BooleanField(null=True)
+    user_id = models.IntegerField(null=True, db_column="userId")
+    team_id = models.IntegerField(null=True, db_column="teamId")
+    event_length = models.IntegerField(null=True, db_column="eventLength")
+    time_status = models.TextField(null=True, db_column="timeStatus")
+    event_parent_id = models.IntegerField(null=True, db_column="eventParentId")
+    user_email = models.TextField(null=True, db_column="userEmail")
+    username = models.TextField(null=True)
+    rating_feedback = models.TextField(null=True, db_column="ratingFeedback")
+    rating = models.IntegerField(null=True)
+    no_show_host = models.BooleanField(null=True, db_column="noShowHost")
+    is_team_booking = models.BooleanField(db_column="isTeamBooking")
+
+    class Meta:
+        db_table = "BookingTimeStatus"
+
+
+class BookingTimeStatusDenormalized(models.Model):
+    id = models.IntegerField(primary_key=True)
+    uid = models.TextField()
+    event_type_id = models.IntegerField(null=True, db_column="eventTypeId")
+    title = models.TextField()
+    description = models.TextField(null=True)
+    start_time = UtcDateTimeField(db_column="startTime")
+    end_time = UtcDateTimeField(db_column="endTime")
+    created_at = UtcDateTimeField(db_column="createdAt")
+    updated_at = UtcDateTimeField(null=True, db_column="updatedAt")
+    location = models.TextField(null=True)
+    paid = models.BooleanField()
+    status = models.TextField(choices=BookingStatus.choices)
+    rescheduled = models.BooleanField(null=True)
+    user_id = models.IntegerField(null=True, db_column="userId")
+    team_id = models.IntegerField(null=True, db_column="teamId")
+    event_length = models.IntegerField(null=True, db_column="eventLength")
+    event_parent_id = models.IntegerField(null=True, db_column="eventParentId")
+    user_email = models.TextField(null=True, db_column="userEmail")
+    user_name = models.TextField(null=True, db_column="userName")
+    user_username = models.TextField(null=True, db_column="userUsername")
+    rating_feedback = models.TextField(null=True, db_column="ratingFeedback")
+    rating = models.IntegerField(null=True)
+    no_show_host = models.BooleanField(null=True, db_column="noShowHost")
+    is_team_booking = models.BooleanField(db_column="isTeamBooking")
+    time_status = models.TextField(null=True, db_column="timeStatus")
+
+    class Meta:
+        db_table = "BookingTimeStatusDenormalized"
 
 
 class UserEventtype(models.Model):

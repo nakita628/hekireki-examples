@@ -29,13 +29,13 @@ pub enum Relation {
     #[sea_orm(
         has_many = "super::attribute_to_user::Entity",
         from = "Column::DirectoryId",
-        to = "super::attribute_to_user::Column::CreatedByDSyncId"
+        to = "super::attribute_to_user::Column::CreatedByDsyncId"
     )]
     CreatedAttributeToUsers,
     #[sea_orm(
         has_many = "super::attribute_to_user::Entity",
         from = "Column::DirectoryId",
-        to = "super::attribute_to_user::Column::UpdatedByDSyncId"
+        to = "super::attribute_to_user::Column::UpdatedByDsyncId"
     )]
     UpdatedAttributeToUsers,
 }

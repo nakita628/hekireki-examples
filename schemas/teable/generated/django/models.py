@@ -926,6 +926,19 @@ class AccessToken(models.Model):
         ]
 
 
+class Setting(models.Model):
+    name = models.TextField(primary_key=True, default=None)
+    content = models.TextField(null=True)
+    created_time = UtcDateTimeField(default=timezone.now)
+    last_modified_time = UtcDateTimeField(null=True, auto_now=True)
+    created_by = models.TextField()
+    last_modified_by = models.TextField(null=True)
+    objects = AutoNowQuerySet.as_manager()
+
+    class Meta:
+        db_table = "setting"
+
+
 class OAuthApp(models.Model):
     id = models.TextField(primary_key=True, default=None)
     name = models.TextField()
@@ -1359,6 +1372,16 @@ class TaskReference(models.Model):
             models.Index(fields=["from_field_id"]),
             models.Index(fields=["to_field_id"]),
         ]
+
+
+class Waitlist(models.Model):
+    email = models.TextField(primary_key=True, default=None)
+    invite = models.BooleanField(null=True)
+    invite_time = UtcDateTimeField(null=True)
+    created_time = UtcDateTimeField(default=timezone.now)
+
+    class Meta:
+        db_table = "waitlist"
 
 
 class BaseNode(models.Model):

@@ -53,7 +53,11 @@ impl Related<super::background_worker::Entity> for Entity {
         super::background_worker_to_background_worker_file::Relation::BackgroundWorker.def()
     }
     fn via() -> Option<RelationDef> {
-        Some(super::background_worker_to_background_worker_file::Relation::BackgroundWorkerFile.def().rev())
+        Some(
+            super::background_worker_to_background_worker_file::Relation::BackgroundWorkerFile
+                .def()
+                .rev(),
+        )
     }
 }
 

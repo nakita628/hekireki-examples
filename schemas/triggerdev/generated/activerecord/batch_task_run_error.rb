@@ -9,5 +9,5 @@ class BatchTaskRunError < ApplicationRecord
   validates :taskIdentifier, presence: true
   validates :error, presence: true
 
-  belongs_to :batch_task_run, foreign_key: "batchTaskRunId", inverse_of: :errors
+  belongs_to :batch_task_run, foreign_key: "batchTaskRunId", inverse_of: :batch_task_run_errors
 end

@@ -12,6 +12,8 @@ class MessagesGroup < ApplicationRecord
   belongs_to :buyer_organization, class_name: "Organization", foreign_key: "buyerOrganizationId",
                                   inverse_of: :buyer_organization
   belongs_to :seller, class_name: "User", foreign_key: "sellerId", inverse_of: :group_seller
-  has_many :messages, foreign_key: "groupId", inverse_of: :group, dependent: :restrict_with_error
-  has_many :orders, foreign_key: "messageGroupId", inverse_of: :message_group, dependent: :restrict_with_error
+  has_many :messages, class_name: "Messages", foreign_key: "groupId", inverse_of: :group,
+                      dependent: :restrict_with_error
+  has_many :orders, class_name: "Orders", foreign_key: "messageGroupId", inverse_of: :message_group,
+                    dependent: :restrict_with_error
 end

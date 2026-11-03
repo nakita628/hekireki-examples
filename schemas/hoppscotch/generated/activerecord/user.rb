@@ -9,7 +9,7 @@ class User < ApplicationRecord
 
   has_one :settings, class_name: "UserSettings", foreign_key: "userUid", inverse_of: :user, dependent: :destroy
   has_many :provider_accounts, class_name: "Account", foreign_key: "userId", inverse_of: :user, dependent: :destroy
-  has_many :invited_users, foreign_key: "adminUid", inverse_of: :user, dependent: :destroy
+  has_many :invited_users, class_name: "InvitedUsers", foreign_key: "adminUid", inverse_of: :user, dependent: :destroy
   has_many :mock_servers, foreign_key: "creatorUid", inverse_of: :user, dependent: :nullify
   has_many :personal_access_tokens, foreign_key: "userUid", inverse_of: :user, dependent: :destroy
   has_many :shortcodes, foreign_key: "creatorUid", inverse_of: :user, dependent: :nullify

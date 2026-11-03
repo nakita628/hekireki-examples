@@ -1,4 +1,5 @@
 import {
+  type PgTableExtraConfigValue,
   bigint,
   boolean,
   char,
@@ -391,7 +392,7 @@ export const projects = pgTable(
     metadata: jsonb('metadata'),
     homeDashboardId: text('home_dashboard_id'),
   },
-  (table) => [
+  (table): PgTableExtraConfigValue[] => [
     index('projects_org_id_idx').on(table.orgId),
     foreignKey({
       name: 'projects_home_dashboard_id_fkey',
@@ -510,33 +511,11 @@ export const roleAssignments = pgTable(
       .$onUpdate(utcNow),
   },
   (table) => [
-    index('role_assignments_owner_org_id_idx').on(table.deprecatedOwnerOrgId),
-    index('role_assignments_owner_project_id_idx').on(table.deprecatedOwnerProjectId),
     index('role_assignments_org_id_idx').on(table.orgId),
     index('role_assignments_project_id_idx').on(table.projectId),
     index('role_assignments_principal_id_idx').on(table.principalId),
     index('role_assignments_user_id_idx').on(table.userId),
     index('role_assignments_api_key_id_idx').on(table.apiKeyId),
-    uniqueIndex('role_assignments_user_org_role_key').on(
-      table.deprecatedPrincipalUserId,
-      table.deprecatedOwnerOrgId,
-      table.systemRole,
-    ),
-    uniqueIndex('role_assignments_user_project_role_key').on(
-      table.deprecatedPrincipalUserId,
-      table.deprecatedOwnerProjectId,
-      table.systemRole,
-    ),
-    uniqueIndex('role_assignments_api_key_org_role_key').on(
-      table.deprecatedPrincipalApiKeyId,
-      table.deprecatedOwnerOrgId,
-      table.systemRole,
-    ),
-    uniqueIndex('role_assignments_api_key_project_role_key').on(
-      table.deprecatedPrincipalApiKeyId,
-      table.deprecatedOwnerProjectId,
-      table.systemRole,
-    ),
     uniqueIndex('role_assignments_owner_id_principal_id_role_id_key').on(
       table.ownerId,
       table.principalId,
@@ -3084,7 +3063,7 @@ export const dashboards = pgTable(
     definition: jsonb('definition').notNull(),
     filters: jsonb('filters').notNull().default([]),
   },
-  (table) => [
+  (table): PgTableExtraConfigValue[] => [
     foreignKey({
       name: 'dashboards_created_by_fkey',
       columns: [table.createdBy],

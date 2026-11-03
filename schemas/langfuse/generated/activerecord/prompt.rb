@@ -14,6 +14,5 @@ class Prompt < ApplicationRecord
   validates :version, presence: true
 
   belongs_to :project, inverse_of: :prompt
-  has_many :prompt_dependency, class_name: "PromptDependency", foreign_key: "parent_id", inverse_of: :parent,
-                               dependent: :destroy
+  has_many :prompt_dependency, foreign_key: "parent_id", inverse_of: :parent, dependent: :destroy
 end

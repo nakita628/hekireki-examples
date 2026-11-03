@@ -26,14 +26,14 @@ pub struct Model {
 pub enum Relation {
     #[sea_orm(
         belongs_to = "super::team_collection::Entity",
-        from = "Column::ParentID",
+        from = "Column::ParentId",
         to = "super::team_collection::Column::Id",
         on_delete = "Cascade"
     )]
     Parent,
     #[sea_orm(
         belongs_to = "super::team::Entity",
-        from = "Column::TeamID",
+        from = "Column::TeamId",
         to = "super::team::Column::Id",
         on_delete = "Cascade"
     )]
@@ -41,7 +41,7 @@ pub enum Relation {
     #[sea_orm(
         has_many = "super::team_collection::Entity",
         from = "Column::Id",
-        to = "super::team_collection::Column::ParentID"
+        to = "super::team_collection::Column::ParentId"
     )]
     Children,
     #[sea_orm(has_many = "super::team_request::Entity")]

@@ -33,8 +33,7 @@ class BatchTaskRun < ApplicationRecord
   has_many :runs_blocked, class_name: "TaskRunWaitpoint", foreign_key: "batchId", inverse_of: :batch,
                           dependent: :nullify
   has_many :waitpoints, foreign_key: "completedByBatchId", inverse_of: :completed_by_batch, dependent: :nullify
-  has_many :errors, class_name: "BatchTaskRunError", foreign_key: "batchTaskRunId", inverse_of: :batch_task_run,
-                    dependent: :destroy
+  has_many :batch_task_run_errors, foreign_key: "batchTaskRunId", inverse_of: :batch_task_run, dependent: :destroy
   has_many :items, class_name: "BatchTaskRunItem", foreign_key: "batchTaskRunId", inverse_of: :batch_task_run,
                    dependent: :destroy
   has_many :run_dependencies, class_name: "TaskRunDependency", foreign_key: "dependentBatchRunId",

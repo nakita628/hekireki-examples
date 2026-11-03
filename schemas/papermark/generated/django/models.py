@@ -1422,6 +1422,18 @@ class User(models.Model):
         db_table = "User"
 
 
+class VerificationToken(models.Model):
+    identifier = models.TextField()
+    token = models.TextField(primary_key=True, default=None)
+    expires = UtcDateTimeField()
+
+    class Meta:
+        db_table = "VerificationToken"
+        constraints = [
+            models.UniqueConstraint(fields=["identifier", "token"], name="VerificationToken_identifier_token_key"),
+        ]
+
+
 class Domain(models.Model):
     id = models.TextField(primary_key=True, default=None)
     slug = models.TextField(unique=True)
@@ -1515,6 +1527,22 @@ class Reaction(models.Model):
         indexes = [
             models.Index(fields=["view"]),
             models.Index(fields=["view", "type"]),
+        ]
+
+
+class Invitation(models.Model):
+    email = models.TextField()
+    expires = UtcDateTimeField()
+    team = models.ForeignKey("Team", on_delete=models.CASCADE, related_name="invitations", db_column="teamId", db_index=False)
+    created_at = UtcDateTimeField(db_column="createdAt", default=timezone.now)
+    token = models.TextField(primary_key=True, default=None)
+    role = models.TextField(choices=Role.choices, default=Role.MEMBER)
+    dataroom_ids = ArrayField(models.TextField(), db_column="dataroomIds", default=list)
+
+    class Meta:
+        db_table = "Invitation"
+        constraints = [
+            models.UniqueConstraint(fields=["email", "team"], name="Invitation_email_teamId_key"),
         ]
 
 
@@ -1841,7 +1869,7 @@ class Team(models.Model):
     limits = models.JSONField(null=True)
     enable_excel_advanced_mode = models.BooleanField(db_column="enableExcelAdvancedMode", default=False)
     replicate_dataroom_folders = models.BooleanField(db_column="replicateDataroomFolders", default=True)
-    timezone = models.TextField(default="Etc/UTC")
+    timezone_field = models.TextField(db_column="timezone", default="Etc/UTC")
     sso_enabled = models.BooleanField(db_column="ssoEnabled", default=False)
     sso_email_domain = models.TextField(null=True, unique=True, db_column="ssoEmailDomain")
     sso_enforced_at = UtcDateTimeField(null=True, db_column="ssoEnforcedAt")

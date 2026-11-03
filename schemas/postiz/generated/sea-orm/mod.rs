@@ -54,6 +54,7 @@ pub mod mastra_threads;
 pub mod mastra_tool_provider_connections;
 pub mod mastra_traces;
 pub mod mastra_workflow_definitions;
+pub mod mastra_workflow_snapshot;
 pub mod mastra_workspace_versions;
 pub mod mastra_workspaces;
 pub mod media;

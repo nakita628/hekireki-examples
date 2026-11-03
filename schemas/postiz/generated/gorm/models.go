@@ -78,15 +78,15 @@ func (*Organization) BeforeUpdate(tx *gorm.DB) error {
 }
 
 type Tags struct {
-	ID           string       `gorm:"column:id;primaryKey;type:char(36)" json:"id"`
-	Name         string       `gorm:"column:name;not null" json:"name"`
-	Color        string       `gorm:"column:color;not null" json:"color"`
-	OrgID        string       `gorm:"column:orgId;index:Tags_orgId_idx;not null" json:"orgId"`
-	DeletedAt    *DateTime    `gorm:"column:deletedAt;index:Tags_deletedAt_idx" json:"deletedAt"`
-	CreatedAt    DateTime     `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
-	UpdatedAt    DateTime     `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Organization Organization `gorm:"foreignKey:OrgID"`
-	Posts        []TagsPosts  `gorm:"foreignKey:TagID"`
+	ID           string        `gorm:"column:id;primaryKey;type:char(36)" json:"id"`
+	Name         string        `gorm:"column:name;not null" json:"name"`
+	Color        string        `gorm:"column:color;not null" json:"color"`
+	OrgID        string        `gorm:"column:orgId;index:Tags_orgId_idx;not null" json:"orgId"`
+	DeletedAt    *DateTime     `gorm:"column:deletedAt;index:Tags_deletedAt_idx" json:"deletedAt"`
+	CreatedAt    DateTime      `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
+	UpdatedAt    DateTime      `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
+	Organization *Organization `gorm:"foreignKey:OrgID"`
+	Posts        []TagsPosts   `gorm:"foreignKey:TagID"`
 }
 
 func (Tags) TableName() string {
@@ -120,8 +120,8 @@ type TagsPosts struct {
 	TagID     string   `gorm:"column:tagId;primaryKey;uniqueIndex:TagsPosts_postId_tagId_key" json:"tagId"`
 	CreatedAt DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Post      Post
-	Tag       Tags `gorm:"foreignKey:TagID"`
+	Post      *Post
+	Tag       *Tags `gorm:"foreignKey:TagID"`
 }
 
 func (TagsPosts) TableName() string {
@@ -175,7 +175,7 @@ type User struct {
 	SendSuccessEmails     *bool                `gorm:"column:sendSuccessEmails;default:true;not null" json:"sendSuccessEmails"`
 	SendFailureEmails     *bool                `gorm:"column:sendFailureEmails;default:true;not null" json:"sendFailureEmails"`
 	SendStreakEmails      *bool                `gorm:"column:sendStreakEmails;default:true;not null" json:"sendStreakEmails"`
-	Picture               Media                `gorm:"foreignKey:PictureID"`
+	Picture               *Media               `gorm:"foreignKey:PictureID"`
 	Comments              []Comments           `gorm:"foreignKey:UserID"`
 	Items                 []ItemUser           `gorm:"foreignKey:UserID"`
 	GroupBuyer            []MessagesGroup      `gorm:"foreignKey:BuyerID"`
@@ -221,12 +221,12 @@ func (*User) BeforeUpdate(tx *gorm.DB) error {
 }
 
 type UsedCodes struct {
-	ID           string       `gorm:"column:id;primaryKey;type:char(36)" json:"id"`
-	Code         string       `gorm:"column:code;index:UsedCodes_code_idx;not null" json:"code"`
-	OrgID        string       `gorm:"column:orgId;not null" json:"orgId"`
-	CreatedAt    DateTime     `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
-	UpdatedAt    DateTime     `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Organization Organization `gorm:"foreignKey:OrgID"`
+	ID           string        `gorm:"column:id;primaryKey;type:char(36)" json:"id"`
+	Code         string        `gorm:"column:code;index:UsedCodes_code_idx;not null" json:"code"`
+	OrgID        string        `gorm:"column:orgId;not null" json:"orgId"`
+	CreatedAt    DateTime      `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
+	UpdatedAt    DateTime      `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
+	Organization *Organization `gorm:"foreignKey:OrgID"`
 }
 
 func (UsedCodes) TableName() string {
@@ -263,8 +263,8 @@ type UserOrganization struct {
 	Role           string   `gorm:"column:role;default:'USER';not null" json:"role"`
 	CreatedAt      DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt      DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Organization   Organization
-	User           User
+	Organization   *Organization
+	User           *User
 }
 
 func (UserOrganization) TableName() string {
@@ -302,7 +302,7 @@ type GitHub struct {
 	OrganizationID string   `gorm:"column:organizationId;index:GitHub_organizationId_idx;not null" json:"organizationId"`
 	CreatedAt      DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt      DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Organization   Organization
+	Organization   *Organization
 }
 
 func (GitHub) TableName() string {
@@ -388,7 +388,7 @@ type ItemUser struct {
 	ID     string `gorm:"column:id;primaryKey;type:char(36)" json:"id"`
 	UserID string `gorm:"column:userId;uniqueIndex:ItemUser_userId_key_key;index:ItemUser_userId_idx;not null" json:"userId"`
 	Key    string `gorm:"column:key;uniqueIndex:ItemUser_userId_key_key;index:ItemUser_key_idx;not null" json:"key"`
-	User   User
+	User   *User
 }
 
 func (ItemUser) TableName() string {
@@ -459,7 +459,7 @@ type Media struct {
 	ThumbnailTimestamp *int      `gorm:"column:thumbnailTimestamp" json:"thumbnailTimestamp"`
 	Status             *string   `gorm:"column:status;default:'ready';not null" json:"status"`
 	ProcessingError    *string   `gorm:"column:processingError" json:"processingError"`
-	Organization       Organization
+	Organization       *Organization
 	Agencies           []SocialMediaAgency `gorm:"foreignKey:LogoID"`
 	UserPicture        []User              `gorm:"foreignKey:PictureID"`
 	OauthApps          []OAuthApp          `gorm:"foreignKey:PictureID"`
@@ -511,8 +511,8 @@ type SocialMediaAgency struct {
 	CreatedAt        DateTime  `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt        DateTime  `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
 	DeletedAt        *DateTime `gorm:"column:deletedAt;index:SocialMediaAgency_deletedAt_idx" json:"deletedAt"`
-	Logo             Media     `gorm:"foreignKey:LogoID"`
-	User             User
+	Logo             *Media    `gorm:"foreignKey:LogoID"`
+	User             *User
 	Niches           []SocialMediaAgencyNiche `gorm:"foreignKey:AgencyID"`
 }
 
@@ -543,9 +543,9 @@ func (*SocialMediaAgency) BeforeUpdate(tx *gorm.DB) error {
 }
 
 type SocialMediaAgencyNiche struct {
-	AgencyID string            `gorm:"column:agencyId;primaryKey" json:"agencyId"`
-	Niche    string            `gorm:"column:niche;primaryKey" json:"niche"`
-	Agency   SocialMediaAgency `gorm:"foreignKey:AgencyID"`
+	AgencyID string             `gorm:"column:agencyId;primaryKey" json:"agencyId"`
+	Niche    string             `gorm:"column:niche;primaryKey" json:"niche"`
+	Agency   *SocialMediaAgency `gorm:"foreignKey:AgencyID"`
 }
 
 func (SocialMediaAgencyNiche) TableName() string {
@@ -559,7 +559,7 @@ type Credits struct {
 	CreatedAt      DateTime `gorm:"column:createdAt;index:Credits_createdAt_idx;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt      DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
 	Type           *string  `gorm:"column:type;default:'ai_images';not null" json:"type"`
-	Organization   Organization
+	Organization   *Organization
 }
 
 func (Credits) TableName() string {
@@ -604,7 +604,7 @@ type Clipping struct {
 	DeletedAt      *DateTime `gorm:"column:deletedAt;index:Clipping_deletedAt_idx" json:"deletedAt"`
 	CreatedAt      DateTime  `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt      DateTime  `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Organization   Organization
+	Organization   *Organization
 	Clips          []ClippingClip `gorm:"foreignKey:ClippingID"`
 }
 
@@ -650,7 +650,7 @@ type ClippingClip struct {
 	DraftedAt  *DateTime `gorm:"column:draftedAt" json:"draftedAt"`
 	CreatedAt  DateTime  `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt  DateTime  `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Clipping   Clipping
+	Clipping   *Clipping
 }
 
 func (ClippingClip) TableName() string {
@@ -692,7 +692,7 @@ type Subscription struct {
 	CreatedAt        DateTime  `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt        DateTime  `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
 	DeletedAt        *DateTime `gorm:"column:deletedAt;index:Subscription_deletedAt_idx" json:"deletedAt"`
-	Organization     Organization
+	Organization     *Organization
 }
 
 func (Subscription) TableName() string {
@@ -728,7 +728,7 @@ type Customer struct {
 	CreatedAt    DateTime      `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt    DateTime      `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
 	DeletedAt    *DateTime     `gorm:"column:deletedAt;uniqueIndex:Customer_orgId_name_deletedAt_key" json:"deletedAt"`
-	Organization Organization  `gorm:"foreignKey:OrgID"`
+	Organization *Organization `gorm:"foreignKey:OrgID"`
 	Integrations []Integration `gorm:"foreignKey:CustomerID"`
 }
 
@@ -782,8 +782,8 @@ type Integration struct {
 	CustomerID            *string   `gorm:"column:customerId;index:Integration_customerId_idx" json:"customerId"`
 	RootInternalID        *string   `gorm:"column:rootInternalId;index:Integration_rootInternalId_idx" json:"rootInternalId"`
 	AdditionalSettings    *string   `gorm:"column:additionalSettings;default:'[]'" json:"additionalSettings"`
-	Customer              Customer
-	Organization          Organization
+	Customer              *Customer
+	Organization          *Organization
 	ExisingPlugData       []ExisingPlugData      `gorm:"foreignKey:IntegrationID"`
 	Webhooks              []IntegrationsWebhooks `gorm:"foreignKey:IntegrationID"`
 	OrderItems            []OrderItems           `gorm:"foreignKey:IntegrationID"`
@@ -825,7 +825,7 @@ type Signatures struct {
 	CreatedAt      DateTime  `gorm:"column:createdAt;index:Signatures_createdAt_idx;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt      DateTime  `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
 	DeletedAt      *DateTime `gorm:"column:deletedAt;index:Signatures_deletedAt_idx" json:"deletedAt"`
-	Organization   Organization
+	Organization   *Organization
 }
 
 func (Signatures) TableName() string {
@@ -869,9 +869,9 @@ type Comments struct {
 	CreatedAt      DateTime  `gorm:"column:createdAt;index:Comments_createdAt_idx;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt      DateTime  `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
 	DeletedAt      *DateTime `gorm:"column:deletedAt;index:Comments_deletedAt_idx" json:"deletedAt"`
-	Organization   Organization
-	Post           Post
-	User           User
+	Organization   *Organization
+	Post           *Post
+	User           *User
 	Parent         *Comments  `gorm:"foreignKey:ParentID"`
 	Replies        []Comments `gorm:"foreignKey:ParentID"`
 }
@@ -929,12 +929,12 @@ type Post struct {
 	CreatedAt                  DateTime  `gorm:"column:createdAt;index:Post_createdAt_idx;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt                  DateTime  `gorm:"column:updatedAt;index:Post_updatedAt_idx;autoUpdateTime:false;not null" json:"updatedAt"`
 	DeletedAt                  *DateTime `gorm:"column:deletedAt;index:Post_deletedAt_idx" json:"deletedAt"`
-	Integration                Integration
-	LastMessage                Messages         `gorm:"foreignKey:LastMessageID"`
-	Organization               Organization     `gorm:"foreignKey:OrganizationID"`
+	Integration                *Integration
+	LastMessage                *Messages        `gorm:"foreignKey:LastMessageID"`
+	Organization               *Organization    `gorm:"foreignKey:OrganizationID"`
 	ParentPost                 *Post            `gorm:"foreignKey:ParentPostID"`
-	SubmittedForOrder          Orders           `gorm:"foreignKey:SubmittedForOrderID"`
-	SubmittedForOrganization   Organization     `gorm:"foreignKey:SubmittedForOrganizationID"`
+	SubmittedForOrder          *Orders          `gorm:"foreignKey:SubmittedForOrderID"`
+	SubmittedForOrganization   *Organization    `gorm:"foreignKey:SubmittedForOrganizationID"`
 	Comments                   []Comments       `gorm:"foreignKey:PostID"`
 	Errors                     []Errors         `gorm:"foreignKey:PostID"`
 	PayoutProblems             []PayoutProblems `gorm:"foreignKey:PostID"`
@@ -976,7 +976,7 @@ type Notifications struct {
 	CreatedAt      DateTime  `gorm:"column:createdAt;index:Notifications_createdAt_idx;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt      DateTime  `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
 	DeletedAt      *DateTime `gorm:"column:deletedAt;index:Notifications_deletedAt_idx" json:"deletedAt"`
-	Organization   Organization
+	Organization   *Organization
 }
 
 func (Notifications) TableName() string {
@@ -1006,17 +1006,17 @@ func (*Notifications) BeforeUpdate(tx *gorm.DB) error {
 }
 
 type MessagesGroup struct {
-	ID                  string       `gorm:"column:id;primaryKey;type:char(36)" json:"id"`
-	BuyerOrganizationID string       `gorm:"column:buyerOrganizationId;index:MessagesGroup_buyerOrganizationId_idx;not null" json:"buyerOrganizationId"`
-	BuyerID             string       `gorm:"column:buyerId;uniqueIndex:MessagesGroup_buyerId_sellerId_key;not null" json:"buyerId"`
-	SellerID            string       `gorm:"column:sellerId;uniqueIndex:MessagesGroup_buyerId_sellerId_key;not null" json:"sellerId"`
-	CreatedAt           DateTime     `gorm:"column:createdAt;index:MessagesGroup_createdAt_idx;autoCreateTime:false;not null" json:"createdAt"`
-	UpdatedAt           DateTime     `gorm:"column:updatedAt;index:MessagesGroup_updatedAt_idx;autoUpdateTime:false;not null" json:"updatedAt"`
-	Buyer               User         `gorm:"foreignKey:BuyerID"`
-	BuyerOrganization   Organization `gorm:"foreignKey:BuyerOrganizationID"`
-	Seller              User         `gorm:"foreignKey:SellerID"`
-	Messages            []Messages   `gorm:"foreignKey:GroupID"`
-	Orders              []Orders     `gorm:"foreignKey:MessageGroupID"`
+	ID                  string        `gorm:"column:id;primaryKey;type:char(36)" json:"id"`
+	BuyerOrganizationID string        `gorm:"column:buyerOrganizationId;index:MessagesGroup_buyerOrganizationId_idx;not null" json:"buyerOrganizationId"`
+	BuyerID             string        `gorm:"column:buyerId;uniqueIndex:MessagesGroup_buyerId_sellerId_key;not null" json:"buyerId"`
+	SellerID            string        `gorm:"column:sellerId;uniqueIndex:MessagesGroup_buyerId_sellerId_key;not null" json:"sellerId"`
+	CreatedAt           DateTime      `gorm:"column:createdAt;index:MessagesGroup_createdAt_idx;autoCreateTime:false;not null" json:"createdAt"`
+	UpdatedAt           DateTime      `gorm:"column:updatedAt;index:MessagesGroup_updatedAt_idx;autoUpdateTime:false;not null" json:"updatedAt"`
+	Buyer               *User         `gorm:"foreignKey:BuyerID"`
+	BuyerOrganization   *Organization `gorm:"foreignKey:BuyerOrganizationID"`
+	Seller              *User         `gorm:"foreignKey:SellerID"`
+	Messages            []Messages    `gorm:"foreignKey:GroupID"`
+	Orders              []Orders      `gorm:"foreignKey:MessageGroupID"`
 }
 
 func (MessagesGroup) TableName() string {
@@ -1054,9 +1054,9 @@ type PayoutProblems struct {
 	Amount    int      `gorm:"column:amount;not null" json:"amount"`
 	CreatedAt DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Order     Orders   `gorm:"foreignKey:OrderID"`
-	Post      Post
-	User      User
+	Order     *Orders  `gorm:"foreignKey:OrderID"`
+	Post      *Post
+	User      *User
 }
 
 func (PayoutProblems) TableName() string {
@@ -1094,9 +1094,9 @@ type Orders struct {
 	CaptureID      *string          `gorm:"column:captureId" json:"captureId"`
 	CreatedAt      DateTime         `gorm:"column:createdAt;index:Orders_createdAt_idx;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt      DateTime         `gorm:"column:updatedAt;index:Orders_updatedAt_idx;autoUpdateTime:false;not null" json:"updatedAt"`
-	Buyer          User             `gorm:"foreignKey:BuyerID"`
-	MessageGroup   MessagesGroup    `gorm:"foreignKey:MessageGroupID"`
-	Seller         User             `gorm:"foreignKey:SellerID"`
+	Buyer          *User            `gorm:"foreignKey:BuyerID"`
+	MessageGroup   *MessagesGroup   `gorm:"foreignKey:MessageGroupID"`
+	Seller         *User            `gorm:"foreignKey:SellerID"`
 	OrdersItems    []OrderItems     `gorm:"foreignKey:OrderID"`
 	PayoutProblems []PayoutProblems `gorm:"foreignKey:OrderID"`
 	Posts          []Post           `gorm:"foreignKey:SubmittedForOrderID"`
@@ -1134,8 +1134,8 @@ type OrderItems struct {
 	IntegrationID string `gorm:"column:integrationId;index:OrderItems_integrationId_idx;not null" json:"integrationId"`
 	Quantity      int    `gorm:"column:quantity;not null" json:"quantity"`
 	Price         int    `gorm:"column:price;not null" json:"price"`
-	Integration   Integration
-	Order         Orders `gorm:"foreignKey:OrderID"`
+	Integration   *Integration
+	Order         *Orders `gorm:"foreignKey:OrderID"`
 }
 
 func (OrderItems) TableName() string {
@@ -1150,16 +1150,16 @@ func (m *OrderItems) BeforeCreate(_ *gorm.DB) error {
 }
 
 type Messages struct {
-	ID        string        `gorm:"column:id;primaryKey;type:char(36)" json:"id"`
-	From      string        `gorm:"column:from;not null" json:"from"`
-	Content   *string       `gorm:"column:content" json:"content"`
-	GroupID   string        `gorm:"column:groupId;index:Messages_groupId_idx;not null" json:"groupId"`
-	Special   *string       `gorm:"column:special" json:"special"`
-	CreatedAt DateTime      `gorm:"column:createdAt;index:Messages_createdAt_idx;autoCreateTime:false;not null" json:"createdAt"`
-	UpdatedAt DateTime      `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	DeletedAt *DateTime     `gorm:"column:deletedAt;index:Messages_deletedAt_idx" json:"deletedAt"`
-	Group     MessagesGroup `gorm:"foreignKey:GroupID"`
-	Posts     []Post        `gorm:"foreignKey:LastMessageID"`
+	ID        string         `gorm:"column:id;primaryKey;type:char(36)" json:"id"`
+	From      string         `gorm:"column:from;not null" json:"from"`
+	Content   *string        `gorm:"column:content" json:"content"`
+	GroupID   string         `gorm:"column:groupId;index:Messages_groupId_idx;not null" json:"groupId"`
+	Special   *string        `gorm:"column:special" json:"special"`
+	CreatedAt DateTime       `gorm:"column:createdAt;index:Messages_createdAt_idx;autoCreateTime:false;not null" json:"createdAt"`
+	UpdatedAt DateTime       `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
+	DeletedAt *DateTime      `gorm:"column:deletedAt;index:Messages_deletedAt_idx" json:"deletedAt"`
+	Group     *MessagesGroup `gorm:"foreignKey:GroupID"`
+	Posts     []Post         `gorm:"foreignKey:LastMessageID"`
 }
 
 func (Messages) TableName() string {
@@ -1195,8 +1195,8 @@ type Plugs struct {
 	Data           string `gorm:"column:data;not null" json:"data"`
 	IntegrationID  string `gorm:"column:integrationId;uniqueIndex:Plugs_plugFunction_integrationId_key;not null" json:"integrationId"`
 	Activated      *bool  `gorm:"column:activated;default:true;not null" json:"activated"`
-	Integration    Integration
-	Organization   Organization
+	Integration    *Integration
+	Organization   *Organization
 }
 
 func (Plugs) TableName() string {
@@ -1215,7 +1215,7 @@ type ExisingPlugData struct {
 	IntegrationID string `gorm:"column:integrationId;uniqueIndex:ExisingPlugData_integrationId_methodName_value_key;not null" json:"integrationId"`
 	MethodName    string `gorm:"column:methodName;uniqueIndex:ExisingPlugData_integrationId_methodName_value_key;not null" json:"methodName"`
 	Value         string `gorm:"column:value;uniqueIndex:ExisingPlugData_integrationId_methodName_value_key;not null" json:"value"`
-	Integration   Integration
+	Integration   *Integration
 }
 
 func (ExisingPlugData) TableName() string {
@@ -1268,8 +1268,8 @@ func (*PopularPosts) BeforeUpdate(tx *gorm.DB) error {
 type IntegrationsWebhooks struct {
 	IntegrationID string `gorm:"column:integrationId;primaryKey;uniqueIndex:IntegrationsWebhooks_integrationId_webhookId_key;index:IntegrationsWebhooks_integrationId_idx" json:"integrationId"`
 	WebhookID     string `gorm:"column:webhookId;primaryKey;uniqueIndex:IntegrationsWebhooks_integrationId_webhookId_key;index:IntegrationsWebhooks_webhookId_idx" json:"webhookId"`
-	Integration   Integration
-	Webhook       Webhooks `gorm:"foreignKey:WebhookID"`
+	Integration   *Integration
+	Webhook       *Webhooks `gorm:"foreignKey:WebhookID"`
 }
 
 func (IntegrationsWebhooks) TableName() string {
@@ -1284,7 +1284,7 @@ type Webhooks struct {
 	DeletedAt      *DateTime `gorm:"column:deletedAt;index:Webhooks_deletedAt_idx" json:"deletedAt"`
 	CreatedAt      DateTime  `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt      DateTime  `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Organization   Organization
+	Organization   *Organization
 	Integrations   []IntegrationsWebhooks `gorm:"foreignKey:WebhookID"`
 }
 
@@ -1330,7 +1330,7 @@ type AutoPost struct {
 	DeletedAt       *DateTime `gorm:"column:deletedAt;index:AutoPost_deletedAt_idx" json:"deletedAt"`
 	CreatedAt       DateTime  `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt       DateTime  `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Organization    Organization
+	Organization    *Organization
 }
 
 func (AutoPost) TableName() string {
@@ -1366,7 +1366,7 @@ type Sets struct {
 	Content        string   `gorm:"column:content;not null" json:"content"`
 	CreatedAt      DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt      DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Organization   Organization
+	Organization   *Organization
 }
 
 func (Sets) TableName() string {
@@ -1405,7 +1405,7 @@ type ThirdParty struct {
 	CreatedAt      DateTime  `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt      DateTime  `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
 	DeletedAt      *DateTime `gorm:"column:deletedAt;index:ThirdParty_deletedAt_idx" json:"deletedAt"`
-	Organization   Organization
+	Organization   *Organization
 }
 
 func (ThirdParty) TableName() string {
@@ -1443,8 +1443,8 @@ type Errors struct {
 	UpdatedAt      DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
 	PostID         string   `gorm:"column:postId;not null" json:"postId"`
 	Body           *string  `gorm:"column:body;default:'{}';not null" json:"body"`
-	Organization   Organization
-	Post           Post
+	Organization   *Organization
+	Post           *Post
 }
 
 func (Errors) TableName() string {
@@ -1661,6 +1661,32 @@ func (m *MastraTraces) BeforeCreate(tx *gorm.DB) error {
 	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
 	if m.CreatedAtZ == nil {
 		m.CreatedAtZ = &DateTime{Time: now}
+	}
+	return nil
+}
+
+type MastraWorkflowSnapshot struct {
+	WorkflowName string    `gorm:"column:workflow_name;primaryKey;uniqueIndex:mastra_workflow_snapshot_workflow_name_run_id_key;index:mastra_workflow_snapshot_name_createdat_idx" json:"workflow_name"`
+	RunID        string    `gorm:"column:run_id;primaryKey;uniqueIndex:mastra_workflow_snapshot_workflow_name_run_id_key" json:"run_id"`
+	ResourceID   *string   `gorm:"column:resourceId" json:"resourceId"`
+	Snapshot     string    `gorm:"column:snapshot;not null" json:"snapshot"`
+	CreatedAt    DateTime  `gorm:"column:createdAt;index:mastra_workflow_snapshot_name_createdat_idx;type:timestamp(6);autoCreateTime:false;not null" json:"createdAt"`
+	UpdatedAt    DateTime  `gorm:"column:updatedAt;type:timestamp(6);autoUpdateTime:false;not null" json:"updatedAt"`
+	CreatedAtZ   *DateTime `gorm:"column:createdAtZ;type:timestamptz(6)" json:"createdAtZ"`
+	UpdatedAtZ   *DateTime `gorm:"column:updatedAtZ;type:timestamptz(6)" json:"updatedAtZ"`
+}
+
+func (MastraWorkflowSnapshot) TableName() string {
+	return "mastra_workflow_snapshot"
+}
+
+func (m *MastraWorkflowSnapshot) BeforeCreate(tx *gorm.DB) error {
+	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
+	if m.CreatedAtZ == nil {
+		m.CreatedAtZ = &DateTime{Time: now}
+	}
+	if m.UpdatedAtZ == nil {
+		m.UpdatedAtZ = &DateTime{Time: now}
 	}
 	return nil
 }
@@ -2787,8 +2813,8 @@ type OAuthApp struct {
 	CreatedAt                DateTime  `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt                DateTime  `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
 	DeletedAt                *DateTime `gorm:"column:deletedAt;uniqueIndex:OAuthApp_organizationId_deletedAt_key;index:OAuthApp_deletedAt_idx" json:"deletedAt"`
-	Organization             Organization
-	Picture                  Media                          `gorm:"foreignKey:PictureID"`
+	Organization             *Organization
+	Picture                  *Media                         `gorm:"foreignKey:PictureID"`
 	Authorizations           []OAuthAuthorization           `gorm:"foreignKey:OauthAppID"`
 	SelfHostedAuthorizations []OAuthSelfHostedAuthorization `gorm:"foreignKey:OauthAppID"`
 }
@@ -2833,9 +2859,9 @@ type OAuthAuthorization struct {
 	RevokedAt           *DateTime `gorm:"column:revokedAt;index:OAuthAuthorization_revokedAt_idx" json:"revokedAt"`
 	CreatedAt           DateTime  `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt           DateTime  `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	OauthApp            OAuthApp  `gorm:"foreignKey:OauthAppID"`
-	User                User
-	Organization        Organization
+	OauthApp            *OAuthApp `gorm:"foreignKey:OauthAppID"`
+	User                *User
+	Organization        *Organization
 }
 
 func (OAuthAuthorization) TableName() string {
@@ -2879,7 +2905,7 @@ type OAuthSelfHostedAuthorization struct {
 	RevokedAt           *DateTime `gorm:"column:revokedAt" json:"revokedAt"`
 	CreatedAt           DateTime  `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt           DateTime  `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	OauthApp            OAuthApp  `gorm:"foreignKey:OauthAppID"`
+	OauthApp            *OAuthApp `gorm:"foreignKey:OauthAppID"`
 }
 
 func (OAuthSelfHostedAuthorization) TableName() string {

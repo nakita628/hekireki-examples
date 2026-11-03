@@ -1,4 +1,5 @@
 import {
+  type PgTableExtraConfigValue,
   bigint,
   boolean,
   doublePrecision,
@@ -222,7 +223,7 @@ export const brand = pgTable(
       .$defaultFn(utcNow),
     updatedAt: timestamp('updatedAt', { precision: 3 }).notNull().$onUpdate(utcNow),
   },
-  (table) => [
+  (table): PgTableExtraConfigValue[] => [
     index('Brand_teamId_idx').on(table.teamId),
     uniqueIndex('Brand_teamId_name_key').on(table.teamId, table.name),
     foreignKey({ name: 'Brand_teamId_fkey', columns: [table.teamId], foreignColumns: [team.id] })
@@ -3136,7 +3137,7 @@ export const team = pgTable(
     referralTrackSelectedAt: timestamp('referralTrackSelectedAt', { precision: 3 }),
     referralProfile: jsonb('referralProfile'),
   },
-  (table) => [
+  (table): PgTableExtraConfigValue[] => [
     uniqueIndex('Team_slug_key').on(table.slug),
     uniqueIndex('Team_stripeId_key').on(table.stripeId),
     uniqueIndex('Team_subscriptionId_key').on(table.subscriptionId),

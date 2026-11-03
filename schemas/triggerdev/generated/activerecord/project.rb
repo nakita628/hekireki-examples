@@ -30,10 +30,8 @@ class Project < ApplicationRecord
   has_many :task_queues, foreign_key: "projectId", inverse_of: :project, dependent: :destroy
   has_many :environment_variables, foreign_key: "projectId", inverse_of: :project, dependent: :destroy
   has_many :checkpoints, foreign_key: "projectId", inverse_of: :project, dependent: :destroy
-  has_many :worker_deployment, class_name: "WorkerDeployment", foreign_key: "projectId", inverse_of: :project,
-                               dependent: :destroy
-  has_many :checkpoint_restore_event, class_name: "CheckpointRestoreEvent", foreign_key: "projectId",
-                                      inverse_of: :project, dependent: :destroy
+  has_many :worker_deployment, foreign_key: "projectId", inverse_of: :project, dependent: :destroy
+  has_many :checkpoint_restore_event, foreign_key: "projectId", inverse_of: :project, dependent: :destroy
   has_many :task_schedules, foreign_key: "projectId", inverse_of: :project, dependent: :destroy
   has_many :alert_channels, class_name: "ProjectAlertChannel", foreign_key: "projectId", inverse_of: :project,
                             dependent: :destroy
@@ -41,14 +39,12 @@ class Project < ApplicationRecord
   has_many :alert_storages, class_name: "ProjectAlertStorage", foreign_key: "projectId", inverse_of: :project,
                             dependent: :destroy
   has_many :bulk_action_groups, foreign_key: "projectId", inverse_of: :project, dependent: :destroy
-  has_many :background_worker_file, class_name: "BackgroundWorkerFile", foreign_key: "projectId", inverse_of: :project,
-                                    dependent: :destroy
+  has_many :background_worker_file, foreign_key: "projectId", inverse_of: :project, dependent: :destroy
   has_many :waitpoints, foreign_key: "projectId", inverse_of: :project, dependent: :destroy
   has_many :task_run_waitpoints, foreign_key: "projectId", inverse_of: :project, dependent: :destroy
   has_many :task_run_checkpoints, foreign_key: "projectId", inverse_of: :project, dependent: :destroy
   has_many :waitpoint_tags, foreign_key: "projectId", inverse_of: :project, dependent: :destroy
-  has_many :organization_project_integration, class_name: "OrganizationProjectIntegration", foreign_key: "projectId",
-                                              inverse_of: :project, dependent: :destroy
+  has_many :organization_project_integration, foreign_key: "projectId", inverse_of: :project, dependent: :destroy
   has_many :customer_queries, foreign_key: "projectId", inverse_of: :project, dependent: :destroy
   has_many :playground_conversations, foreign_key: "projectId", inverse_of: :project, dependent: :destroy
   has_many :task_schedule_instances, foreign_key: "projectId", inverse_of: :project, dependent: :destroy

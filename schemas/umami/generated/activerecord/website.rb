@@ -11,11 +11,11 @@ class Website < ApplicationRecord
   belongs_to :create_user, class_name: "User", foreign_key: "created_by", optional: true, inverse_of: :created_by
   belongs_to :team, optional: true, inverse_of: :websites
   has_many :annotations, dependent: :restrict_with_error
-  has_many :event_data, dependent: :restrict_with_error
+  has_many :event_data, class_name: "EventData", inverse_of: :website, dependent: :restrict_with_error
   has_many :reports, dependent: :restrict_with_error
-  has_many :revenue, class_name: "Revenue", inverse_of: :website, dependent: :restrict_with_error
+  has_many :revenue, dependent: :restrict_with_error
   has_many :segments, dependent: :restrict_with_error
-  has_many :session_data, dependent: :restrict_with_error
+  has_many :session_data, class_name: "SessionData", inverse_of: :website, dependent: :restrict_with_error
   has_many :session_replays, dependent: :restrict_with_error
   has_many :session_replays_saved, class_name: "SessionReplaySaved", inverse_of: :website,
                                    dependent: :restrict_with_error

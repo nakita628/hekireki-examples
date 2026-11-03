@@ -27,7 +27,7 @@ type Account struct {
 	OauthTokenSecret      *string `gorm:"column:oauth_token_secret" json:"oauth_token_secret"`
 	OauthToken            *string `gorm:"column:oauth_token" json:"oauth_token"`
 	RefreshTokenExpiresIn *int    `gorm:"column:refresh_token_expires_in" json:"refresh_token_expires_in"`
-	User                  User
+	User                  *User
 }
 
 func (Account) TableName() string {
@@ -46,7 +46,7 @@ type Session struct {
 	SessionToken string   `gorm:"column:sessionToken;uniqueIndex;not null" json:"sessionToken"`
 	UserID       string   `gorm:"column:userId;not null" json:"userId"`
 	Expires      DateTime `gorm:"column:expires;not null" json:"expires"`
-	User         User
+	User         *User
 }
 
 func (Session) TableName() string {
@@ -122,7 +122,7 @@ type APIToken struct {
 	Token     string   `gorm:"column:token;uniqueIndex;not null" json:"token"`
 	Name      string   `gorm:"column:name;not null" json:"name"`
 	OwnerID   string   `gorm:"column:ownerId;not null" json:"ownerId"`
-	Owner     User     `gorm:"foreignKey:OwnerID"`
+	Owner     *User    `gorm:"foreignKey:OwnerID"`
 }
 
 func (APIToken) TableName() string {
@@ -208,7 +208,7 @@ type Space struct {
 	Name        string   `gorm:"column:name;not null" json:"name"`
 	Icon        *string  `gorm:"column:icon" json:"icon"`
 	WorkspaceID string   `gorm:"column:workspaceId;uniqueIndex:Space_id_workspaceId_key;not null" json:"workspaceId"`
-	Workspace   Workspace
+	Workspace   *Workspace
 	Typebots    []Typebot `gorm:"foreignKey:SpaceID;constraint:OnDelete:SET NULL"`
 }
 
@@ -238,6 +238,39 @@ func (*Space) BeforeUpdate(tx *gorm.DB) error {
 	return nil
 }
 
+type MemberInWorkspace struct {
+	CreatedAt   DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
+	UpdatedAt   DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
+	UserID      string   `gorm:"column:userId;primaryKey;uniqueIndex:MemberInWorkspace_userId_workspaceId_key" json:"userId"`
+	WorkspaceID string   `gorm:"column:workspaceId;primaryKey;uniqueIndex:MemberInWorkspace_userId_workspaceId_key" json:"workspaceId"`
+	Role        string   `gorm:"column:role;not null" json:"role"`
+	User        *User
+	Workspace   *Workspace
+}
+
+func (MemberInWorkspace) TableName() string {
+	return "MemberInWorkspace"
+}
+
+func (m *MemberInWorkspace) BeforeCreate(tx *gorm.DB) error {
+	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
+	if m.CreatedAt.IsZero() {
+		m.CreatedAt = DateTime{Time: now}
+	}
+	if m.UpdatedAt.IsZero() {
+		m.UpdatedAt = DateTime{Time: now}
+	}
+	return nil
+}
+
+func (*MemberInWorkspace) BeforeUpdate(tx *gorm.DB) error {
+	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
+	if !tx.Statement.Changed("UpdatedAt") {
+		tx.Statement.SetColumn("UpdatedAt", DateTime{Time: now})
+	}
+	return nil
+}
+
 type WorkspaceInvitation struct {
 	ID          string   `gorm:"column:id;primaryKey" json:"id"`
 	CreatedAt   DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
@@ -245,7 +278,7 @@ type WorkspaceInvitation struct {
 	Email       string   `gorm:"column:email;not null" json:"email"`
 	WorkspaceID string   `gorm:"column:workspaceId;not null" json:"workspaceId"`
 	Type        string   `gorm:"column:type;not null" json:"type"`
-	Workspace   Workspace
+	Workspace   *Workspace
 }
 
 func (WorkspaceInvitation) TableName() string {
@@ -278,7 +311,7 @@ type CustomDomain struct {
 	Name        string   `gorm:"column:name;primaryKey" json:"name"`
 	CreatedAt   DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	WorkspaceID string   `gorm:"column:workspaceId;not null" json:"workspaceId"`
-	Workspace   Workspace
+	Workspace   *Workspace
 }
 
 func (CustomDomain) TableName() string {
@@ -301,7 +334,7 @@ type Credentials struct {
 	Name        string   `gorm:"column:name;not null" json:"name"`
 	Type        string   `gorm:"column:type;not null" json:"type"`
 	Iv          string   `gorm:"column:iv;not null" json:"iv"`
-	Workspace   Workspace
+	Workspace   *Workspace
 }
 
 func (Credentials) TableName() string {
@@ -327,7 +360,7 @@ type UserCredentials struct {
 	Name      string   `gorm:"column:name;not null" json:"name"`
 	Type      string   `gorm:"column:type;not null" json:"type"`
 	Iv        string   `gorm:"column:iv;not null" json:"iv"`
-	User      User
+	User      *User
 }
 
 func (UserCredentials) TableName() string {
@@ -345,6 +378,18 @@ func (m *UserCredentials) BeforeCreate(tx *gorm.DB) error {
 	return nil
 }
 
+type VerificationToken struct {
+	Identifier     string   `gorm:"column:identifier;uniqueIndex:VerificationToken_identifier_token_key;not null" json:"identifier"`
+	Token          string   `gorm:"column:token;primaryKey;uniqueIndex;uniqueIndex:VerificationToken_identifier_token_key" json:"token"`
+	Value          *string  `gorm:"column:value" json:"value"`
+	FailedAttempts int      `gorm:"column:failedAttempts;default:0;not null" json:"failedAttempts"`
+	Expires        DateTime `gorm:"column:expires;not null" json:"expires"`
+}
+
+func (VerificationToken) TableName() string {
+	return "VerificationToken"
+}
+
 type DashboardFolder struct {
 	ID             string           `gorm:"column:id;primaryKey" json:"id"`
 	CreatedAt      DateTime         `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
@@ -353,7 +398,7 @@ type DashboardFolder struct {
 	ParentFolderID *string          `gorm:"column:parentFolderId" json:"parentFolderId"`
 	WorkspaceID    string           `gorm:"column:workspaceId;not null" json:"workspaceId"`
 	ParentFolder   *DashboardFolder `gorm:"foreignKey:ParentFolderID"`
-	Workspace      Workspace
+	Workspace      *Workspace
 	ChildrenFolder []DashboardFolder `gorm:"foreignKey:ParentFolderID"`
 	Typebots       []Typebot         `gorm:"foreignKey:FolderID"`
 }
@@ -385,32 +430,32 @@ func (*DashboardFolder) BeforeUpdate(tx *gorm.DB) error {
 }
 
 type Typebot struct {
-	ID                      string          `gorm:"column:id;primaryKey" json:"id"`
-	Version                 *string         `gorm:"column:version" json:"version"`
-	CreatedAt               DateTime        `gorm:"column:createdAt;index:Typebot_isArchived_createdAt_idx;autoCreateTime:false;not null" json:"createdAt"`
-	UpdatedAt               DateTime        `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Icon                    *string         `gorm:"column:icon" json:"icon"`
-	Name                    string          `gorm:"column:name;not null" json:"name"`
-	FolderID                *string         `gorm:"column:folderId" json:"folderId"`
-	Groups                  datatypes.JSON  `gorm:"column:groups;not null" json:"groups"`
-	Events                  datatypes.JSON  `gorm:"column:events" json:"events"`
-	Variables               datatypes.JSON  `gorm:"column:variables;not null" json:"variables"`
-	Edges                   datatypes.JSON  `gorm:"column:edges;not null" json:"edges"`
-	Theme                   datatypes.JSON  `gorm:"column:theme;not null" json:"theme"`
-	SelectedThemeTemplateID *string         `gorm:"column:selectedThemeTemplateId" json:"selectedThemeTemplateId"`
-	Settings                datatypes.JSON  `gorm:"column:settings;not null" json:"settings"`
-	PublicID                *string         `gorm:"column:publicId;uniqueIndex" json:"publicId"`
-	CustomDomain            *string         `gorm:"column:customDomain;uniqueIndex" json:"customDomain"`
-	WorkspaceID             string          `gorm:"column:workspaceId;index:Typebot_workspaceId_idx;not null" json:"workspaceId"`
-	ResultsTablePreferences datatypes.JSON  `gorm:"column:resultsTablePreferences" json:"resultsTablePreferences"`
-	IsArchived              bool            `gorm:"column:isArchived;index:Typebot_isArchived_createdAt_idx;default:false;not null" json:"isArchived"`
-	IsClosed                bool            `gorm:"column:isClosed;default:false;not null" json:"isClosed"`
-	WhatsAppCredentialsID   *string         `gorm:"column:whatsAppCredentialsId" json:"whatsAppCredentialsId"`
-	RiskLevel               *int            `gorm:"column:riskLevel" json:"riskLevel"`
-	SpaceID                 *string         `gorm:"column:spaceId" json:"spaceId"`
-	Folder                  DashboardFolder `gorm:"foreignKey:FolderID"`
-	Workspace               Workspace
-	Space                   Space
+	ID                      string           `gorm:"column:id;primaryKey" json:"id"`
+	Version                 *string          `gorm:"column:version" json:"version"`
+	CreatedAt               DateTime         `gorm:"column:createdAt;index:Typebot_isArchived_createdAt_idx;autoCreateTime:false;not null" json:"createdAt"`
+	UpdatedAt               DateTime         `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
+	Icon                    *string          `gorm:"column:icon" json:"icon"`
+	Name                    string           `gorm:"column:name;not null" json:"name"`
+	FolderID                *string          `gorm:"column:folderId" json:"folderId"`
+	Groups                  datatypes.JSON   `gorm:"column:groups;not null" json:"groups"`
+	Events                  datatypes.JSON   `gorm:"column:events" json:"events"`
+	Variables               datatypes.JSON   `gorm:"column:variables;not null" json:"variables"`
+	Edges                   datatypes.JSON   `gorm:"column:edges;not null" json:"edges"`
+	Theme                   datatypes.JSON   `gorm:"column:theme;not null" json:"theme"`
+	SelectedThemeTemplateID *string          `gorm:"column:selectedThemeTemplateId" json:"selectedThemeTemplateId"`
+	Settings                datatypes.JSON   `gorm:"column:settings;not null" json:"settings"`
+	PublicID                *string          `gorm:"column:publicId;uniqueIndex" json:"publicId"`
+	CustomDomain            *string          `gorm:"column:customDomain;uniqueIndex" json:"customDomain"`
+	WorkspaceID             string           `gorm:"column:workspaceId;index:Typebot_workspaceId_idx;not null" json:"workspaceId"`
+	ResultsTablePreferences datatypes.JSON   `gorm:"column:resultsTablePreferences" json:"resultsTablePreferences"`
+	IsArchived              bool             `gorm:"column:isArchived;index:Typebot_isArchived_createdAt_idx;default:false;not null" json:"isArchived"`
+	IsClosed                bool             `gorm:"column:isClosed;default:false;not null" json:"isClosed"`
+	WhatsAppCredentialsID   *string          `gorm:"column:whatsAppCredentialsId" json:"whatsAppCredentialsId"`
+	RiskLevel               *int             `gorm:"column:riskLevel" json:"riskLevel"`
+	SpaceID                 *string          `gorm:"column:spaceId" json:"spaceId"`
+	Folder                  *DashboardFolder `gorm:"foreignKey:FolderID"`
+	Workspace               *Workspace
+	Space                   *Space
 	Collaborators           []CollaboratorsOnTypebots `gorm:"foreignKey:TypebotID;constraint:OnDelete:CASCADE"`
 	Invitations             []Invitation              `gorm:"foreignKey:TypebotID;constraint:OnDelete:CASCADE"`
 	Results                 []Result                  `gorm:"foreignKey:TypebotID;constraint:OnDelete:CASCADE"`
@@ -445,6 +490,71 @@ func (*Typebot) BeforeUpdate(tx *gorm.DB) error {
 	return nil
 }
 
+type Invitation struct {
+	CreatedAt DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
+	UpdatedAt DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
+	Email     string   `gorm:"column:email;primaryKey;uniqueIndex:Invitation_email_typebotId_key" json:"email"`
+	TypebotID string   `gorm:"column:typebotId;primaryKey;uniqueIndex:Invitation_email_typebotId_key" json:"typebotId"`
+	Type      string   `gorm:"column:type;not null" json:"type"`
+	Typebot   *Typebot
+}
+
+func (Invitation) TableName() string {
+	return "Invitation"
+}
+
+func (m *Invitation) BeforeCreate(tx *gorm.DB) error {
+	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
+	if m.CreatedAt.IsZero() {
+		m.CreatedAt = DateTime{Time: now}
+	}
+	if m.UpdatedAt.IsZero() {
+		m.UpdatedAt = DateTime{Time: now}
+	}
+	return nil
+}
+
+func (*Invitation) BeforeUpdate(tx *gorm.DB) error {
+	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
+	if !tx.Statement.Changed("UpdatedAt") {
+		tx.Statement.SetColumn("UpdatedAt", DateTime{Time: now})
+	}
+	return nil
+}
+
+type CollaboratorsOnTypebots struct {
+	CreatedAt DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
+	UpdatedAt DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
+	UserID    string   `gorm:"column:userId;primaryKey;uniqueIndex:CollaboratorsOnTypebots_userId_typebotId_key" json:"userId"`
+	TypebotID string   `gorm:"column:typebotId;primaryKey;uniqueIndex:CollaboratorsOnTypebots_userId_typebotId_key" json:"typebotId"`
+	Type      string   `gorm:"column:type;not null" json:"type"`
+	Typebot   *Typebot
+	User      *User
+}
+
+func (CollaboratorsOnTypebots) TableName() string {
+	return "CollaboratorsOnTypebots"
+}
+
+func (m *CollaboratorsOnTypebots) BeforeCreate(tx *gorm.DB) error {
+	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
+	if m.CreatedAt.IsZero() {
+		m.CreatedAt = DateTime{Time: now}
+	}
+	if m.UpdatedAt.IsZero() {
+		m.UpdatedAt = DateTime{Time: now}
+	}
+	return nil
+}
+
+func (*CollaboratorsOnTypebots) BeforeUpdate(tx *gorm.DB) error {
+	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
+	if !tx.Statement.Changed("UpdatedAt") {
+		tx.Statement.SetColumn("UpdatedAt", DateTime{Time: now})
+	}
+	return nil
+}
+
 type PublicTypebot struct {
 	ID             string         `gorm:"column:id;primaryKey" json:"id"`
 	Version        *string        `gorm:"column:version" json:"version"`
@@ -458,7 +568,7 @@ type PublicTypebot struct {
 	Edges          datatypes.JSON `gorm:"column:edges;not null" json:"edges"`
 	Theme          datatypes.JSON `gorm:"column:theme;not null" json:"theme"`
 	Settings       datatypes.JSON `gorm:"column:settings;not null" json:"settings"`
-	Typebot        Typebot
+	Typebot        *Typebot
 	MediaIdsCache  []RuntimeMediaIDCache `gorm:"foreignKey:PublicTypebotID;constraint:OnDelete:CASCADE"`
 }
 
@@ -480,6 +590,19 @@ func (m *PublicTypebot) BeforeCreate(tx *gorm.DB) error {
 	return nil
 }
 
+type RuntimeMediaIDCache struct {
+	Provider        string    `gorm:"column:provider;primaryKey;uniqueIndex:RuntimeMediaIdCache_publicTypebotId_provider_url_key" json:"provider"`
+	URL             string    `gorm:"column:url;primaryKey;uniqueIndex:RuntimeMediaIdCache_publicTypebotId_provider_url_key" json:"url"`
+	MediaID         string    `gorm:"column:mediaId;not null" json:"mediaId"`
+	ExpiresAt       *DateTime `gorm:"column:expiresAt;index:RuntimeMediaIdCache_expiresAt_idx" json:"expiresAt"`
+	PublicTypebotID string    `gorm:"column:publicTypebotId;primaryKey;uniqueIndex:RuntimeMediaIdCache_publicTypebotId_provider_url_key" json:"publicTypebotId"`
+	PublicTypebot   *PublicTypebot
+}
+
+func (RuntimeMediaIDCache) TableName() string {
+	return "RuntimeMediaIdCache"
+}
+
 type Result struct {
 	ID                 string         `gorm:"column:id;primaryKey" json:"id"`
 	CreatedAt          DateTime       `gorm:"column:createdAt;index:Result_typebotId_hasStarted_createdAt_idx;autoCreateTime:false;not null" json:"createdAt"`
@@ -489,7 +612,7 @@ type Result struct {
 	HasStarted         *bool          `gorm:"column:hasStarted;index:Result_typebotId_hasStarted_createdAt_idx" json:"hasStarted"`
 	IsArchived         *bool          `gorm:"column:isArchived;default:false" json:"isArchived"`
 	LastChatSessionID  *string        `gorm:"column:lastChatSessionId" json:"lastChatSessionId"`
-	Typebot            Typebot
+	Typebot            *Typebot
 	Answers            []Answer                 `gorm:"foreignKey:ResultID;constraint:OnDelete:CASCADE"`
 	AnswersV2          []AnswerV2               `gorm:"foreignKey:ResultID;constraint:OnDelete:CASCADE"`
 	Logs               []Log                    `gorm:"foreignKey:ResultID;constraint:OnDelete:CASCADE"`
@@ -512,6 +635,31 @@ func (m *Result) BeforeCreate(tx *gorm.DB) error {
 	return nil
 }
 
+type SetVariableHistoryItem struct {
+	ResultID   string         `gorm:"column:resultId;primaryKey;uniqueIndex:SetVariableHistoryItem_resultId_index_key" json:"resultId"`
+	Index      int            `gorm:"column:index;primaryKey;uniqueIndex:SetVariableHistoryItem_resultId_index_key" json:"index"`
+	VariableID string         `gorm:"column:variableId;not null" json:"variableId"`
+	BlockID    string         `gorm:"column:blockId;not null" json:"blockId"`
+	BlockIndex *int           `gorm:"column:blockIndex" json:"blockIndex"`
+	Value      datatypes.JSON `gorm:"column:value;not null" json:"value"`
+	Result     *Result
+}
+
+func (SetVariableHistoryItem) TableName() string {
+	return "SetVariableHistoryItem"
+}
+
+type VisitedEdge struct {
+	ResultID string `gorm:"column:resultId;primaryKey;uniqueIndex:VisitedEdge_resultId_index_key" json:"resultId"`
+	EdgeID   string `gorm:"column:edgeId;not null" json:"edgeId"`
+	Index    int    `gorm:"column:index;primaryKey;uniqueIndex:VisitedEdge_resultId_index_key" json:"index"`
+	Result   *Result
+}
+
+func (VisitedEdge) TableName() string {
+	return "VisitedEdge"
+}
+
 type Log struct {
 	ID          string   `gorm:"column:id;primaryKey" json:"id"`
 	CreatedAt   DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
@@ -520,7 +668,7 @@ type Log struct {
 	Context     *string  `gorm:"column:context" json:"context"`
 	Description string   `gorm:"column:description;not null" json:"description"`
 	Details     *string  `gorm:"column:details" json:"details"`
-	Result      Result
+	Result      *Result
 }
 
 func (Log) TableName() string {
@@ -538,6 +686,36 @@ func (m *Log) BeforeCreate(tx *gorm.DB) error {
 	return nil
 }
 
+type Answer struct {
+	CreatedAt  DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
+	ResultID   string   `gorm:"column:resultId;primaryKey;uniqueIndex:Answer_resultId_blockId_groupId_key" json:"resultId"`
+	BlockID    string   `gorm:"column:blockId;primaryKey;uniqueIndex:Answer_resultId_blockId_groupId_key" json:"blockId"`
+	GroupID    string   `gorm:"column:groupId;primaryKey;uniqueIndex:Answer_resultId_blockId_groupId_key" json:"groupId"`
+	VariableID *string  `gorm:"column:variableId" json:"variableId"`
+	Content    string   `gorm:"column:content;not null" json:"content"`
+	Result     *Result
+}
+
+func (Answer) TableName() string {
+	return "Answer"
+}
+
+func (m *Answer) BeforeCreate(tx *gorm.DB) error {
+	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
+	if m.CreatedAt.IsZero() {
+		m.CreatedAt = DateTime{Time: now}
+	}
+	return nil
+}
+
+func (*Answer) BeforeUpdate(tx *gorm.DB) error {
+	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
+	if !tx.Statement.Changed("CreatedAt") {
+		tx.Statement.SetColumn("CreatedAt", DateTime{Time: now})
+	}
+	return nil
+}
+
 type AnswerV2 struct {
 	ID               int            `gorm:"column:id;primaryKey;autoIncrement" json:"id"`
 	CreatedAt        DateTime       `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
@@ -545,7 +723,7 @@ type AnswerV2 struct {
 	Content          string         `gorm:"column:content;not null" json:"content"`
 	AttachedFileUrls datatypes.JSON `gorm:"column:attachedFileUrls" json:"attachedFileUrls"`
 	ResultID         string         `gorm:"column:resultId;not null" json:"resultId"`
-	Result           Result
+	Result           *Result
 }
 
 func (AnswerV2) TableName() string {
@@ -580,7 +758,7 @@ type Webhook struct {
 	Headers     datatypes.JSON `gorm:"column:headers;not null" json:"headers"`
 	Body        *string        `gorm:"column:body" json:"body"`
 	TypebotID   string         `gorm:"column:typebotId;not null" json:"typebotId"`
-	Typebot     Typebot
+	Typebot     *Typebot
 }
 
 func (Webhook) TableName() string {
@@ -625,7 +803,7 @@ type ClaimableCustomPlan struct {
 	CompanyName  *string   `gorm:"column:companyName" json:"companyName"`
 	VatType      *string   `gorm:"column:vatType" json:"vatType"`
 	VatValue     *string   `gorm:"column:vatValue" json:"vatValue"`
-	Workspace    Workspace
+	Workspace    *Workspace
 }
 
 func (ClaimableCustomPlan) TableName() string {
@@ -684,7 +862,7 @@ type ThemeTemplate struct {
 	Name        string         `gorm:"column:name;not null" json:"name"`
 	Theme       datatypes.JSON `gorm:"column:theme;not null" json:"theme"`
 	WorkspaceID string         `gorm:"column:workspaceId;not null" json:"workspaceId"`
-	Workspace   Workspace
+	Workspace   *Workspace
 }
 
 func (ThemeTemplate) TableName() string {
@@ -719,8 +897,8 @@ type BannedIP struct {
 	IP                   string   `gorm:"column:ip;uniqueIndex;not null" json:"ip"`
 	ResponsibleTypebotID string   `gorm:"column:responsibleTypebotId;not null" json:"responsibleTypebotId"`
 	UserID               string   `gorm:"column:userId;not null" json:"userId"`
-	ResponsibleTypebot   Typebot  `gorm:"foreignKey:ResponsibleTypebotID"`
-	User                 User
+	ResponsibleTypebot   *Typebot `gorm:"foreignKey:ResponsibleTypebotID"`
+	User                 *User
 }
 
 func (BannedIP) TableName() string {

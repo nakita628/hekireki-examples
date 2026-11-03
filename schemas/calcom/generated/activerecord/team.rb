@@ -53,7 +53,7 @@ class Team < ApplicationRecord
                                       dependent: :destroy
   has_many :platform_oauth_client, class_name: "PlatformOAuthClient", foreign_key: "organizationId",
                                    inverse_of: :organization, dependent: :destroy
-  has_many :attributes, foreign_key: "teamId", inverse_of: :team, dependent: :destroy
+  has_many :team_attributes, class_name: "Attribute", foreign_key: "teamId", inverse_of: :team, dependent: :destroy
   has_many :delegation_credentials, foreign_key: "organizationId", inverse_of: :organization, dependent: :destroy
   has_many :roles, foreign_key: "teamId", inverse_of: :team, dependent: :destroy
   has_many :cal_ai_phone_numbers, foreign_key: "teamId", inverse_of: :team, dependent: :destroy

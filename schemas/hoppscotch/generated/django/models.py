@@ -162,6 +162,19 @@ class Account(models.Model):
         ]
 
 
+class VerificationToken(models.Model):
+    device_identifier = models.TextField(db_column="deviceIdentifier")
+    token = models.TextField(primary_key=True, default=None)
+    user = models.ForeignKey("User", on_delete=models.CASCADE, related_name="verification_tokens", db_column="userUid", db_index=False)
+    expires_on = models.DateTimeField(db_column="expiresOn")
+
+    class Meta:
+        db_table = "VerificationToken"
+        constraints = [
+            models.UniqueConstraint(fields=["device_identifier", "token"], name="VerificationToken_deviceIdentifier_token_key"),
+        ]
+
+
 class UserSettings(models.Model):
     id = models.TextField(primary_key=True, default=None)
     user = models.OneToOneField("User", on_delete=models.CASCADE, related_name="settings", db_column="userUid")
@@ -195,6 +208,16 @@ class UserEnvironment(models.Model):
 
     class Meta:
         db_table = "UserEnvironment"
+
+
+class InvitedUsers(models.Model):
+    user = models.ForeignKey("User", on_delete=models.CASCADE, related_name="invited_users", db_column="adminUid", db_index=False)
+    admin_email = models.TextField(db_column="adminEmail")
+    invitee_email = models.TextField(primary_key=True, db_column="inviteeEmail", default=None)
+    invited_on = models.DateTimeField(db_column="invitedOn", default=timezone.now)
+
+    class Meta:
+        db_table = "InvitedUsers"
 
 
 class UserRequest(models.Model):

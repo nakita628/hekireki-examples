@@ -12,8 +12,7 @@ class ContactAttributeKey < ApplicationRecord
   validates :key, presence: true, uniqueness: { scope: :workspaceId }
 
   belongs_to :workspace, foreign_key: "workspaceId", inverse_of: :contact_attribute_keys
-  has_many :attributes, class_name: "ContactAttribute", foreign_key: "attributeKeyId", inverse_of: :attribute_key,
-                        dependent: :destroy
+  has_many :contact_attributes, foreign_key: "attributeKeyId", inverse_of: :attribute_key, dependent: :destroy
   has_many :attribute_filters, class_name: "SurveyAttributeFilter", foreign_key: "attributeKeyId",
                                inverse_of: :attribute_key, dependent: :destroy
 end

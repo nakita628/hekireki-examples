@@ -12,5 +12,5 @@ class Plugin < ApplicationRecord
   validates :masked_secret, presence: true
   validates :created_by, presence: true
 
-  has_many :plugin_install, class_name: "PluginInstall", inverse_of: :plugin, dependent: :destroy
+  has_many :plugin_install, dependent: :destroy
 end

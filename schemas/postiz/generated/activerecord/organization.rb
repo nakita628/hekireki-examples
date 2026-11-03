@@ -13,37 +13,43 @@ class Organization < ApplicationRecord
   validates :name, presence: true
 
   has_one :subscription, foreign_key: "organizationId", inverse_of: :organization, dependent: :restrict_with_error
-  has_many :auto_post, class_name: "AutoPost", foreign_key: "organizationId", inverse_of: :organization,
-                       dependent: :restrict_with_error
-  has_many :comments, foreign_key: "organizationId", inverse_of: :organization, dependent: :restrict_with_error
-  has_many :credits, foreign_key: "organizationId", inverse_of: :organization, dependent: :restrict_with_error
+  has_many :auto_post, foreign_key: "organizationId", inverse_of: :organization, dependent: :restrict_with_error
+  has_many :comments, class_name: "Comments", foreign_key: "organizationId", inverse_of: :organization,
+                      dependent: :restrict_with_error
+  has_many :credits, class_name: "Credits", foreign_key: "organizationId", inverse_of: :organization,
+                     dependent: :restrict_with_error
   has_many :clippings, foreign_key: "organizationId", inverse_of: :organization, dependent: :restrict_with_error
   has_many :customers, foreign_key: "orgId", inverse_of: :organization, dependent: :restrict_with_error
-  has_many :errors, foreign_key: "organizationId", inverse_of: :organization, dependent: :restrict_with_error
+  has_many :organization_errors, class_name: "Errors", foreign_key: "organizationId", inverse_of: :organization,
+                                 dependent: :restrict_with_error
   has_many :github, class_name: "GitHub", foreign_key: "organizationId", inverse_of: :organization,
                     dependent: :restrict_with_error
-  has_many :integration, class_name: "Integration", foreign_key: "organizationId", inverse_of: :organization,
-                         dependent: :restrict_with_error
-  has_many :media, foreign_key: "organizationId", inverse_of: :organization, dependent: :restrict_with_error
+  has_many :integration, foreign_key: "organizationId", inverse_of: :organization, dependent: :restrict_with_error
+  has_many :media, class_name: "Media", foreign_key: "organizationId", inverse_of: :organization,
+                   dependent: :restrict_with_error
   has_many :buyer_organization, class_name: "MessagesGroup", foreign_key: "buyerOrganizationId",
                                 inverse_of: :buyer_organization, dependent: :restrict_with_error
-  has_many :notifications, foreign_key: "organizationId", inverse_of: :organization, dependent: :restrict_with_error
-  has_many :plugs, foreign_key: "organizationId", inverse_of: :organization, dependent: :restrict_with_error
-  has_many :post, class_name: "Post", foreign_key: "organizationId", inverse_of: :organization,
-                  dependent: :restrict_with_error
+  has_many :notifications, class_name: "Notifications", foreign_key: "organizationId", inverse_of: :organization,
+                           dependent: :restrict_with_error
+  has_many :plugs, class_name: "Plugs", foreign_key: "organizationId", inverse_of: :organization,
+                   dependent: :restrict_with_error
+  has_many :post, foreign_key: "organizationId", inverse_of: :organization, dependent: :restrict_with_error
   has_many :submitted_post, class_name: "Post", foreign_key: "submittedForOrganizationId",
                             inverse_of: :submitted_for_organization, dependent: :nullify
-  has_many :sets, foreign_key: "organizationId", inverse_of: :organization, dependent: :restrict_with_error
-  has_many :signatures, foreign_key: "organizationId", inverse_of: :organization, dependent: :restrict_with_error
-  has_many :tags, foreign_key: "orgId", inverse_of: :organization, dependent: :restrict_with_error
-  has_many :third_party, class_name: "ThirdParty", foreign_key: "organizationId", inverse_of: :organization,
-                         dependent: :restrict_with_error
-  has_many :used_codes, foreign_key: "orgId", inverse_of: :organization, dependent: :restrict_with_error
+  has_many :sets, class_name: "Sets", foreign_key: "organizationId", inverse_of: :organization,
+                  dependent: :restrict_with_error
+  has_many :signatures, class_name: "Signatures", foreign_key: "organizationId", inverse_of: :organization,
+                        dependent: :restrict_with_error
+  has_many :tags, class_name: "Tags", foreign_key: "orgId", inverse_of: :organization, dependent: :restrict_with_error
+  has_many :third_party, foreign_key: "organizationId", inverse_of: :organization, dependent: :restrict_with_error
+  has_many :used_codes, class_name: "UsedCodes", foreign_key: "orgId", inverse_of: :organization,
+                        dependent: :restrict_with_error
   has_many :users, class_name: "UserOrganization", foreign_key: "organizationId", inverse_of: :organization,
                    dependent: :restrict_with_error
-  has_many :webhooks, foreign_key: "organizationId", inverse_of: :organization, dependent: :restrict_with_error
+  has_many :webhooks, class_name: "Webhooks", foreign_key: "organizationId", inverse_of: :organization,
+                      dependent: :restrict_with_error
   has_many :oauth_app, class_name: "OAuthApp", foreign_key: "organizationId", inverse_of: :organization,
                        dependent: :nullify
-  has_many :oauth_authorizations, foreign_key: "organizationId", inverse_of: :organization,
-                                  dependent: :restrict_with_error
+  has_many :oauth_authorizations, class_name: "OAuthAuthorization", foreign_key: "organizationId",
+                                  inverse_of: :organization, dependent: :restrict_with_error
 end

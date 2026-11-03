@@ -9,5 +9,5 @@ class User < ApplicationRecord
 
   has_many :accounts, foreign_key: "userId", inverse_of: :user, dependent: :destroy
   has_many :sessions, foreign_key: "userId", inverse_of: :user, dependent: :destroy
-  has_many :post, class_name: "Post", foreign_key: "authorId", inverse_of: :author, dependent: :restrict_with_error
+  has_many :post, foreign_key: "authorId", inverse_of: :author, dependent: :restrict_with_error
 end

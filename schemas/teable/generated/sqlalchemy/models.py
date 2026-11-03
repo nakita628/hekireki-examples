@@ -55,7 +55,7 @@ class Space(Base):
     last_modified_time: Mapped[Optional[datetime]] = mapped_column(default=utc_now, onupdate=utc_now)
     is_template: Mapped[Optional[bool]]
 
-    base_group: Mapped[list["Base"]] = relationship(passive_deletes="all", back_populates="space")
+    base_group: Mapped[list["Base_"]] = relationship(passive_deletes="all", back_populates="space")
     data_db_migration_jobs: Mapped[list["SpaceDataDbMigrationJob"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="space")
     base_data_db_move_jobs_as_source: Mapped[list["BaseDataDbMoveJob"]] = relationship(foreign_keys="BaseDataDbMoveJob.source_space_id", cascade="all, delete", passive_deletes=True, back_populates="source_space")
     base_data_db_move_jobs_as_target: Mapped[list["BaseDataDbMoveJob"]] = relationship(foreign_keys="BaseDataDbMoveJob.target_space_id", cascade="all, delete", passive_deletes=True, back_populates="target_space")
@@ -174,7 +174,7 @@ class BaseDataDbMoveJob(Base):
         Index("base_data_db_move_job_target_space_id_state_idx", "target_space_id", "state"),
     )
 
-    base: Mapped["Base"] = relationship(back_populates="data_db_move_jobs")
+    base: Mapped["Base_"] = relationship(back_populates="data_db_move_jobs")
     source_space: Mapped["Space"] = relationship(foreign_keys=[source_space_id], back_populates="base_data_db_move_jobs_as_source")
     target_space: Mapped["Space"] = relationship(foreign_keys=[target_space_id], back_populates="base_data_db_move_jobs_as_target")
 
@@ -193,7 +193,7 @@ class PinResource(Base):
         Index("pin_resource_created_by_resource_id_key", "created_by", "resource_id", unique=True),
     )
 
-class Base(Base):
+class Base_(Base):
     __tablename__ = "base"
 
     id: Mapped[str] = mapped_column(primary_key=True)
@@ -248,7 +248,7 @@ class TableMeta(Base):
         Index("table_meta_base_id_deleted_time_idx", "base_id", "deleted_time"),
     )
 
-    base: Mapped["Base"] = relationship(back_populates="tables")
+    base: Mapped["Base_"] = relationship(back_populates="tables")
     fields: Mapped[list["Field"]] = relationship(passive_deletes="all", back_populates="table")
     views: Mapped[list["View"]] = relationship(passive_deletes="all", back_populates="table")
     plugin_panel: Mapped[list["PluginPanel"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="table")
@@ -848,6 +848,22 @@ class AccessToken(Base):
         Index("access_token_client_id_idx", "client_id"),
     )
 
+class Setting(Base):
+    __tablename__ = "setting"
+
+    name: Mapped[str] = mapped_column()
+    content: Mapped[Optional[str]]
+    created_time: Mapped[datetime] = mapped_column(default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
+    last_modified_time: Mapped[Optional[datetime]] = mapped_column(default=utc_now, onupdate=utc_now)
+    created_by: Mapped[str]
+    last_modified_by: Mapped[Optional[str]]
+
+    __table_args__ = (
+        Index("setting_name_key", "name", unique=True),
+    )
+
+    __mapper_args__ = {"primary_key": [name]}
+
 class OAuthApp(Base):
     __tablename__ = "oauth_app"
 
@@ -1180,7 +1196,7 @@ class UserBaseOrder(Base):
     )
 
     user: Mapped["User"] = relationship(back_populates="base_orders")
-    base: Mapped["Base"] = relationship(back_populates="user_orders")
+    base: Mapped["Base_"] = relationship(back_populates="user_orders")
 
 class Template(Base):
     __tablename__ = "template"
@@ -1280,6 +1296,20 @@ class TaskReference(Base):
         Index("task_reference_to_field_id_idx", "to_field_id"),
         Index("task_reference_to_field_id_from_field_id_key", "to_field_id", "from_field_id", unique=True),
     )
+
+class Waitlist(Base):
+    __tablename__ = "waitlist"
+
+    email: Mapped[str] = mapped_column()
+    invite: Mapped[Optional[bool]]
+    invite_time: Mapped[Optional[datetime]]
+    created_time: Mapped[datetime] = mapped_column(default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
+
+    __table_args__ = (
+        Index("waitlist_email_key", "email", unique=True),
+    )
+
+    __mapper_args__ = {"primary_key": [email]}
 
 class BaseNode(Base):
     __tablename__ = "base_node"

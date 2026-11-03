@@ -22,9 +22,9 @@ type DocumentAnnotation struct {
 	IsVisible   *bool          `gorm:"column:isVisible;default:true;not null" json:"isVisible"`
 	CreatedAt   DateTime       `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt   DateTime       `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Document    Document
-	Team        Team
-	CreatedBy   User              `gorm:"foreignKey:CreatedByID"`
+	Document    *Document
+	Team        *Team
+	CreatedBy   *User             `gorm:"foreignKey:CreatedByID"`
 	Images      []AnnotationImage `gorm:"foreignKey:AnnotationID;constraint:OnDelete:CASCADE"`
 }
 
@@ -55,14 +55,14 @@ func (*DocumentAnnotation) BeforeUpdate(tx *gorm.DB) error {
 }
 
 type AnnotationImage struct {
-	ID           string             `gorm:"column:id;primaryKey" json:"id"`
-	Filename     string             `gorm:"column:filename;not null" json:"filename"`
-	URL          string             `gorm:"column:url;not null" json:"url"`
-	Size         *int               `gorm:"column:size" json:"size"`
-	MimeType     *string            `gorm:"column:mimeType" json:"mimeType"`
-	AnnotationID string             `gorm:"column:annotationId;index:AnnotationImage_annotationId_idx;not null" json:"annotationId"`
-	CreatedAt    DateTime           `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
-	Annotation   DocumentAnnotation `gorm:"foreignKey:AnnotationID"`
+	ID           string              `gorm:"column:id;primaryKey" json:"id"`
+	Filename     string              `gorm:"column:filename;not null" json:"filename"`
+	URL          string              `gorm:"column:url;not null" json:"url"`
+	Size         *int                `gorm:"column:size" json:"size"`
+	MimeType     *string             `gorm:"column:mimeType" json:"mimeType"`
+	AnnotationID string              `gorm:"column:annotationId;index:AnnotationImage_annotationId_idx;not null" json:"annotationId"`
+	CreatedAt    DateTime            `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
+	Annotation   *DocumentAnnotation `gorm:"foreignKey:AnnotationID"`
 }
 
 func (AnnotationImage) TableName() string {
@@ -108,7 +108,7 @@ type Brand struct {
 	TeamID                         string   `gorm:"column:teamId;uniqueIndex:Brand_teamId_name_key;index:Brand_teamId_idx;not null" json:"teamId"`
 	CreatedAt                      DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt                      DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Team                           Team
+	Team                           *Team
 	DefaultForTeam                 []Team     `gorm:"foreignKey:DefaultBrandID;constraint:OnDelete:SET NULL"`
 	Links                          []Link     `gorm:"foreignKey:BrandID;constraint:OnDelete:SET NULL"`
 	Datarooms                      []Dataroom `gorm:"foreignKey:BrandID;constraint:OnDelete:SET NULL"`
@@ -161,14 +161,14 @@ type Conversation struct {
 	LastMessageAt         *DateTime `gorm:"column:lastMessageAt" json:"lastMessageAt"`
 	CreatedAt             DateTime  `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt             DateTime  `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Dataroom              Dataroom
-	DataroomDocument      DataroomDocument
-	Link                  Link
-	ViewerGroup           ViewerGroup
-	Question              DataroomQuestion `gorm:"foreignKey:QuestionID"`
-	RecipientViewer       Viewer           `gorm:"foreignKey:RecipientViewerID"`
-	InitialView           View             `gorm:"foreignKey:InitialViewID"`
-	Team                  Team
+	Dataroom              *Dataroom
+	DataroomDocument      *DataroomDocument
+	Link                  *Link
+	ViewerGroup           *ViewerGroup
+	Question              *DataroomQuestion `gorm:"foreignKey:QuestionID"`
+	RecipientViewer       *Viewer           `gorm:"foreignKey:RecipientViewerID"`
+	InitialView           *View             `gorm:"foreignKey:InitialViewID"`
+	Team                  *Team
 	Views                 []ConversationView        `gorm:"foreignKey:ConversationID;constraint:OnDelete:CASCADE"`
 	Participants          []ConversationParticipant `gorm:"foreignKey:ConversationID;constraint:OnDelete:CASCADE"`
 	Messages              []Message                 `gorm:"foreignKey:ConversationID;constraint:OnDelete:CASCADE"`
@@ -216,10 +216,10 @@ type DataroomQuestion struct {
 	DocumentPageNumber *int     `gorm:"column:documentPageNumber" json:"documentPageNumber"`
 	CreatedAt          DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt          DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Dataroom           Dataroom
-	Team               Team
-	CreatedByUser      User `gorm:"foreignKey:CreatedByUserID"`
-	DataroomDocument   DataroomDocument
+	Dataroom           *Dataroom
+	Team               *Team
+	CreatedByUser      *User `gorm:"foreignKey:CreatedByUserID"`
+	DataroomDocument   *DataroomDocument
 	Assignments        []DataroomQuestionAssignment `gorm:"foreignKey:QuestionID;constraint:OnDelete:CASCADE"`
 	Conversations      []Conversation               `gorm:"foreignKey:QuestionID;constraint:OnDelete:CASCADE"`
 }
@@ -251,17 +251,17 @@ func (*DataroomQuestion) BeforeUpdate(tx *gorm.DB) error {
 }
 
 type DataroomQuestionAssignment struct {
-	ID         string           `gorm:"column:id;primaryKey" json:"id"`
-	QuestionID string           `gorm:"column:questionId;uniqueIndex:DataroomQuestionAssignment_questionId_linkId_key;uniqueIndex:DataroomQuestionAssignment_questionId_groupId_key;uniqueIndex:DataroomQuestionAssignment_questionId_viewerId_key;uniqueIndex:DataroomQuestionAssignment_questionId_email_key;index:DataroomQuestionAssignment_questionId_idx;not null" json:"questionId"`
-	LinkID     *string          `gorm:"column:linkId;uniqueIndex:DataroomQuestionAssignment_questionId_linkId_key;index:DataroomQuestionAssignment_linkId_idx" json:"linkId"`
-	GroupID    *string          `gorm:"column:groupId;uniqueIndex:DataroomQuestionAssignment_questionId_groupId_key;index:DataroomQuestionAssignment_groupId_idx" json:"groupId"`
-	ViewerID   *string          `gorm:"column:viewerId;uniqueIndex:DataroomQuestionAssignment_questionId_viewerId_key;index:DataroomQuestionAssignment_viewerId_idx" json:"viewerId"`
-	Email      *string          `gorm:"column:email;uniqueIndex:DataroomQuestionAssignment_questionId_email_key" json:"email"`
-	CreatedAt  DateTime         `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
-	Question   DataroomQuestion `gorm:"foreignKey:QuestionID"`
-	Link       Link
-	Group      ViewerGroup `gorm:"foreignKey:GroupID"`
-	Viewer     Viewer
+	ID         string            `gorm:"column:id;primaryKey" json:"id"`
+	QuestionID string            `gorm:"column:questionId;uniqueIndex:DataroomQuestionAssignment_questionId_linkId_key;uniqueIndex:DataroomQuestionAssignment_questionId_groupId_key;uniqueIndex:DataroomQuestionAssignment_questionId_viewerId_key;uniqueIndex:DataroomQuestionAssignment_questionId_email_key;index:DataroomQuestionAssignment_questionId_idx;not null" json:"questionId"`
+	LinkID     *string           `gorm:"column:linkId;uniqueIndex:DataroomQuestionAssignment_questionId_linkId_key;index:DataroomQuestionAssignment_linkId_idx" json:"linkId"`
+	GroupID    *string           `gorm:"column:groupId;uniqueIndex:DataroomQuestionAssignment_questionId_groupId_key;index:DataroomQuestionAssignment_groupId_idx" json:"groupId"`
+	ViewerID   *string           `gorm:"column:viewerId;uniqueIndex:DataroomQuestionAssignment_questionId_viewerId_key;index:DataroomQuestionAssignment_viewerId_idx" json:"viewerId"`
+	Email      *string           `gorm:"column:email;uniqueIndex:DataroomQuestionAssignment_questionId_email_key" json:"email"`
+	CreatedAt  DateTime          `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
+	Question   *DataroomQuestion `gorm:"foreignKey:QuestionID"`
+	Link       *Link
+	Group      *ViewerGroup `gorm:"foreignKey:GroupID"`
+	Viewer     *Viewer
 }
 
 func (DataroomQuestionAssignment) TableName() string {
@@ -287,9 +287,9 @@ type ConversationParticipant struct {
 	UserID               *string  `gorm:"column:userId;uniqueIndex:ConversationParticipant_conversationId_userId_key;index:ConversationParticipant_userId_idx" json:"userId"`
 	ReceiveNotifications bool     `gorm:"column:receiveNotifications;default:false;not null" json:"receiveNotifications"`
 	CreatedAt            DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
-	Conversation         Conversation
-	Viewer               Viewer
-	User                 User
+	Conversation         *Conversation
+	Viewer               *Viewer
+	User                 *User
 }
 
 func (ConversationParticipant) TableName() string {
@@ -318,10 +318,10 @@ type Message struct {
 	IsInternalNote bool     `gorm:"column:isInternalNote;default:false;not null" json:"isInternalNote"`
 	CreatedAt      DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt      DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Conversation   Conversation
-	User           User
-	Viewer         Viewer
-	View           View
+	Conversation   *Conversation
+	User           *User
+	Viewer         *Viewer
+	View           *View
 	FaqAsQuestion  []DataroomFaqItem `gorm:"foreignKey:QuestionMessageID;constraint:OnDelete:SET NULL"`
 	FaqAsAnswer    []DataroomFaqItem `gorm:"foreignKey:AnswerMessageID;constraint:OnDelete:SET NULL"`
 }
@@ -357,8 +357,8 @@ type ConversationView struct {
 	ConversationID string   `gorm:"column:conversationId;uniqueIndex:ConversationView_conversationId_viewId_key;index:ConversationView_conversationId_idx;not null" json:"conversationId"`
 	ViewID         string   `gorm:"column:viewId;uniqueIndex:ConversationView_conversationId_viewId_key;index:ConversationView_viewId_idx;not null" json:"viewId"`
 	CreatedAt      DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
-	Conversation   Conversation
-	View           View
+	Conversation   *Conversation
+	View           *View
 }
 
 func (ConversationView) TableName() string {
@@ -400,14 +400,14 @@ type DataroomFaqItem struct {
 	DocumentVersionNumber *int     `gorm:"column:documentVersionNumber" json:"documentVersionNumber"`
 	CreatedAt             DateTime `gorm:"column:createdAt;index:DataroomFaqItem_createdAt_idx;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt             DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Dataroom              Dataroom
-	Link                  Link
-	DataroomDocument      DataroomDocument
-	SourceConversation    Conversation `gorm:"foreignKey:SourceConversationID"`
-	QuestionMessage       Message      `gorm:"foreignKey:QuestionMessageID"`
-	AnswerMessage         Message      `gorm:"foreignKey:AnswerMessageID"`
-	Team                  Team
-	PublishedByUser       User `gorm:"foreignKey:PublishedByUserID"`
+	Dataroom              *Dataroom
+	Link                  *Link
+	DataroomDocument      *DataroomDocument
+	SourceConversation    *Conversation `gorm:"foreignKey:SourceConversationID"`
+	QuestionMessage       *Message      `gorm:"foreignKey:QuestionMessageID"`
+	AnswerMessage         *Message      `gorm:"foreignKey:AnswerMessageID"`
+	Team                  *Team
+	PublishedByUser       *User `gorm:"foreignKey:PublishedByUserID"`
 }
 
 func (DataroomFaqItem) TableName() string {
@@ -466,9 +466,9 @@ type Dataroom struct {
 	FreezeArchiveHash                      *string        `gorm:"column:freezeArchiveHash" json:"freezeArchiveHash"`
 	CreatedAt                              DateTime       `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt                              DateTime       `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Team                                   Team
-	BaseBrand                              Brand              `gorm:"foreignKey:BrandID"`
-	FrozenByUser                           User               `gorm:"foreignKey:FrozenBy"`
+	Team                                   *Team
+	BaseBrand                              *Brand             `gorm:"foreignKey:BrandID"`
+	FrozenByUser                           *User              `gorm:"foreignKey:FrozenBy"`
 	Documents                              []DataroomDocument `gorm:"foreignKey:DataroomID;constraint:OnDelete:CASCADE"`
 	Folders                                []DataroomFolder   `gorm:"foreignKey:DataroomID;constraint:OnDelete:CASCADE"`
 	Links                                  []Link             `gorm:"foreignKey:DataroomID;constraint:OnDelete:CASCADE"`
@@ -522,8 +522,8 @@ type TaskList struct {
 	TeamID     string   `gorm:"column:teamId;index:TaskList_teamId_idx;not null" json:"teamId"`
 	CreatedAt  DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt  DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Dataroom   Dataroom
-	Team       Team
+	Dataroom   *Dataroom
+	Team       *Team
 	Tasks      []Task `gorm:"foreignKey:TaskListID;constraint:OnDelete:CASCADE"`
 }
 
@@ -570,11 +570,11 @@ type Task struct {
 	LastActivityNotifiedAt *DateTime `gorm:"column:lastActivityNotifiedAt" json:"lastActivityNotifiedAt"`
 	CreatedAt              DateTime  `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt              DateTime  `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	TaskList               TaskList
-	Dataroom               Dataroom
-	Team                   Team
-	UploadFolder           DataroomFolder   `gorm:"foreignKey:UploadFolderID"`
-	CreatedByUser          User             `gorm:"foreignKey:CreatedByUserID"`
+	TaskList               *TaskList
+	Dataroom               *Dataroom
+	Team                   *Team
+	UploadFolder           *DataroomFolder  `gorm:"foreignKey:UploadFolderID"`
+	CreatedByUser          *User            `gorm:"foreignKey:CreatedByUserID"`
 	Assignments            []TaskAssignment `gorm:"foreignKey:TaskID;constraint:OnDelete:CASCADE"`
 	Activities             []TaskActivity   `gorm:"foreignKey:TaskID;constraint:OnDelete:CASCADE"`
 	Uploads                []DocumentUpload `gorm:"foreignKey:TaskID;constraint:OnDelete:SET NULL"`
@@ -617,10 +617,10 @@ type TaskAssignment struct {
 	LastReminderAt *DateTime `gorm:"column:lastReminderAt" json:"lastReminderAt"`
 	CreatedAt      DateTime  `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt      DateTime  `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Task           Task
-	Viewer         Viewer
-	Group          ViewerGroup `gorm:"foreignKey:GroupID"`
-	Link           Link
+	Task           *Task
+	Viewer         *Viewer
+	Group          *ViewerGroup `gorm:"foreignKey:GroupID"`
+	Link           *Link
 }
 
 func (TaskAssignment) TableName() string {
@@ -660,10 +660,10 @@ type TaskActivity struct {
 	ViewerID   *string  `gorm:"column:viewerId;index:TaskActivity_viewerId_idx" json:"viewerId"`
 	ViewID     *string  `gorm:"column:viewId;index:TaskActivity_viewId_idx" json:"viewId"`
 	CreatedAt  DateTime `gorm:"column:createdAt;index:TaskActivity_taskId_createdAt_idx;autoCreateTime:false;not null" json:"createdAt"`
-	Task       Task
-	User       User
-	Viewer     Viewer
-	View       View
+	Task       *Task
+	User       *User
+	Viewer     *Viewer
+	View       *View
 }
 
 func (TaskActivity) TableName() string {
@@ -691,9 +691,9 @@ type DataroomDocument struct {
 	VectorStoreFileID *string  `gorm:"column:vectorStoreFileId" json:"vectorStoreFileId"`
 	CreatedAt         DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt         DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Dataroom          Dataroom
-	Document          Document
-	Folder            DataroomFolder     `gorm:"foreignKey:FolderID"`
+	Dataroom          *Dataroom
+	Document          *Document
+	Folder            *DataroomFolder    `gorm:"foreignKey:FolderID"`
 	Conversations     []Conversation     `gorm:"foreignKey:DataroomDocumentID;constraint:OnDelete:SET NULL"`
 	Questions         []DataroomQuestion `gorm:"foreignKey:DataroomDocumentID;constraint:OnDelete:SET NULL"`
 	DataroomFAQs      []DataroomFaqItem  `gorm:"foreignKey:DataroomDocumentID;constraint:OnDelete:SET NULL"`
@@ -739,7 +739,7 @@ type DataroomFolder struct {
 	CreatedAt         DateTime        `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt         DateTime        `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
 	ParentFolder      *DataroomFolder `gorm:"foreignKey:ParentID"`
-	Dataroom          Dataroom
+	Dataroom          *Dataroom
 	Documents         []DataroomDocument `gorm:"foreignKey:FolderID;constraint:OnDelete:SET NULL"`
 	ChildFolders      []DataroomFolder   `gorm:"foreignKey:ParentID;constraint:OnDelete:SET NULL"`
 	UploadTasks       []Task             `gorm:"foreignKey:UploadFolderID;constraint:OnDelete:SET NULL"`
@@ -797,7 +797,7 @@ type DataroomBrand struct {
 	DataroomID                     string   `gorm:"column:dataroomId;uniqueIndex;not null" json:"dataroomId"`
 	CreatedAt                      DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt                      DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Dataroom                       Dataroom
+	Dataroom                       *Dataroom
 }
 
 func (DataroomBrand) TableName() string {
@@ -835,8 +835,8 @@ type ViewerGroup struct {
 	TeamID              string   `gorm:"column:teamId;index:ViewerGroup_teamId_idx;not null" json:"teamId"`
 	CreatedAt           DateTime `gorm:"column:createdAt;index:ViewerGroup_dataroomId_createdAt_idx;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt           DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Dataroom            Dataroom
-	Team                Team
+	Dataroom            *Dataroom
+	Team                *Team
 	Members             []ViewerGroupMembership      `gorm:"foreignKey:GroupID;constraint:OnDelete:CASCADE"`
 	Links               []Link                       `gorm:"foreignKey:GroupID;constraint:OnDelete:SET NULL"`
 	AccessControls      []ViewerGroupAccessControls  `gorm:"foreignKey:GroupID;constraint:OnDelete:CASCADE"`
@@ -879,8 +879,8 @@ type ViewerGroupMembership struct {
 	GroupID   string   `gorm:"column:groupId;uniqueIndex:ViewerGroupMembership_viewerId_groupId_key;index:ViewerGroupMembership_groupId_idx;not null" json:"groupId"`
 	CreatedAt DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Viewer    Viewer
-	Group     ViewerGroup `gorm:"foreignKey:GroupID"`
+	Viewer    *Viewer
+	Group     *ViewerGroup `gorm:"foreignKey:GroupID"`
 }
 
 func (ViewerGroupMembership) TableName() string {
@@ -910,15 +910,15 @@ func (*ViewerGroupMembership) BeforeUpdate(tx *gorm.DB) error {
 }
 
 type ViewerGroupAccessControls struct {
-	ID          string      `gorm:"column:id;primaryKey" json:"id"`
-	GroupID     string      `gorm:"column:groupId;uniqueIndex:ViewerGroupAccessControls_groupId_itemId_key;index:ViewerGroupAccessControls_groupId_idx;not null" json:"groupId"`
-	ItemID      string      `gorm:"column:itemId;uniqueIndex:ViewerGroupAccessControls_groupId_itemId_key;not null" json:"itemId"`
-	ItemType    string      `gorm:"column:itemType;not null" json:"itemType"`
-	CanView     *bool       `gorm:"column:canView;default:true;not null" json:"canView"`
-	CanDownload bool        `gorm:"column:canDownload;default:false;not null" json:"canDownload"`
-	CreatedAt   DateTime    `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
-	UpdatedAt   DateTime    `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Group       ViewerGroup `gorm:"foreignKey:GroupID"`
+	ID          string       `gorm:"column:id;primaryKey" json:"id"`
+	GroupID     string       `gorm:"column:groupId;uniqueIndex:ViewerGroupAccessControls_groupId_itemId_key;index:ViewerGroupAccessControls_groupId_idx;not null" json:"groupId"`
+	ItemID      string       `gorm:"column:itemId;uniqueIndex:ViewerGroupAccessControls_groupId_itemId_key;not null" json:"itemId"`
+	ItemType    string       `gorm:"column:itemType;not null" json:"itemType"`
+	CanView     *bool        `gorm:"column:canView;default:true;not null" json:"canView"`
+	CanDownload bool         `gorm:"column:canDownload;default:false;not null" json:"canDownload"`
+	CreatedAt   DateTime     `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
+	UpdatedAt   DateTime     `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
+	Group       *ViewerGroup `gorm:"foreignKey:GroupID"`
 }
 
 func (ViewerGroupAccessControls) TableName() string {
@@ -955,8 +955,8 @@ type PermissionGroup struct {
 	TeamID         string   `gorm:"column:teamId;index:PermissionGroup_teamId_idx;not null" json:"teamId"`
 	CreatedAt      DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt      DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Dataroom       Dataroom
-	Team           Team
+	Dataroom       *Dataroom
+	Team           *Team
 	Links          []Link                          `gorm:"foreignKey:PermissionGroupID;constraint:OnDelete:SET NULL"`
 	AccessControls []PermissionGroupAccessControls `gorm:"foreignKey:GroupID;constraint:OnDelete:CASCADE"`
 }
@@ -988,16 +988,16 @@ func (*PermissionGroup) BeforeUpdate(tx *gorm.DB) error {
 }
 
 type PermissionGroupAccessControls struct {
-	ID                  string          `gorm:"column:id;primaryKey" json:"id"`
-	GroupID             string          `gorm:"column:groupId;uniqueIndex:PermissionGroupAccessControls_groupId_itemId_key;index:PermissionGroupAccessControls_groupId_idx;not null" json:"groupId"`
-	ItemID              string          `gorm:"column:itemId;uniqueIndex:PermissionGroupAccessControls_groupId_itemId_key;not null" json:"itemId"`
-	ItemType            string          `gorm:"column:itemType;not null" json:"itemType"`
-	CanView             *bool           `gorm:"column:canView;default:true;not null" json:"canView"`
-	CanDownload         bool            `gorm:"column:canDownload;default:false;not null" json:"canDownload"`
-	CanDownloadOriginal bool            `gorm:"column:canDownloadOriginal;default:false;not null" json:"canDownloadOriginal"`
-	CreatedAt           DateTime        `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
-	UpdatedAt           DateTime        `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Group               PermissionGroup `gorm:"foreignKey:GroupID"`
+	ID                  string           `gorm:"column:id;primaryKey" json:"id"`
+	GroupID             string           `gorm:"column:groupId;uniqueIndex:PermissionGroupAccessControls_groupId_itemId_key;index:PermissionGroupAccessControls_groupId_idx;not null" json:"groupId"`
+	ItemID              string           `gorm:"column:itemId;uniqueIndex:PermissionGroupAccessControls_groupId_itemId_key;not null" json:"itemId"`
+	ItemType            string           `gorm:"column:itemType;not null" json:"itemType"`
+	CanView             *bool            `gorm:"column:canView;default:true;not null" json:"canView"`
+	CanDownload         bool             `gorm:"column:canDownload;default:false;not null" json:"canDownload"`
+	CanDownloadOriginal bool             `gorm:"column:canDownloadOriginal;default:false;not null" json:"canDownloadOriginal"`
+	CreatedAt           DateTime         `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
+	UpdatedAt           DateTime         `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
+	Group               *PermissionGroup `gorm:"foreignKey:GroupID"`
 }
 
 func (PermissionGroupAccessControls) TableName() string {
@@ -1047,9 +1047,9 @@ type Document struct {
 	UpdatedAt            DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
 	FolderID             *string  `gorm:"column:folderId;index:Document_folderId_idx;index:Document_teamId_folderId_idx" json:"folderId"`
 	IsExternalUpload     bool     `gorm:"column:isExternalUpload;default:false;not null" json:"isExternalUpload"`
-	Owner                User     `gorm:"foreignKey:OwnerID"`
-	Team                 Team
-	Folder               Folder
+	Owner                *User    `gorm:"foreignKey:OwnerID"`
+	Team                 *Team
+	Folder               *Folder
 	Links                []Link                 `gorm:"foreignKey:DocumentID;constraint:OnDelete:CASCADE"`
 	Views                []View                 `gorm:"foreignKey:DocumentID;constraint:OnDelete:CASCADE"`
 	Versions             []DocumentVersion      `gorm:"foreignKey:DocumentID;constraint:OnDelete:CASCADE"`
@@ -1106,7 +1106,7 @@ type DocumentVersion struct {
 	Length            *int     `gorm:"column:length" json:"length"`
 	CreatedAt         DateTime `gorm:"column:createdAt;index:DocumentVersion_documentId_createdAt_idx;index:DocumentVersion_documentId_isPrimary_createdAt_idx;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt         DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Document          Document
+	Document          *Document
 	Pages             []DocumentPage         `gorm:"foreignKey:VersionID;constraint:OnDelete:CASCADE"`
 	RedactionJobs     []DocumentRedactionJob `gorm:"foreignKey:DocumentVersionID;constraint:OnDelete:CASCADE"`
 }
@@ -1138,17 +1138,17 @@ func (*DocumentVersion) BeforeUpdate(tx *gorm.DB) error {
 }
 
 type DocumentPage struct {
-	ID            string          `gorm:"column:id;primaryKey" json:"id"`
-	VersionID     string          `gorm:"column:versionId;uniqueIndex:DocumentPage_pageNumber_versionId_key;index:DocumentPage_versionId_idx;not null" json:"versionId"`
-	PageNumber    int             `gorm:"column:pageNumber;uniqueIndex:DocumentPage_pageNumber_versionId_key;not null" json:"pageNumber"`
-	EmbeddedLinks []string        `gorm:"column:embeddedLinks;serializer:json;not null" json:"embeddedLinks"`
-	PageLinks     datatypes.JSON  `gorm:"column:pageLinks" json:"pageLinks"`
-	Metadata      datatypes.JSON  `gorm:"column:metadata" json:"metadata"`
-	File          string          `gorm:"column:file;not null" json:"file"`
-	StorageType   string          `gorm:"column:storageType;default:'VERCEL_BLOB';not null" json:"storageType"`
-	CreatedAt     DateTime        `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
-	UpdatedAt     DateTime        `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Version       DocumentVersion `gorm:"foreignKey:VersionID"`
+	ID            string           `gorm:"column:id;primaryKey" json:"id"`
+	VersionID     string           `gorm:"column:versionId;uniqueIndex:DocumentPage_pageNumber_versionId_key;index:DocumentPage_versionId_idx;not null" json:"versionId"`
+	PageNumber    int              `gorm:"column:pageNumber;uniqueIndex:DocumentPage_pageNumber_versionId_key;not null" json:"pageNumber"`
+	EmbeddedLinks []string         `gorm:"column:embeddedLinks;serializer:json;not null" json:"embeddedLinks"`
+	PageLinks     datatypes.JSON   `gorm:"column:pageLinks" json:"pageLinks"`
+	Metadata      datatypes.JSON   `gorm:"column:metadata" json:"metadata"`
+	File          string           `gorm:"column:file;not null" json:"file"`
+	StorageType   string           `gorm:"column:storageType;default:'VERCEL_BLOB';not null" json:"storageType"`
+	CreatedAt     DateTime         `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
+	UpdatedAt     DateTime         `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
+	Version       *DocumentVersion `gorm:"foreignKey:VersionID"`
 }
 
 func (DocumentPage) TableName() string {
@@ -1189,7 +1189,7 @@ type Folder struct {
 	CreatedAt            DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt            DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
 	ParentFolder         *Folder  `gorm:"foreignKey:ParentID"`
-	Team                 Team
+	Team                 *Team
 	Documents            []Document `gorm:"foreignKey:FolderID;constraint:OnDelete:SET NULL"`
 	ChildFolders         []Folder   `gorm:"foreignKey:ParentID;constraint:OnDelete:SET NULL"`
 }
@@ -1237,14 +1237,14 @@ type DocumentUpload struct {
 	UploadedAt         DateTime `gorm:"column:uploadedAt;not null" json:"uploadedAt"`
 	CreatedAt          DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt          DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Document           Document
-	Team               Team
-	Viewer             Viewer
-	View               View
-	Link               Link
-	Dataroom           Dataroom
-	DataroomDocument   DataroomDocument
-	Task               Task
+	Document           *Document
+	Team               *Team
+	Viewer             *Viewer
+	View               *View
+	Link               *Link
+	Dataroom           *Dataroom
+	DataroomDocument   *DataroomDocument
+	Task               *Task
 }
 
 func (DocumentUpload) TableName() string {
@@ -1359,9 +1359,9 @@ type InstalledIntegration struct {
 	TeamID        string         `gorm:"column:teamId;uniqueIndex:InstalledIntegration_teamId_integrationId_key;index:InstalledIntegration_teamId_idx;not null" json:"teamId"`
 	CreatedAt     DateTime       `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt     DateTime       `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Integration   Integration
-	User          User
-	Team          Team
+	Integration   *Integration
+	User          *User
+	Team          *Team
 }
 
 func (InstalledIntegration) TableName() string {
@@ -1481,15 +1481,15 @@ type Link struct {
 	TeamID                     *string        `gorm:"column:teamId;index:Link_teamId_idx" json:"teamId"`
 	BrandID                    *string        `gorm:"column:brandId;index:Link_brandId_idx" json:"brandId"`
 	OwnerID                    *string        `gorm:"column:ownerId;index:Link_ownerId_idx" json:"ownerId"`
-	Document                   Document
-	Dataroom                   Dataroom
-	Domain                     Domain
-	Agreement                  Agreement
-	Group                      ViewerGroup `gorm:"foreignKey:GroupID"`
-	PermissionGroup            PermissionGroup
-	Team                       Team
-	Brand                      Brand
-	Owner                      User                         `gorm:"foreignKey:OwnerID"`
+	Document                   *Document
+	Dataroom                   *Dataroom
+	Domain                     *Domain
+	Agreement                  *Agreement
+	Group                      *ViewerGroup `gorm:"foreignKey:GroupID"`
+	PermissionGroup            *PermissionGroup
+	Team                       *Team
+	Brand                      *Brand
+	Owner                      *User                        `gorm:"foreignKey:OwnerID"`
 	Views                      []View                       `gorm:"foreignKey:LinkID;constraint:OnDelete:CASCADE"`
 	Conversations              []Conversation               `gorm:"foreignKey:LinkID;constraint:OnDelete:SET NULL"`
 	QuestionAssignments        []DataroomQuestionAssignment `gorm:"foreignKey:LinkID;constraint:OnDelete:CASCADE"`
@@ -1566,7 +1566,7 @@ type LinkPreset struct {
 	IsDefault                  bool           `gorm:"column:isDefault;default:false;not null" json:"isDefault"`
 	CreatedAt                  DateTime       `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt                  DateTime       `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Team                       Team
+	Team                       *Team
 }
 
 func (LinkPreset) TableName() string {
@@ -1602,7 +1602,7 @@ type VisitorGroup struct {
 	TeamID    string   `gorm:"column:teamId;index:VisitorGroup_teamId_idx;not null" json:"teamId"`
 	CreatedAt DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Team      Team
+	Team      *Team
 	Links     []LinkVisitorGroup `gorm:"foreignKey:VisitorGroupID;constraint:OnDelete:CASCADE"`
 }
 
@@ -1637,8 +1637,8 @@ type LinkVisitorGroup struct {
 	LinkID         string   `gorm:"column:linkId;uniqueIndex:LinkVisitorGroup_linkId_visitorGroupId_key;index:LinkVisitorGroup_linkId_idx;not null" json:"linkId"`
 	VisitorGroupID string   `gorm:"column:visitorGroupId;uniqueIndex:LinkVisitorGroup_linkId_visitorGroupId_key;index:LinkVisitorGroup_visitorGroupId_idx;not null" json:"visitorGroupId"`
 	CreatedAt      DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
-	Link           Link
-	VisitorGroup   VisitorGroup
+	Link           *Link
+	VisitorGroup   *VisitorGroup
 }
 
 func (LinkVisitorGroup) TableName() string {
@@ -1668,7 +1668,7 @@ type CustomField struct {
 	Disabled    bool     `gorm:"column:disabled;default:false;not null" json:"disabled"`
 	LinkID      string   `gorm:"column:linkId;index:CustomField_linkId_idx;not null" json:"linkId"`
 	OrderIndex  int      `gorm:"column:orderIndex;default:0;not null" json:"orderIndex"`
-	Link        Link
+	Link        *Link
 }
 
 func (CustomField) TableName() string {
@@ -1703,7 +1703,7 @@ type CustomFieldResponse struct {
 	ViewID    string         `gorm:"column:viewId;uniqueIndex;index:CustomFieldResponse_viewId_idx;not null" json:"viewId"`
 	CreatedAt DateTime       `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt DateTime       `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	View      View
+	View      *View
 }
 
 func (CustomFieldResponse) TableName() string {
@@ -1741,8 +1741,8 @@ type NotificationPreference struct {
 	Scope     *string  `gorm:"column:scope;default:'ALL';not null" json:"scope"`
 	CreatedAt DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	User      User
-	Team      Team
+	User      *User
+	Team      *Team
 }
 
 func (NotificationPreference) TableName() string {
@@ -1901,10 +1901,10 @@ type DocumentRedactionJob struct {
 	ApplyRunID        *string  `gorm:"column:applyRunId" json:"applyRunId"`
 	CreatedAt         DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt         DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Document          Document
-	DocumentVersion   DocumentVersion
-	Team              Team
-	CreatedBy         User                `gorm:"foreignKey:CreatedByID"`
+	Document          *Document
+	DocumentVersion   *DocumentVersion
+	Team              *Team
+	CreatedBy         *User               `gorm:"foreignKey:CreatedByID"`
 	Redactions        []DocumentRedaction `gorm:"foreignKey:JobID;constraint:OnDelete:CASCADE"`
 }
 
@@ -1935,22 +1935,22 @@ func (*DocumentRedactionJob) BeforeUpdate(tx *gorm.DB) error {
 }
 
 type DocumentRedaction struct {
-	ID          string               `gorm:"column:id;primaryKey" json:"id"`
-	JobID       string               `gorm:"column:jobId;index:DocumentRedaction_jobId_idx;index:DocumentRedaction_jobId_pageNumber_idx;index:DocumentRedaction_jobId_status_idx;not null" json:"jobId"`
-	PageNumber  int                  `gorm:"column:pageNumber;index:DocumentRedaction_jobId_pageNumber_idx;not null" json:"pageNumber"`
-	X           float64              `gorm:"column:x;not null" json:"x"`
-	Y           float64              `gorm:"column:y;not null" json:"y"`
-	Width       float64              `gorm:"column:width;not null" json:"width"`
-	Height      float64              `gorm:"column:height;not null" json:"height"`
-	TextPreview *string              `gorm:"column:textPreview" json:"textPreview"`
-	Category    *string              `gorm:"column:category" json:"category"`
-	Confidence  *string              `gorm:"column:confidence" json:"confidence"`
-	Reason      *string              `gorm:"column:reason" json:"reason"`
-	Source      *string              `gorm:"column:source;default:'AI';not null" json:"source"`
-	Status      *string              `gorm:"column:status;index:DocumentRedaction_jobId_status_idx;default:'PENDING';not null" json:"status"`
-	CreatedAt   DateTime             `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
-	UpdatedAt   DateTime             `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Job         DocumentRedactionJob `gorm:"foreignKey:JobID"`
+	ID          string                `gorm:"column:id;primaryKey" json:"id"`
+	JobID       string                `gorm:"column:jobId;index:DocumentRedaction_jobId_idx;index:DocumentRedaction_jobId_pageNumber_idx;index:DocumentRedaction_jobId_status_idx;not null" json:"jobId"`
+	PageNumber  int                   `gorm:"column:pageNumber;index:DocumentRedaction_jobId_pageNumber_idx;not null" json:"pageNumber"`
+	X           float64               `gorm:"column:x;not null" json:"x"`
+	Y           float64               `gorm:"column:y;not null" json:"y"`
+	Width       float64               `gorm:"column:width;not null" json:"width"`
+	Height      float64               `gorm:"column:height;not null" json:"height"`
+	TextPreview *string               `gorm:"column:textPreview" json:"textPreview"`
+	Category    *string               `gorm:"column:category" json:"category"`
+	Confidence  *string               `gorm:"column:confidence" json:"confidence"`
+	Reason      *string               `gorm:"column:reason" json:"reason"`
+	Source      *string               `gorm:"column:source;default:'AI';not null" json:"source"`
+	Status      *string               `gorm:"column:status;index:DocumentRedaction_jobId_status_idx;default:'PENDING';not null" json:"status"`
+	CreatedAt   DateTime              `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
+	UpdatedAt   DateTime              `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
+	Job         *DocumentRedactionJob `gorm:"foreignKey:JobID"`
 }
 
 func (DocumentRedaction) TableName() string {
@@ -1987,8 +1987,8 @@ type ReferralInvite struct {
 	Email        string   `gorm:"column:email;uniqueIndex:ReferralInvite_scopeId_email_key;not null" json:"email"`
 	ReferralLink *string  `gorm:"column:referralLink" json:"referralLink"`
 	SentAt       DateTime `gorm:"column:sentAt;not null" json:"sentAt"`
-	User         User
-	Team         Team
+	User         *User
+	Team         *Team
 }
 
 func (ReferralInvite) TableName() string {
@@ -2019,7 +2019,7 @@ type Account struct {
 	Scope             *string `gorm:"column:scope" json:"scope"`
 	IDToken           *string `gorm:"column:id_token;type:text" json:"id_token"`
 	SessionState      *string `gorm:"column:session_state" json:"session_state"`
-	User              User
+	User              *User
 }
 
 func (Account) TableName() string {
@@ -2038,7 +2038,7 @@ type Session struct {
 	SessionToken string   `gorm:"column:sessionToken;uniqueIndex;not null" json:"sessionToken"`
 	UserID       string   `gorm:"column:userId;not null" json:"userId"`
 	Expires      DateTime `gorm:"column:expires;not null" json:"expires"`
-	User         User
+	User         *User
 }
 
 func (Session) TableName() string {
@@ -2106,6 +2106,16 @@ func (m *User) BeforeCreate(tx *gorm.DB) error {
 	return nil
 }
 
+type VerificationToken struct {
+	Identifier string   `gorm:"column:identifier;uniqueIndex:VerificationToken_identifier_token_key;not null" json:"identifier"`
+	Token      string   `gorm:"column:token;primaryKey;uniqueIndex;uniqueIndex:VerificationToken_identifier_token_key" json:"token"`
+	Expires    DateTime `gorm:"column:expires;not null" json:"expires"`
+}
+
+func (VerificationToken) TableName() string {
+	return "VerificationToken"
+}
+
 type Domain struct {
 	ID          string   `gorm:"column:id;primaryKey" json:"id"`
 	Slug        string   `gorm:"column:slug;uniqueIndex;not null" json:"slug"`
@@ -2117,8 +2127,8 @@ type Domain struct {
 	LastChecked DateTime `gorm:"column:lastChecked;not null" json:"lastChecked"`
 	CreatedAt   DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt   DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	User        User
-	Team        Team
+	User        *User
+	Team        *Team
 	Links       []Link `gorm:"foreignKey:DomainID;constraint:OnDelete:SET NULL"`
 }
 
@@ -2169,12 +2179,12 @@ type View struct {
 	GroupID              *string        `gorm:"column:groupId;index:View_groupId_idx" json:"groupId"`
 	IsArchived           bool           `gorm:"column:isArchived;index:View_documentId_isArchived_idx;default:false;not null" json:"isArchived"`
 	TeamID               *string        `gorm:"column:teamId;index:View_teamId_idx" json:"teamId"`
-	Link                 Link
-	Document             Document
-	Dataroom             Dataroom
-	Viewer               Viewer
-	Group                ViewerGroup `gorm:"foreignKey:GroupID"`
-	Team                 Team
+	Link                 *Link
+	Document             *Document
+	Dataroom             *Dataroom
+	Viewer               *Viewer
+	Group                *ViewerGroup `gorm:"foreignKey:GroupID"`
+	Team                 *Team
 	Reactions            []Reaction           `gorm:"foreignKey:ViewID;constraint:OnDelete:CASCADE"`
 	ConversationViews    []ConversationView   `gorm:"foreignKey:ViewID;constraint:OnDelete:CASCADE"`
 	Messages             []Message            `gorm:"foreignKey:ViewID;constraint:OnDelete:SET NULL"`
@@ -2212,8 +2222,8 @@ type Viewer struct {
 	TeamID                    string         `gorm:"column:teamId;uniqueIndex:Viewer_teamId_email_key;index:Viewer_teamId_idx;not null" json:"teamId"`
 	CreatedAt                 DateTime       `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt                 DateTime       `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Dataroom                  Dataroom
-	Team                      Team
+	Dataroom                  *Dataroom
+	Team                      *Team
 	Views                     []View                       `gorm:"foreignKey:ViewerID;constraint:OnDelete:CASCADE"`
 	Groups                    []ViewerGroupMembership      `gorm:"foreignKey:ViewerID;constraint:OnDelete:CASCADE"`
 	Invitations               []ViewerInvitation           `gorm:"foreignKey:ViewerID;constraint:OnDelete:CASCADE"`
@@ -2259,7 +2269,7 @@ type Reaction struct {
 	PageNumber int      `gorm:"column:pageNumber;not null" json:"pageNumber"`
 	Type       string   `gorm:"column:type;index:Reaction_viewId_type_idx;not null" json:"type"`
 	CreatedAt  DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
-	View       View
+	View       *View
 }
 
 func (Reaction) TableName() string {
@@ -2277,6 +2287,29 @@ func (m *Reaction) BeforeCreate(tx *gorm.DB) error {
 	return nil
 }
 
+type Invitation struct {
+	Email       string   `gorm:"column:email;uniqueIndex:Invitation_email_teamId_key;not null" json:"email"`
+	Expires     DateTime `gorm:"column:expires;not null" json:"expires"`
+	TeamID      string   `gorm:"column:teamId;uniqueIndex:Invitation_email_teamId_key;not null" json:"teamId"`
+	CreatedAt   DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
+	Token       string   `gorm:"column:token;primaryKey;uniqueIndex" json:"token"`
+	Role        string   `gorm:"column:role;default:'MEMBER';not null" json:"role"`
+	DataroomIds []string `gorm:"column:dataroomIds;serializer:json;not null" json:"dataroomIds"`
+	Team        *Team
+}
+
+func (Invitation) TableName() string {
+	return "Invitation"
+}
+
+func (m *Invitation) BeforeCreate(tx *gorm.DB) error {
+	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
+	if m.CreatedAt.IsZero() {
+		m.CreatedAt = DateTime{Time: now}
+	}
+	return nil
+}
+
 type SentEmail struct {
 	ID         string   `gorm:"column:id;primaryKey" json:"id"`
 	Type       string   `gorm:"column:type;not null" json:"type"`
@@ -2285,7 +2318,7 @@ type SentEmail struct {
 	CreatedAt  DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	TeamID     string   `gorm:"column:teamId;index:SentEmail_teamId_idx;not null" json:"teamId"`
 	DomainSlug *string  `gorm:"column:domainSlug" json:"domainSlug"`
-	Team       Team
+	Team       *Team
 }
 
 func (SentEmail) TableName() string {
@@ -2317,13 +2350,13 @@ type Chat struct {
 	CreatedAt     DateTime  `gorm:"column:createdAt;index:Chat_createdAt_idx;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt     DateTime  `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
 	LastMessageAt *DateTime `gorm:"column:lastMessageAt" json:"lastMessageAt"`
-	Team          Team
-	Document      Document
-	Dataroom      Dataroom
-	Link          Link
-	View          View
-	User          User
-	Viewer        Viewer
+	Team          *Team
+	Document      *Document
+	Dataroom      *Dataroom
+	Link          *Link
+	View          *View
+	User          *User
+	Viewer        *Viewer
 	Messages      []ChatMessage `gorm:"foreignKey:ChatID;constraint:OnDelete:CASCADE"`
 }
 
@@ -2360,7 +2393,7 @@ type ChatMessage struct {
 	Content   string         `gorm:"column:content;type:text;not null" json:"content"`
 	Metadata  datatypes.JSON `gorm:"column:metadata" json:"metadata"`
 	CreatedAt DateTime       `gorm:"column:createdAt;index:ChatMessage_chatId_createdAt_idx;autoCreateTime:false;not null" json:"createdAt"`
-	Chat      Chat
+	Chat      *Chat
 }
 
 func (ChatMessage) TableName() string {
@@ -2384,7 +2417,7 @@ type Feedback struct {
 	Data      datatypes.JSON `gorm:"column:data;not null" json:"data"`
 	CreatedAt DateTime       `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt DateTime       `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Link      Link
+	Link      *Link
 	Responses []FeedbackResponse `gorm:"foreignKey:FeedbackID;constraint:OnDelete:CASCADE"`
 }
 
@@ -2421,8 +2454,8 @@ type FeedbackResponse struct {
 	ViewID     string         `gorm:"column:viewId;uniqueIndex;index:FeedbackResponse_viewId_idx;not null" json:"viewId"`
 	CreatedAt  DateTime       `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt  DateTime       `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Feedback   Feedback
-	View       View
+	Feedback   *Feedback
+	View       *View
 }
 
 func (FeedbackResponse) TableName() string {
@@ -2466,7 +2499,7 @@ type Agreement struct {
 	UpdatedAt         DateTime  `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
 	DeletedAt         *DateTime `gorm:"column:deletedAt" json:"deletedAt"`
 	DeletedBy         *string   `gorm:"column:deletedBy" json:"deletedBy"`
-	Team              Team
+	Team              *Team
 	Links             []Link              `gorm:"foreignKey:AgreementID;constraint:OnDelete:SET NULL"`
 	Responses         []AgreementResponse `gorm:"foreignKey:AgreementID;constraint:OnDelete:CASCADE"`
 }
@@ -2515,8 +2548,8 @@ type AgreementResponse struct {
 	SignedFileStorageType *string   `gorm:"column:signedFileStorageType" json:"signedFileStorageType"`
 	CreatedAt             DateTime  `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt             DateTime  `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Agreement             Agreement
-	View                  View
+	Agreement             *Agreement
+	View                  *View
 }
 
 func (AgreementResponse) TableName() string {
@@ -2558,7 +2591,7 @@ type IncomingWebhook struct {
 	TeamID              string    `gorm:"column:teamId;index:IncomingWebhook_teamId_idx;not null" json:"teamId"`
 	CreatedAt           DateTime  `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt           DateTime  `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Team                Team
+	Team                *Team
 }
 
 func (IncomingWebhook) TableName() string {
@@ -2604,9 +2637,9 @@ type RestrictedToken struct {
 	TeamID      string    `gorm:"column:teamId;index:RestrictedToken_teamId_idx;not null" json:"teamId"`
 	CreatedAt   DateTime  `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt   DateTime  `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	User        User
-	Team        Team
-	OauthClient OAuthClient `gorm:"foreignKey:ClientID"`
+	User        *User
+	Team        *Team
+	OauthClient *OAuthClient `gorm:"foreignKey:ClientID"`
 }
 
 func (RestrictedToken) TableName() string {
@@ -2645,7 +2678,7 @@ type Webhook struct {
 	TeamID    string         `gorm:"column:teamId;index:Webhook_teamId_idx;not null" json:"teamId"`
 	CreatedAt DateTime       `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt DateTime       `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Team      Team
+	Team      *Team
 }
 
 func (Webhook) TableName() string {
@@ -2721,7 +2754,7 @@ type Tag struct {
 	CreatedBy   *string  `gorm:"column:createdBy" json:"createdBy"`
 	CreatedAt   DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt   DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Team        Team
+	Team        *Team
 	Items       []TagItem `gorm:"foreignKey:TagID;constraint:OnDelete:CASCADE"`
 }
 
@@ -2761,10 +2794,10 @@ type TagItem struct {
 	TaggedBy   *string  `gorm:"column:taggedBy" json:"taggedBy"`
 	CreatedAt  DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt  DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Tag        Tag
-	Link       Link
-	Document   Document
-	Dataroom   Dataroom
+	Tag        *Tag
+	Link       *Link
+	Document   *Document
+	Dataroom   *Dataroom
 }
 
 func (TagItem) TableName() string {
@@ -2803,9 +2836,9 @@ type ViewerInvitation struct {
 	SentAt        DateTime `gorm:"column:sentAt;not null" json:"sentAt"`
 	Status        string   `gorm:"column:status;default:'SENT';not null" json:"status"`
 	CreatedAt     DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
-	Viewer        Viewer
-	Link          Link
-	Group         ViewerGroup `gorm:"foreignKey:GroupID"`
+	Viewer        *Viewer
+	Link          *Link
+	Group         *ViewerGroup `gorm:"foreignKey:GroupID"`
 }
 
 func (ViewerInvitation) TableName() string {
@@ -2861,7 +2894,7 @@ type Team struct {
 	ReferralTrack            *string                  `gorm:"column:referralTrack" json:"referralTrack"`
 	ReferralTrackSelectedAt  *DateTime                `gorm:"column:referralTrackSelectedAt" json:"referralTrackSelectedAt"`
 	ReferralProfile          datatypes.JSON           `gorm:"column:referralProfile" json:"referralProfile"`
-	DefaultBrand             Brand                    `gorm:"foreignKey:DefaultBrandID"`
+	DefaultBrand             *Brand                   `gorm:"foreignKey:DefaultBrandID"`
 	Users                    []UserTeam               `gorm:"foreignKey:TeamID;constraint:OnDelete:CASCADE"`
 	UserDatarooms            []UserDataroom           `gorm:"foreignKey:TeamID;constraint:OnDelete:CASCADE"`
 	Documents                []Document               `gorm:"foreignKey:TeamID;constraint:OnDelete:CASCADE"`
@@ -2929,9 +2962,9 @@ type UserDataroom struct {
 	TeamID     string   `gorm:"column:teamId;index:UserDataroom_teamId_idx;not null" json:"teamId"`
 	DataroomID string   `gorm:"column:dataroomId;primaryKey;index:UserDataroom_dataroomId_idx" json:"dataroomId"`
 	CreatedAt  DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
-	User       User
-	Team       Team
-	Dataroom   Dataroom
+	User       *User
+	Team       *Team
+	Dataroom   *Dataroom
 }
 
 func (UserDataroom) TableName() string {
@@ -2953,8 +2986,8 @@ type UserTeam struct {
 	TeamID                  string         `gorm:"column:teamId;primaryKey;index:UserTeam_teamId_idx" json:"teamId"`
 	BlockedAt               *DateTime      `gorm:"column:blockedAt" json:"blockedAt"`
 	NotificationPreferences datatypes.JSON `gorm:"column:notificationPreferences" json:"notificationPreferences"`
-	User                    User
-	Team                    Team
+	User                    *User
+	Team                    *Team
 }
 
 func (UserTeam) TableName() string {
@@ -2970,8 +3003,8 @@ type Workflow struct {
 	IsActive    *bool    `gorm:"column:isActive;index:Workflow_isActive_idx;default:true;not null" json:"isActive"`
 	CreatedAt   DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt   DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	EntryLink   Link     `gorm:"foreignKey:EntryLinkID"`
-	Team        Team
+	EntryLink   *Link    `gorm:"foreignKey:EntryLinkID"`
+	Team        *Team
 	Steps       []WorkflowStep      `gorm:"foreignKey:WorkflowID;constraint:OnDelete:CASCADE"`
 	Executions  []WorkflowExecution `gorm:"foreignKey:WorkflowID;constraint:OnDelete:CASCADE"`
 }
@@ -3012,7 +3045,7 @@ type WorkflowStep struct {
 	Actions       datatypes.JSON `gorm:"column:actions;not null" json:"actions"`
 	CreatedAt     DateTime       `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt     DateTime       `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Workflow      Workflow
+	Workflow      *Workflow
 	ExecutionLogs []WorkflowStepLog `gorm:"foreignKey:WorkflowStepID;constraint:OnDelete:CASCADE"`
 }
 
@@ -3052,7 +3085,7 @@ type WorkflowExecution struct {
 	CompletedAt  *DateTime      `gorm:"column:completedAt" json:"completedAt"`
 	Result       datatypes.JSON `gorm:"column:result" json:"result"`
 	Metadata     datatypes.JSON `gorm:"column:metadata" json:"metadata"`
-	Workflow     Workflow
+	Workflow     *Workflow
 	StepLogs     []WorkflowStepLog `gorm:"foreignKey:ExecutionID;constraint:OnDelete:CASCADE"`
 }
 
@@ -3072,17 +3105,17 @@ func (m *WorkflowExecution) BeforeCreate(tx *gorm.DB) error {
 }
 
 type WorkflowStepLog struct {
-	ID                string            `gorm:"column:id;primaryKey" json:"id"`
-	ExecutionID       string            `gorm:"column:executionId;index:WorkflowStepLog_executionId_idx;not null" json:"executionId"`
-	WorkflowStepID    string            `gorm:"column:workflowStepId;index:WorkflowStepLog_workflowStepId_idx;not null" json:"workflowStepId"`
-	ConditionsMatched bool              `gorm:"column:conditionsMatched;not null" json:"conditionsMatched"`
-	ConditionResults  datatypes.JSON    `gorm:"column:conditionResults" json:"conditionResults"`
-	ActionsExecuted   datatypes.JSON    `gorm:"column:actionsExecuted" json:"actionsExecuted"`
-	ExecutedAt        DateTime          `gorm:"column:executedAt;not null" json:"executedAt"`
-	Duration          *int              `gorm:"column:duration" json:"duration"`
-	Error             *string           `gorm:"column:error" json:"error"`
-	Execution         WorkflowExecution `gorm:"foreignKey:ExecutionID"`
-	Step              WorkflowStep      `gorm:"foreignKey:WorkflowStepID"`
+	ID                string             `gorm:"column:id;primaryKey" json:"id"`
+	ExecutionID       string             `gorm:"column:executionId;index:WorkflowStepLog_executionId_idx;not null" json:"executionId"`
+	WorkflowStepID    string             `gorm:"column:workflowStepId;index:WorkflowStepLog_workflowStepId_idx;not null" json:"workflowStepId"`
+	ConditionsMatched bool               `gorm:"column:conditionsMatched;not null" json:"conditionsMatched"`
+	ConditionResults  datatypes.JSON     `gorm:"column:conditionResults" json:"conditionResults"`
+	ActionsExecuted   datatypes.JSON     `gorm:"column:actionsExecuted" json:"actionsExecuted"`
+	ExecutedAt        DateTime           `gorm:"column:executedAt;not null" json:"executedAt"`
+	Duration          *int               `gorm:"column:duration" json:"duration"`
+	Error             *string            `gorm:"column:error" json:"error"`
+	Execution         *WorkflowExecution `gorm:"foreignKey:ExecutionID"`
+	Step              *WorkflowStep      `gorm:"foreignKey:WorkflowStepID"`
 }
 
 func (WorkflowStepLog) TableName() string {

@@ -1,4 +1,5 @@
 import {
+  type PgTableExtraConfigValue,
   bigint,
   boolean,
   customType,
@@ -1170,7 +1171,7 @@ export const organisation = pgTable(
     organisationGlobalSettingsId: text('organisationGlobalSettingsId').notNull(),
     organisationAuthenticationPortalId: text('organisationAuthenticationPortalId').notNull(),
   },
-  (table) => [
+  (table): PgTableExtraConfigValue[] => [
     uniqueIndex('Organisation_url_key').on(table.url),
     uniqueIndex('Organisation_customerId_key').on(table.customerId),
     uniqueIndex('Organisation_organisationClaimId_key').on(table.organisationClaimId),
@@ -1394,7 +1395,7 @@ export const organisationGlobalSettings = pgTable(
     reminderSettings: jsonb('reminderSettings'),
     aiFeaturesEnabled: boolean('aiFeaturesEnabled').notNull().default(false),
   },
-  (table) => [
+  (table): PgTableExtraConfigValue[] => [
     foreignKey({
       name: 'OrganisationGlobalSettings_emailId_fkey',
       columns: [table.emailId],
@@ -1663,7 +1664,7 @@ export const emailDomain = pgTable(
     lastVerifiedAt: timestamp('lastVerifiedAt', { precision: 3 }),
     organisationId: text('organisationId').notNull(),
   },
-  (table) => [
+  (table): PgTableExtraConfigValue[] => [
     uniqueIndex('EmailDomain_selector_key').on(table.selector),
     uniqueIndex('EmailDomain_domain_key').on(table.domain),
     foreignKey({
@@ -1690,7 +1691,7 @@ export const organisationEmail = pgTable(
     emailDomainId: text('emailDomainId').notNull(),
     organisationId: text('organisationId').notNull(),
   },
-  (table) => [
+  (table): PgTableExtraConfigValue[] => [
     uniqueIndex('OrganisationEmail_email_key').on(table.email),
     foreignKey({
       name: 'OrganisationEmail_emailDomainId_fkey',

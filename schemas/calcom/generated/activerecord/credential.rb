@@ -13,8 +13,7 @@ class Credential < ApplicationRecord
   belongs_to :delegation_credential, foreign_key: "delegationCredentialId", optional: true, inverse_of: :credentials
   has_many :destination_calendars, foreign_key: "credentialId", inverse_of: :credential, dependent: :destroy
   has_many :selected_calendars, foreign_key: "credentialId", inverse_of: :credential, dependent: :destroy
-  has_many :calendar_cache, class_name: "CalendarCache", foreign_key: "credentialId", inverse_of: :credential,
-                            dependent: :destroy
+  has_many :calendar_cache, foreign_key: "credentialId", inverse_of: :credential, dependent: :destroy
   has_many :references, class_name: "BookingReference", foreign_key: "credentialId", inverse_of: :credential,
                         dependent: :nullify
   has_many :integration_attribute_syncs, foreign_key: "credentialId", inverse_of: :credential, dependent: :destroy

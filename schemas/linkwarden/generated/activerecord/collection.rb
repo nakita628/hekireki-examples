@@ -18,6 +18,5 @@ class Collection < ApplicationRecord
                      dependent: :destroy
   has_many :links, foreign_key: "collectionId", inverse_of: :collection, dependent: :destroy
   has_many :rss_subscriptions, foreign_key: "collectionId", inverse_of: :collection, dependent: :destroy
-  has_many :dashboard_section, class_name: "DashboardSection", foreign_key: "collectionId", inverse_of: :collection,
-                               dependent: :destroy
+  has_many :dashboard_section, foreign_key: "collectionId", inverse_of: :collection, dependent: :destroy
 end

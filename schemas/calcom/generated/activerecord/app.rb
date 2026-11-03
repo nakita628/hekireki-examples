@@ -11,6 +11,6 @@ class App < ApplicationRecord
 
   has_many :credentials, foreign_key: "appId", inverse_of: :app, dependent: :destroy
   has_many :payments, foreign_key: "appId", inverse_of: :app, dependent: :destroy
-  has_many :webhook, class_name: "Webhook", foreign_key: "appId", inverse_of: :app, dependent: :destroy
-  has_many :api_key, class_name: "ApiKey", foreign_key: "appId", inverse_of: :app, dependent: :destroy
+  has_many :webhook, foreign_key: "appId", inverse_of: :app, dependent: :destroy
+  has_many :api_key, foreign_key: "appId", inverse_of: :app, dependent: :destroy
 end

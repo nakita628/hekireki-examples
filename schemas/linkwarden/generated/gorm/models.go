@@ -28,7 +28,7 @@ type Account struct {
 	Scope             *string `gorm:"column:scope" json:"scope"`
 	IDToken           *string `gorm:"column:id_token" json:"id_token"`
 	SessionState      *string `gorm:"column:session_state" json:"session_state"`
-	User              User
+	User              *User
 }
 
 func (Account) TableName() string {
@@ -77,7 +77,7 @@ type User struct {
 	TrialEndEmailSent       bool                  `gorm:"column:trialEndEmailSent;default:false;not null" json:"trialEndEmailSent"`
 	CreatedAt               DateTime              `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt               DateTime              `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	ParentSubscription      Subscription          `gorm:"foreignKey:ParentSubscriptionID"`
+	ParentSubscription      *Subscription         `gorm:"foreignKey:ParentSubscriptionID"`
 	Accounts                []Account             `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
 	Collections             []Collection          `gorm:"foreignKey:OwnerID;constraint:OnDelete:CASCADE"`
 	Tags                    []Tag                 `gorm:"foreignKey:OwnerID;constraint:OnDelete:CASCADE"`
@@ -117,6 +117,68 @@ func (*User) BeforeUpdate(tx *gorm.DB) error {
 	return nil
 }
 
+type VerificationToken struct {
+	Identifier string   `gorm:"column:identifier;uniqueIndex:VerificationToken_identifier_token_key;not null" json:"identifier"`
+	Token      string   `gorm:"column:token;primaryKey;uniqueIndex;uniqueIndex:VerificationToken_identifier_token_key" json:"token"`
+	Expires    DateTime `gorm:"column:expires;not null" json:"expires"`
+	CreatedAt  DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
+	UpdatedAt  DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
+}
+
+func (VerificationToken) TableName() string {
+	return "VerificationToken"
+}
+
+func (m *VerificationToken) BeforeCreate(tx *gorm.DB) error {
+	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
+	if m.CreatedAt.IsZero() {
+		m.CreatedAt = DateTime{Time: now}
+	}
+	if m.UpdatedAt.IsZero() {
+		m.UpdatedAt = DateTime{Time: now}
+	}
+	return nil
+}
+
+func (*VerificationToken) BeforeUpdate(tx *gorm.DB) error {
+	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
+	if !tx.Statement.Changed("UpdatedAt") {
+		tx.Statement.SetColumn("UpdatedAt", DateTime{Time: now})
+	}
+	return nil
+}
+
+type PasswordResetToken struct {
+	Identifier string   `gorm:"column:identifier;not null" json:"identifier"`
+	Token      string   `gorm:"column:token;primaryKey;uniqueIndex" json:"token"`
+	Expires    DateTime `gorm:"column:expires;not null" json:"expires"`
+	CreatedAt  DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
+	UpdatedAt  DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
+}
+
+func (PasswordResetToken) TableName() string {
+	return "PasswordResetToken"
+}
+
+func (m *PasswordResetToken) BeforeCreate(tx *gorm.DB) error {
+	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
+	if m.CreatedAt.IsZero() {
+		m.CreatedAt = DateTime{Time: now}
+	}
+	if m.UpdatedAt.IsZero() {
+		m.UpdatedAt = DateTime{Time: now}
+	}
+	return nil
+}
+
+func (*PasswordResetToken) BeforeUpdate(tx *gorm.DB) error {
+	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
+	if !tx.Statement.Changed("UpdatedAt") {
+		tx.Statement.SetColumn("UpdatedAt", DateTime{Time: now})
+	}
+	return nil
+}
+
 type Collection struct {
 	ID               int                   `gorm:"column:id;primaryKey;autoIncrement" json:"id"`
 	Name             string                `gorm:"column:name;not null" json:"name"`
@@ -131,8 +193,8 @@ type Collection struct {
 	CreatedAt        DateTime              `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt        DateTime              `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
 	Parent           *Collection           `gorm:"foreignKey:ParentID"`
-	Owner            User                  `gorm:"foreignKey:OwnerID"`
-	CreatedBy        User                  `gorm:"foreignKey:CreatedByID"`
+	Owner            *User                 `gorm:"foreignKey:OwnerID"`
+	CreatedBy        *User                 `gorm:"foreignKey:CreatedByID"`
 	SubCollections   []Collection          `gorm:"foreignKey:ParentID;constraint:OnDelete:CASCADE"`
 	Members          []UsersAndCollections `gorm:"foreignKey:CollectionID;constraint:OnDelete:CASCADE"`
 	Links            []Link                `gorm:"foreignKey:CollectionID;constraint:OnDelete:CASCADE"`
@@ -171,8 +233,8 @@ type UsersAndCollections struct {
 	CanDelete    bool     `gorm:"column:canDelete;not null" json:"canDelete"`
 	CreatedAt    DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt    DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	User         User
-	Collection   Collection
+	User         *User
+	Collection   *Collection
 }
 
 func (UsersAndCollections) TableName() string {
@@ -223,8 +285,8 @@ type Link struct {
 	ImportDate      *DateTime `gorm:"column:importDate" json:"importDate"`
 	CreatedAt       DateTime  `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt       DateTime  `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	CreatedBy       User      `gorm:"foreignKey:CreatedByID"`
-	Collection      Collection
+	CreatedBy       *User     `gorm:"foreignKey:CreatedByID"`
+	Collection      *Collection
 	Highlight       []Highlight `gorm:"foreignKey:LinkID;constraint:OnDelete:CASCADE"`
 	PinnedBy        []User      `gorm:"many2many:_PinnedLinks;joinForeignKey:A;joinReferences:B"`
 	Tags            []Tag       `gorm:"many2many:_LinkToTag;joinForeignKey:A;joinReferences:B"`
@@ -266,7 +328,7 @@ type Tag struct {
 	AiGenerated             bool     `gorm:"column:aiGenerated;default:false;not null" json:"aiGenerated"`
 	CreatedAt               DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt               DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Owner                   User     `gorm:"foreignKey:OwnerID"`
+	Owner                   *User    `gorm:"foreignKey:OwnerID"`
 	Links                   []Link   `gorm:"many2many:_LinkToTag;joinForeignKey:B;joinReferences:A"`
 }
 
@@ -308,7 +370,7 @@ type Subscription struct {
 	UserID                     int            `gorm:"column:userId;uniqueIndex;not null" json:"userId"`
 	CreatedAt                  DateTime       `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt                  DateTime       `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	User                       User
+	User                       *User
 	ChildUsers                 []User `gorm:"foreignKey:ParentSubscriptionID"`
 }
 
@@ -346,7 +408,7 @@ type AccessToken struct {
 	LastUsedAt *DateTime `gorm:"column:lastUsedAt" json:"lastUsedAt"`
 	CreatedAt  DateTime  `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt  DateTime  `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	User       User
+	User       *User
 }
 
 func (AccessToken) TableName() string {
@@ -381,7 +443,7 @@ type RssSubscription struct {
 	OwnerID       int       `gorm:"column:ownerId;not null" json:"ownerId"`
 	CreatedAt     DateTime  `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt     DateTime  `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Collection    Collection
+	Collection    *Collection
 }
 
 func (RssSubscription) TableName() string {
@@ -418,8 +480,8 @@ type Highlight struct {
 	Text        string   `gorm:"column:text;not null" json:"text"`
 	CreatedAt   DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt   DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Link        Link
-	User        User
+	Link        *Link
+	User        *User
 }
 
 func (Highlight) TableName() string {
@@ -453,8 +515,8 @@ type DashboardSection struct {
 	Order        int      `gorm:"column:order;not null" json:"order"`
 	CreatedAt    DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt    DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	User         User
-	Collection   Collection
+	User         *User
+	Collection   *Collection
 }
 
 func (DashboardSection) TableName() string {

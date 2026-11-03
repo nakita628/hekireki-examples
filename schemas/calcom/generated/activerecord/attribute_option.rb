@@ -8,7 +8,7 @@ class AttributeOption < ApplicationRecord
   validates :value, presence: true
   validates :slug, presence: true
 
-  belongs_to :attribute, foreign_key: "attributeId", inverse_of: :options
+  belongs_to :attribute_option_attribute, class_name: "Attribute", foreign_key: "attributeId", inverse_of: :options
   has_many :assigned_users, class_name: "AttributeToUser", foreign_key: "attributeOptionId",
                             inverse_of: :attribute_option, dependent: :destroy
 end

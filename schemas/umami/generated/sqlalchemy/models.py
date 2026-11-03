@@ -336,7 +336,7 @@ class Annotation(Base):
     id: Mapped[uuid_mod.UUID] = mapped_column("annotation_id", Uuid, primary_key=True)
     website_id: Mapped[uuid_mod.UUID] = mapped_column(Uuid, ForeignKey("website.website_id", ondelete="RESTRICT", onupdate="CASCADE", name="annotation_website_id_fkey"))
     user_id: Mapped[Optional[uuid_mod.UUID]] = mapped_column(Uuid)
-    date: Mapped[datetime] = mapped_column(UtcDateTimeTz(precision=6))
+    date_: Mapped[datetime] = mapped_column("date", UtcDateTimeTz(precision=6))
     all_day: Mapped[bool] = mapped_column(default=True, server_default=text("true"))
     note: Mapped[str] = mapped_column(String(500))
     created_at: Mapped[Optional[datetime]] = mapped_column(UtcDateTimeTz(precision=6), default=utc_now, server_default=text("CURRENT_TIMESTAMP"))

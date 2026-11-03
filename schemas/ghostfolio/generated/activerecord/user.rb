@@ -21,7 +21,7 @@ class User < ApplicationRecord
   has_many :auth_devices, foreign_key: "userId", inverse_of: :user, dependent: :destroy
   has_many :subscriptions, foreign_key: "userId", inverse_of: :user, dependent: :destroy
   has_many :tags, foreign_key: "userId", inverse_of: :user, dependent: :destroy
-  has_many :symbol_profile, class_name: "SymbolProfile", foreign_key: "userId", inverse_of: :user, dependent: :destroy
+  has_many :symbol_profile, foreign_key: "userId", inverse_of: :user, dependent: :destroy
   has_and_belongs_to_many :watchlist, class_name: "SymbolProfile", join_table: "_UserWatchlist", foreign_key: "B",
                                       association_foreign_key: "A"
 end

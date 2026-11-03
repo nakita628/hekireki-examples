@@ -1,4 +1,5 @@
 import {
+  type PgTableExtraConfigValue,
   boolean,
   customType,
   doublePrecision,
@@ -874,7 +875,7 @@ export const users = pgTable(
     creationSource: creationSourceEnum('creationSource'),
     autoOptInFeatures: boolean('autoOptInFeatures').notNull().default(false),
   },
-  (table) => [
+  (table): PgTableExtraConfigValue[] => [
     uniqueIndex('users_uuid_key').on(table.uuid),
     index('users_username_idx').on(table.username),
     index('users_emailVerified_idx').on(table.emailVerified),
@@ -937,7 +938,7 @@ export const profile = pgTable(
       .$defaultFn(utcNow),
     updatedAt: timestamp('updatedAt', { precision: 3 }).notNull().$onUpdate(utcNow),
   },
-  (table) => [
+  (table): PgTableExtraConfigValue[] => [
     index('Profile_uid_idx').on(table.uid),
     index('Profile_userId_idx').on(table.userId),
     index('Profile_organizationId_idx').on(table.organizationId),
@@ -996,7 +997,7 @@ export const team = pgTable(
     includeManagedEventsInLimits: boolean('includeManagedEventsInLimits').notNull().default(false),
     autoOptInFeatures: boolean('autoOptInFeatures').notNull().default(false),
   },
-  (table) => [
+  (table): PgTableExtraConfigValue[] => [
     index('Team_parentId_idx').on(table.parentId),
     uniqueIndex('Team_slug_parentId_key').on(table.slug, table.parentId),
     foreignKey({
@@ -2532,7 +2533,7 @@ export const platformOAuthClient = pgTable(
       .default(sql`CURRENT_TIMESTAMP`)
       .$defaultFn(utcNow),
   },
-  (table) => [
+  (table): PgTableExtraConfigValue[] => [
     foreignKey({
       name: 'PlatformOAuthClient_organizationId_fkey',
       columns: [table.organizationId],

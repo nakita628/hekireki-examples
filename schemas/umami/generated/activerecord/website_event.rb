@@ -28,5 +28,5 @@ class WebsiteEvent < ApplicationRecord
   validates :hostname, length: { maximum: 100 }
 
   belongs_to :session, inverse_of: :website_events
-  has_many :event_data, dependent: :restrict_with_error
+  has_many :event_data, class_name: "EventData", inverse_of: :website_event, dependent: :restrict_with_error
 end

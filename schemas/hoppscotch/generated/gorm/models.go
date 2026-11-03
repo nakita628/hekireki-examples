@@ -38,7 +38,7 @@ type TeamMember struct {
 	Role    string `gorm:"column:role;not null" json:"role"`
 	UserUID string `gorm:"column:userUid;uniqueIndex:TeamMember_teamID_userUid_key;not null" json:"userUid"`
 	TeamID  string `gorm:"column:teamID;uniqueIndex:TeamMember_teamID_userUid_key;not null" json:"teamID"`
-	Team    Team
+	Team    *Team
 }
 
 func (TeamMember) TableName() string {
@@ -58,7 +58,7 @@ type TeamInvitation struct {
 	CreatorUID   string `gorm:"column:creatorUid;not null" json:"creatorUid"`
 	InviteeEmail string `gorm:"column:inviteeEmail;uniqueIndex:TeamInvitation_teamID_inviteeEmail_key;not null" json:"inviteeEmail"`
 	InviteeRole  string `gorm:"column:inviteeRole;not null" json:"inviteeRole"`
-	Team         Team
+	Team         *Team
 }
 
 func (TeamInvitation) TableName() string {
@@ -82,7 +82,7 @@ type TeamCollection struct {
 	CreatedOn  DateTime        `gorm:"column:createdOn;type:timestamptz(3);not null" json:"createdOn"`
 	UpdatedOn  DateTime        `gorm:"column:updatedOn;type:timestamptz(3);not null" json:"updatedOn"`
 	Parent     *TeamCollection `gorm:"foreignKey:ParentID"`
-	Team       Team
+	Team       *Team
 	Children   []TeamCollection `gorm:"foreignKey:ParentID;constraint:OnDelete:CASCADE"`
 	Requests   []TeamRequest    `gorm:"foreignKey:CollectionID;constraint:OnDelete:CASCADE"`
 }
@@ -114,17 +114,17 @@ func (*TeamCollection) BeforeUpdate(tx *gorm.DB) error {
 }
 
 type TeamRequest struct {
-	ID           string         `gorm:"column:id;primaryKey" json:"id"`
-	CollectionID string         `gorm:"column:collectionID;uniqueIndex:TeamRequest_teamID_collectionID_orderIndex_key;not null" json:"collectionID"`
-	TeamID       string         `gorm:"column:teamID;uniqueIndex:TeamRequest_teamID_collectionID_orderIndex_key;not null" json:"teamID"`
-	Title        string         `gorm:"column:title;not null" json:"title"`
-	Request      datatypes.JSON `gorm:"column:request;not null" json:"request"`
-	MockExamples datatypes.JSON `gorm:"column:mockExamples" json:"mockExamples"`
-	OrderIndex   int            `gorm:"column:orderIndex;uniqueIndex:TeamRequest_teamID_collectionID_orderIndex_key;not null" json:"orderIndex"`
-	CreatedOn    DateTime       `gorm:"column:createdOn;type:timestamptz(3);not null" json:"createdOn"`
-	UpdatedOn    DateTime       `gorm:"column:updatedOn;type:timestamptz(3);not null" json:"updatedOn"`
-	Collection   TeamCollection `gorm:"foreignKey:CollectionID"`
-	Team         Team
+	ID           string          `gorm:"column:id;primaryKey" json:"id"`
+	CollectionID string          `gorm:"column:collectionID;uniqueIndex:TeamRequest_teamID_collectionID_orderIndex_key;not null" json:"collectionID"`
+	TeamID       string          `gorm:"column:teamID;uniqueIndex:TeamRequest_teamID_collectionID_orderIndex_key;not null" json:"teamID"`
+	Title        string          `gorm:"column:title;not null" json:"title"`
+	Request      datatypes.JSON  `gorm:"column:request;not null" json:"request"`
+	MockExamples datatypes.JSON  `gorm:"column:mockExamples" json:"mockExamples"`
+	OrderIndex   int             `gorm:"column:orderIndex;uniqueIndex:TeamRequest_teamID_collectionID_orderIndex_key;not null" json:"orderIndex"`
+	CreatedOn    DateTime        `gorm:"column:createdOn;type:timestamptz(3);not null" json:"createdOn"`
+	UpdatedOn    DateTime        `gorm:"column:updatedOn;type:timestamptz(3);not null" json:"updatedOn"`
+	Collection   *TeamCollection `gorm:"foreignKey:CollectionID"`
+	Team         *Team
 }
 
 func (TeamRequest) TableName() string {
@@ -158,7 +158,7 @@ type TeamEnvironment struct {
 	TeamID    string         `gorm:"column:teamID;not null" json:"teamID"`
 	Name      string         `gorm:"column:name;not null" json:"name"`
 	Variables datatypes.JSON `gorm:"column:variables;not null" json:"variables"`
-	Team      Team
+	Team      *Team
 }
 
 func (TeamEnvironment) TableName() string {
@@ -221,7 +221,7 @@ type Account struct {
 	ProviderAccessToken  *string  `gorm:"column:providerAccessToken" json:"providerAccessToken"`
 	ProviderScope        *string  `gorm:"column:providerScope" json:"providerScope"`
 	LoggedIn             DateTime `gorm:"column:loggedIn;type:timestamptz(3);not null" json:"loggedIn"`
-	User                 User     `gorm:"foreignKey:UserID;references:UID"`
+	User                 *User    `gorm:"foreignKey:UserID;references:UID"`
 }
 
 func (Account) TableName() string {
@@ -239,12 +239,31 @@ func (m *Account) BeforeCreate(tx *gorm.DB) error {
 	return nil
 }
 
+type VerificationToken struct {
+	DeviceIdentifier string   `gorm:"column:deviceIdentifier;uniqueIndex:VerificationToken_deviceIdentifier_token_key;not null" json:"deviceIdentifier"`
+	Token            string   `gorm:"column:token;primaryKey;uniqueIndex;uniqueIndex:VerificationToken_deviceIdentifier_token_key" json:"token"`
+	UserUID          string   `gorm:"column:userUid;not null" json:"userUid"`
+	ExpiresOn        DateTime `gorm:"column:expiresOn;type:timestamptz(3);not null" json:"expiresOn"`
+	User             *User    `gorm:"references:UID"`
+}
+
+func (VerificationToken) TableName() string {
+	return "VerificationToken"
+}
+
+func (m *VerificationToken) BeforeCreate(_ *gorm.DB) error {
+	if m.Token == "" {
+		m.Token = cuid.New()
+	}
+	return nil
+}
+
 type UserSettings struct {
 	ID         string         `gorm:"column:id;primaryKey" json:"id"`
 	UserUID    string         `gorm:"column:userUid;uniqueIndex;not null" json:"userUid"`
 	Properties datatypes.JSON `gorm:"column:properties;not null" json:"properties"`
 	UpdatedOn  DateTime       `gorm:"column:updatedOn;type:timestamptz(3);not null" json:"updatedOn"`
-	User       User           `gorm:"references:UID"`
+	User       *User          `gorm:"references:UID"`
 }
 
 func (UserSettings) TableName() string {
@@ -278,7 +297,7 @@ type UserHistory struct {
 	ResponseMetadata datatypes.JSON `gorm:"column:responseMetadata;not null" json:"responseMetadata"`
 	IsStarred        bool           `gorm:"column:isStarred;not null" json:"isStarred"`
 	ExecutedOn       DateTime       `gorm:"column:executedOn;type:timestamptz(3);not null" json:"executedOn"`
-	User             User           `gorm:"references:UID"`
+	User             *User          `gorm:"references:UID"`
 }
 
 func (UserHistory) TableName() string {
@@ -302,7 +321,7 @@ type UserEnvironment struct {
 	Name      *string        `gorm:"column:name" json:"name"`
 	Variables datatypes.JSON `gorm:"column:variables;not null" json:"variables"`
 	IsGlobal  bool           `gorm:"column:isGlobal;not null" json:"isGlobal"`
-	User      User           `gorm:"references:UID"`
+	User      *User          `gorm:"references:UID"`
 }
 
 func (UserEnvironment) TableName() string {
@@ -316,19 +335,39 @@ func (m *UserEnvironment) BeforeCreate(_ *gorm.DB) error {
 	return nil
 }
 
+type InvitedUsers struct {
+	AdminUID     string   `gorm:"column:adminUid;not null" json:"adminUid"`
+	AdminEmail   string   `gorm:"column:adminEmail;not null" json:"adminEmail"`
+	InviteeEmail string   `gorm:"column:inviteeEmail;primaryKey;uniqueIndex" json:"inviteeEmail"`
+	InvitedOn    DateTime `gorm:"column:invitedOn;type:timestamptz(3);not null" json:"invitedOn"`
+	User         *User    `gorm:"foreignKey:AdminUID;references:UID"`
+}
+
+func (InvitedUsers) TableName() string {
+	return "InvitedUsers"
+}
+
+func (m *InvitedUsers) BeforeCreate(tx *gorm.DB) error {
+	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
+	if m.InvitedOn.IsZero() {
+		m.InvitedOn = DateTime{Time: now}
+	}
+	return nil
+}
+
 type UserRequest struct {
-	ID             string         `gorm:"column:id;primaryKey" json:"id"`
-	CollectionID   string         `gorm:"column:collectionID;uniqueIndex:UserRequest_userUid_collectionID_orderIndex_key;not null" json:"collectionID"`
-	UserUID        string         `gorm:"column:userUid;uniqueIndex:UserRequest_userUid_collectionID_orderIndex_key;not null" json:"userUid"`
-	Title          string         `gorm:"column:title;not null" json:"title"`
-	Request        datatypes.JSON `gorm:"column:request;not null" json:"request"`
-	Type           string         `gorm:"column:type;not null" json:"type"`
-	MockExamples   datatypes.JSON `gorm:"column:mockExamples" json:"mockExamples"`
-	OrderIndex     int            `gorm:"column:orderIndex;uniqueIndex:UserRequest_userUid_collectionID_orderIndex_key;not null" json:"orderIndex"`
-	CreatedOn      DateTime       `gorm:"column:createdOn;type:timestamptz(3);not null" json:"createdOn"`
-	UpdatedOn      DateTime       `gorm:"column:updatedOn;type:timestamptz(3);not null" json:"updatedOn"`
-	UserCollection UserCollection `gorm:"foreignKey:CollectionID"`
-	User           User           `gorm:"references:UID"`
+	ID             string          `gorm:"column:id;primaryKey" json:"id"`
+	CollectionID   string          `gorm:"column:collectionID;uniqueIndex:UserRequest_userUid_collectionID_orderIndex_key;not null" json:"collectionID"`
+	UserUID        string          `gorm:"column:userUid;uniqueIndex:UserRequest_userUid_collectionID_orderIndex_key;not null" json:"userUid"`
+	Title          string          `gorm:"column:title;not null" json:"title"`
+	Request        datatypes.JSON  `gorm:"column:request;not null" json:"request"`
+	Type           string          `gorm:"column:type;not null" json:"type"`
+	MockExamples   datatypes.JSON  `gorm:"column:mockExamples" json:"mockExamples"`
+	OrderIndex     int             `gorm:"column:orderIndex;uniqueIndex:UserRequest_userUid_collectionID_orderIndex_key;not null" json:"orderIndex"`
+	CreatedOn      DateTime        `gorm:"column:createdOn;type:timestamptz(3);not null" json:"createdOn"`
+	UpdatedOn      DateTime        `gorm:"column:updatedOn;type:timestamptz(3);not null" json:"updatedOn"`
+	UserCollection *UserCollection `gorm:"foreignKey:CollectionID"`
+	User           *User           `gorm:"references:UID"`
 }
 
 func (UserRequest) TableName() string {
@@ -368,7 +407,7 @@ type UserCollection struct {
 	CreatedOn  DateTime         `gorm:"column:createdOn;type:timestamptz(3);not null" json:"createdOn"`
 	UpdatedOn  DateTime         `gorm:"column:updatedOn;type:timestamptz(3);not null" json:"updatedOn"`
 	Parent     *UserCollection  `gorm:"foreignKey:ParentID"`
-	User       User             `gorm:"references:UID"`
+	User       *User            `gorm:"references:UID"`
 	Children   []UserCollection `gorm:"foreignKey:ParentID;constraint:OnDelete:CASCADE"`
 	Requests   []UserRequest    `gorm:"foreignKey:CollectionID;constraint:OnDelete:CASCADE"`
 }
@@ -415,7 +454,7 @@ type MockServer struct {
 	CreatedOn       DateTime             `gorm:"column:createdOn;type:timestamptz(3);not null" json:"createdOn"`
 	UpdatedOn       DateTime             `gorm:"column:updatedOn;type:timestamptz(3);not null" json:"updatedOn"`
 	DeletedAt       *DateTime            `gorm:"column:deletedAt;type:timestamptz(3)" json:"deletedAt"`
-	User            User                 `gorm:"foreignKey:CreatorUID;references:UID"`
+	User            *User                `gorm:"foreignKey:CreatorUID;references:UID"`
 	RequestLogs     []MockServerLog      `gorm:"foreignKey:MockServerID;constraint:OnDelete:CASCADE"`
 	ActivityHistory []MockServerActivity `gorm:"foreignKey:MockServerID;constraint:OnDelete:CASCADE"`
 }
@@ -461,7 +500,7 @@ type MockServerLog struct {
 	IPAddress       *string        `gorm:"column:ipAddress" json:"ipAddress"`
 	UserAgent       *string        `gorm:"column:userAgent" json:"userAgent"`
 	ExecutedAt      DateTime       `gorm:"column:executedAt;index:MockServerLog_mockServerID_executedAt_idx;type:timestamptz(3);not null" json:"executedAt"`
-	MockServer      MockServer
+	MockServer      *MockServer
 }
 
 func (MockServerLog) TableName() string {
@@ -485,7 +524,7 @@ type MockServerActivity struct {
 	Action       string   `gorm:"column:action;not null" json:"action"`
 	PerformedBy  *string  `gorm:"column:performedBy" json:"performedBy"`
 	PerformedAt  DateTime `gorm:"column:performedAt;type:timestamptz(3);not null" json:"performedAt"`
-	MockServer   MockServer
+	MockServer   *MockServer
 }
 
 func (MockServerActivity) TableName() string {
@@ -510,7 +549,7 @@ type Shortcode struct {
 	EmbedProperties datatypes.JSON `gorm:"column:embedProperties" json:"embedProperties"`
 	CreatedOn       DateTime       `gorm:"column:createdOn;type:timestamptz(3);not null" json:"createdOn"`
 	UpdatedOn       DateTime       `gorm:"column:updatedOn;type:timestamptz(3);not null" json:"updatedOn"`
-	User            User           `gorm:"foreignKey:CreatorUID;references:UID"`
+	User            *User          `gorm:"foreignKey:CreatorUID;references:UID"`
 }
 
 func (Shortcode) TableName() string {
@@ -580,7 +619,7 @@ type PersonalAccessToken struct {
 	ExpiresOn *DateTime `gorm:"column:expiresOn;type:timestamptz(3)" json:"expiresOn"`
 	CreatedOn DateTime  `gorm:"column:createdOn;type:timestamptz(3);not null" json:"createdOn"`
 	UpdatedOn DateTime  `gorm:"column:updatedOn;type:timestamptz(3);not null" json:"updatedOn"`
-	User      User      `gorm:"references:UID"`
+	User      *User     `gorm:"references:UID"`
 }
 
 func (PersonalAccessToken) TableName() string {

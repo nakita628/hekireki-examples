@@ -1016,7 +1016,7 @@ class Team(models.Model):
 
 
 class TeamEmail(models.Model):
-    team = models.OneToOneField("Team", on_delete=models.CASCADE, related_name="team_email", db_column="teamId")
+    team = models.OneToOneField("Team", on_delete=models.CASCADE, related_name="team_email", primary_key=True, db_column="teamId")
     created_at = UtcDateTimeField(db_column="createdAt", default=timezone.now)
     name = models.TextField()
     email = models.TextField(unique=True)
@@ -1026,7 +1026,7 @@ class TeamEmail(models.Model):
 
 
 class TeamEmailVerification(models.Model):
-    team = models.OneToOneField("Team", on_delete=models.CASCADE, related_name="email_verification", db_column="teamId")
+    team = models.OneToOneField("Team", on_delete=models.CASCADE, related_name="email_verification", primary_key=True, db_column="teamId")
     name = models.TextField()
     email = models.TextField()
     token = models.TextField(unique=True)

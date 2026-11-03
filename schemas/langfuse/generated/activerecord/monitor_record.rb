@@ -1,4 +1,5 @@
-class Monitor < ApplicationRecord
+class MonitorRecord < ApplicationRecord
+  self.table_name = "monitors"
   self.implicit_order_column = "created_at"
 
   attribute :id, default: -> { Cuid.generate }

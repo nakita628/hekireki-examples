@@ -118,8 +118,8 @@ type SpaceDataDbBinding struct {
 	LastModifiedTime     *DateTime `gorm:"column:last_modified_time" json:"last_modified_time"`
 	LastHistoryFlushedAt *DateTime `gorm:"column:last_history_flushed_at" json:"last_history_flushed_at"`
 	LastRemovalFlushedAt *DateTime `gorm:"column:last_removal_flushed_at" json:"last_removal_flushed_at"`
-	Space                Space
-	DataDbConnection     DataDbConnection
+	Space                *Space
+	DataDbConnection     *DataDbConnection
 }
 
 func (SpaceDataDbBinding) TableName() string {
@@ -167,9 +167,9 @@ type SpaceDataDbMigrationJob struct {
 	CreatedBy            string         `gorm:"column:created_by;not null" json:"created_by"`
 	CreatedTime          DateTime       `gorm:"column:created_time;not null" json:"created_time"`
 	LastModifiedTime     *DateTime      `gorm:"column:last_modified_time" json:"last_modified_time"`
-	Space                Space
-	SourceConnection     DataDbConnection `gorm:"foreignKey:SourceConnectionID"`
-	TargetConnection     DataDbConnection `gorm:"foreignKey:TargetConnectionID"`
+	Space                *Space
+	SourceConnection     *DataDbConnection `gorm:"foreignKey:SourceConnectionID"`
+	TargetConnection     *DataDbConnection `gorm:"foreignKey:TargetConnectionID"`
 }
 
 func (SpaceDataDbMigrationJob) TableName() string {
@@ -215,9 +215,9 @@ type BaseDataDbMoveJob struct {
 	CreatedBy          string         `gorm:"column:created_by;not null" json:"created_by"`
 	CreatedTime        DateTime       `gorm:"column:created_time;not null" json:"created_time"`
 	LastModifiedTime   *DateTime      `gorm:"column:last_modified_time" json:"last_modified_time"`
-	Base               Base
-	SourceSpace        Space `gorm:"foreignKey:SourceSpaceID"`
-	TargetSpace        Space `gorm:"foreignKey:TargetSpaceID"`
+	Base               *Base
+	SourceSpace        *Space `gorm:"foreignKey:SourceSpaceID"`
+	TargetSpace        *Space `gorm:"foreignKey:TargetSpaceID"`
 }
 
 func (BaseDataDbMoveJob) TableName() string {
@@ -284,7 +284,7 @@ type Base struct {
 	CreatedBy        string    `gorm:"column:created_by;not null" json:"created_by"`
 	LastModifiedBy   *string   `gorm:"column:last_modified_by" json:"last_modified_by"`
 	LastModifiedTime *DateTime `gorm:"column:last_modified_time" json:"last_modified_time"`
-	Space            Space
+	Space            *Space
 	Tables           []TableMeta         `gorm:"foreignKey:BaseID"`
 	DataDbMoveJobs   []BaseDataDbMoveJob `gorm:"foreignKey:BaseID;constraint:OnDelete:CASCADE"`
 	UserOrders       []UserBaseOrder     `gorm:"foreignKey:BaseID;constraint:OnDelete:CASCADE"`
@@ -335,7 +335,7 @@ type TableMeta struct {
 	DeletedTime       *DateTime      `gorm:"column:deleted_time;index:table_meta_base_id_deleted_time_idx" json:"deleted_time"`
 	CreatedBy         string         `gorm:"column:created_by;not null" json:"created_by"`
 	LastModifiedBy    *string        `gorm:"column:last_modified_by" json:"last_modified_by"`
-	Base              Base
+	Base              *Base
 	Fields            []Field             `gorm:"foreignKey:TableID"`
 	Views             []View              `gorm:"foreignKey:TableID"`
 	PluginPanel       []PluginPanel       `gorm:"foreignKey:TableID;constraint:OnDelete:CASCADE"`
@@ -451,37 +451,37 @@ func (*SchemaOperation) BeforeUpdate(tx *gorm.DB) error {
 }
 
 type Field struct {
-	ID                  string    `gorm:"column:id;primaryKey" json:"id"`
-	Name                string    `gorm:"column:name;not null" json:"name"`
-	Description         *string   `gorm:"column:description" json:"description"`
-	Options             *string   `gorm:"column:options" json:"options"`
-	Meta                *string   `gorm:"column:meta" json:"meta"`
-	AiConfig            *string   `gorm:"column:ai_config" json:"ai_config"`
-	Type                string    `gorm:"column:type;not null" json:"type"`
-	CellValueType       string    `gorm:"column:cell_value_type;not null" json:"cell_value_type"`
-	IsMultipleCellValue *bool     `gorm:"column:is_multiple_cell_value" json:"is_multiple_cell_value"`
-	DbFieldType         string    `gorm:"column:db_field_type;not null" json:"db_field_type"`
-	DbFieldName         string    `gorm:"column:db_field_name;not null" json:"db_field_name"`
-	ProvisionState      string    `gorm:"column:provision_state;default:'ready';not null" json:"provision_state"`
-	NotNull             *bool     `gorm:"column:not_null" json:"not_null"`
-	Unique              *bool     `gorm:"column:unique" json:"unique"`
-	IsPrimary           *bool     `gorm:"column:is_primary" json:"is_primary"`
-	IsComputed          *bool     `gorm:"column:is_computed" json:"is_computed"`
-	IsLookup            *bool     `gorm:"column:is_lookup" json:"is_lookup"`
-	IsConditionalLookup *bool     `gorm:"column:is_conditional_lookup" json:"is_conditional_lookup"`
-	IsPending           *bool     `gorm:"column:is_pending" json:"is_pending"`
-	HasError            *bool     `gorm:"column:has_error" json:"has_error"`
-	LookupLinkedFieldID *string   `gorm:"column:lookup_linked_field_id;index:field_lookup_linked_field_id_idx" json:"lookup_linked_field_id"`
-	LookupOptions       *string   `gorm:"column:lookup_options" json:"lookup_options"`
-	TableID             string    `gorm:"column:table_id;index:field_table_id_deleted_time_idx;not null" json:"table_id"`
-	Order               float64   `gorm:"column:order;not null" json:"order"`
-	Version             int       `gorm:"column:version;not null" json:"version"`
-	CreatedTime         DateTime  `gorm:"column:created_time;not null" json:"created_time"`
-	LastModifiedTime    *DateTime `gorm:"column:last_modified_time" json:"last_modified_time"`
-	DeletedTime         *DateTime `gorm:"column:deleted_time;index:field_table_id_deleted_time_idx" json:"deleted_time"`
-	CreatedBy           string    `gorm:"column:created_by;not null" json:"created_by"`
-	LastModifiedBy      *string   `gorm:"column:last_modified_by" json:"last_modified_by"`
-	Table               TableMeta `gorm:"foreignKey:TableID"`
+	ID                  string     `gorm:"column:id;primaryKey" json:"id"`
+	Name                string     `gorm:"column:name;not null" json:"name"`
+	Description         *string    `gorm:"column:description" json:"description"`
+	Options             *string    `gorm:"column:options" json:"options"`
+	Meta                *string    `gorm:"column:meta" json:"meta"`
+	AiConfig            *string    `gorm:"column:ai_config" json:"ai_config"`
+	Type                string     `gorm:"column:type;not null" json:"type"`
+	CellValueType       string     `gorm:"column:cell_value_type;not null" json:"cell_value_type"`
+	IsMultipleCellValue *bool      `gorm:"column:is_multiple_cell_value" json:"is_multiple_cell_value"`
+	DbFieldType         string     `gorm:"column:db_field_type;not null" json:"db_field_type"`
+	DbFieldName         string     `gorm:"column:db_field_name;not null" json:"db_field_name"`
+	ProvisionState      string     `gorm:"column:provision_state;default:'ready';not null" json:"provision_state"`
+	NotNull             *bool      `gorm:"column:not_null" json:"not_null"`
+	Unique              *bool      `gorm:"column:unique" json:"unique"`
+	IsPrimary           *bool      `gorm:"column:is_primary" json:"is_primary"`
+	IsComputed          *bool      `gorm:"column:is_computed" json:"is_computed"`
+	IsLookup            *bool      `gorm:"column:is_lookup" json:"is_lookup"`
+	IsConditionalLookup *bool      `gorm:"column:is_conditional_lookup" json:"is_conditional_lookup"`
+	IsPending           *bool      `gorm:"column:is_pending" json:"is_pending"`
+	HasError            *bool      `gorm:"column:has_error" json:"has_error"`
+	LookupLinkedFieldID *string    `gorm:"column:lookup_linked_field_id;index:field_lookup_linked_field_id_idx" json:"lookup_linked_field_id"`
+	LookupOptions       *string    `gorm:"column:lookup_options" json:"lookup_options"`
+	TableID             string     `gorm:"column:table_id;index:field_table_id_deleted_time_idx;not null" json:"table_id"`
+	Order               float64    `gorm:"column:order;not null" json:"order"`
+	Version             int        `gorm:"column:version;not null" json:"version"`
+	CreatedTime         DateTime   `gorm:"column:created_time;not null" json:"created_time"`
+	LastModifiedTime    *DateTime  `gorm:"column:last_modified_time" json:"last_modified_time"`
+	DeletedTime         *DateTime  `gorm:"column:deleted_time;index:field_table_id_deleted_time_idx" json:"deleted_time"`
+	CreatedBy           string     `gorm:"column:created_by;not null" json:"created_by"`
+	LastModifiedBy      *string    `gorm:"column:last_modified_by" json:"last_modified_by"`
+	Table               *TableMeta `gorm:"foreignKey:TableID"`
 }
 
 func (Field) TableName() string {
@@ -570,11 +570,11 @@ func (*ComputedUpdateOutbox) BeforeUpdate(tx *gorm.DB) error {
 }
 
 type ComputedUpdateOutboxSeed struct {
-	ID       string               `gorm:"column:id;primaryKey" json:"id"`
-	TaskID   string               `gorm:"column:task_id;uniqueIndex:computed_update_outbox_seed_task_id_table_id_record_id_key;index:computed_update_outbox_seed_task_id_idx;not null" json:"task_id"`
-	TableID  string               `gorm:"column:table_id;uniqueIndex:computed_update_outbox_seed_task_id_table_id_record_id_key;not null" json:"table_id"`
-	RecordID string               `gorm:"column:record_id;uniqueIndex:computed_update_outbox_seed_task_id_table_id_record_id_key;not null" json:"record_id"`
-	Task     ComputedUpdateOutbox `gorm:"foreignKey:TaskID"`
+	ID       string                `gorm:"column:id;primaryKey" json:"id"`
+	TaskID   string                `gorm:"column:task_id;uniqueIndex:computed_update_outbox_seed_task_id_table_id_record_id_key;index:computed_update_outbox_seed_task_id_idx;not null" json:"task_id"`
+	TableID  string                `gorm:"column:table_id;uniqueIndex:computed_update_outbox_seed_task_id_table_id_record_id_key;not null" json:"table_id"`
+	RecordID string                `gorm:"column:record_id;uniqueIndex:computed_update_outbox_seed_task_id_table_id_record_id_key;not null" json:"record_id"`
+	Task     *ComputedUpdateOutbox `gorm:"foreignKey:TaskID"`
 }
 
 func (ComputedUpdateOutboxSeed) TableName() string {
@@ -796,28 +796,28 @@ func (m *ComputedTaskFieldRef) BeforeCreate(tx *gorm.DB) error {
 }
 
 type View struct {
-	ID               string    `gorm:"column:id;primaryKey" json:"id"`
-	Name             string    `gorm:"column:name;not null" json:"name"`
-	Description      *string   `gorm:"column:description" json:"description"`
-	TableID          string    `gorm:"column:table_id;index:view_table_id_deleted_time_idx;not null" json:"table_id"`
-	Type             string    `gorm:"column:type;not null" json:"type"`
-	Sort             *string   `gorm:"column:sort" json:"sort"`
-	Filter           *string   `gorm:"column:filter" json:"filter"`
-	Group            *string   `gorm:"column:group" json:"group"`
-	Options          *string   `gorm:"column:options" json:"options"`
-	Order            float64   `gorm:"column:order;index:view_order_idx;not null" json:"order"`
-	Version          int       `gorm:"column:version;not null" json:"version"`
-	ColumnMeta       string    `gorm:"column:column_meta;not null" json:"column_meta"`
-	IsLocked         *bool     `gorm:"column:is_locked" json:"is_locked"`
-	EnableShare      *bool     `gorm:"column:enable_share" json:"enable_share"`
-	ShareID          *string   `gorm:"column:share_id;uniqueIndex" json:"share_id"`
-	ShareMeta        *string   `gorm:"column:share_meta" json:"share_meta"`
-	CreatedTime      DateTime  `gorm:"column:created_time;not null" json:"created_time"`
-	LastModifiedTime *DateTime `gorm:"column:last_modified_time" json:"last_modified_time"`
-	DeletedTime      *DateTime `gorm:"column:deleted_time;index:view_table_id_deleted_time_idx" json:"deleted_time"`
-	CreatedBy        string    `gorm:"column:created_by;not null" json:"created_by"`
-	LastModifiedBy   *string   `gorm:"column:last_modified_by" json:"last_modified_by"`
-	Table            TableMeta `gorm:"foreignKey:TableID"`
+	ID               string     `gorm:"column:id;primaryKey" json:"id"`
+	Name             string     `gorm:"column:name;not null" json:"name"`
+	Description      *string    `gorm:"column:description" json:"description"`
+	TableID          string     `gorm:"column:table_id;index:view_table_id_deleted_time_idx;not null" json:"table_id"`
+	Type             string     `gorm:"column:type;not null" json:"type"`
+	Sort             *string    `gorm:"column:sort" json:"sort"`
+	Filter           *string    `gorm:"column:filter" json:"filter"`
+	Group            *string    `gorm:"column:group" json:"group"`
+	Options          *string    `gorm:"column:options" json:"options"`
+	Order            float64    `gorm:"column:order;index:view_order_idx;not null" json:"order"`
+	Version          int        `gorm:"column:version;not null" json:"version"`
+	ColumnMeta       string     `gorm:"column:column_meta;not null" json:"column_meta"`
+	IsLocked         *bool      `gorm:"column:is_locked" json:"is_locked"`
+	EnableShare      *bool      `gorm:"column:enable_share" json:"enable_share"`
+	ShareID          *string    `gorm:"column:share_id;uniqueIndex" json:"share_id"`
+	ShareMeta        *string    `gorm:"column:share_meta" json:"share_meta"`
+	CreatedTime      DateTime   `gorm:"column:created_time;not null" json:"created_time"`
+	LastModifiedTime *DateTime  `gorm:"column:last_modified_time" json:"last_modified_time"`
+	DeletedTime      *DateTime  `gorm:"column:deleted_time;index:view_table_id_deleted_time_idx" json:"deleted_time"`
+	CreatedBy        string     `gorm:"column:created_by;not null" json:"created_by"`
+	LastModifiedBy   *string    `gorm:"column:last_modified_by" json:"last_modified_by"`
+	Table            *TableMeta `gorm:"foreignKey:TableID"`
 }
 
 func (View) TableName() string {
@@ -949,7 +949,7 @@ type Account struct {
 	ProviderID   string   `gorm:"column:provider_id;uniqueIndex:account_provider_provider_id_connection_id_key;not null" json:"provider_id"`
 	ConnectionID string   `gorm:"column:connection_id;uniqueIndex:account_provider_provider_id_connection_id_key;default:'';not null" json:"connection_id"`
 	CreatedTime  DateTime `gorm:"column:created_time;not null" json:"created_time"`
-	User         User
+	User         *User
 }
 
 func (Account) TableName() string {
@@ -1216,6 +1216,38 @@ func (*AccessToken) BeforeUpdate(tx *gorm.DB) error {
 	return nil
 }
 
+type Setting struct {
+	Name             string    `gorm:"column:name;primaryKey;uniqueIndex" json:"name"`
+	Content          *string   `gorm:"column:content" json:"content"`
+	CreatedTime      DateTime  `gorm:"column:created_time;not null" json:"created_time"`
+	LastModifiedTime *DateTime `gorm:"column:last_modified_time" json:"last_modified_time"`
+	CreatedBy        string    `gorm:"column:created_by;not null" json:"created_by"`
+	LastModifiedBy   *string   `gorm:"column:last_modified_by" json:"last_modified_by"`
+}
+
+func (Setting) TableName() string {
+	return "setting"
+}
+
+func (m *Setting) BeforeCreate(tx *gorm.DB) error {
+	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
+	if m.CreatedTime.IsZero() {
+		m.CreatedTime = DateTime{Time: now}
+	}
+	if m.LastModifiedTime == nil {
+		m.LastModifiedTime = &DateTime{Time: now}
+	}
+	return nil
+}
+
+func (*Setting) BeforeUpdate(tx *gorm.DB) error {
+	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
+	if !tx.Statement.Changed("LastModifiedTime") {
+		tx.Statement.SetColumn("LastModifiedTime", &DateTime{Time: now})
+	}
+	return nil
+}
+
 type OAuthApp struct {
 	ID                  string               `gorm:"column:id;primaryKey" json:"id"`
 	Name                string               `gorm:"column:name;not null" json:"name"`
@@ -1262,11 +1294,11 @@ func (*OAuthApp) BeforeUpdate(tx *gorm.DB) error {
 }
 
 type OAuthAppAuthorized struct {
-	ID             string   `gorm:"column:id;primaryKey" json:"id"`
-	ClientID       string   `gorm:"column:client_id;uniqueIndex:oauth_app_authorized_client_id_user_id_key;not null" json:"client_id"`
-	UserID         string   `gorm:"column:user_id;uniqueIndex:oauth_app_authorized_client_id_user_id_key;not null" json:"user_id"`
-	AuthorizedTime DateTime `gorm:"column:authorized_time;not null" json:"authorized_time"`
-	OAuthApp       OAuthApp `gorm:"foreignKey:ClientID;references:ClientID"`
+	ID             string    `gorm:"column:id;primaryKey" json:"id"`
+	ClientID       string    `gorm:"column:client_id;uniqueIndex:oauth_app_authorized_client_id_user_id_key;not null" json:"client_id"`
+	UserID         string    `gorm:"column:user_id;uniqueIndex:oauth_app_authorized_client_id_user_id_key;not null" json:"user_id"`
+	AuthorizedTime DateTime  `gorm:"column:authorized_time;not null" json:"authorized_time"`
+	OAuthApp       *OAuthApp `gorm:"foreignKey:ClientID;references:ClientID"`
 }
 
 func (OAuthAppAuthorized) TableName() string {
@@ -1288,7 +1320,7 @@ type OAuthAppSecret struct {
 	CreatedTime  DateTime        `gorm:"column:created_time;not null" json:"created_time"`
 	CreatedBy    string          `gorm:"column:created_by;not null" json:"created_by"`
 	LastUsedTime *DateTime       `gorm:"column:last_used_time" json:"last_used_time"`
-	OAuthApp     OAuthApp        `gorm:"foreignKey:ClientID;references:ClientID"`
+	OAuthApp     *OAuthApp       `gorm:"foreignKey:ClientID;references:ClientID"`
 	Tokens       []OAuthAppToken `gorm:"foreignKey:AppSecretID;constraint:OnDelete:CASCADE"`
 }
 
@@ -1308,15 +1340,15 @@ func (m *OAuthAppSecret) BeforeCreate(tx *gorm.DB) error {
 }
 
 type OAuthAppToken struct {
-	ID               string         `gorm:"column:id;primaryKey" json:"id"`
-	ClientID         string         `gorm:"column:client_id;index:oauth_app_token_client_id_idx;not null" json:"client_id"`
-	AppSecretID      *string        `gorm:"column:app_secret_id" json:"app_secret_id"`
-	RefreshTokenSign string         `gorm:"column:refresh_token_sign;uniqueIndex;not null" json:"refresh_token_sign"`
-	ExpiredTime      DateTime       `gorm:"column:expired_time;not null" json:"expired_time"`
-	CreatedTime      DateTime       `gorm:"column:created_time;not null" json:"created_time"`
-	CreatedBy        string         `gorm:"column:created_by;not null" json:"created_by"`
-	OAuthAppSecret   OAuthAppSecret `gorm:"foreignKey:AppSecretID"`
-	OAuthApp         OAuthApp       `gorm:"foreignKey:ClientID;references:ClientID"`
+	ID               string          `gorm:"column:id;primaryKey" json:"id"`
+	ClientID         string          `gorm:"column:client_id;index:oauth_app_token_client_id_idx;not null" json:"client_id"`
+	AppSecretID      *string         `gorm:"column:app_secret_id" json:"app_secret_id"`
+	RefreshTokenSign string          `gorm:"column:refresh_token_sign;uniqueIndex;not null" json:"refresh_token_sign"`
+	ExpiredTime      DateTime        `gorm:"column:expired_time;not null" json:"expired_time"`
+	CreatedTime      DateTime        `gorm:"column:created_time;not null" json:"created_time"`
+	CreatedBy        string          `gorm:"column:created_by;not null" json:"created_by"`
+	OAuthAppSecret   *OAuthAppSecret `gorm:"foreignKey:AppSecretID"`
+	OAuthApp         *OAuthApp       `gorm:"foreignKey:ClientID;references:ClientID"`
 }
 
 func (OAuthAppToken) TableName() string {
@@ -1518,7 +1550,7 @@ type PluginInstall struct {
 	CreatedBy        string    `gorm:"column:created_by;not null" json:"created_by"`
 	LastModifiedTime *DateTime `gorm:"column:last_modified_time" json:"last_modified_time"`
 	LastModifiedBy   *string   `gorm:"column:last_modified_by" json:"last_modified_by"`
-	Plugin           Plugin
+	Plugin           *Plugin
 }
 
 func (PluginInstall) TableName() string {
@@ -1683,15 +1715,15 @@ func (*Integration) BeforeUpdate(tx *gorm.DB) error {
 }
 
 type PluginPanel struct {
-	ID               string    `gorm:"column:id;primaryKey" json:"id"`
-	Name             string    `gorm:"column:name;not null" json:"name"`
-	TableID          string    `gorm:"column:table_id;not null" json:"table_id"`
-	Layout           *string   `gorm:"column:layout" json:"layout"`
-	CreatedBy        string    `gorm:"column:created_by;not null" json:"created_by"`
-	CreatedTime      DateTime  `gorm:"column:created_time;not null" json:"created_time"`
-	LastModifiedTime *DateTime `gorm:"column:last_modified_time" json:"last_modified_time"`
-	LastModifiedBy   *string   `gorm:"column:last_modified_by" json:"last_modified_by"`
-	Table            TableMeta `gorm:"foreignKey:TableID"`
+	ID               string     `gorm:"column:id;primaryKey" json:"id"`
+	Name             string     `gorm:"column:name;not null" json:"name"`
+	TableID          string     `gorm:"column:table_id;not null" json:"table_id"`
+	Layout           *string    `gorm:"column:layout" json:"layout"`
+	CreatedBy        string     `gorm:"column:created_by;not null" json:"created_by"`
+	CreatedTime      DateTime   `gorm:"column:created_time;not null" json:"created_time"`
+	LastModifiedTime *DateTime  `gorm:"column:last_modified_time" json:"last_modified_time"`
+	LastModifiedBy   *string    `gorm:"column:last_modified_by" json:"last_modified_by"`
+	Table            *TableMeta `gorm:"foreignKey:TableID"`
 }
 
 func (PluginPanel) TableName() string {
@@ -1721,15 +1753,15 @@ func (*PluginPanel) BeforeUpdate(tx *gorm.DB) error {
 }
 
 type PluginContextMenu struct {
-	ID               string    `gorm:"column:id;primaryKey" json:"id"`
-	TableID          string    `gorm:"column:table_id;not null" json:"table_id"`
-	PluginInstallID  string    `gorm:"column:plugin_install_id;uniqueIndex;not null" json:"plugin_install_id"`
-	Order            float64   `gorm:"column:order;not null" json:"order"`
-	CreatedTime      DateTime  `gorm:"column:created_time;not null" json:"created_time"`
-	CreatedBy        string    `gorm:"column:created_by;not null" json:"created_by"`
-	LastModifiedTime *DateTime `gorm:"column:last_modified_time" json:"last_modified_time"`
-	LastModifiedBy   *string   `gorm:"column:last_modified_by" json:"last_modified_by"`
-	Table            TableMeta `gorm:"foreignKey:TableID"`
+	ID               string     `gorm:"column:id;primaryKey" json:"id"`
+	TableID          string     `gorm:"column:table_id;not null" json:"table_id"`
+	PluginInstallID  string     `gorm:"column:plugin_install_id;uniqueIndex;not null" json:"plugin_install_id"`
+	Order            float64    `gorm:"column:order;not null" json:"order"`
+	CreatedTime      DateTime   `gorm:"column:created_time;not null" json:"created_time"`
+	CreatedBy        string     `gorm:"column:created_by;not null" json:"created_by"`
+	LastModifiedTime *DateTime  `gorm:"column:last_modified_time" json:"last_modified_time"`
+	LastModifiedBy   *string    `gorm:"column:last_modified_by" json:"last_modified_by"`
+	Table            *TableMeta `gorm:"foreignKey:TableID"`
 }
 
 func (PluginContextMenu) TableName() string {
@@ -1789,8 +1821,8 @@ type UserBaseOrder struct {
 	Order            float64   `gorm:"column:order;index:user_base_order_user_id_order_idx;not null" json:"order"`
 	CreatedTime      DateTime  `gorm:"column:created_time;not null" json:"created_time"`
 	LastModifiedTime *DateTime `gorm:"column:last_modified_time" json:"last_modified_time"`
-	User             User
-	Base             Base
+	User             *User
+	Base             *Base
 }
 
 func (UserBaseOrder) TableName() string {
@@ -1955,7 +1987,7 @@ type TaskRun struct {
 	StartedTime      *DateTime `gorm:"column:started_time" json:"started_time"`
 	CreatedTime      DateTime  `gorm:"column:created_time;index:task_run_status_base_id_created_time_idx;not null" json:"created_time"`
 	LastModifiedTime *DateTime `gorm:"column:last_modified_time;index:task_run_status_last_modified_time_idx" json:"last_modified_time"`
-	Task             Task
+	Task             *Task
 }
 
 func (TaskRun) TableName() string {
@@ -2000,6 +2032,25 @@ func (m *TaskReference) BeforeCreate(tx *gorm.DB) error {
 	if m.ID == "" {
 		m.ID = cuid.New()
 	}
+	if m.CreatedTime.IsZero() {
+		m.CreatedTime = DateTime{Time: now}
+	}
+	return nil
+}
+
+type Waitlist struct {
+	Email       string    `gorm:"column:email;primaryKey;uniqueIndex" json:"email"`
+	Invite      *bool     `gorm:"column:invite" json:"invite"`
+	InviteTime  *DateTime `gorm:"column:invite_time" json:"invite_time"`
+	CreatedTime DateTime  `gorm:"column:created_time;not null" json:"created_time"`
+}
+
+func (Waitlist) TableName() string {
+	return "waitlist"
+}
+
+func (m *Waitlist) BeforeCreate(tx *gorm.DB) error {
+	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
 	if m.CreatedTime.IsZero() {
 		m.CreatedTime = DateTime{Time: now}
 	}

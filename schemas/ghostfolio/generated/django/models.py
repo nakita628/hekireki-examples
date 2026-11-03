@@ -205,7 +205,7 @@ class Analytics(models.Model):
     last_request_at = UtcDateTimeField(db_column="lastRequestAt", default=timezone.now)
     last_request_client = models.TextField(choices=RequestClient.choices, null=True, db_column="lastRequestClient")
     updated_at = UtcDateTimeField(db_column="updatedAt", auto_now=True)
-    user = models.OneToOneField("User", on_delete=models.CASCADE, related_name="analytics", db_column="userId")
+    user = models.OneToOneField("User", on_delete=models.CASCADE, related_name="analytics", primary_key=True, db_column="userId")
     objects = AutoNowQuerySet.as_manager()
 
     class Meta:
@@ -238,7 +238,7 @@ class AssetProfileOverrides(models.Model):
     holdings = models.JSONField(null=True, default=list)
     name = models.TextField(null=True)
     sectors = models.JSONField(null=True, default=list)
-    symbol_profile = models.OneToOneField("SymbolProfile", on_delete=models.CASCADE, related_name="asset_profile_overrides", db_column="symbolProfileId")
+    symbol_profile = models.OneToOneField("SymbolProfile", on_delete=models.CASCADE, related_name="asset_profile_overrides", primary_key=True, db_column="symbolProfileId")
     updated_at = UtcDateTimeField(db_column="updatedAt", auto_now=True)
     url = models.TextField(null=True)
     objects = AutoNowQuerySet.as_manager()
@@ -377,7 +377,7 @@ class Property(models.Model):
 class Settings(models.Model):
     settings = models.JSONField(null=True)
     updated_at = UtcDateTimeField(db_column="updatedAt", auto_now=True)
-    user = models.OneToOneField("User", on_delete=models.CASCADE, related_name="settings", db_column="userId")
+    user = models.OneToOneField("User", on_delete=models.CASCADE, related_name="settings", primary_key=True, db_column="userId")
     objects = AutoNowQuerySet.as_manager()
 
     class Meta:

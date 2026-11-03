@@ -17,8 +17,7 @@ class User < ApplicationRecord
   has_many :password_reset_tokens, foreign_key: "userId", inverse_of: :user, dependent: :destroy
   has_many :owned_organisations, class_name: "Organisation", foreign_key: "ownerUserId", inverse_of: :owner,
                                  dependent: :destroy
-  has_many :organisation_member, class_name: "OrganisationMember", foreign_key: "userId", inverse_of: :user,
-                                 dependent: :destroy
+  has_many :organisation_member, foreign_key: "userId", inverse_of: :user, dependent: :destroy
   has_many :folders, foreign_key: "userId", inverse_of: :user, dependent: :destroy
   has_many :envelopes, foreign_key: "userId", inverse_of: :user, dependent: :destroy
   has_many :verification_tokens, foreign_key: "userId", inverse_of: :user, dependent: :destroy
@@ -26,6 +25,7 @@ class User < ApplicationRecord
   has_many :security_audit_logs, class_name: "UserSecurityAuditLog", foreign_key: "userId", inverse_of: :user,
                                  dependent: :destroy
   has_many :webhooks, foreign_key: "userId", inverse_of: :user, dependent: :destroy
-  has_many :site_settings, foreign_key: "lastModifiedByUserId", inverse_of: :last_modified_by_user, dependent: :nullify
+  has_many :site_settings, class_name: "SiteSettings", foreign_key: "lastModifiedByUserId",
+                           inverse_of: :last_modified_by_user, dependent: :nullify
   has_many :passkeys, foreign_key: "userId", inverse_of: :user, dependent: :destroy
 end

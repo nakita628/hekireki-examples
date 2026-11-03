@@ -1,4 +1,5 @@
 import {
+  type PgTableExtraConfigValue,
   boolean,
   doublePrecision,
   foreignKey,
@@ -476,7 +477,7 @@ export const credentials = pgTable(
       .$defaultFn(utcNow),
     updatedAt: timestamp('updated_at', { precision: 3 }).notNull().$onUpdate(utcNow),
   },
-  (table) => [
+  (table): PgTableExtraConfigValue[] => [
     index('credential_expiry_idx').on(table.expiresAt),
     uniqueIndex('credentials_user_id_provider_provider_account_id_key').on(
       table.userId,
@@ -512,7 +513,7 @@ export const calendarConnections = pgTable(
     updatedAt: timestamp('updated_at', { precision: 3 }).notNull().$onUpdate(utcNow),
     credentialId: text('credential_id').notNull(),
   },
-  (table) => [
+  (table): PgTableExtraConfigValue[] => [
     uniqueIndex('calendar_connections_user_id_provider_provider_account_id_key').on(
       table.userId,
       table.provider,
@@ -560,7 +561,7 @@ export const providerCalendars = pgTable(
       .$defaultFn(utcNow),
     updatedAt: timestamp('updated_at', { precision: 3 }).notNull().$onUpdate(utcNow),
   },
-  (table) => [
+  (table): PgTableExtraConfigValue[] => [
     index('connection_selected_idx').on(table.calendarConnectionId, table.isSelected),
     index('primary_calendar_idx').on(table.isPrimary),
     index('sync_time_idx').on(table.lastSyncedAt),
@@ -1382,7 +1383,7 @@ export const users = pgTable(
     reviewRequestedAt: timestamp('review_requested_at', { precision: 3 }),
     defaultDestinationCalendarId: text('default_destination_calendar_id'),
   },
-  (table) => [
+  (table): PgTableExtraConfigValue[] => [
     uniqueIndex('users_email_key').on(table.email),
     index('users_deleted_at_idx').on(table.deletedAt),
     index('users_anonymous_last_seen_at_idx').on(table.isAnonymous, table.lastSeenAt),

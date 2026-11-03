@@ -74,11 +74,9 @@ class EventType < ApplicationRecord
   has_one :destination_calendar, foreign_key: "eventTypeId", inverse_of: :event_type, dependent: :destroy
   has_one :cal_video_settings, foreign_key: "eventTypeId", inverse_of: :event_type, dependent: :destroy
   has_many :hosts, foreign_key: "eventTypeId", inverse_of: :event_type, dependent: :destroy
-  has_many :hashed_link, class_name: "HashedLink", foreign_key: "eventTypeId", inverse_of: :event_type,
-                         dependent: :destroy
+  has_many :hashed_link, foreign_key: "eventTypeId", inverse_of: :event_type, dependent: :destroy
   has_many :bookings, foreign_key: "eventTypeId", inverse_of: :event_type, dependent: :nullify
-  has_many :availability, class_name: "Availability", foreign_key: "eventTypeId", inverse_of: :event_type,
-                          dependent: :nullify
+  has_many :availability, foreign_key: "eventTypeId", inverse_of: :event_type, dependent: :nullify
   has_many :webhooks, foreign_key: "eventTypeId", inverse_of: :event_type, dependent: :destroy
   has_many :custom_inputs, class_name: "EventTypeCustomInput", foreign_key: "eventTypeId", inverse_of: :event_type,
                            dependent: :destroy
