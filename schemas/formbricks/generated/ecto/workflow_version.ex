@@ -23,6 +23,6 @@ defmodule Formbricks.WorkflowVersion do
     field(:published_at, Formbricks.PrismaDateTime, autogenerate: true, source: :publishedAt)
     field(:published_by, :string, source: :publishedBy)
     belongs_to(:publisher, Formbricks.User, foreign_key: :published_by, define_field: false, type: :string)
-    has_many(:runs, Formbricks.WorkflowRun, foreign_key: :workflow_version_id)
+    has_many(:runs, Formbricks.WorkflowRun, foreign_key: :workflow_version_id, references: :id)
   end
 end

@@ -20,7 +20,7 @@ defmodule Documenso.OrganisationGroup do
     field(:organisation_role, Ecto.Enum, values: [:ADMIN, :MANAGER, :MEMBER], source: :organisationRole)
     field(:organisation_id, :string, source: :organisationId)
     belongs_to(:organisation, Documenso.Organisation, foreign_key: :organisation_id, define_field: false, type: :string)
-    has_many(:organisation_group_members, Documenso.OrganisationGroupMember, foreign_key: :group_id)
-    has_many(:team_groups, Documenso.TeamGroup, foreign_key: :organisation_group_id)
+    has_many(:organisation_group_members, Documenso.OrganisationGroupMember, foreign_key: :group_id, references: :id)
+    has_many(:team_groups, Documenso.TeamGroup, foreign_key: :organisation_group_id, references: :id)
   end
 end

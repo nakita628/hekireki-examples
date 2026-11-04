@@ -45,8 +45,8 @@ defmodule Papermark.DocumentVersion do
     field(:length, :integer)
     field(:document_id, :string, source: :documentId)
     belongs_to(:document, Papermark.Document, foreign_key: :document_id, define_field: false, type: :string)
-    has_many(:pages, Papermark.DocumentPage, foreign_key: :version_id)
-    has_many(:redaction_jobs, Papermark.DocumentRedactionJob, foreign_key: :document_version_id)
+    has_many(:pages, Papermark.DocumentPage, foreign_key: :version_id, references: :id)
+    has_many(:redaction_jobs, Papermark.DocumentRedactionJob, foreign_key: :document_version_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)
   end
 end

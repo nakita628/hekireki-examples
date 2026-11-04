@@ -30,8 +30,8 @@ defmodule Trigger.OrganizationIntegration do
     field(:organization_id, :string, source: :organizationId)
     belongs_to(:token_reference, Trigger.SecretReference, foreign_key: :token_reference_id, define_field: false, type: :string)
     belongs_to(:organization, Trigger.Organization, foreign_key: :organization_id, define_field: false, type: :string)
-    has_many(:alert_channels, Trigger.ProjectAlertChannel, foreign_key: :integration_id)
-    has_many(:organization_project_integration, Trigger.OrganizationProjectIntegration, foreign_key: :organization_integration_id)
+    has_many(:alert_channels, Trigger.ProjectAlertChannel, foreign_key: :integration_id, references: :id)
+    has_many(:organization_project_integration, Trigger.OrganizationProjectIntegration, foreign_key: :organization_integration_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)
   end
 end

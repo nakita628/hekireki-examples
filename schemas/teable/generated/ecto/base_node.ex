@@ -28,7 +28,7 @@ defmodule Teable.BaseNode do
     field(:created_by, :string)
     field(:last_modified_by, :string)
     belongs_to(:parent, Teable.BaseNode, foreign_key: :parent_id, type: :string)
-    has_many(:children, Teable.BaseNode, foreign_key: :parent_id)
+    has_many(:children, Teable.BaseNode, foreign_key: :parent_id, references: :id)
     timestamps(inserted_at: false, updated_at_source: :last_modified_time)
   end
 end

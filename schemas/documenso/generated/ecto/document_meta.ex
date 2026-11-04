@@ -44,6 +44,6 @@ defmodule Documenso.DocumentMeta do
     field(:email_id, :string, source: :emailId)
     field(:envelope_expiration_period, :map, source: :envelopeExpirationPeriod)
     field(:reminder_settings, :map, source: :reminderSettings)
-    has_one(:envelope, Documenso.Envelope, foreign_key: :document_meta_id)
+    has_one(:envelope, Documenso.Envelope, foreign_key: :document_meta_id, references: :id)
   end
 end

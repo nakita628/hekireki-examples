@@ -20,7 +20,7 @@ defmodule Typebot.Space do
     field(:icon, :string)
     field(:workspace_id, :string, source: :workspaceId)
     belongs_to(:workspace, Typebot.Workspace, foreign_key: :workspace_id, define_field: false, type: :string)
-    has_many(:typebots, Typebot.Typebot, foreign_key: :space_id)
+    has_many(:typebots, Typebot.Typebot, foreign_key: :space_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)
   end
 end

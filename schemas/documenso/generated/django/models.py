@@ -285,7 +285,7 @@ class User(models.Model):
 class TeamProfile(models.Model):
     id = models.TextField(primary_key=True, default=None)
     enabled = models.BooleanField(default=False)
-    team = models.OneToOneField("Team", on_delete=models.CASCADE, related_name="profile", db_column="teamId", null=True)
+    team = models.OneToOneField("Team", on_delete=models.CASCADE, related_name="profile", db_column="teamId")
     bio = models.TextField(null=True)
 
     class Meta:
@@ -522,7 +522,7 @@ class Account(models.Model):
 class Session(models.Model):
     id = models.TextField(primary_key=True, default=None)
     session_token = models.TextField(unique=True, db_column="sessionToken")
-    user = models.ForeignKey("User", on_delete=models.CASCADE, related_name="sessions", db_column="userId", null=True, db_index=False)
+    user = models.ForeignKey("User", on_delete=models.CASCADE, related_name="sessions", db_column="userId", db_index=False)
     ip_address = models.TextField(null=True, db_column="ipAddress")
     user_agent = models.TextField(null=True, db_column="userAgent")
     expires_at = UtcDateTimeField(db_column="expiresAt")

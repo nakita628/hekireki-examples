@@ -27,6 +27,6 @@ defmodule Calcom.PlatformBilling do
     field(:manager_billing_id, :id, source: :managerBillingId)
     belongs_to(:manager_billing, Calcom.PlatformBilling, foreign_key: :manager_billing_id, define_field: false)
     belongs_to(:team, Calcom.Team, foreign_key: :id)
-    has_many(:managed_billings, Calcom.PlatformBilling, foreign_key: :manager_billing_id)
+    has_many(:managed_billings, Calcom.PlatformBilling, foreign_key: :manager_billing_id, references: :id)
   end
 end

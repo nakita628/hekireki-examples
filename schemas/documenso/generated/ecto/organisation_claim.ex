@@ -40,7 +40,7 @@ defmodule Documenso.OrganisationClaim do
     field(:api_quota, :integer, source: :apiQuota)
     field(:email_transport_id, :string, source: :emailTransportId)
     belongs_to(:email_transport, Documenso.EmailTransport, foreign_key: :email_transport_id, define_field: false, type: :string)
-    has_one(:organisation, Documenso.Organisation, foreign_key: :organisation_claim_id)
+    has_one(:organisation, Documenso.Organisation, foreign_key: :organisation_claim_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)
   end
 end

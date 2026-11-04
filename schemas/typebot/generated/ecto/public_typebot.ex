@@ -33,7 +33,7 @@ defmodule Typebot.PublicTypebot do
     field(:settings, :map)
     field(:typebot_id, :string, source: :typebotId)
     belongs_to(:typebot, Typebot.Typebot, foreign_key: :typebot_id, define_field: false, type: :string)
-    has_many(:media_ids_cache, Typebot.RuntimeMediaIdCache, foreign_key: :public_typebot_id)
+    has_many(:media_ids_cache, Typebot.RuntimeMediaIdCache, foreign_key: :public_typebot_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at: false)
   end
 end

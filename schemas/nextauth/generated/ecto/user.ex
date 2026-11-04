@@ -20,8 +20,8 @@ defmodule NextAuth.User do
     field(:email, :string)
     field(:email_verified, NextAuth.PrismaDateTime, source: :emailVerified)
     field(:image, :string)
-    has_many(:accounts, NextAuth.Account, foreign_key: :user_id)
-    has_many(:sessions, NextAuth.Session, foreign_key: :user_id)
-    has_many(:authenticator, NextAuth.Authenticator, foreign_key: :user_id)
+    has_many(:accounts, NextAuth.Account, foreign_key: :user_id, references: :id)
+    has_many(:sessions, NextAuth.Session, foreign_key: :user_id, references: :id)
+    has_many(:authenticator, NextAuth.Authenticator, foreign_key: :user_id, references: :id)
   end
 end

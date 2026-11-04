@@ -27,8 +27,8 @@ defmodule Formbricks.ActionClass do
     field(:no_code_config, :map, source: :noCodeConfig)
     field(:workspace_id, :string, source: :workspaceId)
     belongs_to(:workspace, Formbricks.Workspace, foreign_key: :workspace_id, define_field: false, type: :string)
-    has_many(:survey_triggers, Formbricks.SurveyTrigger, foreign_key: :action_class_id)
-    has_many(:creative_triggers, Formbricks.CreativeTrigger, foreign_key: :action_class_id)
+    has_many(:survey_triggers, Formbricks.SurveyTrigger, foreign_key: :action_class_id, references: :id)
+    has_many(:creative_triggers, Formbricks.CreativeTrigger, foreign_key: :action_class_id, references: :id)
     timestamps(inserted_at_source: :created_at)
   end
 end

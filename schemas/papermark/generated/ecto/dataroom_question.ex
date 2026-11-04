@@ -40,8 +40,8 @@ defmodule Papermark.DataroomQuestion do
     belongs_to(:team, Papermark.Team, foreign_key: :team_id, define_field: false, type: :string)
     belongs_to(:created_by_user, Papermark.User, foreign_key: :created_by_user_id, define_field: false, type: :string)
     belongs_to(:dataroom_document, Papermark.DataroomDocument, foreign_key: :dataroom_document_id, define_field: false, type: :string)
-    has_many(:assignments, Papermark.DataroomQuestionAssignment, foreign_key: :question_id)
-    has_many(:conversations, Papermark.Conversation, foreign_key: :question_id)
+    has_many(:assignments, Papermark.DataroomQuestionAssignment, foreign_key: :question_id, references: :id)
+    has_many(:conversations, Papermark.Conversation, foreign_key: :question_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)
   end
 end

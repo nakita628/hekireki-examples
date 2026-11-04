@@ -26,6 +26,6 @@ defmodule Documenso.OrganisationAuthenticationPortal do
     field(:auto_provision_users, :boolean, default: true, source: :autoProvisionUsers)
     field(:allowed_domains, {:array, :string}, source: :allowedDomains)
     field(:allow_personal_organisations, :boolean, default: false, source: :allowPersonalOrganisations)
-    has_one(:organisation, Documenso.Organisation, foreign_key: :organisation_authentication_portal_id)
+    has_one(:organisation, Documenso.Organisation, foreign_key: :organisation_authentication_portal_id, references: :id)
   end
 end

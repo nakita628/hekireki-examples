@@ -25,8 +25,8 @@ defmodule Formbricks.Session do
     field(:user_agent, :string, source: :userAgent)
     field(:user_id, :string, source: :userId)
     belongs_to(:user, Formbricks.User, foreign_key: :user_id, define_field: false, type: :string)
-    has_many(:oauth_access_tokens, Formbricks.OauthAccessToken, foreign_key: :session_id)
-    has_many(:oauth_refresh_tokens, Formbricks.OauthRefreshToken, foreign_key: :session_id)
+    has_many(:oauth_access_tokens, Formbricks.OauthAccessToken, foreign_key: :session_id, references: :id)
+    has_many(:oauth_refresh_tokens, Formbricks.OauthRefreshToken, foreign_key: :session_id, references: :id)
     timestamps(inserted_at_source: :created_at)
   end
 end

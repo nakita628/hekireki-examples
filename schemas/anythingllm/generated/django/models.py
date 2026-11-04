@@ -341,7 +341,7 @@ class DocumentSyncQueues(models.Model):
     next_sync_at = UtcDateTimeField(db_column="nextSyncAt")
     created_at = UtcDateTimeField(db_column="createdAt", default=timezone.now)
     last_synced_at = UtcDateTimeField(db_column="lastSyncedAt", default=timezone.now)
-    workspace_doc = models.OneToOneField("WorkspaceDocuments", on_delete=models.CASCADE, related_name="document_sync_queues", db_column="workspaceDocId", null=True)
+    workspace_doc = models.OneToOneField("WorkspaceDocuments", on_delete=models.CASCADE, related_name="document_sync_queues", db_column="workspaceDocId")
 
     class Meta:
         db_table = "document_sync_queues"

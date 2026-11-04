@@ -15,7 +15,7 @@ defmodule Trigger.WorkerGroupToken do
   schema "WorkerGroupToken" do
     field(:id, :string, primary_key: true)
     field(:token_hash, :string, source: :tokenHash)
-    has_one(:worker_group, Trigger.WorkerInstanceGroup, foreign_key: :token_id)
+    has_one(:worker_group, Trigger.WorkerInstanceGroup, foreign_key: :token_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)
   end
 end

@@ -21,8 +21,8 @@ defmodule Formbricks.Language do
     field(:alias, :string)
     field(:workspace_id, :string, source: :workspaceId)
     belongs_to(:workspace, Formbricks.Workspace, foreign_key: :workspace_id, define_field: false, type: :string)
-    has_many(:survey_languages, Formbricks.SurveyLanguage, foreign_key: :language_id)
-    has_many(:creative_languages, Formbricks.CreativeLanguage, foreign_key: :language_id)
+    has_many(:survey_languages, Formbricks.SurveyLanguage, foreign_key: :language_id, references: :id)
+    has_many(:creative_languages, Formbricks.CreativeLanguage, foreign_key: :language_id, references: :id)
     timestamps(inserted_at_source: :created_at)
   end
 end

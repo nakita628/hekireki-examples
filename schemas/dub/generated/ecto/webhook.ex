@@ -38,8 +38,8 @@ defmodule Dub.Webhook do
     field(:installation_id, :string, source: :installationId)
     belongs_to(:project, Dub.Project, foreign_key: :project_id, define_field: false, type: :string)
     belongs_to(:installed_integration, Dub.InstalledIntegration, foreign_key: :installation_id, define_field: false, type: :string)
-    has_many(:links, Dub.LinkWebhook, foreign_key: :webhook_id)
-    has_many(:folders, Dub.FolderWebhook, foreign_key: :webhook_id)
+    has_many(:links, Dub.LinkWebhook, foreign_key: :webhook_id, references: :id)
+    has_many(:folders, Dub.FolderWebhook, foreign_key: :webhook_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)
   end
 end

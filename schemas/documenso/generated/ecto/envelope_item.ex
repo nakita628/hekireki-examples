@@ -20,6 +20,6 @@ defmodule Documenso.EnvelopeItem do
     field(:envelope_id, :string, source: :envelopeId)
     belongs_to(:document_data, Documenso.DocumentData, foreign_key: :document_data_id, define_field: false, type: :string)
     belongs_to(:envelope, Documenso.Envelope, foreign_key: :envelope_id, define_field: false, type: :string)
-    has_many(:field, Documenso.Field, foreign_key: :envelope_item_id)
+    has_many(:field, Documenso.Field, foreign_key: :envelope_item_id, references: :id)
   end
 end

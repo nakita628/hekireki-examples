@@ -48,7 +48,7 @@ defmodule Trigger.TaskSchedule do
     field(:active, :boolean, default: true)
     field(:project_id, :string, source: :projectId)
     belongs_to(:project, Trigger.Project, foreign_key: :project_id, define_field: false, type: :string)
-    has_many(:instances, Trigger.TaskScheduleInstance, foreign_key: :task_schedule_id)
+    has_many(:instances, Trigger.TaskScheduleInstance, foreign_key: :task_schedule_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)
   end
 end

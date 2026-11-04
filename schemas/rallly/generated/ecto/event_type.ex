@@ -32,8 +32,8 @@ defmodule Rallly.EventType do
     field(:deleted_at, Rallly.PrismaDateTime)
     belongs_to(:space, Rallly.Space, foreign_key: :space_id, type: :binary_id)
     belongs_to(:host, Rallly.User, foreign_key: :host_id, type: :string)
-    has_many(:slots, Rallly.SheetSlot, foreign_key: :event_type_id)
-    has_many(:scheduled_events, Rallly.ScheduledEvent, foreign_key: :event_type_id)
+    has_many(:slots, Rallly.SheetSlot, foreign_key: :event_type_id, references: :id)
+    has_many(:scheduled_events, Rallly.ScheduledEvent, foreign_key: :event_type_id, references: :id)
     timestamps(inserted_at_source: :created_at)
   end
 end

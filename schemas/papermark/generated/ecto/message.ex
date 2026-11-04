@@ -32,8 +32,8 @@ defmodule Papermark.Message do
     belongs_to(:user, Papermark.User, foreign_key: :user_id, define_field: false, type: :string)
     belongs_to(:viewer, Papermark.Viewer, foreign_key: :viewer_id, define_field: false, type: :string)
     belongs_to(:view, Papermark.View, foreign_key: :view_id, define_field: false, type: :string)
-    has_many(:faq_as_question, Papermark.DataroomFaqItem, foreign_key: :question_message_id)
-    has_many(:faq_as_answer, Papermark.DataroomFaqItem, foreign_key: :answer_message_id)
+    has_many(:faq_as_question, Papermark.DataroomFaqItem, foreign_key: :question_message_id, references: :id)
+    has_many(:faq_as_answer, Papermark.DataroomFaqItem, foreign_key: :answer_message_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)
   end
 end

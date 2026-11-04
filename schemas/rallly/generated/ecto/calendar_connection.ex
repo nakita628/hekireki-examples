@@ -27,7 +27,7 @@ defmodule Rallly.CalendarConnection do
     field(:display_name, :string)
     belongs_to(:credential, Rallly.Credential, foreign_key: :credential_id, type: :string)
     belongs_to(:user, Rallly.User, foreign_key: :user_id, type: :string)
-    has_many(:provider_calendars, Rallly.ProviderCalendar, foreign_key: :calendar_connection_id)
+    has_many(:provider_calendars, Rallly.ProviderCalendar, foreign_key: :calendar_connection_id, references: :id)
     timestamps(inserted_at_source: :created_at)
   end
 end

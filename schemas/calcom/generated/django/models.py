@@ -1178,7 +1178,7 @@ class Payment(models.Model):
     id = models.AutoField(primary_key=True)
     uid = models.TextField(unique=True)
     app = models.ForeignKey("App", on_delete=models.CASCADE, related_name="payments", db_column="appId", null=True, db_index=False)
-    booking = models.ForeignKey("Booking", on_delete=models.CASCADE, related_name="payment", db_column="bookingId", null=True, db_index=False)
+    booking = models.ForeignKey("Booking", on_delete=models.CASCADE, related_name="payment", db_column="bookingId", db_index=False)
     amount = models.IntegerField()
     fee = models.IntegerField()
     currency = models.TextField()
@@ -1227,7 +1227,7 @@ class Webhook(models.Model):
 
 class ApiKey(models.Model):
     id = models.TextField(primary_key=True, default=None)
-    user = models.ForeignKey("User", on_delete=models.CASCADE, related_name="api_keys", db_column="userId", null=True, db_index=False)
+    user = models.ForeignKey("User", on_delete=models.CASCADE, related_name="api_keys", db_column="userId", db_index=False)
     team = models.ForeignKey("Team", on_delete=models.CASCADE, related_name="api_keys", db_column="teamId", null=True, db_index=False)
     note = models.TextField(null=True)
     created_at = UtcDateTimeField(db_column="createdAt", default=timezone.now)
@@ -1278,7 +1278,7 @@ class HashedLink(models.Model):
 
 class Account(models.Model):
     id = models.TextField(primary_key=True, default=None)
-    user = models.ForeignKey("User", on_delete=models.CASCADE, related_name="accounts", db_column="userId", null=True, db_index=False)
+    user = models.ForeignKey("User", on_delete=models.CASCADE, related_name="accounts", db_column="userId", db_index=False)
     type = models.TextField()
     provider = models.TextField()
     provider_account_id = models.TextField(db_column="providerAccountId")
@@ -1305,7 +1305,7 @@ class Account(models.Model):
 class Session(models.Model):
     id = models.TextField(primary_key=True, default=None)
     session_token = models.TextField(unique=True, db_column="sessionToken")
-    user = models.ForeignKey("User", on_delete=models.CASCADE, related_name="sessions", db_column="userId", null=True, db_index=False)
+    user = models.ForeignKey("User", on_delete=models.CASCADE, related_name="sessions", db_column="userId", db_index=False)
     expires = UtcDateTimeField()
 
     class Meta:
@@ -1577,7 +1577,7 @@ class CalendarCache(models.Model):
     value = models.JSONField()
     expires_at = UtcDateTimeField(db_column="expiresAt")
     updated_at = UtcDateTimeField(db_column="updatedAt", auto_now=True)
-    credential = models.ForeignKey("Credential", on_delete=models.CASCADE, related_name="calendar_cache", db_column="credentialId", null=True, db_index=False)
+    credential = models.ForeignKey("Credential", on_delete=models.CASCADE, related_name="calendar_cache", db_column="credentialId", db_index=False)
     user_id = models.IntegerField(null=True, db_column="userId")
     objects = AutoNowQuerySet.as_manager()
 
@@ -2348,7 +2348,7 @@ class CalAiPhoneNumber(models.Model):
 
 class TeamBilling(models.Model):
     id = models.TextField(primary_key=True, default=uuid4_str)
-    team = models.OneToOneField("Team", on_delete=models.CASCADE, related_name="team_billing", db_column="teamId", null=True)
+    team = models.OneToOneField("Team", on_delete=models.CASCADE, related_name="team_billing", db_column="teamId")
     subscription_id = models.TextField(unique=True, db_column="subscriptionId")
     subscription_item_id = models.TextField(db_column="subscriptionItemId")
     customer_id = models.TextField(db_column="customerId")

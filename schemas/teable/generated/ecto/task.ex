@@ -24,7 +24,7 @@ defmodule Teable.Task do
     field(:created_time, Teable.PrismaDateTime, autogenerate: true)
     field(:created_by, :string)
     field(:last_modified_by, :string)
-    has_many(:runs, Teable.TaskRun, foreign_key: :task_id)
+    has_many(:runs, Teable.TaskRun, foreign_key: :task_id, references: :id)
     timestamps(inserted_at: false, updated_at_source: :last_modified_time)
   end
 end

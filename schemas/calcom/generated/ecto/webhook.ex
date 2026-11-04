@@ -45,7 +45,7 @@ defmodule Calcom.Webhook do
     belongs_to(:event_type, Calcom.EventType, foreign_key: :event_type_id, define_field: false)
     belongs_to(:platform_oauth_client, Calcom.PlatformOAuthClient, foreign_key: :platform_oauth_client_id, define_field: false, type: :string)
     belongs_to(:app, Calcom.App, foreign_key: :app_id, define_field: false, type: :string, references: :slug)
-    has_many(:scheduled_triggers, Calcom.WebhookScheduledTriggers, foreign_key: :webhook_id)
+    has_many(:scheduled_triggers, Calcom.WebhookScheduledTriggers, foreign_key: :webhook_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at: false)
   end
 end

@@ -33,7 +33,7 @@ defmodule Rallly.SpaceWebhook do
     field(:last_failed_at, Rallly.PrismaDateTime)
     field(:consecutive_failures, :integer, default: 0)
     belongs_to(:space, Rallly.Space, foreign_key: :space_id, type: :binary_id)
-    has_many(:deliveries, Rallly.WebhookDelivery, foreign_key: :webhook_id)
+    has_many(:deliveries, Rallly.WebhookDelivery, foreign_key: :webhook_id, references: :id)
     timestamps(inserted_at_source: :created_at)
   end
 end

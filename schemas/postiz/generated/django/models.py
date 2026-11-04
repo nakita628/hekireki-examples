@@ -967,7 +967,6 @@ class MastraMessages(models.Model):
         db_table = "mastra_messages"
         indexes = [
             models.Index(fields=["thread_id", "-created_at"]),
-            models.Index(fields=["thread_id", "-created_at"]),
         ]
 
 
@@ -1028,7 +1027,6 @@ class MastraScorers(models.Model):
         db_table = "mastra_scorers"
         indexes = [
             models.Index(fields=["trace_id", "span_id", "-created_at"]),
-            models.Index(fields=["trace_id", "span_id", "-created_at"]),
         ]
 
 
@@ -1045,7 +1043,6 @@ class MastraThreads(models.Model):
     class Meta:
         db_table = "mastra_threads"
         indexes = [
-            models.Index(fields=["resource_id", "-created_at"]),
             models.Index(fields=["resource_id", "-created_at"]),
         ]
 

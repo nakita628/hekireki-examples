@@ -252,9 +252,9 @@ class Project(Base):
     notification_preference: Mapped[list["NotificationPreference"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="project")
     default_view: Mapped[list["DefaultView"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="project")
     in_app_agent_conversation: Mapped[list["InAppAgentConversation"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="project")
-    in_app_agent_event: Mapped[list["InAppAgentEvent"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="project")
-    in_app_agent_run: Mapped[list["InAppAgentRun"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="project")
-    in_app_agent_pending_tool_approval: Mapped[list["InAppAgentPendingToolApproval"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="project")
+    in_app_agent_event: Mapped[list["InAppAgentEvent"]] = relationship(cascade="all, delete", passive_deletes=True, overlaps="conversation,events,run", back_populates="project")
+    in_app_agent_run: Mapped[list["InAppAgentRun"]] = relationship(cascade="all, delete", passive_deletes=True, overlaps="conversation,runs", back_populates="project")
+    in_app_agent_pending_tool_approval: Mapped[list["InAppAgentPendingToolApproval"]] = relationship(cascade="all, delete", passive_deletes=True, overlaps="conversation,pending_tool_approvals", back_populates="project")
     topic_clustering_runs: Mapped[list["TopicClusteringRun"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="project")
     gateway_configs: Mapped[list["GatewayConfig"]] = relationship(back_populates="default_ingestion_project")
     tracing_readiness_settings: Mapped[Optional["TracingReadinessSettings"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="project")
@@ -399,9 +399,9 @@ class InAppAgentConversation(Base):
 
     project: Mapped["Project"] = relationship(back_populates="in_app_agent_conversation")
     created_by_user: Mapped[Optional["User"]] = relationship(back_populates="in_app_agent_conversations")
-    events: Mapped[list["InAppAgentEvent"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="conversation")
-    runs: Mapped[list["InAppAgentRun"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="conversation")
-    pending_tool_approvals: Mapped[list["InAppAgentPendingToolApproval"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="conversation")
+    events: Mapped[list["InAppAgentEvent"]] = relationship(cascade="all, delete", passive_deletes=True, overlaps="events,in_app_agent_event,project,run", back_populates="conversation")
+    runs: Mapped[list["InAppAgentRun"]] = relationship(cascade="all, delete", passive_deletes=True, overlaps="in_app_agent_run,project", back_populates="conversation")
+    pending_tool_approvals: Mapped[list["InAppAgentPendingToolApproval"]] = relationship(cascade="all, delete", passive_deletes=True, overlaps="in_app_agent_pending_tool_approval,project", back_populates="conversation")
 
 class InAppAgentEvent(Base):
     __tablename__ = "in_app_agent_events"
@@ -420,9 +420,9 @@ class InAppAgentEvent(Base):
         ForeignKeyConstraint(["run_id", "project_id"], ["in_app_agent_runs.id", "in_app_agent_runs.project_id"], ondelete="CASCADE", onupdate="CASCADE", name="in_app_agent_events_run_id_project_id_fkey"),
     )
 
-    project: Mapped["Project"] = relationship(back_populates="in_app_agent_event")
-    conversation: Mapped["InAppAgentConversation"] = relationship(back_populates="events")
-    run: Mapped["InAppAgentRun"] = relationship(back_populates="events")
+    project: Mapped["Project"] = relationship(overlaps="conversation,events,run", back_populates="in_app_agent_event")
+    conversation: Mapped["InAppAgentConversation"] = relationship(overlaps="events,in_app_agent_event,project,run", back_populates="events")
+    run: Mapped["InAppAgentRun"] = relationship(overlaps="conversation,events,in_app_agent_event,project", back_populates="events")
 
 class InAppAgentRun(Base):
     __tablename__ = "in_app_agent_runs"
@@ -449,10 +449,10 @@ class InAppAgentRun(Base):
         ForeignKeyConstraint(["conversation_id", "project_id"], ["in_app_agent_conversations.id", "in_app_agent_conversations.project_id"], ondelete="CASCADE", onupdate="CASCADE", name="in_app_agent_runs_conversation_id_project_id_fkey"),
     )
 
-    project: Mapped["Project"] = relationship(back_populates="in_app_agent_run")
-    conversation: Mapped["InAppAgentConversation"] = relationship(back_populates="runs")
+    project: Mapped["Project"] = relationship(overlaps="conversation,runs", back_populates="in_app_agent_run")
+    conversation: Mapped["InAppAgentConversation"] = relationship(overlaps="in_app_agent_run,project", back_populates="runs")
     triggered_by_user: Mapped[Optional["User"]] = relationship(back_populates="in_app_agent_runs")
-    events: Mapped[list["InAppAgentEvent"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="run")
+    events: Mapped[list["InAppAgentEvent"]] = relationship(cascade="all, delete", passive_deletes=True, overlaps="conversation,events,in_app_agent_event,project", back_populates="run")
 
 class InAppAgentPendingToolApproval(Base):
     __tablename__ = "in_app_agent_pending_tool_approvals"
@@ -470,8 +470,8 @@ class InAppAgentPendingToolApproval(Base):
         ForeignKeyConstraint(["conversation_id", "project_id"], ["in_app_agent_conversations.id", "in_app_agent_conversations.project_id"], ondelete="CASCADE", onupdate="CASCADE", name="in_app_agent_pending_tool_approvals_conversation_id_projec_fkey"),
     )
 
-    project: Mapped["Project"] = relationship(back_populates="in_app_agent_pending_tool_approval")
-    conversation: Mapped["InAppAgentConversation"] = relationship(back_populates="pending_tool_approvals")
+    project: Mapped["Project"] = relationship(overlaps="conversation,pending_tool_approvals", back_populates="in_app_agent_pending_tool_approval")
+    conversation: Mapped["InAppAgentConversation"] = relationship(overlaps="in_app_agent_pending_tool_approval,project", back_populates="pending_tool_approvals")
 
 class BackgroundMigration(Base):
     __tablename__ = "background_migrations"

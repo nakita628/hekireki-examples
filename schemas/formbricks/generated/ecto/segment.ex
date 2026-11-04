@@ -24,7 +24,7 @@ defmodule Formbricks.Segment do
     field(:filters, :map)
     field(:workspace_id, :string, source: :workspaceId)
     belongs_to(:workspace, Formbricks.Workspace, foreign_key: :workspace_id, define_field: false, type: :string)
-    has_many(:surveys, Formbricks.Survey, foreign_key: :segment_id)
+    has_many(:surveys, Formbricks.Survey, foreign_key: :segment_id, references: :id)
     timestamps(inserted_at_source: :created_at)
   end
 end

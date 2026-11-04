@@ -28,7 +28,7 @@ defmodule Trigger.PersonalAccessToken do
     field(:last_accessed_at, Trigger.PrismaDateTime, source: :lastAccessedAt)
     field(:user_id, :string, source: :userId)
     belongs_to(:user, Trigger.User, foreign_key: :user_id, define_field: false, type: :string)
-    has_many(:authorization_codes, Trigger.AuthorizationCode, foreign_key: :personal_access_token_id)
+    has_many(:authorization_codes, Trigger.AuthorizationCode, foreign_key: :personal_access_token_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)
   end
 end

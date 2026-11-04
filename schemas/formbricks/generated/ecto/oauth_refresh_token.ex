@@ -47,6 +47,6 @@ defmodule Formbricks.OauthRefreshToken do
     belongs_to(:client, Formbricks.OauthClient, foreign_key: :client_id, define_field: false, type: :string, references: :client_id)
     belongs_to(:session, Formbricks.Session, foreign_key: :session_id, define_field: false, type: :string)
     belongs_to(:user, Formbricks.User, foreign_key: :user_id, define_field: false, type: :string)
-    has_many(:access_tokens, Formbricks.OauthAccessToken, foreign_key: :refresh_id)
+    has_many(:access_tokens, Formbricks.OauthAccessToken, foreign_key: :refresh_id, references: :id)
   end
 end

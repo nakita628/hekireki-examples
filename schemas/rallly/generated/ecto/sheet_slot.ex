@@ -19,7 +19,7 @@ defmodule Rallly.SheetSlot do
     field(:start_time, Rallly.PrismaDateTime)
     belongs_to(:sheet, Rallly.Sheet, foreign_key: :sheet_id, type: :string)
     belongs_to(:event_type, Rallly.EventType, foreign_key: :event_type_id, type: :string)
-    has_one(:scheduled_event, Rallly.ScheduledEvent, foreign_key: :sheet_slot_id)
+    has_one(:scheduled_event, Rallly.ScheduledEvent, foreign_key: :sheet_slot_id, references: :id)
     timestamps(inserted_at_source: :created_at)
   end
 end

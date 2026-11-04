@@ -27,11 +27,11 @@ defmodule Umami.Team do
     field(:logo_url, :string)
     field(:two_factor_required, :boolean, default: false)
     field(:deleted_at, Umami.PrismaDateTime)
-    has_many(:websites, Umami.Website, foreign_key: :team_id)
-    has_many(:members, Umami.TeamUser, foreign_key: :team_id)
-    has_many(:links, Umami.Link, foreign_key: :team_id)
-    has_many(:pixels, Umami.Pixel, foreign_key: :team_id)
-    has_many(:boards, Umami.Board, foreign_key: :team_id)
+    has_many(:websites, Umami.Website, foreign_key: :team_id, references: :id)
+    has_many(:members, Umami.TeamUser, foreign_key: :team_id, references: :id)
+    has_many(:links, Umami.Link, foreign_key: :team_id, references: :id)
+    has_many(:pixels, Umami.Pixel, foreign_key: :team_id, references: :id)
+    has_many(:boards, Umami.Board, foreign_key: :team_id, references: :id)
     timestamps(inserted_at_source: :created_at)
   end
 end

@@ -2499,8 +2499,8 @@ type MastraSchedules struct {
 	NextFireAt int64          `gorm:"column:next_fire_at;index:idx_mastra_schedules_status_next_fire;not null" json:"next_fire_at"`
 	LastFireAt *int64         `gorm:"column:last_fire_at" json:"last_fire_at"`
 	LastRunID  *string        `gorm:"column:last_run_id" json:"last_run_id"`
-	CreatedAt  int64          `gorm:"column:created_at;not null" json:"created_at"`
-	UpdatedAt  int64          `gorm:"column:updated_at;not null" json:"updated_at"`
+	CreatedAt  int64          `gorm:"column:created_at;autoCreateTime:false;not null" json:"created_at"`
+	UpdatedAt  int64          `gorm:"column:updated_at;autoUpdateTime:false;not null" json:"updated_at"`
 	Metadata   datatypes.JSON `gorm:"column:metadata" json:"metadata"`
 	OwnerType  *string        `gorm:"column:owner_type" json:"owner_type"`
 	OwnerID    *string        `gorm:"column:owner_id" json:"owner_id"`

@@ -33,7 +33,7 @@ defmodule Rallly.ProviderCalendar do
     field(:provider_data, :map)
     field(:last_synced_at, Rallly.PrismaDateTime, autogenerate: true)
     belongs_to(:calendar_connection, Rallly.CalendarConnection, foreign_key: :calendar_connection_id, type: :string)
-    has_many(:user_default_destination, Rallly.User, foreign_key: :default_destination_calendar_id)
+    has_many(:user_default_destination, Rallly.User, foreign_key: :default_destination_calendar_id, references: :id)
     timestamps(inserted_at_source: :created_at)
   end
 end

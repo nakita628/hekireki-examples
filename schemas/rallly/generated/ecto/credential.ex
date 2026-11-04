@@ -28,8 +28,8 @@ defmodule Rallly.Credential do
     field(:scopes, {:array, :string})
     field(:expires_at, Rallly.PrismaDateTime)
     belongs_to(:user, Rallly.User, foreign_key: :user_id, type: :string)
-    has_many(:calendar_connections, Rallly.CalendarConnection, foreign_key: :credential_id)
-    has_many(:conferencing_connections, Rallly.ConferencingConnection, foreign_key: :credential_id)
+    has_many(:calendar_connections, Rallly.CalendarConnection, foreign_key: :credential_id, references: :id)
+    has_many(:conferencing_connections, Rallly.ConferencingConnection, foreign_key: :credential_id, references: :id)
     timestamps(inserted_at_source: :created_at)
   end
 end

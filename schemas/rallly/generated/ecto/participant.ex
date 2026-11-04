@@ -30,8 +30,8 @@ defmodule Rallly.Participant do
     field(:time_zone, :string)
     belongs_to(:poll, Rallly.Poll, foreign_key: :poll_id, type: :string)
     belongs_to(:user, Rallly.User, foreign_key: :user_id, type: :string)
-    has_one(:invite, Rallly.PollInvite, foreign_key: :participant_id)
-    has_many(:votes, Rallly.Vote, foreign_key: :participant_id)
+    has_one(:invite, Rallly.PollInvite, foreign_key: :participant_id, references: :id)
+    has_many(:votes, Rallly.Vote, foreign_key: :participant_id, references: :id)
     timestamps(inserted_at_source: :created_at)
   end
 end

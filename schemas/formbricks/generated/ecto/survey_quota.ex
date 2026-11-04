@@ -28,7 +28,7 @@ defmodule Formbricks.SurveyQuota do
     field(:count_partial_submissions, :boolean, default: false, source: :countPartialSubmissions)
     field(:survey_id, :string, source: :surveyId)
     belongs_to(:survey, Formbricks.Survey, foreign_key: :survey_id, define_field: false, type: :string)
-    has_many(:quota_links, Formbricks.ResponseQuotaLink, foreign_key: :quota_id)
+    has_many(:quota_links, Formbricks.ResponseQuotaLink, foreign_key: :quota_id, references: :id)
     timestamps(inserted_at_source: :created_at)
   end
 end

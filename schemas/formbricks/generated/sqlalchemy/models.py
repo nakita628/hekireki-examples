@@ -61,9 +61,9 @@ class Creative(Base):
         ForeignKeyConstraint(["surveyId", "workspaceId"], ["Survey.id", "Survey.workspaceId"], ondelete="NO ACTION", onupdate="NO ACTION", name="Creative_surveyId_workspaceId_fkey"),
     )
 
-    workspace: Mapped["Workspace"] = relationship(back_populates="creatives")
+    workspace: Mapped["Workspace"] = relationship(overlaps="creatives,survey", back_populates="creatives")
     creator: Mapped[Optional["User"]] = relationship(back_populates="creatives")
-    survey: Mapped[Optional["Survey"]] = relationship(back_populates="creatives")
+    survey: Mapped[Optional["Survey"]] = relationship(overlaps="creatives,workspace", back_populates="creatives")
     triggers: Mapped[list["CreativeTrigger"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="creative")
     languages: Mapped[list["CreativeLanguage"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="creative")
     daily_stats: Mapped[list["CreativeDailyStat"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="creative")
@@ -478,13 +478,13 @@ class Survey(Base):
     attribute_filters: Mapped[list["SurveyAttributeFilter"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="survey")
     displays: Mapped[list["Display"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="survey")
     languages: Mapped[list["SurveyLanguage"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="survey")
-    embedded_data: Mapped[list["EmbeddedData"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="survey")
-    embedded_data_links: Mapped[list["SurveyEmbeddedData"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="survey")
+    embedded_data: Mapped[list["EmbeddedData"]] = relationship(cascade="all, delete", passive_deletes=True, overlaps="embedded_data,workspace", back_populates="survey")
+    embedded_data_links: Mapped[list["SurveyEmbeddedData"]] = relationship(cascade="all, delete", passive_deletes=True, overlaps="embedded_data,survey_links", back_populates="survey")
     follow_ups: Mapped[list["SurveyFollowUp"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="survey")
-    feedback_source_mappings: Mapped[list["FeedbackSourceFormbricksMapping"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="survey")
+    feedback_source_mappings: Mapped[list["FeedbackSourceFormbricksMapping"]] = relationship(cascade="all, delete", passive_deletes=True, overlaps="feedback_source,formbricks_mappings", back_populates="survey")
     retention_exemptions: Mapped[list["RetentionExemption"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="survey")
     retention_notices: Mapped[list["RetentionNotice"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="survey")
-    creatives: Mapped[list["Creative"]] = relationship(passive_deletes="all", back_populates="survey")
+    creatives: Mapped[list["Creative"]] = relationship(passive_deletes="all", overlaps="creatives,workspace", back_populates="survey")
     retention_restore: Mapped[Optional["RetentionSurveyRestore"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="survey")
 
 class SurveyQuota(Base):
@@ -618,12 +618,12 @@ class Workspace(Base):
 
     organization: Mapped["Organization"] = relationship(back_populates="workspaces")
     languages: Mapped[list["Language"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="workspace")
-    embedded_data: Mapped[list["EmbeddedData"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="workspace")
+    embedded_data: Mapped[list["EmbeddedData"]] = relationship(cascade="all, delete", passive_deletes=True, overlaps="embedded_data,survey", back_populates="workspace")
     workspace_teams: Mapped[list["WorkspaceTeam"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="workspace")
     feedback_directory_workspaces: Mapped[list["FeedbackDirectoryWorkspace"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="workspace")
     charts: Mapped[list["Chart"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="workspace")
     dashboards: Mapped[list["Dashboard"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="workspace")
-    creatives: Mapped[list["Creative"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="workspace")
+    creatives: Mapped[list["Creative"]] = relationship(cascade="all, delete", passive_deletes=True, overlaps="creatives,survey", back_populates="workspace")
     surveys: Mapped[list["Survey"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="workspace")
     contacts: Mapped[list["Contact"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="workspace")
     action_classes: Mapped[list["ActionClass"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="workspace")
@@ -633,9 +633,9 @@ class Workspace(Base):
     segments: Mapped[list["Segment"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="workspace")
     integrations: Mapped[list["Integration"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="workspace")
     api_key_workspaces: Mapped[list["ApiKeyWorkspace"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="workspace")
-    feedback_sources: Mapped[list["FeedbackSource"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="workspace")
+    feedback_sources: Mapped[list["FeedbackSource"]] = relationship(cascade="all, delete", passive_deletes=True, overlaps="feedback_directory_workspace,feedback_sources", back_populates="workspace")
     workflows: Mapped[list["Workflow"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="workspace")
-    workflow_runs: Mapped[list["WorkflowRun"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="workspace")
+    workflow_runs: Mapped[list["WorkflowRun"]] = relationship(cascade="all, delete", passive_deletes=True, overlaps="runs,workflow", back_populates="workspace")
 
 class Organization(Base):
     __tablename__ = "Organization"
@@ -1189,9 +1189,9 @@ class EmbeddedData(Base):
         ForeignKeyConstraint(["surveyId", "workspaceId"], ["Survey.id", "Survey.workspaceId"], ondelete="CASCADE", onupdate="CASCADE", name="EmbeddedData_surveyId_workspaceId_fkey"),
     )
 
-    survey: Mapped[Optional["Survey"]] = relationship(back_populates="embedded_data")
-    workspace: Mapped["Workspace"] = relationship(back_populates="embedded_data")
-    survey_links: Mapped[list["SurveyEmbeddedData"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="embedded_data")
+    survey: Mapped[Optional["Survey"]] = relationship(overlaps="embedded_data,workspace", back_populates="embedded_data")
+    workspace: Mapped["Workspace"] = relationship(overlaps="embedded_data,survey", back_populates="embedded_data")
+    survey_links: Mapped[list["SurveyEmbeddedData"]] = relationship(cascade="all, delete", passive_deletes=True, overlaps="embedded_data_links,survey", back_populates="embedded_data")
 
 class SurveyEmbeddedData(Base):
     __tablename__ = "SurveyEmbeddedData"
@@ -1212,8 +1212,8 @@ class SurveyEmbeddedData(Base):
         ForeignKeyConstraint(["embeddedDataId", "workspaceId"], ["EmbeddedData.id", "EmbeddedData.workspaceId"], ondelete="CASCADE", onupdate="CASCADE", name="SurveyEmbeddedData_embeddedDataId_workspaceId_fkey"),
     )
 
-    survey: Mapped["Survey"] = relationship(back_populates="embedded_data_links")
-    embedded_data: Mapped["EmbeddedData"] = relationship(back_populates="survey_links")
+    survey: Mapped["Survey"] = relationship(overlaps="embedded_data,survey_links", back_populates="embedded_data_links")
+    embedded_data: Mapped["EmbeddedData"] = relationship(overlaps="embedded_data_links,survey", back_populates="survey_links")
 
 class Team(Base):
     __tablename__ = "Team"
@@ -1373,11 +1373,11 @@ class FeedbackSource(Base):
         ForeignKeyConstraint(["feedbackDirectoryId", "workspaceId"], ["FeedbackDirectoryWorkspace.feedbackDirectoryId", "FeedbackDirectoryWorkspace.workspaceId"], ondelete="NO ACTION", onupdate="CASCADE", name="FeedbackSource_feedbackDirectoryId_workspaceId_fkey"),
     )
 
-    workspace: Mapped["Workspace"] = relationship(back_populates="feedback_sources")
-    feedback_directory: Mapped["FeedbackDirectory"] = relationship(back_populates="feedback_sources")
+    workspace: Mapped["Workspace"] = relationship(overlaps="feedback_directory_workspace,feedback_sources", back_populates="feedback_sources")
+    feedback_directory: Mapped["FeedbackDirectory"] = relationship(overlaps="feedback_directory_workspace,feedback_sources", back_populates="feedback_sources")
     creator: Mapped[Optional["User"]] = relationship(back_populates="feedback_sources")
-    feedback_directory_workspace: Mapped["FeedbackDirectoryWorkspace"] = relationship(back_populates="feedback_sources")
-    formbricks_mappings: Mapped[list["FeedbackSourceFormbricksMapping"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="feedback_source")
+    feedback_directory_workspace: Mapped["FeedbackDirectoryWorkspace"] = relationship(overlaps="feedback_directory,feedback_sources,workspace", back_populates="feedback_sources")
+    formbricks_mappings: Mapped[list["FeedbackSourceFormbricksMapping"]] = relationship(cascade="all, delete", passive_deletes=True, overlaps="feedback_source_mappings,survey", back_populates="feedback_source")
     field_mappings: Mapped[list["FeedbackSourceFieldMapping"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="feedback_source")
 
 class FeedbackSourceFormbricksMapping(Base):
@@ -1400,8 +1400,8 @@ class FeedbackSourceFormbricksMapping(Base):
         ForeignKeyConstraint(["surveyId", "workspaceId"], ["Survey.id", "Survey.workspaceId"], ondelete="CASCADE", onupdate="CASCADE", name="FeedbackSourceFormbricksMapping_surveyId_workspaceId_fkey"),
     )
 
-    feedback_source: Mapped["FeedbackSource"] = relationship(back_populates="formbricks_mappings")
-    survey: Mapped["Survey"] = relationship(back_populates="feedback_source_mappings")
+    feedback_source: Mapped["FeedbackSource"] = relationship(overlaps="feedback_source_mappings,survey", back_populates="formbricks_mappings")
+    survey: Mapped["Survey"] = relationship(overlaps="feedback_source,formbricks_mappings", back_populates="feedback_source_mappings")
 
 class FeedbackSourceFieldMapping(Base):
     __tablename__ = "FeedbackSourceFieldMapping"
@@ -1437,7 +1437,7 @@ class FeedbackDirectory(Base):
 
     organization: Mapped["Organization"] = relationship(back_populates="feedback_directories")
     workspaces: Mapped[list["FeedbackDirectoryWorkspace"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="feedback_directory")
-    feedback_sources: Mapped[list["FeedbackSource"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="feedback_directory")
+    feedback_sources: Mapped[list["FeedbackSource"]] = relationship(cascade="all, delete", passive_deletes=True, overlaps="feedback_directory_workspace,feedback_sources", back_populates="feedback_directory")
     charts: Mapped[list["Chart"]] = relationship(passive_deletes="all", back_populates="feedback_directory")
 
 class FeedbackDirectoryWorkspace(Base):
@@ -1454,7 +1454,7 @@ class FeedbackDirectoryWorkspace(Base):
 
     feedback_directory: Mapped["FeedbackDirectory"] = relationship(back_populates="workspaces")
     workspace: Mapped["Workspace"] = relationship(back_populates="feedback_directory_workspaces")
-    feedback_sources: Mapped[list["FeedbackSource"]] = relationship(passive_deletes="all", back_populates="feedback_directory_workspace")
+    feedback_sources: Mapped[list["FeedbackSource"]] = relationship(passive_deletes="all", overlaps="feedback_directory,feedback_sources,workspace", back_populates="feedback_directory_workspace")
 
 class AuthzedProjectionScopeState(Base):
     __tablename__ = "AuthzedProjectionScopeState"
@@ -1650,7 +1650,7 @@ class Workflow(Base):
     workspace: Mapped["Workspace"] = relationship(back_populates="workflows")
     creator: Mapped[Optional["User"]] = relationship(back_populates="workflows")
     versions: Mapped[list["WorkflowVersion"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="workflow")
-    runs: Mapped[list["WorkflowRun"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="workflow")
+    runs: Mapped[list["WorkflowRun"]] = relationship(cascade="all, delete", passive_deletes=True, overlaps="workflow_runs,workspace", back_populates="workflow")
 
 class WorkflowVersion(Base):
     __tablename__ = "WorkflowVersion"
@@ -1710,8 +1710,8 @@ class WorkflowRun(Base):
         ForeignKeyConstraint(["workflowId", "workspaceId"], ["Workflow.id", "Workflow.workspaceId"], ondelete="CASCADE", onupdate="CASCADE", name="WorkflowRun_workflowId_workspaceId_fkey"),
     )
 
-    workflow: Mapped["Workflow"] = relationship(back_populates="runs")
-    workspace: Mapped["Workspace"] = relationship(back_populates="workflow_runs")
+    workflow: Mapped["Workflow"] = relationship(overlaps="workflow_runs,workspace", back_populates="runs")
+    workspace: Mapped["Workspace"] = relationship(overlaps="runs,workflow", back_populates="workflow_runs")
     workflow_version: Mapped[Optional["WorkflowVersion"]] = relationship(back_populates="runs")
     response: Mapped[Optional["Response"]] = relationship(back_populates="workflow_runs")
     logs: Mapped[list["WorkflowRunLog"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="run")

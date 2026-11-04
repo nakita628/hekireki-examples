@@ -52,7 +52,7 @@ defmodule Formbricks.WorkflowRun do
     belongs_to(:workspace, Formbricks.Workspace, foreign_key: :workspace_id, define_field: false, type: :string)
     belongs_to(:workflow_version, Formbricks.WorkflowVersion, foreign_key: :workflow_version_id, define_field: false, type: :string)
     belongs_to(:response, Formbricks.Response, foreign_key: :response_id, define_field: false, type: :string)
-    has_many(:logs, Formbricks.WorkflowRunLog, foreign_key: :run_id)
+    has_many(:logs, Formbricks.WorkflowRunLog, foreign_key: :run_id, references: :id)
     timestamps(inserted_at_source: :created_at)
   end
 end

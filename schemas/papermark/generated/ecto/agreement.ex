@@ -37,8 +37,8 @@ defmodule Papermark.Agreement do
     field(:deleted_by, :string, source: :deletedBy)
     field(:team_id, :string, source: :teamId)
     belongs_to(:team, Papermark.Team, foreign_key: :team_id, define_field: false, type: :string)
-    has_many(:links, Papermark.Link, foreign_key: :agreement_id)
-    has_many(:responses, Papermark.AgreementResponse, foreign_key: :agreement_id)
+    has_many(:links, Papermark.Link, foreign_key: :agreement_id, references: :id)
+    has_many(:responses, Papermark.AgreementResponse, foreign_key: :agreement_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)
   end
 end

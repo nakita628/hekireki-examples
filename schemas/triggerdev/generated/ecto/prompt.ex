@@ -44,7 +44,7 @@ defmodule Trigger.Prompt do
     belongs_to(:organization, Trigger.Organization, foreign_key: :organization_id, define_field: false, type: :string)
     belongs_to(:project, Trigger.Project, foreign_key: :project_id, define_field: false, type: :string)
     belongs_to(:runtime_environment, Trigger.RuntimeEnvironment, foreign_key: :runtime_environment_id, define_field: false, type: :string)
-    has_many(:versions, Trigger.PromptVersion, foreign_key: :prompt_id)
+    has_many(:versions, Trigger.PromptVersion, foreign_key: :prompt_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)
   end
 end

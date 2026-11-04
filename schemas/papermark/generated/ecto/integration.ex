@@ -37,7 +37,7 @@ defmodule Papermark.Integration do
     field(:install_url, :string, source: :installUrl)
     field(:category, :string)
     field(:coming_soon, :boolean, default: false, source: :comingSoon)
-    has_many(:installed_integrations, Papermark.InstalledIntegration, foreign_key: :integration_id)
+    has_many(:installed_integrations, Papermark.InstalledIntegration, foreign_key: :integration_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)
   end
 end

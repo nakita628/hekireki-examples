@@ -44,7 +44,7 @@ defmodule Teable.Plugin do
     field(:created_time, Teable.PrismaDateTime, autogenerate: true)
     field(:created_by, :string)
     field(:last_modified_by, :string)
-    has_many(:plugin_install, Teable.PluginInstall, foreign_key: :plugin_id)
+    has_many(:plugin_install, Teable.PluginInstall, foreign_key: :plugin_id, references: :id)
     timestamps(inserted_at: false, updated_at_source: :last_modified_time)
   end
 end

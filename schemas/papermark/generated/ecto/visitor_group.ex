@@ -20,7 +20,7 @@ defmodule Papermark.VisitorGroup do
     field(:emails, {:array, :string})
     field(:team_id, :string, source: :teamId)
     belongs_to(:team, Papermark.Team, foreign_key: :team_id, define_field: false, type: :string)
-    has_many(:links, Papermark.LinkVisitorGroup, foreign_key: :visitor_group_id)
+    has_many(:links, Papermark.LinkVisitorGroup, foreign_key: :visitor_group_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)
   end
 end

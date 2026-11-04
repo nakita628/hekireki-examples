@@ -59,11 +59,11 @@ defmodule Postiz.Integration do
     field(:organization_id, :binary_id, source: :organizationId)
     belongs_to(:customer, Postiz.Customer, foreign_key: :customer_id, define_field: false, type: :binary_id)
     belongs_to(:organization, Postiz.Organization, foreign_key: :organization_id, define_field: false, type: :binary_id)
-    has_many(:exising_plug_data, Postiz.ExisingPlugData, foreign_key: :integration_id)
-    has_many(:webhooks, Postiz.IntegrationsWebhooks, foreign_key: :integration_id)
-    has_many(:order_items, Postiz.OrderItems, foreign_key: :integration_id)
-    has_many(:plugs, Postiz.Plugs, foreign_key: :integration_id)
-    has_many(:posts, Postiz.Post, foreign_key: :integration_id)
+    has_many(:exising_plug_data, Postiz.ExisingPlugData, foreign_key: :integration_id, references: :id)
+    has_many(:webhooks, Postiz.IntegrationsWebhooks, foreign_key: :integration_id, references: :id)
+    has_many(:order_items, Postiz.OrderItems, foreign_key: :integration_id, references: :id)
+    has_many(:plugs, Postiz.Plugs, foreign_key: :integration_id, references: :id)
+    has_many(:posts, Postiz.Post, foreign_key: :integration_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)
   end
 end

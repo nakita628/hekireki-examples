@@ -23,7 +23,7 @@ defmodule Langfuse.PricingTier do
     field(:priority, :integer)
     field(:conditions, :map)
     belongs_to(:model, Langfuse.Model, foreign_key: :model_id, type: :string)
-    has_many(:prices, Langfuse.Price, foreign_key: :pricing_tier_id)
+    has_many(:prices, Langfuse.Price, foreign_key: :pricing_tier_id, references: :id)
     timestamps(inserted_at_source: :created_at)
   end
 end

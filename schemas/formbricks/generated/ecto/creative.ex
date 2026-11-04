@@ -52,10 +52,10 @@ defmodule Formbricks.Creative do
     field(:created_by, :string, source: :createdBy)
     belongs_to(:workspace, Formbricks.Workspace, foreign_key: :workspace_id, define_field: false, type: :string)
     belongs_to(:creator, Formbricks.User, foreign_key: :created_by, define_field: false, type: :string)
-    has_many(:triggers, Formbricks.CreativeTrigger, foreign_key: :creative_id)
-    has_many(:languages, Formbricks.CreativeLanguage, foreign_key: :creative_id)
-    has_many(:daily_stats, Formbricks.CreativeDailyStat, foreign_key: :creative_id)
-    has_many(:daily_page_stats, Formbricks.CreativeDailyPageStat, foreign_key: :creative_id)
+    has_many(:triggers, Formbricks.CreativeTrigger, foreign_key: :creative_id, references: :id)
+    has_many(:languages, Formbricks.CreativeLanguage, foreign_key: :creative_id, references: :id)
+    has_many(:daily_stats, Formbricks.CreativeDailyStat, foreign_key: :creative_id, references: :id)
+    has_many(:daily_page_stats, Formbricks.CreativeDailyPageStat, foreign_key: :creative_id, references: :id)
     timestamps(inserted_at_source: :created_at)
   end
 end

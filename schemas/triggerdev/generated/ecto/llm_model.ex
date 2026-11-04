@@ -42,8 +42,8 @@ defmodule Trigger.LlmModel do
     field(:base_model_name, :string)
     field(:pricing_unit, :string)
     belongs_to(:project, Trigger.Project, foreign_key: :project_id, type: :string)
-    has_many(:pricing_tiers, Trigger.LlmPricingTier, foreign_key: :model_id)
-    has_many(:prices, Trigger.LlmPrice, foreign_key: :model_id)
+    has_many(:pricing_tiers, Trigger.LlmPricingTier, foreign_key: :model_id, references: :id)
+    has_many(:prices, Trigger.LlmPrice, foreign_key: :model_id, references: :id)
     timestamps(inserted_at_source: :created_at)
   end
 end

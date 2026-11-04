@@ -47,10 +47,10 @@ defmodule Teable.TableMeta do
     field(:created_by, :string)
     field(:last_modified_by, :string)
     belongs_to(:base, Teable.Base, foreign_key: :base_id, type: :string)
-    has_many(:fields, Teable.Field, foreign_key: :table_id)
-    has_many(:views, Teable.View, foreign_key: :table_id)
-    has_many(:plugin_panel, Teable.PluginPanel, foreign_key: :table_id)
-    has_many(:plugin_context_menu, Teable.PluginContextMenu, foreign_key: :table_id)
+    has_many(:fields, Teable.Field, foreign_key: :table_id, references: :id)
+    has_many(:views, Teable.View, foreign_key: :table_id, references: :id)
+    has_many(:plugin_panel, Teable.PluginPanel, foreign_key: :table_id, references: :id)
+    has_many(:plugin_context_menu, Teable.PluginContextMenu, foreign_key: :table_id, references: :id)
     timestamps(inserted_at: false, updated_at_source: :last_modified_time)
   end
 end

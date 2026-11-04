@@ -34,9 +34,9 @@ defmodule Umami.Session do
     field(:region, :string)
     field(:city, :string)
     field(:distinct_id, :string)
-    has_many(:website_events, Umami.WebsiteEvent, foreign_key: :session_id)
-    has_many(:session_data, Umami.SessionData, foreign_key: :session_id)
-    has_many(:revenue, Umami.Revenue, foreign_key: :session_id)
+    has_many(:website_events, Umami.WebsiteEvent, foreign_key: :session_id, references: :id)
+    has_many(:session_data, Umami.SessionData, foreign_key: :session_id, references: :id)
+    has_many(:revenue, Umami.Revenue, foreign_key: :session_id, references: :id)
     timestamps(inserted_at_source: :created_at, updated_at: false)
   end
 end

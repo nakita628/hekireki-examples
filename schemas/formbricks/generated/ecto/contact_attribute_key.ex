@@ -29,8 +29,8 @@ defmodule Formbricks.ContactAttributeKey do
     field(:data_type, Ecto.Enum, values: [:string, :number, :date], default: :string, source: :dataType)
     field(:workspace_id, :string, source: :workspaceId)
     belongs_to(:workspace, Formbricks.Workspace, foreign_key: :workspace_id, define_field: false, type: :string)
-    has_many(:attributes, Formbricks.ContactAttribute, foreign_key: :attribute_key_id)
-    has_many(:attribute_filters, Formbricks.SurveyAttributeFilter, foreign_key: :attribute_key_id)
+    has_many(:attributes, Formbricks.ContactAttribute, foreign_key: :attribute_key_id, references: :id)
+    has_many(:attribute_filters, Formbricks.SurveyAttributeFilter, foreign_key: :attribute_key_id, references: :id)
     timestamps(inserted_at_source: :created_at)
   end
 end

@@ -24,7 +24,7 @@ defmodule Papermark.Tag do
     field(:created_by, :string, source: :createdBy)
     field(:team_id, :string, source: :teamId)
     belongs_to(:team, Papermark.Team, foreign_key: :team_id, define_field: false, type: :string)
-    has_many(:items, Papermark.TagItem, foreign_key: :tag_id)
+    has_many(:items, Papermark.TagItem, foreign_key: :tag_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)
   end
 end

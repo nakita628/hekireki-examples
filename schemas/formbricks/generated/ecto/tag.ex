@@ -18,7 +18,7 @@ defmodule Formbricks.Tag do
     field(:name, :string)
     field(:workspace_id, :string, source: :workspaceId)
     belongs_to(:workspace, Formbricks.Workspace, foreign_key: :workspace_id, define_field: false, type: :string)
-    has_many(:responses, Formbricks.TagsOnResponses, foreign_key: :tag_id)
+    has_many(:responses, Formbricks.TagsOnResponses, foreign_key: :tag_id, references: :id)
     timestamps(inserted_at_source: :created_at)
   end
 end

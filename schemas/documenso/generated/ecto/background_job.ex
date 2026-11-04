@@ -32,7 +32,7 @@ defmodule Documenso.BackgroundJob do
     field(:submitted_at, Documenso.PrismaDateTime, autogenerate: true, source: :submittedAt)
     field(:completed_at, Documenso.PrismaDateTime, source: :completedAt)
     field(:last_retried_at, Documenso.PrismaDateTime, source: :lastRetriedAt)
-    has_many(:tasks, Documenso.BackgroundJobTask, foreign_key: :job_id)
+    has_many(:tasks, Documenso.BackgroundJobTask, foreign_key: :job_id, references: :id)
     timestamps(inserted_at: false, updated_at_source: :updatedAt)
   end
 end

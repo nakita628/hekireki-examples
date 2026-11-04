@@ -107,10 +107,10 @@ defmodule Dub.Link do
     belongs_to(:project, Dub.Project, foreign_key: :project_id, define_field: false, type: :string)
     belongs_to(:folder, Dub.Folder, foreign_key: :folder_id, define_field: false, type: :string)
     belongs_to(:short_domain, Dub.Domain, foreign_key: :domain, type: :string, references: :slug)
-    has_one(:dashboard, Dub.Dashboard, foreign_key: :link_id)
-    has_many(:tags, Dub.LinkTag, foreign_key: :link_id)
-    has_many(:webhooks, Dub.LinkWebhook, foreign_key: :link_id)
-    has_many(:customers, Dub.Customer, foreign_key: :link_id)
+    has_one(:dashboard, Dub.Dashboard, foreign_key: :link_id, references: :id)
+    has_many(:tags, Dub.LinkTag, foreign_key: :link_id, references: :id)
+    has_many(:webhooks, Dub.LinkWebhook, foreign_key: :link_id, references: :id)
+    has_many(:customers, Dub.Customer, foreign_key: :link_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)
   end
 end

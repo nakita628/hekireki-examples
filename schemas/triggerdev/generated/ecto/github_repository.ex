@@ -28,7 +28,7 @@ defmodule Trigger.GithubRepository do
     field(:default_branch, :string, source: :defaultBranch)
     field(:installation_id, :string, source: :installationId)
     belongs_to(:installation, Trigger.GithubAppInstallation, foreign_key: :installation_id, define_field: false, type: :string)
-    has_many(:connected_github_repository, Trigger.ConnectedGithubRepository, foreign_key: :repository_id)
+    has_many(:connected_github_repository, Trigger.ConnectedGithubRepository, foreign_key: :repository_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)
   end
 end

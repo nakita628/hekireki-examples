@@ -14,7 +14,7 @@ defmodule Trigger.InvitationCode do
   schema "InvitationCode" do
     field(:id, :string, primary_key: true)
     field(:code, :string)
-    has_many(:users, Trigger.User, foreign_key: :invitation_code_id)
+    has_many(:users, Trigger.User, foreign_key: :invitation_code_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at: false)
   end
 end

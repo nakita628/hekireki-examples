@@ -51,7 +51,7 @@ defmodule Trigger.Session do
     field(:expires_at, Trigger.PrismaDateTime, source: :expiresAt)
     field(:stream_basin_name, :string, source: :streamBasinName)
     field(:chat_snapshot_storage_path, :string, source: :chatSnapshotStoragePath)
-    has_many(:runs, Trigger.SessionRun, foreign_key: :session_id)
+    has_many(:runs, Trigger.SessionRun, foreign_key: :session_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)
   end
 end

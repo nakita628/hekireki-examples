@@ -39,7 +39,7 @@ defmodule Papermark.DocumentRedactionJob do
     belongs_to(:document_version, Papermark.DocumentVersion, foreign_key: :document_version_id, define_field: false, type: :string)
     belongs_to(:team, Papermark.Team, foreign_key: :team_id, define_field: false, type: :string)
     belongs_to(:created_by, Papermark.User, foreign_key: :created_by_id, define_field: false, type: :string)
-    has_many(:redactions, Papermark.DocumentRedaction, foreign_key: :job_id)
+    has_many(:redactions, Papermark.DocumentRedaction, foreign_key: :job_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)
   end
 end

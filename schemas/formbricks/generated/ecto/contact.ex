@@ -18,9 +18,9 @@ defmodule Formbricks.Contact do
     field(:id, :string, primary_key: true)
     field(:workspace_id, :string, source: :workspaceId)
     belongs_to(:workspace, Formbricks.Workspace, foreign_key: :workspace_id, define_field: false, type: :string)
-    has_many(:responses, Formbricks.Response, foreign_key: :contact_id)
-    has_many(:attributes, Formbricks.ContactAttribute, foreign_key: :contact_id)
-    has_many(:displays, Formbricks.Display, foreign_key: :contact_id)
+    has_many(:responses, Formbricks.Response, foreign_key: :contact_id, references: :id)
+    has_many(:attributes, Formbricks.ContactAttribute, foreign_key: :contact_id, references: :id)
+    has_many(:displays, Formbricks.Display, foreign_key: :contact_id, references: :id)
     timestamps(inserted_at_source: :created_at)
   end
 end

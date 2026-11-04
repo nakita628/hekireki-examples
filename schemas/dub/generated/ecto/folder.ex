@@ -28,11 +28,11 @@ defmodule Dub.Folder do
     field(:access_level, Ecto.Enum, values: [:read, :write], source: :accessLevel)
     field(:project_id, :string, source: :projectId)
     belongs_to(:project, Dub.Project, foreign_key: :project_id, define_field: false, type: :string)
-    has_one(:dashboard, Dub.Dashboard, foreign_key: :folder_id)
-    has_many(:links, Dub.Link, foreign_key: :folder_id)
-    has_many(:users, Dub.FolderUser, foreign_key: :folder_id)
-    has_many(:access_requests, Dub.FolderAccessRequest, foreign_key: :folder_id)
-    has_many(:webhooks, Dub.FolderWebhook, foreign_key: :folder_id)
+    has_one(:dashboard, Dub.Dashboard, foreign_key: :folder_id, references: :id)
+    has_many(:links, Dub.Link, foreign_key: :folder_id, references: :id)
+    has_many(:users, Dub.FolderUser, foreign_key: :folder_id, references: :id)
+    has_many(:access_requests, Dub.FolderAccessRequest, foreign_key: :folder_id, references: :id)
+    has_many(:webhooks, Dub.FolderWebhook, foreign_key: :folder_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)
   end
 end

@@ -29,7 +29,7 @@ defmodule Papermark.Domain do
     field(:team_id, :string, source: :teamId)
     belongs_to(:user, Papermark.User, foreign_key: :user_id, define_field: false, type: :string)
     belongs_to(:team, Papermark.Team, foreign_key: :team_id, define_field: false, type: :string)
-    has_many(:links, Papermark.Link, foreign_key: :domain_id)
+    has_many(:links, Papermark.Link, foreign_key: :domain_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)
   end
 end

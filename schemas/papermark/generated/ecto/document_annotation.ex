@@ -30,7 +30,7 @@ defmodule Papermark.DocumentAnnotation do
     belongs_to(:document, Papermark.Document, foreign_key: :document_id, define_field: false, type: :string)
     belongs_to(:team, Papermark.Team, foreign_key: :team_id, define_field: false, type: :string)
     belongs_to(:created_by, Papermark.User, foreign_key: :created_by_id, define_field: false, type: :string)
-    has_many(:images, Papermark.AnnotationImage, foreign_key: :annotation_id)
+    has_many(:images, Papermark.AnnotationImage, foreign_key: :annotation_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)
   end
 end

@@ -36,9 +36,9 @@ defmodule Teable.Base do
     field(:created_by, :string)
     field(:last_modified_by, :string)
     belongs_to(:space, Teable.Space, foreign_key: :space_id, type: :string)
-    has_many(:tables, Teable.TableMeta, foreign_key: :base_id)
-    has_many(:data_db_move_jobs, Teable.BaseDataDbMoveJob, foreign_key: :base_id)
-    has_many(:user_orders, Teable.UserBaseOrder, foreign_key: :base_id)
+    has_many(:tables, Teable.TableMeta, foreign_key: :base_id, references: :id)
+    has_many(:data_db_move_jobs, Teable.BaseDataDbMoveJob, foreign_key: :base_id, references: :id)
+    has_many(:user_orders, Teable.UserBaseOrder, foreign_key: :base_id, references: :id)
     timestamps(inserted_at: false, updated_at_source: :last_modified_time)
   end
 end

@@ -88,10 +88,10 @@ defmodule Trigger.WorkerDeployment do
     belongs_to(:environment, Trigger.RuntimeEnvironment, foreign_key: :environment_id, define_field: false, type: :string)
     belongs_to(:worker, Trigger.BackgroundWorker, foreign_key: :worker_id, define_field: false, type: :string)
     belongs_to(:triggered_by, Trigger.User, foreign_key: :triggered_by_id, define_field: false, type: :string)
-    has_many(:promotions, Trigger.WorkerDeploymentPromotion, foreign_key: :deployment_id)
-    has_many(:alerts, Trigger.ProjectAlert, foreign_key: :worker_deployment_id)
-    has_many(:worker_instance, Trigger.WorkerInstance, foreign_key: :deployment_id)
-    has_many(:integration_deployments, Trigger.IntegrationDeployment, foreign_key: :deployment_id)
+    has_many(:promotions, Trigger.WorkerDeploymentPromotion, foreign_key: :deployment_id, references: :id)
+    has_many(:alerts, Trigger.ProjectAlert, foreign_key: :worker_deployment_id, references: :id)
+    has_many(:worker_instance, Trigger.WorkerInstance, foreign_key: :deployment_id, references: :id)
+    has_many(:integration_deployments, Trigger.IntegrationDeployment, foreign_key: :deployment_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)
   end
 end

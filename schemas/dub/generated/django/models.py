@@ -531,7 +531,7 @@ class NotificationPreference(models.Model):
 
 class OAuthApp(models.Model):
     id = models.TextField(primary_key=True, default=None)
-    integration = models.OneToOneField("Integration", on_delete=models.CASCADE, related_name="o_auth_app", db_column="integrationId", null=True)
+    integration = models.OneToOneField("Integration", on_delete=models.CASCADE, related_name="o_auth_app", db_column="integrationId")
     client_id = models.TextField(unique=True, db_column="clientId")
     hashed_client_secret = models.TextField(db_column="hashedClientSecret")
     partial_client_secret = models.TextField(db_column="partialClientSecret")

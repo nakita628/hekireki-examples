@@ -46,8 +46,8 @@ defmodule Dub.Integration do
     field(:project_id, :string, source: :projectId)
     belongs_to(:user, Dub.User, foreign_key: :user_id, define_field: false, type: :string)
     belongs_to(:project, Dub.Project, foreign_key: :project_id, define_field: false, type: :string)
-    has_one(:o_auth_app, Dub.OAuthApp, foreign_key: :integration_id)
-    has_many(:installations, Dub.InstalledIntegration, foreign_key: :integration_id)
+    has_one(:o_auth_app, Dub.OAuthApp, foreign_key: :integration_id, references: :id)
+    has_many(:installations, Dub.InstalledIntegration, foreign_key: :integration_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)
   end
 end

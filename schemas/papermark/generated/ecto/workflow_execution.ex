@@ -27,6 +27,6 @@ defmodule Papermark.WorkflowExecution do
     field(:metadata, :map)
     field(:workflow_id, :string, source: :workflowId)
     belongs_to(:workflow, Papermark.Workflow, foreign_key: :workflow_id, define_field: false, type: :string)
-    has_many(:step_logs, Papermark.WorkflowStepLog, foreign_key: :execution_id)
+    has_many(:step_logs, Papermark.WorkflowStepLog, foreign_key: :execution_id, references: :id)
   end
 end

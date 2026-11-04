@@ -48,7 +48,7 @@ defmodule Trigger.PlatformNotification do
     belongs_to(:user, Trigger.User, foreign_key: :user_id, define_field: false, type: :string)
     belongs_to(:organization, Trigger.Organization, foreign_key: :organization_id, define_field: false, type: :string)
     belongs_to(:project, Trigger.Project, foreign_key: :project_id, define_field: false, type: :string)
-    has_many(:interactions, Trigger.PlatformNotificationInteraction, foreign_key: :notification_id)
+    has_many(:interactions, Trigger.PlatformNotificationInteraction, foreign_key: :notification_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)
   end
 end

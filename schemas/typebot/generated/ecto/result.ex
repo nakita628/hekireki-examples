@@ -29,11 +29,11 @@ defmodule Typebot.Result do
     field(:last_chat_session_id, :string, source: :lastChatSessionId)
     field(:typebot_id, :string, source: :typebotId)
     belongs_to(:typebot, Typebot.Typebot, foreign_key: :typebot_id, define_field: false, type: :string)
-    has_many(:answers, Typebot.Answer, foreign_key: :result_id)
-    has_many(:answers_v2, Typebot.AnswerV2, foreign_key: :result_id)
-    has_many(:logs, Typebot.Log, foreign_key: :result_id)
-    has_many(:edges, Typebot.VisitedEdge, foreign_key: :result_id)
-    has_many(:set_variable_history, Typebot.SetVariableHistoryItem, foreign_key: :result_id)
+    has_many(:answers, Typebot.Answer, foreign_key: :result_id, references: :id)
+    has_many(:answers_v2, Typebot.AnswerV2, foreign_key: :result_id, references: :id)
+    has_many(:logs, Typebot.Log, foreign_key: :result_id, references: :id)
+    has_many(:edges, Typebot.VisitedEdge, foreign_key: :result_id, references: :id)
+    has_many(:set_variable_history, Typebot.SetVariableHistoryItem, foreign_key: :result_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at: false)
   end
 end

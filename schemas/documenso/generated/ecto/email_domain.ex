@@ -28,7 +28,7 @@ defmodule Documenso.EmailDomain do
     field(:last_verified_at, Documenso.PrismaDateTime, source: :lastVerifiedAt)
     field(:organisation_id, :string, source: :organisationId)
     belongs_to(:organisation, Documenso.Organisation, foreign_key: :organisation_id, define_field: false, type: :string)
-    has_many(:emails, Documenso.OrganisationEmail, foreign_key: :email_domain_id)
+    has_many(:emails, Documenso.OrganisationEmail, foreign_key: :email_domain_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)
   end
 end

@@ -72,6 +72,6 @@ defmodule Teable.ComputedUpdateDeadLetter do
     field(:failed_at, Teable.PrismaDateTime)
     field(:created_at, Teable.PrismaDateTime)
     field(:updated_at, Teable.PrismaDateTime)
-    has_many(:seeds, Teable.ComputedUpdateDeadLetterSeed, foreign_key: :task_id)
+    has_many(:seeds, Teable.ComputedUpdateDeadLetterSeed, foreign_key: :task_id, references: :id)
   end
 end

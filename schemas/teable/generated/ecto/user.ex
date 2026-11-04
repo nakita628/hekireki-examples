@@ -47,8 +47,8 @@ defmodule Teable.User do
     field(:deleted_time, Teable.PrismaDateTime)
     field(:permanent_deleted_time, Teable.PrismaDateTime)
     field(:ref_meta, :string)
-    has_many(:accounts, Teable.Account, foreign_key: :user_id)
-    has_many(:base_orders, Teable.UserBaseOrder, foreign_key: :user_id)
+    has_many(:accounts, Teable.Account, foreign_key: :user_id, references: :id)
+    has_many(:base_orders, Teable.UserBaseOrder, foreign_key: :user_id, references: :id)
     timestamps(inserted_at: false, updated_at_source: :last_modified_time)
   end
 end

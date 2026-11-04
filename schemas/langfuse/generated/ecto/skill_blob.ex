@@ -22,7 +22,7 @@ defmodule Langfuse.SkillBlob do
     field(:content_length, :integer)
     field(:content, :string)
     belongs_to(:project, Langfuse.Project, foreign_key: :project_id, type: :string)
-    has_many(:files, Langfuse.SkillFile, foreign_key: :blob_id)
+    has_many(:files, Langfuse.SkillFile, foreign_key: :blob_id, references: :id)
     timestamps(inserted_at_source: :created_at, updated_at: false)
   end
 end

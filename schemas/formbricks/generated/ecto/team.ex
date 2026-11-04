@@ -19,8 +19,8 @@ defmodule Formbricks.Team do
     field(:name, :string)
     field(:organization_id, :string, source: :organizationId)
     belongs_to(:organization, Formbricks.Organization, foreign_key: :organization_id, define_field: false, type: :string)
-    has_many(:team_users, Formbricks.TeamUser, foreign_key: :team_id)
-    has_many(:workspace_teams, Formbricks.WorkspaceTeam, foreign_key: :team_id)
+    has_many(:team_users, Formbricks.TeamUser, foreign_key: :team_id, references: :id)
+    has_many(:workspace_teams, Formbricks.WorkspaceTeam, foreign_key: :team_id, references: :id)
     timestamps(inserted_at_source: :created_at)
   end
 end

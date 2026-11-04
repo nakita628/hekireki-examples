@@ -32,11 +32,11 @@ defmodule Teable.Space do
     field(:created_by, :string)
     field(:last_modified_by, :string)
     field(:is_template, :boolean)
-    has_one(:data_db_binding, Teable.SpaceDataDbBinding, foreign_key: :space_id)
-    has_many(:base_group, Teable.Base, foreign_key: :space_id)
-    has_many(:data_db_migration_jobs, Teable.SpaceDataDbMigrationJob, foreign_key: :space_id)
-    has_many(:base_data_db_move_jobs_as_source, Teable.BaseDataDbMoveJob, foreign_key: :source_space_id)
-    has_many(:base_data_db_move_jobs_as_target, Teable.BaseDataDbMoveJob, foreign_key: :target_space_id)
+    has_one(:data_db_binding, Teable.SpaceDataDbBinding, foreign_key: :space_id, references: :id)
+    has_many(:base_group, Teable.Base, foreign_key: :space_id, references: :id)
+    has_many(:data_db_migration_jobs, Teable.SpaceDataDbMigrationJob, foreign_key: :space_id, references: :id)
+    has_many(:base_data_db_move_jobs_as_source, Teable.BaseDataDbMoveJob, foreign_key: :source_space_id, references: :id)
+    has_many(:base_data_db_move_jobs_as_target, Teable.BaseDataDbMoveJob, foreign_key: :target_space_id, references: :id)
     timestamps(inserted_at: false, updated_at_source: :last_modified_time)
   end
 end

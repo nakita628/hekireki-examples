@@ -59,6 +59,6 @@ defmodule Documenso.TeamGlobalSettings do
     field(:ai_features_enabled, :boolean, source: :aiFeaturesEnabled)
     field(:email_id, :string, source: :emailId)
     belongs_to(:email, Documenso.OrganisationEmail, foreign_key: :email_id, define_field: false, type: :string)
-    has_one(:team, Documenso.Team, foreign_key: :team_global_settings_id)
+    has_one(:team, Documenso.Team, foreign_key: :team_global_settings_id, references: :id)
   end
 end

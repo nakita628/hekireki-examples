@@ -19,7 +19,7 @@ defmodule Documenso.OrganisationMember do
     field(:organisation_id, :string, source: :organisationId)
     belongs_to(:user, Documenso.User, foreign_key: :user_id, define_field: false)
     belongs_to(:organisation, Documenso.Organisation, foreign_key: :organisation_id, define_field: false, type: :string)
-    has_many(:organisation_group_members, Documenso.OrganisationGroupMember, foreign_key: :organisation_member_id)
+    has_many(:organisation_group_members, Documenso.OrganisationGroupMember, foreign_key: :organisation_member_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)
   end
 end

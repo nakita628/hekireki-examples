@@ -40,8 +40,8 @@ defmodule Hoppscotch.MockServer do
     field(:deleted_at, Hoppscotch.PrismaDateTime, source: :deletedAt)
     field(:creator_uid, :string, source: :creatorUid)
     belongs_to(:user, Hoppscotch.User, foreign_key: :creator_uid, define_field: false, type: :string, references: :uid)
-    has_many(:request_logs, Hoppscotch.MockServerLog, foreign_key: :mock_server_id)
-    has_many(:activity_history, Hoppscotch.MockServerActivity, foreign_key: :mock_server_id)
+    has_many(:request_logs, Hoppscotch.MockServerLog, foreign_key: :mock_server_id, references: :id)
+    has_many(:activity_history, Hoppscotch.MockServerActivity, foreign_key: :mock_server_id, references: :id)
     timestamps(inserted_at: false, updated_at_source: :updatedOn)
   end
 end

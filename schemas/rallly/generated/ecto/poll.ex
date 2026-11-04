@@ -60,12 +60,12 @@ defmodule Rallly.Poll do
     belongs_to(:user, Rallly.User, foreign_key: :user_id, type: :string)
     belongs_to(:scheduled_event, Rallly.ScheduledEvent, foreign_key: :scheduled_event_id, type: :string)
     belongs_to(:space, Rallly.Space, foreign_key: :space_id, type: :binary_id)
-    has_many(:options, Rallly.Option, foreign_key: :poll_id)
-    has_many(:participants, Rallly.Participant, foreign_key: :poll_id)
-    has_many(:comments, Rallly.Comment, foreign_key: :poll_id)
-    has_many(:votes, Rallly.Vote, foreign_key: :poll_id)
-    has_many(:invites, Rallly.PollInvite, foreign_key: :poll_id)
-    has_many(:activities, Rallly.PollActivity, foreign_key: :poll_id)
+    has_many(:options, Rallly.Option, foreign_key: :poll_id, references: :id)
+    has_many(:participants, Rallly.Participant, foreign_key: :poll_id, references: :id)
+    has_many(:comments, Rallly.Comment, foreign_key: :poll_id, references: :id)
+    has_many(:votes, Rallly.Vote, foreign_key: :poll_id, references: :id)
+    has_many(:invites, Rallly.PollInvite, foreign_key: :poll_id, references: :id)
+    has_many(:activities, Rallly.PollActivity, foreign_key: :poll_id, references: :id)
     timestamps(inserted_at_source: :created_at)
   end
 end

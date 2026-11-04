@@ -43,9 +43,9 @@ defmodule Langfuse.ApiKey do
     belongs_to(:created_by_user, Langfuse.User, foreign_key: :created_by_user_id, type: :string)
     belongs_to(:user, Langfuse.User, foreign_key: :user_id, type: :string)
     belongs_to(:created_by_api_key, Langfuse.ApiKey, foreign_key: :created_by_api_key_id, type: :string)
-    has_one(:gateway_association, Langfuse.GatewayApiKeyAssociation, foreign_key: :api_key_id)
-    has_many(:api_keys_created, Langfuse.ApiKey, foreign_key: :created_by_api_key_id)
-    has_many(:role_assignments, Langfuse.RoleAssignment, foreign_key: :api_key_id)
+    has_one(:gateway_association, Langfuse.GatewayApiKeyAssociation, foreign_key: :api_key_id, references: :id)
+    has_many(:api_keys_created, Langfuse.ApiKey, foreign_key: :created_by_api_key_id, references: :id)
+    has_many(:role_assignments, Langfuse.RoleAssignment, foreign_key: :api_key_id, references: :id)
     timestamps(inserted_at_source: :created_at, updated_at: false)
   end
 end

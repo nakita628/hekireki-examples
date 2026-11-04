@@ -61,12 +61,12 @@ defmodule Typebot.Typebot do
     belongs_to(:folder, Typebot.DashboardFolder, foreign_key: :folder_id, define_field: false, type: :string)
     belongs_to(:workspace, Typebot.Workspace, foreign_key: :workspace_id, define_field: false, type: :string)
     belongs_to(:space, Typebot.Space, foreign_key: :space_id, define_field: false, type: :string)
-    has_one(:published_typebot, Typebot.PublicTypebot, foreign_key: :typebot_id)
-    has_many(:collaborators, Typebot.CollaboratorsOnTypebots, foreign_key: :typebot_id)
-    has_many(:invitations, Typebot.Invitation, foreign_key: :typebot_id)
-    has_many(:results, Typebot.Result, foreign_key: :typebot_id)
-    has_many(:webhooks, Typebot.Webhook, foreign_key: :typebot_id)
-    has_many(:banned_ips, Typebot.BannedIp, foreign_key: :responsible_typebot_id)
+    has_one(:published_typebot, Typebot.PublicTypebot, foreign_key: :typebot_id, references: :id)
+    has_many(:collaborators, Typebot.CollaboratorsOnTypebots, foreign_key: :typebot_id, references: :id)
+    has_many(:invitations, Typebot.Invitation, foreign_key: :typebot_id, references: :id)
+    has_many(:results, Typebot.Result, foreign_key: :typebot_id, references: :id)
+    has_many(:webhooks, Typebot.Webhook, foreign_key: :typebot_id, references: :id)
+    has_many(:banned_ips, Typebot.BannedIp, foreign_key: :responsible_typebot_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)
   end
 end

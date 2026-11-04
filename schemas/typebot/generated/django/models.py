@@ -372,7 +372,7 @@ class RuntimeMediaIdCache(models.Model):
     url = models.TextField()
     media_id = models.TextField(db_column="mediaId")
     expires_at = UtcDateTimeField(null=True, db_column="expiresAt")
-    public_typebot = models.ForeignKey("PublicTypebot", on_delete=models.CASCADE, related_name="media_ids_cache", db_column="publicTypebotId", null=True, db_index=False)
+    public_typebot = models.ForeignKey("PublicTypebot", on_delete=models.CASCADE, related_name="media_ids_cache", db_column="publicTypebotId", db_index=False)
 
     class Meta:
         db_table = "RuntimeMediaIdCache"

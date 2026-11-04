@@ -16,6 +16,6 @@ defmodule Documenso.DocumentData do
     field(:type, Ecto.Enum, values: [:S3_PATH, :BYTES, :BYTES_64])
     field(:data, :string)
     field(:initial_data, :string, source: :initialData)
-    has_one(:envelope_item, Documenso.EnvelopeItem, foreign_key: :document_data_id)
+    has_one(:envelope_item, Documenso.EnvelopeItem, foreign_key: :document_data_id, references: :id)
   end
 end

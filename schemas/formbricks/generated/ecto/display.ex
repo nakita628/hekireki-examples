@@ -21,7 +21,7 @@ defmodule Formbricks.Display do
     field(:contact_id, :string, source: :contactId)
     belongs_to(:survey, Formbricks.Survey, foreign_key: :survey_id, define_field: false, type: :string)
     belongs_to(:contact, Formbricks.Contact, foreign_key: :contact_id, define_field: false, type: :string)
-    has_one(:response, Formbricks.Response, foreign_key: :display_id)
+    has_one(:response, Formbricks.Response, foreign_key: :display_id, references: :id)
     timestamps(inserted_at_source: :created_at)
   end
 end

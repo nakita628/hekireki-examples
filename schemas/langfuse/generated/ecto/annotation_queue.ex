@@ -22,8 +22,8 @@ defmodule Langfuse.AnnotationQueue do
     field(:description, :string)
     field(:score_config_ids, {:array, :string})
     belongs_to(:project, Langfuse.Project, foreign_key: :project_id, type: :string)
-    has_many(:annotation_queue_item, Langfuse.AnnotationQueueItem, foreign_key: :queue_id)
-    has_many(:annotation_queue_assignment, Langfuse.AnnotationQueueAssignment, foreign_key: :queue_id)
+    has_many(:annotation_queue_item, Langfuse.AnnotationQueueItem, foreign_key: :queue_id, references: :id)
+    has_many(:annotation_queue_assignment, Langfuse.AnnotationQueueAssignment, foreign_key: :queue_id, references: :id)
     timestamps(inserted_at_source: :created_at)
   end
 end

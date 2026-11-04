@@ -20,6 +20,6 @@ defmodule Trigger.LlmPricingTier do
     field(:priority, :integer, default: 0)
     field(:conditions, :map)
     belongs_to(:model, Trigger.LlmModel, foreign_key: :model_id, type: :string)
-    has_many(:prices, Trigger.LlmPrice, foreign_key: :pricing_tier_id)
+    has_many(:prices, Trigger.LlmPrice, foreign_key: :pricing_tier_id, references: :id)
   end
 end

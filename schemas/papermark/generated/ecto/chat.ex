@@ -40,7 +40,7 @@ defmodule Papermark.Chat do
     belongs_to(:view, Papermark.View, foreign_key: :view_id, define_field: false, type: :string)
     belongs_to(:user, Papermark.User, foreign_key: :user_id, define_field: false, type: :string)
     belongs_to(:viewer, Papermark.Viewer, foreign_key: :viewer_id, define_field: false, type: :string)
-    has_many(:messages, Papermark.ChatMessage, foreign_key: :chat_id)
+    has_many(:messages, Papermark.ChatMessage, foreign_key: :chat_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)
   end
 end

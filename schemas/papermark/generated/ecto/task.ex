@@ -46,9 +46,9 @@ defmodule Papermark.Task do
     belongs_to(:team, Papermark.Team, foreign_key: :team_id, define_field: false, type: :string)
     belongs_to(:upload_folder, Papermark.DataroomFolder, foreign_key: :upload_folder_id, define_field: false, type: :string)
     belongs_to(:created_by_user, Papermark.User, foreign_key: :created_by_user_id, define_field: false, type: :string)
-    has_many(:assignments, Papermark.TaskAssignment, foreign_key: :task_id)
-    has_many(:activities, Papermark.TaskActivity, foreign_key: :task_id)
-    has_many(:uploads, Papermark.DocumentUpload, foreign_key: :task_id)
+    has_many(:assignments, Papermark.TaskAssignment, foreign_key: :task_id, references: :id)
+    has_many(:activities, Papermark.TaskActivity, foreign_key: :task_id, references: :id)
+    has_many(:uploads, Papermark.DocumentUpload, foreign_key: :task_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)
   end
 end

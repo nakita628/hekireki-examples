@@ -35,8 +35,8 @@ defmodule Trigger.CheckpointRestoreEvent do
     belongs_to(:attempt, Trigger.TaskRunAttempt, foreign_key: :attempt_id, define_field: false, type: :string)
     belongs_to(:project, Trigger.Project, foreign_key: :project_id, define_field: false, type: :string)
     belongs_to(:runtime_environment, Trigger.RuntimeEnvironment, foreign_key: :runtime_environment_id, define_field: false, type: :string)
-    has_one(:task_run_dependency, Trigger.TaskRunDependency, foreign_key: :checkpoint_event_id)
-    has_one(:batch_task_run_dependency, Trigger.BatchTaskRun, foreign_key: :checkpoint_event_id)
+    has_one(:task_run_dependency, Trigger.TaskRunDependency, foreign_key: :checkpoint_event_id, references: :id)
+    has_one(:batch_task_run_dependency, Trigger.BatchTaskRun, foreign_key: :checkpoint_event_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)
   end
 end

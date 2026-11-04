@@ -69,11 +69,11 @@ defmodule Postiz.Post do
     belongs_to(:parent_post, Postiz.Post, foreign_key: :parent_post_id, define_field: false, type: :string)
     belongs_to(:submitted_for_order, Postiz.Orders, foreign_key: :submitted_for_order_id, define_field: false, type: :binary_id)
     belongs_to(:submitted_for_organization, Postiz.Organization, foreign_key: :submitted_for_organization_id, define_field: false, type: :binary_id)
-    has_many(:comments, Postiz.Comments, foreign_key: :post_id)
-    has_many(:errors, Postiz.Errors, foreign_key: :post_id)
-    has_many(:payout_problems, Postiz.PayoutProblems, foreign_key: :post_id)
-    has_many(:children_post, Postiz.Post, foreign_key: :parent_post_id)
-    has_many(:tags, Postiz.TagsPosts, foreign_key: :post_id)
+    has_many(:comments, Postiz.Comments, foreign_key: :post_id, references: :id)
+    has_many(:errors, Postiz.Errors, foreign_key: :post_id, references: :id)
+    has_many(:payout_problems, Postiz.PayoutProblems, foreign_key: :post_id, references: :id)
+    has_many(:children_post, Postiz.Post, foreign_key: :parent_post_id, references: :id)
+    has_many(:tags, Postiz.TagsPosts, foreign_key: :post_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)
   end
 end

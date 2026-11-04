@@ -22,6 +22,6 @@ defmodule Teable.OAuthAppSecret do
     field(:created_by, :string)
     field(:last_used_time, Teable.PrismaDateTime)
     belongs_to(:o_auth_app, Teable.OAuthApp, foreign_key: :client_id, type: :string, references: :client_id)
-    has_many(:tokens, Teable.OAuthAppToken, foreign_key: :app_secret_id)
+    has_many(:tokens, Teable.OAuthAppToken, foreign_key: :app_secret_id, references: :id)
   end
 end

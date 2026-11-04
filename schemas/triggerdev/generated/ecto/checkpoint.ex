@@ -39,7 +39,7 @@ defmodule Trigger.Checkpoint do
     belongs_to(:attempt, Trigger.TaskRunAttempt, foreign_key: :attempt_id, define_field: false, type: :string)
     belongs_to(:project, Trigger.Project, foreign_key: :project_id, define_field: false, type: :string)
     belongs_to(:runtime_environment, Trigger.RuntimeEnvironment, foreign_key: :runtime_environment_id, define_field: false, type: :string)
-    has_many(:events, Trigger.CheckpointRestoreEvent, foreign_key: :checkpoint_id)
+    has_many(:events, Trigger.CheckpointRestoreEvent, foreign_key: :checkpoint_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)
   end
 end

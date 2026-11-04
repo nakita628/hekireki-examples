@@ -16,10 +16,10 @@ defmodule Hoppscotch.Team do
   schema "Team" do
     field(:id, :string, primary_key: true)
     field(:name, :string)
-    has_many(:collections, Hoppscotch.TeamCollection, foreign_key: :team_id)
-    has_many(:environments, Hoppscotch.TeamEnvironment, foreign_key: :team_id)
-    has_many(:invitations, Hoppscotch.TeamInvitation, foreign_key: :team_id)
-    has_many(:members, Hoppscotch.TeamMember, foreign_key: :team_id)
-    has_many(:requests, Hoppscotch.TeamRequest, foreign_key: :team_id)
+    has_many(:collections, Hoppscotch.TeamCollection, foreign_key: :team_id, references: :id)
+    has_many(:environments, Hoppscotch.TeamEnvironment, foreign_key: :team_id, references: :id)
+    has_many(:invitations, Hoppscotch.TeamInvitation, foreign_key: :team_id, references: :id)
+    has_many(:members, Hoppscotch.TeamMember, foreign_key: :team_id, references: :id)
+    has_many(:requests, Hoppscotch.TeamRequest, foreign_key: :team_id, references: :id)
   end
 end

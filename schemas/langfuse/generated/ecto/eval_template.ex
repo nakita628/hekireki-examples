@@ -39,7 +39,7 @@ defmodule Langfuse.EvalTemplate do
     field(:source_code, :string)
     field(:source_code_language, Ecto.Enum, values: [:PYTHON, :TYPESCRIPT])
     belongs_to(:project, Langfuse.Project, foreign_key: :project_id, type: :string)
-    has_many(:job_configuration, Langfuse.JobConfiguration, foreign_key: :eval_template_id)
+    has_many(:job_configuration, Langfuse.JobConfiguration, foreign_key: :eval_template_id, references: :id)
     timestamps(inserted_at_source: :created_at)
   end
 end

@@ -40,10 +40,10 @@ defmodule Langfuse.LlmApiKeys do
     field(:config, :map)
     belongs_to(:project, Langfuse.Project, foreign_key: :project_id, type: :string)
     belongs_to(:organization, Langfuse.Organization, foreign_key: :organization_id, type: :string)
-    has_many(:default_llm_model, Langfuse.DefaultLlmModel, foreign_key: :llm_api_key_id)
-    has_many(:topic_summary_configs, Langfuse.TopicConfig, foreign_key: :summary_llm_api_key_id)
-    has_many(:topic_embedding_configs, Langfuse.TopicConfig, foreign_key: :embedding_llm_api_key_id)
-    has_many(:topic_clustering_configs, Langfuse.TopicConfig, foreign_key: :clustering_llm_api_key_id)
+    has_many(:default_llm_model, Langfuse.DefaultLlmModel, foreign_key: :llm_api_key_id, references: :id)
+    has_many(:topic_summary_configs, Langfuse.TopicConfig, foreign_key: :summary_llm_api_key_id, references: :id)
+    has_many(:topic_embedding_configs, Langfuse.TopicConfig, foreign_key: :embedding_llm_api_key_id, references: :id)
+    has_many(:topic_clustering_configs, Langfuse.TopicConfig, foreign_key: :clustering_llm_api_key_id, references: :id)
     timestamps(inserted_at_source: :created_at)
   end
 end

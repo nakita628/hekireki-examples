@@ -24,8 +24,8 @@ defmodule Papermark.PermissionGroup do
     field(:team_id, :string, source: :teamId)
     belongs_to(:dataroom, Papermark.Dataroom, foreign_key: :dataroom_id, define_field: false, type: :string)
     belongs_to(:team, Papermark.Team, foreign_key: :team_id, define_field: false, type: :string)
-    has_many(:links, Papermark.Link, foreign_key: :permission_group_id)
-    has_many(:access_controls, Papermark.PermissionGroupAccessControls, foreign_key: :group_id)
+    has_many(:links, Papermark.Link, foreign_key: :permission_group_id, references: :id)
+    has_many(:access_controls, Papermark.PermissionGroupAccessControls, foreign_key: :group_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)
   end
 end

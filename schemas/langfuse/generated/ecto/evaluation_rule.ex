@@ -33,7 +33,7 @@ defmodule Langfuse.EvaluationRule do
     field(:time_scope, {:array, :string})
     belongs_to(:project, Langfuse.Project, foreign_key: :project_id, type: :string)
     belongs_to(:created_by_user, Langfuse.User, foreign_key: :created_by_user_id, type: :string)
-    has_many(:assignments, Langfuse.EvaluationRuleEvaluatorAssignment, foreign_key: :evaluation_rule_id)
+    has_many(:assignments, Langfuse.EvaluationRuleEvaluatorAssignment, foreign_key: :evaluation_rule_id, references: :id)
     timestamps(inserted_at_source: :created_at)
   end
 end

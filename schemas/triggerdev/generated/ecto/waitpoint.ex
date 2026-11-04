@@ -53,7 +53,7 @@ defmodule Trigger.Waitpoint do
     belongs_to(:completed_by_batch, Trigger.BatchTaskRun, foreign_key: :completed_by_batch_id, define_field: false, type: :string)
     belongs_to(:project, Trigger.Project, foreign_key: :project_id, define_field: false, type: :string)
     belongs_to(:environment, Trigger.RuntimeEnvironment, foreign_key: :environment_id, define_field: false, type: :string)
-    has_many(:blocking_task_runs, Trigger.TaskRunWaitpoint, foreign_key: :waitpoint_id)
+    has_many(:blocking_task_runs, Trigger.TaskRunWaitpoint, foreign_key: :waitpoint_id, references: :id)
     many_to_many(:connected_runs, Trigger.TaskRun, join_through: "_WaitpointRunConnections", join_keys: [B: :id, A: :id])
     many_to_many(:completed_execution_snapshots, Trigger.TaskRunExecutionSnapshot, join_through: "_completedWaitpoints", join_keys: [B: :id, A: :id])
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)

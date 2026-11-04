@@ -20,8 +20,8 @@ defmodule Langfuse.Action do
     field(:type, Ecto.Enum, values: [:WEBHOOK, :SLACK, :GITHUB_DISPATCH, :PAGERDUTY])
     field(:config, :map)
     belongs_to(:project, Langfuse.Project, foreign_key: :project_id, type: :string)
-    has_many(:automations, Langfuse.Automation, foreign_key: :action_id)
-    has_many(:automation_executions, Langfuse.AutomationExecution, foreign_key: :action_id)
+    has_many(:automations, Langfuse.Automation, foreign_key: :action_id, references: :id)
+    has_many(:automation_executions, Langfuse.AutomationExecution, foreign_key: :action_id, references: :id)
     timestamps(inserted_at_source: :created_at)
   end
 end

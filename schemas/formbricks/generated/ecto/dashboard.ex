@@ -21,7 +21,7 @@ defmodule Formbricks.Dashboard do
     field(:created_by, :string, source: :createdBy)
     belongs_to(:workspace, Formbricks.Workspace, foreign_key: :workspace_id, define_field: false, type: :string)
     belongs_to(:creator, Formbricks.User, foreign_key: :created_by, define_field: false, type: :string)
-    has_many(:widgets, Formbricks.DashboardWidget, foreign_key: :dashboard_id)
+    has_many(:widgets, Formbricks.DashboardWidget, foreign_key: :dashboard_id, references: :id)
     timestamps(inserted_at_source: :created_at)
   end
 end

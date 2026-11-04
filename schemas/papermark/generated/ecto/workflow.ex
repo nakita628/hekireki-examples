@@ -26,8 +26,8 @@ defmodule Papermark.Workflow do
     field(:team_id, :string, source: :teamId)
     belongs_to(:entry_link, Papermark.Link, foreign_key: :entry_link_id, define_field: false, type: :string)
     belongs_to(:team, Papermark.Team, foreign_key: :team_id, define_field: false, type: :string)
-    has_many(:steps, Papermark.WorkflowStep, foreign_key: :workflow_id)
-    has_many(:executions, Papermark.WorkflowExecution, foreign_key: :workflow_id)
+    has_many(:steps, Papermark.WorkflowStep, foreign_key: :workflow_id, references: :id)
+    has_many(:executions, Papermark.WorkflowExecution, foreign_key: :workflow_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)
   end
 end

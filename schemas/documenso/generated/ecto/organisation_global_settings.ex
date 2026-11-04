@@ -59,6 +59,6 @@ defmodule Documenso.OrganisationGlobalSettings do
     field(:ai_features_enabled, :boolean, default: false, source: :aiFeaturesEnabled)
     field(:email_id, :string, source: :emailId)
     belongs_to(:email, Documenso.OrganisationEmail, foreign_key: :email_id, define_field: false, type: :string)
-    has_one(:organisation, Documenso.Organisation, foreign_key: :organisation_global_settings_id)
+    has_one(:organisation, Documenso.Organisation, foreign_key: :organisation_global_settings_id, references: :id)
   end
 end

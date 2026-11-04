@@ -67,7 +67,7 @@ defmodule Teable.ComputedUpdateOutbox do
     field(:source_changed_at, Teable.PrismaDateTime)
     field(:stage_depth, :integer, default: 0)
     field(:predecessor_task_id, :string)
-    has_many(:seeds, Teable.ComputedUpdateOutboxSeed, foreign_key: :task_id)
+    has_many(:seeds, Teable.ComputedUpdateOutboxSeed, foreign_key: :task_id, references: :id)
     timestamps(inserted_at_source: :created_at)
   end
 end

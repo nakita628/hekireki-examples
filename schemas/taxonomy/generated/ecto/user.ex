@@ -32,9 +32,9 @@ defmodule Taxonomy.User do
     field(:stripe_subscription_id, :string)
     field(:stripe_price_id, :string)
     field(:stripe_current_period_end, Taxonomy.PrismaDateTime)
-    has_many(:accounts, Taxonomy.Account, foreign_key: :user_id)
-    has_many(:sessions, Taxonomy.Session, foreign_key: :user_id)
-    has_many(:post, Taxonomy.Post, foreign_key: :author_id)
+    has_many(:accounts, Taxonomy.Account, foreign_key: :user_id, references: :id)
+    has_many(:sessions, Taxonomy.Session, foreign_key: :user_id, references: :id)
+    has_many(:post, Taxonomy.Post, foreign_key: :author_id, references: :id)
     timestamps(inserted_at_source: :created_at, updated_at: false)
   end
 end

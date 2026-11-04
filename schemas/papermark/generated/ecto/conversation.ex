@@ -58,10 +58,10 @@ defmodule Papermark.Conversation do
     belongs_to(:recipient_viewer, Papermark.Viewer, foreign_key: :recipient_viewer_id, define_field: false, type: :string)
     belongs_to(:initial_view, Papermark.View, foreign_key: :initial_view_id, define_field: false, type: :string)
     belongs_to(:team, Papermark.Team, foreign_key: :team_id, define_field: false, type: :string)
-    has_many(:views, Papermark.ConversationView, foreign_key: :conversation_id)
-    has_many(:participants, Papermark.ConversationParticipant, foreign_key: :conversation_id)
-    has_many(:messages, Papermark.Message, foreign_key: :conversation_id)
-    has_many(:faq_items, Papermark.DataroomFaqItem, foreign_key: :source_conversation_id)
+    has_many(:views, Papermark.ConversationView, foreign_key: :conversation_id, references: :id)
+    has_many(:participants, Papermark.ConversationParticipant, foreign_key: :conversation_id, references: :id)
+    has_many(:messages, Papermark.Message, foreign_key: :conversation_id, references: :id)
+    has_many(:faq_items, Papermark.DataroomFaqItem, foreign_key: :source_conversation_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)
   end
 end

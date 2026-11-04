@@ -27,7 +27,7 @@ defmodule Rallly.Sheet do
     field(:deleted_at, Rallly.PrismaDateTime)
     belongs_to(:space, Rallly.Space, foreign_key: :space_id, type: :binary_id)
     belongs_to(:host, Rallly.User, foreign_key: :host_id, type: :string)
-    has_many(:slots, Rallly.SheetSlot, foreign_key: :sheet_id)
+    has_many(:slots, Rallly.SheetSlot, foreign_key: :sheet_id, references: :id)
     timestamps(inserted_at_source: :created_at)
   end
 end

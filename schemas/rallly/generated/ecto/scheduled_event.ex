@@ -51,9 +51,9 @@ defmodule Rallly.ScheduledEvent do
     belongs_to(:space, Rallly.Space, foreign_key: :space_id, type: :binary_id)
     belongs_to(:event_type, Rallly.EventType, foreign_key: :event_type_id, type: :string)
     belongs_to(:sheet_slot, Rallly.SheetSlot, foreign_key: :sheet_slot_id, type: :string)
-    has_many(:rescheduled_dates, Rallly.RescheduledEventDate, foreign_key: :scheduled_event_id)
-    has_many(:invites, Rallly.ScheduledEventInvite, foreign_key: :scheduled_event_id)
-    has_many(:polls, Rallly.Poll, foreign_key: :scheduled_event_id)
+    has_many(:rescheduled_dates, Rallly.RescheduledEventDate, foreign_key: :scheduled_event_id, references: :id)
+    has_many(:invites, Rallly.ScheduledEventInvite, foreign_key: :scheduled_event_id, references: :id)
+    has_many(:polls, Rallly.Poll, foreign_key: :scheduled_event_id, references: :id)
     timestamps(inserted_at_source: :created_at)
   end
 end

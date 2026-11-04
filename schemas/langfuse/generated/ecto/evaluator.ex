@@ -32,8 +32,8 @@ defmodule Langfuse.Evaluator do
     field(:block_message, :string)
     belongs_to(:project, Langfuse.Project, foreign_key: :project_id, type: :string)
     belongs_to(:created_by_user, Langfuse.User, foreign_key: :created_by_user_id, type: :string)
-    has_many(:versions, Langfuse.EvaluatorVersion, foreign_key: :evaluator_id)
-    has_many(:assignments, Langfuse.EvaluationRuleEvaluatorAssignment, foreign_key: :evaluator_id)
+    has_many(:versions, Langfuse.EvaluatorVersion, foreign_key: :evaluator_id, references: :id)
+    has_many(:assignments, Langfuse.EvaluationRuleEvaluatorAssignment, foreign_key: :evaluator_id, references: :id)
     timestamps(inserted_at_source: :created_at)
   end
 end

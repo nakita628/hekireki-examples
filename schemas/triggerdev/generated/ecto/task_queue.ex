@@ -59,8 +59,8 @@ defmodule Trigger.TaskQueue do
     field(:runtime_environment_id, :string, source: :runtimeEnvironmentId)
     belongs_to(:project, Trigger.Project, foreign_key: :project_id, define_field: false, type: :string)
     belongs_to(:runtime_environment, Trigger.RuntimeEnvironment, foreign_key: :runtime_environment_id, define_field: false, type: :string)
-    has_many(:attempts, Trigger.TaskRunAttempt, foreign_key: :queue_id)
-    has_many(:tasks, Trigger.BackgroundWorkerTask, foreign_key: :queue_id)
+    has_many(:attempts, Trigger.TaskRunAttempt, foreign_key: :queue_id, references: :id)
+    has_many(:tasks, Trigger.BackgroundWorkerTask, foreign_key: :queue_id, references: :id)
     many_to_many(:workers, Trigger.BackgroundWorker, join_through: "_BackgroundWorkerToTaskQueue", join_keys: [B: :id, A: :id])
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)
   end

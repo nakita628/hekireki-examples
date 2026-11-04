@@ -27,7 +27,7 @@ defmodule Formbricks.ApiKey do
     field(:organization_access, :map, default: %{}, source: :organizationAccess)
     field(:organization_id, :string, source: :organizationId)
     belongs_to(:organization, Formbricks.Organization, foreign_key: :organization_id, define_field: false, type: :string)
-    has_many(:api_key_workspaces, Formbricks.ApiKeyWorkspace, foreign_key: :api_key_id)
+    has_many(:api_key_workspaces, Formbricks.ApiKeyWorkspace, foreign_key: :api_key_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at: false)
   end
 end

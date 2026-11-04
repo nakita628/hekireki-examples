@@ -22,9 +22,9 @@ defmodule Formbricks.FeedbackDirectory do
     field(:is_archived, :boolean, default: false, source: :isArchived)
     field(:organization_id, :string, source: :organizationId)
     belongs_to(:organization, Formbricks.Organization, foreign_key: :organization_id, define_field: false, type: :string)
-    has_many(:workspaces, Formbricks.FeedbackDirectoryWorkspace, foreign_key: :feedback_directory_id)
-    has_many(:feedback_sources, Formbricks.FeedbackSource, foreign_key: :feedback_directory_id)
-    has_many(:charts, Formbricks.Chart, foreign_key: :feedback_directory_id)
+    has_many(:workspaces, Formbricks.FeedbackDirectoryWorkspace, foreign_key: :feedback_directory_id, references: :id)
+    has_many(:feedback_sources, Formbricks.FeedbackSource, foreign_key: :feedback_directory_id, references: :id)
+    has_many(:charts, Formbricks.Chart, foreign_key: :feedback_directory_id, references: :id)
     timestamps(inserted_at_source: :created_at)
   end
 end

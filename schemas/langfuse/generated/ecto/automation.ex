@@ -20,7 +20,7 @@ defmodule Langfuse.Automation do
     belongs_to(:trigger, Langfuse.Trigger, foreign_key: :trigger_id, type: :string)
     belongs_to(:action, Langfuse.Action, foreign_key: :action_id, type: :string)
     belongs_to(:project, Langfuse.Project, foreign_key: :project_id, type: :string)
-    has_many(:automation_execution, Langfuse.AutomationExecution, foreign_key: :automation_id)
+    has_many(:automation_execution, Langfuse.AutomationExecution, foreign_key: :automation_id, references: :id)
     timestamps(inserted_at_source: :created_at, updated_at: false)
   end
 end

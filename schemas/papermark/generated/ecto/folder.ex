@@ -30,8 +30,8 @@ defmodule Papermark.Folder do
     field(:team_id, :string, source: :teamId)
     belongs_to(:parent_folder, Papermark.Folder, foreign_key: :parent_id, define_field: false, type: :string)
     belongs_to(:team, Papermark.Team, foreign_key: :team_id, define_field: false, type: :string)
-    has_many(:documents, Papermark.Document, foreign_key: :folder_id)
-    has_many(:child_folders, Papermark.Folder, foreign_key: :parent_id)
+    has_many(:documents, Papermark.Document, foreign_key: :folder_id, references: :id)
+    has_many(:child_folders, Papermark.Folder, foreign_key: :parent_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)
   end
 end

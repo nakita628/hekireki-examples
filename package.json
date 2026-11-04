@@ -8,7 +8,7 @@
     "@types/node": "24.10.1",
     "cuid": "3.0.0",
     "drizzle-orm": "1.0.0-rc.5",
-    "hekireki": "0.42.0",
+    "hekireki": "0.43.0",
     "kysely": "0.29.7",
     "nanoid": "6.0.2",
     "prisma": "8.1.0-dev.9",

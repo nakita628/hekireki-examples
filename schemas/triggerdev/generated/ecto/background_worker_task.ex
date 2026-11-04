@@ -57,8 +57,8 @@ defmodule Trigger.BackgroundWorkerTask do
     belongs_to(:file, Trigger.BackgroundWorkerFile, foreign_key: :file_id, define_field: false, type: :string)
     belongs_to(:runtime_environment, Trigger.RuntimeEnvironment, foreign_key: :runtime_environment_id, define_field: false, type: :string)
     belongs_to(:queue, Trigger.TaskQueue, foreign_key: :queue_id, define_field: false, type: :string)
-    has_many(:attempts, Trigger.TaskRunAttempt, foreign_key: :background_worker_task_id)
-    has_many(:runs, Trigger.TaskRun, foreign_key: :locked_by_id)
+    has_many(:attempts, Trigger.TaskRunAttempt, foreign_key: :background_worker_task_id, references: :id)
+    has_many(:runs, Trigger.TaskRun, foreign_key: :locked_by_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)
   end
 end

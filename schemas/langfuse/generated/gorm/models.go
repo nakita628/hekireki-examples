@@ -28,7 +28,7 @@ type Account struct {
 	IDToken               *string `gorm:"column:id_token" json:"id_token"`
 	SessionState          *string `gorm:"column:session_state" json:"session_state"`
 	RefreshTokenExpiresIn *int    `gorm:"column:refresh_token_expires_in" json:"refresh_token_expires_in"`
-	CreatedAt             *int    `gorm:"column:created_at" json:"created_at"`
+	CreatedAt             *int    `gorm:"column:created_at;autoCreateTime:false" json:"created_at"`
 	User                  *User
 }
 

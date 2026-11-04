@@ -23,7 +23,7 @@ defmodule Papermark.TaskList do
     field(:team_id, :string, source: :teamId)
     belongs_to(:dataroom, Papermark.Dataroom, foreign_key: :dataroom_id, define_field: false, type: :string)
     belongs_to(:team, Papermark.Team, foreign_key: :team_id, define_field: false, type: :string)
-    has_many(:tasks, Papermark.Task, foreign_key: :task_list_id)
+    has_many(:tasks, Papermark.Task, foreign_key: :task_list_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)
   end
 end

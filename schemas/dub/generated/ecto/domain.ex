@@ -43,7 +43,7 @@ defmodule Dub.Domain do
     field(:link_retention_days, :integer, source: :linkRetentionDays)
     field(:project_id, :string, source: :projectId)
     belongs_to(:project, Dub.Project, foreign_key: :project_id, define_field: false, type: :string)
-    has_one(:registered_domain, Dub.RegisteredDomain, foreign_key: :domain_id)
+    has_one(:registered_domain, Dub.RegisteredDomain, foreign_key: :domain_id, references: :id)
     has_many(:links, Dub.Link, foreign_key: :domain, references: :slug)
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)
   end

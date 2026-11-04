@@ -51,12 +51,12 @@ defmodule Trigger.TaskRunAttempt do
     belongs_to(:background_worker_task, Trigger.BackgroundWorkerTask, foreign_key: :background_worker_task_id, define_field: false, type: :string)
     belongs_to(:runtime_environment, Trigger.RuntimeEnvironment, foreign_key: :runtime_environment_id, define_field: false, type: :string)
     belongs_to(:queue, Trigger.TaskQueue, foreign_key: :queue_id, define_field: false, type: :string)
-    has_many(:dependencies, Trigger.TaskRunDependency, foreign_key: :dependent_attempt_id)
-    has_many(:batch_dependencies, Trigger.BatchTaskRun, foreign_key: :dependent_task_attempt_id)
-    has_many(:checkpoints, Trigger.Checkpoint, foreign_key: :attempt_id)
-    has_many(:batch_task_run_items, Trigger.BatchTaskRunItem, foreign_key: :task_run_attempt_id)
-    has_many(:checkpoint_restore_event, Trigger.CheckpointRestoreEvent, foreign_key: :attempt_id)
-    has_many(:child_runs, Trigger.TaskRun, foreign_key: :parent_task_run_attempt_id)
+    has_many(:dependencies, Trigger.TaskRunDependency, foreign_key: :dependent_attempt_id, references: :id)
+    has_many(:batch_dependencies, Trigger.BatchTaskRun, foreign_key: :dependent_task_attempt_id, references: :id)
+    has_many(:checkpoints, Trigger.Checkpoint, foreign_key: :attempt_id, references: :id)
+    has_many(:batch_task_run_items, Trigger.BatchTaskRunItem, foreign_key: :task_run_attempt_id, references: :id)
+    has_many(:checkpoint_restore_event, Trigger.CheckpointRestoreEvent, foreign_key: :attempt_id, references: :id)
+    has_many(:child_runs, Trigger.TaskRun, foreign_key: :parent_task_run_attempt_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)
   end
 end

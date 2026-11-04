@@ -40,8 +40,8 @@ defmodule Trigger.ProjectAlertChannel do
     field(:project_id, :string, source: :projectId)
     belongs_to(:integration, Trigger.OrganizationIntegration, foreign_key: :integration_id, define_field: false, type: :string)
     belongs_to(:project, Trigger.Project, foreign_key: :project_id, define_field: false, type: :string)
-    has_many(:alerts, Trigger.ProjectAlert, foreign_key: :channel_id)
-    has_many(:alert_storages, Trigger.ProjectAlertStorage, foreign_key: :alert_channel_id)
+    has_many(:alerts, Trigger.ProjectAlert, foreign_key: :channel_id, references: :id)
+    has_many(:alert_storages, Trigger.ProjectAlertStorage, foreign_key: :alert_channel_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)
   end
 end

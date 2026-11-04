@@ -27,7 +27,7 @@ defmodule Documenso.Webhook do
     field(:team_id, :id, source: :teamId)
     belongs_to(:user, Documenso.User, foreign_key: :user_id, define_field: false)
     belongs_to(:team, Documenso.Team, foreign_key: :team_id, define_field: false)
-    has_many(:webhook_calls, Documenso.WebhookCall, foreign_key: :webhook_id)
+    has_many(:webhook_calls, Documenso.WebhookCall, foreign_key: :webhook_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)
   end
 end

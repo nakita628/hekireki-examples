@@ -18,7 +18,7 @@ defmodule Papermark.Feedback do
     field(:data, :map)
     field(:link_id, :string, source: :linkId)
     belongs_to(:link, Papermark.Link, foreign_key: :link_id, define_field: false, type: :string)
-    has_many(:responses, Papermark.FeedbackResponse, foreign_key: :feedback_id)
+    has_many(:responses, Papermark.FeedbackResponse, foreign_key: :feedback_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)
   end
 end

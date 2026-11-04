@@ -21,7 +21,7 @@ defmodule Trigger.OrgMember do
     field(:user_id, :string, source: :userId)
     belongs_to(:organization, Trigger.Organization, foreign_key: :organization_id, define_field: false, type: :string)
     belongs_to(:user, Trigger.User, foreign_key: :user_id, define_field: false, type: :string)
-    has_many(:environments, Trigger.RuntimeEnvironment, foreign_key: :org_member_id)
+    has_many(:environments, Trigger.RuntimeEnvironment, foreign_key: :org_member_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)
   end
 end

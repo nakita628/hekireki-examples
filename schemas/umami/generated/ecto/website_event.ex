@@ -70,7 +70,7 @@ defmodule Umami.WebsiteEvent do
     field(:fcp, :decimal)
     field(:ttfb, :decimal)
     belongs_to(:session, Umami.Session, foreign_key: :session_id, type: :string)
-    has_many(:event_data, Umami.EventData, foreign_key: :website_event_id)
+    has_many(:event_data, Umami.EventData, foreign_key: :website_event_id, references: :id)
     timestamps(inserted_at_source: :created_at, updated_at: false)
   end
 end

@@ -27,8 +27,8 @@ defmodule Hoppscotch.TeamCollection do
     field(:team_id, :string, source: :teamID)
     belongs_to(:parent, Hoppscotch.TeamCollection, foreign_key: :parent_id, define_field: false, type: :string)
     belongs_to(:team, Hoppscotch.Team, foreign_key: :team_id, define_field: false, type: :string)
-    has_many(:children, Hoppscotch.TeamCollection, foreign_key: :parent_id)
-    has_many(:requests, Hoppscotch.TeamRequest, foreign_key: :collection_id)
+    has_many(:children, Hoppscotch.TeamCollection, foreign_key: :parent_id, references: :id)
+    has_many(:requests, Hoppscotch.TeamRequest, foreign_key: :collection_id, references: :id)
     timestamps(inserted_at: false, updated_at_source: :updatedOn)
   end
 end

@@ -26,7 +26,7 @@ defmodule Papermark.WorkflowStep do
     field(:actions, :map)
     field(:workflow_id, :string, source: :workflowId)
     belongs_to(:workflow, Papermark.Workflow, foreign_key: :workflow_id, define_field: false, type: :string)
-    has_many(:execution_logs, Papermark.WorkflowStepLog, foreign_key: :workflow_step_id)
+    has_many(:execution_logs, Papermark.WorkflowStepLog, foreign_key: :workflow_step_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)
   end
 end

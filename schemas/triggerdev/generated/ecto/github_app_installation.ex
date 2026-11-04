@@ -36,7 +36,7 @@ defmodule Trigger.GithubAppInstallation do
     field(:suspended_at, Trigger.PrismaDateTime, source: :suspendedAt)
     field(:organization_id, :string, source: :organizationId)
     belongs_to(:organization, Trigger.Organization, foreign_key: :organization_id, define_field: false, type: :string)
-    has_many(:repositories, Trigger.GithubRepository, foreign_key: :installation_id)
+    has_many(:repositories, Trigger.GithubRepository, foreign_key: :installation_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)
   end
 end

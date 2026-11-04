@@ -30,7 +30,7 @@ defmodule Formbricks.Chart do
     belongs_to(:workspace, Formbricks.Workspace, foreign_key: :workspace_id, define_field: false, type: :string)
     belongs_to(:creator, Formbricks.User, foreign_key: :created_by, define_field: false, type: :string)
     belongs_to(:feedback_directory, Formbricks.FeedbackDirectory, foreign_key: :feedback_directory_id, define_field: false, type: :string)
-    has_many(:widgets, Formbricks.DashboardWidget, foreign_key: :chart_id)
+    has_many(:widgets, Formbricks.DashboardWidget, foreign_key: :chart_id, references: :id)
     timestamps(inserted_at_source: :created_at)
   end
 end

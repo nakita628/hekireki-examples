@@ -46,9 +46,9 @@ defmodule Formbricks.Response do
     belongs_to(:survey, Formbricks.Survey, foreign_key: :survey_id, define_field: false, type: :string)
     belongs_to(:contact, Formbricks.Contact, foreign_key: :contact_id, define_field: false, type: :string)
     belongs_to(:display, Formbricks.Display, foreign_key: :display_id, define_field: false, type: :string)
-    has_many(:tags, Formbricks.TagsOnResponses, foreign_key: :response_id)
-    has_many(:quota_links, Formbricks.ResponseQuotaLink, foreign_key: :response_id)
-    has_many(:workflow_runs, Formbricks.WorkflowRun, foreign_key: :response_id)
+    has_many(:tags, Formbricks.TagsOnResponses, foreign_key: :response_id, references: :id)
+    has_many(:quota_links, Formbricks.ResponseQuotaLink, foreign_key: :response_id, references: :id)
+    has_many(:workflow_runs, Formbricks.WorkflowRun, foreign_key: :response_id, references: :id)
     timestamps(inserted_at_source: :created_at)
   end
 end

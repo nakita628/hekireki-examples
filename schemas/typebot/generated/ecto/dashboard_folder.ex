@@ -22,8 +22,8 @@ defmodule Typebot.DashboardFolder do
     field(:workspace_id, :string, source: :workspaceId)
     belongs_to(:parent_folder, Typebot.DashboardFolder, foreign_key: :parent_folder_id, define_field: false, type: :string)
     belongs_to(:workspace, Typebot.Workspace, foreign_key: :workspace_id, define_field: false, type: :string)
-    has_many(:children_folder, Typebot.DashboardFolder, foreign_key: :parent_folder_id)
-    has_many(:typebots, Typebot.Typebot, foreign_key: :folder_id)
+    has_many(:children_folder, Typebot.DashboardFolder, foreign_key: :parent_folder_id, references: :id)
+    has_many(:typebots, Typebot.Typebot, foreign_key: :folder_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)
   end
 end

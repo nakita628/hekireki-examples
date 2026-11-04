@@ -74,12 +74,12 @@ defmodule Trigger.BatchTaskRun do
     field(:dependent_task_attempt_id, :string, source: :dependentTaskAttemptId)
     belongs_to(:checkpoint_event, Trigger.CheckpointRestoreEvent, foreign_key: :checkpoint_event_id, define_field: false, type: :string)
     belongs_to(:dependent_task_attempt, Trigger.TaskRunAttempt, foreign_key: :dependent_task_attempt_id, define_field: false, type: :string)
-    has_many(:runs, Trigger.TaskRun, foreign_key: :batch_id)
-    has_many(:runs_blocked, Trigger.TaskRunWaitpoint, foreign_key: :batch_id)
-    has_many(:waitpoints, Trigger.Waitpoint, foreign_key: :completed_by_batch_id)
-    has_many(:errors, Trigger.BatchTaskRunError, foreign_key: :batch_task_run_id)
-    has_many(:items, Trigger.BatchTaskRunItem, foreign_key: :batch_task_run_id)
-    has_many(:run_dependencies, Trigger.TaskRunDependency, foreign_key: :dependent_batch_run_id)
+    has_many(:runs, Trigger.TaskRun, foreign_key: :batch_id, references: :id)
+    has_many(:runs_blocked, Trigger.TaskRunWaitpoint, foreign_key: :batch_id, references: :id)
+    has_many(:waitpoints, Trigger.Waitpoint, foreign_key: :completed_by_batch_id, references: :id)
+    has_many(:errors, Trigger.BatchTaskRunError, foreign_key: :batch_task_run_id, references: :id)
+    has_many(:items, Trigger.BatchTaskRunItem, foreign_key: :batch_task_run_id, references: :id)
+    has_many(:run_dependencies, Trigger.TaskRunDependency, foreign_key: :dependent_batch_run_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)
   end
 end

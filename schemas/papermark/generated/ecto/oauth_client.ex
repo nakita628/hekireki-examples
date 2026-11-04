@@ -35,7 +35,7 @@ defmodule Papermark.OAuthClient do
     field(:hashed_secret, :string, source: :hashedSecret)
     field(:registration_type, :string, source: :registrationType)
     field(:metadata_url, :string, source: :metadataUrl)
-    has_many(:tokens, Papermark.RestrictedToken, foreign_key: :client_id)
+    has_many(:tokens, Papermark.RestrictedToken, foreign_key: :client_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)
   end
 end

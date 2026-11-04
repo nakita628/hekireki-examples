@@ -19,7 +19,7 @@ defmodule Langfuse.OrganizationMembership do
     field(:role, Ecto.Enum, values: [:OWNER, :ADMIN, :MEMBER, :VIEWER, :NONE, :AI_GATEWAY])
     belongs_to(:organization, Langfuse.Organization, foreign_key: :org_id, type: :string)
     belongs_to(:user, Langfuse.User, foreign_key: :user_id, type: :string)
-    has_many(:project_memberships, Langfuse.ProjectMembership, foreign_key: :org_membership_id)
+    has_many(:project_memberships, Langfuse.ProjectMembership, foreign_key: :org_membership_id, references: :id)
     timestamps(inserted_at_source: :created_at)
   end
 end

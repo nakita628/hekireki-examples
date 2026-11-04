@@ -18,7 +18,7 @@ defmodule Rallly.Option do
     field(:start_time, Rallly.PrismaDateTime)
     field(:duration, :integer, default: 0, source: :duration_minutes)
     belongs_to(:poll, Rallly.Poll, foreign_key: :poll_id, type: :string)
-    has_many(:votes, Rallly.Vote, foreign_key: :option_id)
+    has_many(:votes, Rallly.Vote, foreign_key: :option_id, references: :id)
     timestamps(inserted_at_source: :created_at, updated_at: false)
   end
 end

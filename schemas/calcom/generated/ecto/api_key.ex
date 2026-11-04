@@ -29,7 +29,7 @@ defmodule Calcom.ApiKey do
     belongs_to(:user, Calcom.User, foreign_key: :user_id, define_field: false)
     belongs_to(:team, Calcom.Team, foreign_key: :team_id, define_field: false)
     belongs_to(:app, Calcom.App, foreign_key: :app_id, define_field: false, type: :string, references: :slug)
-    has_many(:rate_limits, Calcom.RateLimit, foreign_key: :api_key_id)
+    has_many(:rate_limits, Calcom.RateLimit, foreign_key: :api_key_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at: false)
   end
 end

@@ -24,8 +24,8 @@ defmodule Documenso.EmailTransport do
     field(:from_name, :string, source: :fromName)
     field(:from_address, :string, source: :fromAddress)
     field(:config, :string)
-    has_many(:subscription_claims, Documenso.SubscriptionClaim, foreign_key: :email_transport_id)
-    has_many(:organisation_claims, Documenso.OrganisationClaim, foreign_key: :email_transport_id)
+    has_many(:subscription_claims, Documenso.SubscriptionClaim, foreign_key: :email_transport_id, references: :id)
+    has_many(:organisation_claims, Documenso.OrganisationClaim, foreign_key: :email_transport_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)
   end
 end

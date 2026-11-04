@@ -29,8 +29,8 @@ defmodule Hoppscotch.UserCollection do
     field(:user_uid, :string, source: :userUid)
     belongs_to(:parent, Hoppscotch.UserCollection, foreign_key: :parent_id, define_field: false, type: :string)
     belongs_to(:user, Hoppscotch.User, foreign_key: :user_uid, define_field: false, type: :string, references: :uid)
-    has_many(:children, Hoppscotch.UserCollection, foreign_key: :parent_id)
-    has_many(:requests, Hoppscotch.UserRequest, foreign_key: :collection_id)
+    has_many(:children, Hoppscotch.UserCollection, foreign_key: :parent_id, references: :id)
+    has_many(:requests, Hoppscotch.UserRequest, foreign_key: :collection_id, references: :id)
     timestamps(inserted_at: false, updated_at_source: :updatedOn)
   end
 end

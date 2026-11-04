@@ -33,6 +33,6 @@ defmodule Formbricks.RetentionRun do
     field(:scan_cursor, :string, source: :scanCursor)
     field(:organization_id, :string, source: :organizationId)
     belongs_to(:organization, Formbricks.Organization, foreign_key: :organization_id, define_field: false, type: :string)
-    has_many(:items, Formbricks.RetentionRunItem, foreign_key: :run_id)
+    has_many(:items, Formbricks.RetentionRunItem, foreign_key: :run_id, references: :id)
   end
 end

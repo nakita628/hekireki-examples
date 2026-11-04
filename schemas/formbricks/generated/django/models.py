@@ -163,7 +163,7 @@ class SurveyVisibility(models.TextChoices):
 
 class SurveyScriptMode(models.TextChoices):
     add = "add"
-    replace = "replace"
+    replace_ = "replace"
 
 
 class ActionType(models.TextChoices):
@@ -189,7 +189,7 @@ class WidgetPlacement(models.TextChoices):
     bottomRight = "bottomRight"
     topLeft = "topLeft"
     topRight = "topRight"
-    center = "center"
+    center_ = "center"
 
 
 class SurveyOverlay(models.TextChoices):
@@ -1026,7 +1026,7 @@ class Account(models.Model):
     id = models.TextField(primary_key=True, default=None)
     created_at = UtcDateTimeField(default=timezone.now)
     updated_at = UtcDateTimeField(auto_now=True)
-    user = models.ForeignKey("User", on_delete=models.CASCADE, related_name="accounts", db_column="userId", null=True, db_index=False)
+    user = models.ForeignKey("User", on_delete=models.CASCADE, related_name="accounts", db_column="userId", db_index=False)
     type = models.TextField(null=True)
     provider = models.TextField()
     provider_account_id = models.TextField(db_column="providerAccountId")

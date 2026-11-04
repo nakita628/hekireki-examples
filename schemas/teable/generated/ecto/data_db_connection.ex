@@ -50,9 +50,9 @@ defmodule Teable.DataDbConnection do
     field(:consecutive_health_failures, :integer, default: 0)
     field(:created_by, :string)
     field(:created_time, Teable.PrismaDateTime, autogenerate: true)
-    has_many(:space_bindings, Teable.SpaceDataDbBinding, foreign_key: :data_db_connection_id)
-    has_many(:source_migration_jobs, Teable.SpaceDataDbMigrationJob, foreign_key: :source_connection_id)
-    has_many(:target_migration_jobs, Teable.SpaceDataDbMigrationJob, foreign_key: :target_connection_id)
+    has_many(:space_bindings, Teable.SpaceDataDbBinding, foreign_key: :data_db_connection_id, references: :id)
+    has_many(:source_migration_jobs, Teable.SpaceDataDbMigrationJob, foreign_key: :source_connection_id, references: :id)
+    has_many(:target_migration_jobs, Teable.SpaceDataDbMigrationJob, foreign_key: :target_connection_id, references: :id)
     timestamps(inserted_at: false, updated_at_source: :last_modified_time)
   end
 end

@@ -34,7 +34,7 @@ defmodule Dub.RestrictedToken do
     belongs_to(:user, Dub.User, foreign_key: :user_id, define_field: false, type: :string)
     belongs_to(:project, Dub.Project, foreign_key: :project_id, define_field: false, type: :string)
     belongs_to(:installed_integration, Dub.InstalledIntegration, foreign_key: :installation_id, define_field: false, type: :string)
-    has_many(:refresh_tokens, Dub.OAuthRefreshToken, foreign_key: :access_token_id)
+    has_many(:refresh_tokens, Dub.OAuthRefreshToken, foreign_key: :access_token_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)
   end
 end

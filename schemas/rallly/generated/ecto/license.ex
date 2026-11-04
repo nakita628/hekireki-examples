@@ -32,6 +32,6 @@ defmodule Rallly.License do
     field(:licensee_name, :string)
     field(:white_label_addon, :boolean, default: false)
     field(:status, Ecto.Enum, values: [:ACTIVE, :REVOKED], default: :ACTIVE)
-    has_many(:validations, Rallly.LicenseValidation, foreign_key: :license_id)
+    has_many(:validations, Rallly.LicenseValidation, foreign_key: :license_id, references: :id)
   end
 end

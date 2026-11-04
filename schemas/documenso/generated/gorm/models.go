@@ -487,7 +487,7 @@ type Account struct {
 	RefreshToken      *string  `gorm:"column:refresh_token;type:text" json:"refresh_token"`
 	AccessToken       *string  `gorm:"column:access_token;type:text" json:"access_token"`
 	ExpiresAt         *int     `gorm:"column:expires_at" json:"expires_at"`
-	CreatedAt         *int     `gorm:"column:created_at" json:"created_at"`
+	CreatedAt1        *int     `gorm:"column:created_at" json:"created_at"`
 	ExtExpiresIn      *int     `gorm:"column:ext_expires_in" json:"ext_expires_in"`
 	TokenType         *string  `gorm:"column:token_type" json:"token_type"`
 	Scope             *string  `gorm:"column:scope" json:"scope"`

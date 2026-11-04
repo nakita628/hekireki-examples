@@ -64,9 +64,9 @@ defmodule Papermark.Brand do
     field(:name, :string, default: "Default")
     field(:team_id, :string, source: :teamId)
     belongs_to(:team, Papermark.Team, foreign_key: :team_id, define_field: false, type: :string)
-    has_many(:default_for_team, Papermark.Team, foreign_key: :default_brand_id)
-    has_many(:links, Papermark.Link, foreign_key: :brand_id)
-    has_many(:datarooms, Papermark.Dataroom, foreign_key: :brand_id)
+    has_many(:default_for_team, Papermark.Team, foreign_key: :default_brand_id, references: :id)
+    has_many(:links, Papermark.Link, foreign_key: :brand_id, references: :id)
+    has_many(:datarooms, Papermark.Dataroom, foreign_key: :brand_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)
   end
 end

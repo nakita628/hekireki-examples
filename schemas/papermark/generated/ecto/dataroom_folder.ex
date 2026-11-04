@@ -33,9 +33,9 @@ defmodule Papermark.DataroomFolder do
     field(:dataroom_id, :string, source: :dataroomId)
     belongs_to(:parent_folder, Papermark.DataroomFolder, foreign_key: :parent_id, define_field: false, type: :string)
     belongs_to(:dataroom, Papermark.Dataroom, foreign_key: :dataroom_id, define_field: false, type: :string)
-    has_many(:documents, Papermark.DataroomDocument, foreign_key: :folder_id)
-    has_many(:child_folders, Papermark.DataroomFolder, foreign_key: :parent_id)
-    has_many(:upload_tasks, Papermark.Task, foreign_key: :upload_folder_id)
+    has_many(:documents, Papermark.DataroomDocument, foreign_key: :folder_id, references: :id)
+    has_many(:child_folders, Papermark.DataroomFolder, foreign_key: :parent_id, references: :id)
+    has_many(:upload_tasks, Papermark.Task, foreign_key: :upload_folder_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)
   end
 end
