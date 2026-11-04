@@ -192,6 +192,7 @@ erDiagram
         string cloudFreeTierUsageThresholdState
         boolean aiFeaturesEnabled
         boolean aiTelemetryEnabled
+        boolean accessAuditLogEnabled
         string[] featureFlagOrgDefaults
         string sfdcOrgId
     }
@@ -1154,5 +1155,7 @@ erDiagram
         datetime startedAt
         datetime finishedAt
         string[] topicVersionIds
+        string ruleId
+        string batchActionId
     }
 ```

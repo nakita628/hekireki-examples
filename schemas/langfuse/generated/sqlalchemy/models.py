@@ -167,6 +167,7 @@ class Organization(Base):
     cloud_free_tier_usage_threshold_state: Mapped[Optional[str]]
     ai_features_enabled: Mapped[bool] = mapped_column(default=False, server_default=text("false"))
     ai_telemetry_enabled: Mapped[bool] = mapped_column(default=True, server_default=text("true"))
+    access_audit_log_enabled: Mapped[bool] = mapped_column(default=False, server_default=text("false"))
     feature_flag_org_defaults: Mapped[list[str]] = mapped_column(ARRAY(Text), nullable=True, default=lambda: [], server_default=text("ARRAY[]::text[]"))
     sfdc_org_id: Mapped[Optional[str]]
 
@@ -1950,9 +1951,13 @@ class TopicClusteringRun(Base):
     started_at: Mapped[Optional[datetime]] = mapped_column(UtcDateTimeTz(precision=3))
     finished_at: Mapped[Optional[datetime]] = mapped_column(UtcDateTimeTz(precision=3))
     topic_version_ids: Mapped[list[str]] = mapped_column(ARRAY(Text), nullable=True, default=lambda: [], server_default=text("ARRAY[]::text[]"))
+    rule_id: Mapped[Optional[str]]
+    batch_action_id: Mapped[Optional[str]]
 
     __table_args__ = (
         Index("topic_clustering_runs_serving_map_idx", "project_id", "facet_id", "status", "facet_version", "created_at", "id"),
+        Index("topic_clustering_runs_rule_serving_map_idx", "project_id", "rule_id", "facet_id", "status"),
+        Index("topic_clustering_runs_project_id_batch_action_id_idx", "project_id", "batch_action_id"),
         ForeignKeyConstraint(["facet_id", "facet_version"], ["evaluator_versions.evaluator_id", "evaluator_versions.version"], ondelete="CASCADE", onupdate="CASCADE", name="topic_clustering_runs_facet_id_facet_version_fkey"),
     )
 

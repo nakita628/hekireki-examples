@@ -46,4 +46,16 @@ public partial class Template
     public int VisitCount { get; set; } = 0;
 
     public string? Kind { get; set; }
+
+    public int Version { get; set; } = 1;
+
+    public string? Manifest { get; set; }
+
+    public string? Review { get; set; }
+
+    public string? History { get; set; }
+
+    public string? ParentTemplateId { get; set; }
+
+    public string? Slug { get; set; }
 }

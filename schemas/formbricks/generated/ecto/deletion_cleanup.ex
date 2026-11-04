@@ -22,7 +22,7 @@ defmodule Formbricks.DeletionCleanup do
 
   schema "DeletionCleanup" do
     field(:id, :string, primary_key: true)
-    field(:kind, Ecto.Enum, values: [:hubSurvey, :hubResponses, :storageFiles, :storageSurveyFolder])
+    field(:kind, Ecto.Enum, values: [:hubSurvey, :hubResponses, :storageFiles, :storageSurveyFolder, :hubResponseOutcome])
     field(:organization_id, :string, source: :organizationId)
     field(:workspace_id, :string, source: :workspaceId)
     field(:survey_id, :string, source: :surveyId)

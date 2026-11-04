@@ -7,6 +7,7 @@ defmodule Teable.ComputedUpdateOutbox do
   @type t :: %__MODULE__{
           id: String.t(),
           base_id: String.t(),
+          worker_lane: String.t(),
           seed_table_id: String.t(),
           seed_record_ids: map() | nil,
           change_type: String.t(),
@@ -40,6 +41,7 @@ defmodule Teable.ComputedUpdateOutbox do
   schema "computed_update_outbox" do
     field(:id, :string, primary_key: true)
     field(:base_id, :string)
+    field(:worker_lane, :string, default: "production")
     field(:seed_table_id, :string)
     field(:seed_record_ids, :map)
     field(:change_type, :string)

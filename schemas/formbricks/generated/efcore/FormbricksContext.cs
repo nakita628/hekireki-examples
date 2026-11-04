@@ -32,6 +32,10 @@ public partial class FormbricksContext : DbContext
 
     public virtual DbSet<CreativeLanguage> CreativeLanguages { get; set; }
 
+    public virtual DbSet<OutboundEmailAudit> OutboundEmailAudits { get; set; }
+
+    public virtual DbSet<OutboundEmailAuditErasureIntent> OutboundEmailAuditErasureIntents { get; set; }
+
     public virtual DbSet<Webhook> Webhooks { get; set; }
 
     public virtual DbSet<ContactAttribute> ContactAttributes { get; set; }
@@ -178,6 +182,7 @@ public partial class FormbricksContext : DbContext
         npgsql.MapEnum<WebhookSource>("WebhookSource");
         npgsql.MapEnum<ContactAttributeType>("ContactAttributeType");
         npgsql.MapEnum<ContactAttributeDataType>("ContactAttributeDataType");
+        npgsql.MapEnum<ResponseOutcome>("ResponseOutcome");
         npgsql.MapEnum<SurveyStatus>("SurveyStatus");
         npgsql.MapEnum<SurveyAttributeFilterCondition>("SurveyAttributeFilterCondition");
         npgsql.MapEnum<SurveyQuotaAction>("SurveyQuotaAction");
@@ -228,6 +233,7 @@ public partial class FormbricksContext : DbContext
         dataSource.MapEnum<WebhookSource>("WebhookSource");
         dataSource.MapEnum<ContactAttributeType>("ContactAttributeType");
         dataSource.MapEnum<ContactAttributeDataType>("ContactAttributeDataType");
+        dataSource.MapEnum<ResponseOutcome>("ResponseOutcome");
         dataSource.MapEnum<SurveyStatus>("SurveyStatus");
         dataSource.MapEnum<SurveyAttributeFilterCondition>("SurveyAttributeFilterCondition");
         dataSource.MapEnum<SurveyQuotaAction>("SurveyQuotaAction");
@@ -286,6 +292,7 @@ public partial class FormbricksContext : DbContext
         modelBuilder.HasPostgresEnum<WebhookSource>(name: "WebhookSource");
         modelBuilder.HasPostgresEnum<ContactAttributeType>(name: "ContactAttributeType");
         modelBuilder.HasPostgresEnum<ContactAttributeDataType>(name: "ContactAttributeDataType");
+        modelBuilder.HasPostgresEnum<ResponseOutcome>(name: "ResponseOutcome");
         modelBuilder.HasPostgresEnum<SurveyStatus>(name: "SurveyStatus");
         modelBuilder.HasPostgresEnum<SurveyAttributeFilterCondition>(name: "SurveyAttributeFilterCondition");
         modelBuilder.HasPostgresEnum<SurveyQuotaAction>(name: "SurveyQuotaAction");
@@ -526,6 +533,154 @@ public partial class FormbricksContext : DbContext
                 .HasConstraintName("CreativeLanguage_creativeId_fkey");
         });
 
+        modelBuilder.Entity<OutboundEmailAudit>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("OutboundEmailAudit_pkey");
+
+            entity.ToTable("OutboundEmailAudit");
+
+            entity.HasIndex(e => new { e.Environment, e.CreatedAt, e.Id }, "OutboundEmailAudit_environment_createdAt_id_idx");
+
+            entity.HasIndex(e => new { e.OrganizationId, e.CreatedAt, e.Id }, "OutboundEmailAudit_organizationId_createdAt_id_idx");
+
+            entity.HasIndex(e => new { e.SurveyId, e.CreatedAt, e.Id }, "OutboundEmailAudit_surveyId_createdAt_id_idx");
+
+            entity.HasIndex(e => new { e.ResponseId, e.CreatedAt, e.Id }, "OutboundEmailAudit_responseId_createdAt_id_idx");
+
+            entity.HasIndex(e => new { e.ActorUserId, e.CreatedAt, e.Id }, "OutboundEmailAudit_actorUserId_createdAt_id_idx");
+
+            entity.HasIndex(e => new { e.ConfiguredByUserId, e.CreatedAt, e.Id }, "OutboundEmailAudit_configuredByUserId_createdAt_id_idx");
+
+            entity.HasIndex(e => new { e.ActorUserHash, e.CreatedAt, e.Id }, "OutboundEmailAudit_actorUserHash_createdAt_id_idx");
+
+            entity.HasIndex(e => new { e.ConfiguredByUserHash, e.CreatedAt, e.Id }, "OutboundEmailAudit_configuredByUserHash_createdAt_id_idx");
+
+            entity.HasIndex(e => new { e.RecipientMac, e.CreatedAt, e.Id }, "OutboundEmailAudit_recipientMac_createdAt_id_idx");
+
+            entity.HasIndex(e => e.SesMessageHash, "OutboundEmailAudit_sesMessageHash_idx");
+
+            entity.HasIndex(e => new { e.Status, e.CreatedAt, e.Id }, "OutboundEmailAudit_status_createdAt_id_idx");
+
+            entity.HasIndex(e => new { e.ContentExpiresAt, e.Id }, "OutboundEmailAudit_contentExpiresAt_id_idx");
+
+            entity.HasIndex(e => new { e.ExpiresAt, e.Id }, "OutboundEmailAudit_expiresAt_id_idx");
+
+            entity.HasIndex(e => new { e.ErasureRequestedAt, e.Id }, "OutboundEmailAudit_erasureRequestedAt_id_idx");
+
+            entity.HasIndex(e => new { e.ContentDeleteRetryAt, e.Id }, "OutboundEmailAudit_contentDeleteRetryAt_id_idx");
+
+            entity.Property(e => e.Id)
+                .HasValueGenerator<UuidV4StringGenerator>()
+                .HasColumnName("id");
+            entity.Property(e => e.CreatedAt)
+                .HasValueGenerator<UtcNowGenerator>()
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("createdAt");
+            entity.Property(e => e.UpdatedAt)
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("updatedAt");
+            entity.Property(e => e.ExpiresAt)
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("expiresAt");
+            entity.Property(e => e.ContentExpiresAt)
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("contentExpiresAt");
+            entity.Property(e => e.Environment).HasColumnName("environment");
+            entity.Property(e => e.EmailType).HasColumnName("emailType");
+            entity.Property(e => e.Trigger).HasColumnName("trigger");
+            entity.Property(e => e.ActorKind).HasColumnName("actorKind");
+            entity.Property(e => e.ActorUserId).HasColumnName("actorUserId");
+            entity.Property(e => e.ConfiguredByUserId).HasColumnName("configuredByUserId");
+            entity.Property(e => e.ActorUserHash).HasColumnName("actorUserHash");
+            entity.Property(e => e.ConfiguredByUserHash).HasColumnName("configuredByUserHash");
+            entity.Property(e => e.OrganizationId).HasColumnName("organizationId");
+            entity.Property(e => e.SurveyId).HasColumnName("surveyId");
+            entity.Property(e => e.ResponseId).HasColumnName("responseId");
+            entity.Property(e => e.FollowUpId).HasColumnName("followUpId");
+            entity.Property(e => e.WorkflowId).HasColumnName("workflowId");
+            entity.Property(e => e.WorkflowRunId).HasColumnName("workflowRunId");
+            entity.Property(e => e.InviteId).HasColumnName("inviteId");
+            entity.Property(e => e.RecipientMac).HasColumnName("recipientMac");
+            entity.Property(e => e.SesMessageHash).HasColumnName("sesMessageHash");
+            entity.Property(e => e.SnapshotKey).HasColumnName("snapshotKey");
+            entity.Property(e => e.SnapshotSha256).HasColumnName("snapshotSha256");
+            entity.Property(e => e.Status)
+                .ValueGeneratedNever()
+                .HasDefaultValue("prepared")
+                .HasColumnName("status");
+            entity.Property(e => e.StatusRecordedAt)
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("statusRecordedAt");
+            entity.Property(e => e.AuditGap)
+                .ValueGeneratedNever()
+                .HasDefaultValue(false)
+                .HasColumnName("auditGap");
+            entity.Property(e => e.ErasureRequestedAt)
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("erasureRequestedAt");
+            entity.Property(e => e.ErasedAt)
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("erasedAt");
+            entity.Property(e => e.ContentDeleteRetryAt)
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("contentDeleteRetryAt");
+            entity.Property(e => e.ContentDeleteFailures)
+                .ValueGeneratedNever()
+                .HasDefaultValue(0)
+                .HasColumnName("contentDeleteFailures");
+        });
+
+        modelBuilder.Entity<OutboundEmailAuditErasureIntent>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("OutboundEmailAuditErasureIntent_pkey");
+
+            entity.ToTable("OutboundEmailAuditErasureIntent");
+
+            entity.HasIndex(e => e.UserId, "OutboundEmailAuditErasureIntent_userId_idx");
+
+            entity.HasIndex(e => new { e.RecipientMac, e.ActivatedAt }, "OutboundEmailAuditErasureIntent_recipientMac_activatedAt_idx");
+
+            entity.HasIndex(e => new { e.UserHash, e.ActivatedAt }, "OutboundEmailAuditErasureIntent_userHash_activatedAt_idx");
+
+            entity.HasIndex(e => new { e.CheckedAt, e.Id }, "OutboundEmailAuditErasureIntent_checkedAt_id_idx");
+
+            entity.HasIndex(e => e.ExpiresAt, "OutboundEmailAuditErasureIntent_expiresAt_idx");
+
+            entity.Property(e => e.Id)
+                .HasValueGenerator<UuidV4StringGenerator>()
+                .HasColumnName("id");
+            entity.Property(e => e.UserId).HasColumnName("userId");
+            entity.Property(e => e.UserHash).HasColumnName("userHash");
+            entity.Property(e => e.RecipientMac).HasColumnName("recipientMac");
+            entity.Property(e => e.CreatedAt)
+                .HasValueGenerator<UtcNowGenerator>()
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("createdAt");
+            entity.Property(e => e.ActivatedAt)
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("activatedAt");
+            entity.Property(e => e.CheckedAt)
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("checkedAt");
+            entity.Property(e => e.ExpiresAt)
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("expiresAt");
+        });
+
         modelBuilder.Entity<Webhook>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("Webhook_pkey");
@@ -757,6 +912,7 @@ public partial class FormbricksContext : DbContext
             entity.Property(e => e.IngestFlags)
                 .HasColumnType("jsonb")
                 .HasColumnName("ingest_flags");
+            entity.Property(e => e.Outcome).HasColumnName("outcome");
             entity.Property(e => e.ContactAttributes)
                 .HasColumnType("jsonb")
                 .HasColumnName("contactAttributes");
@@ -3703,6 +3859,15 @@ public partial class FormbricksContext : DbContext
         }
 
         foreach (var entry in ChangeTracker.Entries<CreativeTrigger>())
+        {
+            if ((entry.State == EntityState.Added && entry.Entity.UpdatedAt == default)
+                || (entry.State == EntityState.Modified && !entry.Property(e => e.UpdatedAt).IsModified))
+            {
+                entry.Entity.UpdatedAt = now;
+            }
+        }
+
+        foreach (var entry in ChangeTracker.Entries<OutboundEmailAudit>())
         {
             if ((entry.State == EntityState.Added && entry.Entity.UpdatedAt == default)
                 || (entry.State == EntityState.Modified && !entry.Property(e => e.UpdatedAt).IsModified))

@@ -11,6 +11,8 @@ public partial class ComputedUpdateDeadLetter
 
     public string BaseId { get; set; } = null!;
 
+    public string WorkerLane { get; set; } = "production";
+
     public string SeedTableId { get; set; } = null!;
 
     public string? SeedRecordIds { get; set; }
@@ -68,4 +70,6 @@ public partial class ComputedUpdateDeadLetter
     public DateTime CreatedAt { get; set; }
 
     public DateTime UpdatedAt { get; set; }
+
+    public virtual ICollection<ComputedUpdateDeadLetterSeed> Seeds { get; set; } = new List<ComputedUpdateDeadLetterSeed>();
 }

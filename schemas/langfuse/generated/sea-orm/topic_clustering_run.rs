@@ -23,6 +23,8 @@ pub struct Model {
     #[sea_orm(column_type = "TimestampWithTimeZone")]
     pub finished_at: Option<DateTimeWithTimeZone>,
     pub topic_version_ids: Vec<String>,
+    pub rule_id: Option<String>,
+    pub batch_action_id: Option<String>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

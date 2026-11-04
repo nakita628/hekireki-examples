@@ -74,6 +74,8 @@ export const contactAttributeDataTypeEnum = pgEnum('ContactAttributeDataType', [
   'date',
 ])
 
+export const responseOutcomeEnum = pgEnum('ResponseOutcome', ['lowQuality'])
+
 export const surveyStatusEnum = pgEnum('SurveyStatus', [
   'draft',
   'inProgress',
@@ -209,6 +211,7 @@ export const deletionCleanupKindEnum = pgEnum('DeletionCleanupKind', [
   'hubResponses',
   'storageFiles',
   'storageSurveyFolder',
+  'hubResponseOutcome',
 ])
 
 export const retentionEntityEnum = pgEnum('RetentionEntity', ['responses', 'surveys', 'members'])
@@ -437,6 +440,136 @@ export const creativeLanguage = pgTable(
   ],
 )
 
+export const outboundEmailAudit = pgTable(
+  'OutboundEmailAudit',
+  {
+    id: text('id')
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    createdAt: timestamp('createdAt', { precision: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`)
+      .$defaultFn(utcNow),
+    updatedAt: timestamp('updatedAt', { precision: 3 }).notNull().$onUpdate(utcNow),
+    expiresAt: timestamp('expiresAt', { precision: 3 }).notNull(),
+    contentExpiresAt: timestamp('contentExpiresAt', { precision: 3 }).notNull(),
+    environment: text('environment').notNull(),
+    emailType: text('emailType').notNull(),
+    trigger: text('trigger').notNull(),
+    actorKind: text('actorKind').notNull(),
+    actorUserId: text('actorUserId'),
+    configuredByUserId: text('configuredByUserId'),
+    actorUserHash: text('actorUserHash'),
+    configuredByUserHash: text('configuredByUserHash'),
+    organizationId: text('organizationId'),
+    surveyId: text('surveyId'),
+    responseId: text('responseId'),
+    followUpId: text('followUpId'),
+    workflowId: text('workflowId'),
+    workflowRunId: text('workflowRunId'),
+    inviteId: text('inviteId'),
+    recipientMac: text('recipientMac'),
+    sesMessageHash: text('sesMessageHash'),
+    snapshotKey: text('snapshotKey'),
+    snapshotSha256: text('snapshotSha256'),
+    status: text('status').notNull().default('prepared'),
+    statusRecordedAt: timestamp('statusRecordedAt', { precision: 3 }),
+    auditGap: boolean('auditGap').notNull().default(false),
+    erasureRequestedAt: timestamp('erasureRequestedAt', { precision: 3 }),
+    erasedAt: timestamp('erasedAt', { precision: 3 }),
+    contentDeleteRetryAt: timestamp('contentDeleteRetryAt', { precision: 3 }),
+    contentDeleteFailures: integer('contentDeleteFailures').notNull().default(0),
+  },
+  (table) => [
+    index('OutboundEmailAudit_environment_createdAt_id_idx').on(
+      table.environment,
+      table.createdAt,
+      table.id,
+    ),
+    index('OutboundEmailAudit_organizationId_createdAt_id_idx').on(
+      table.organizationId,
+      table.createdAt,
+      table.id,
+    ),
+    index('OutboundEmailAudit_surveyId_createdAt_id_idx').on(
+      table.surveyId,
+      table.createdAt,
+      table.id,
+    ),
+    index('OutboundEmailAudit_responseId_createdAt_id_idx').on(
+      table.responseId,
+      table.createdAt,
+      table.id,
+    ),
+    index('OutboundEmailAudit_actorUserId_createdAt_id_idx').on(
+      table.actorUserId,
+      table.createdAt,
+      table.id,
+    ),
+    index('OutboundEmailAudit_configuredByUserId_createdAt_id_idx').on(
+      table.configuredByUserId,
+      table.createdAt,
+      table.id,
+    ),
+    index('OutboundEmailAudit_actorUserHash_createdAt_id_idx').on(
+      table.actorUserHash,
+      table.createdAt,
+      table.id,
+    ),
+    index('OutboundEmailAudit_configuredByUserHash_createdAt_id_idx').on(
+      table.configuredByUserHash,
+      table.createdAt,
+      table.id,
+    ),
+    index('OutboundEmailAudit_recipientMac_createdAt_id_idx').on(
+      table.recipientMac,
+      table.createdAt,
+      table.id,
+    ),
+    index('OutboundEmailAudit_sesMessageHash_idx').on(table.sesMessageHash),
+    index('OutboundEmailAudit_status_createdAt_id_idx').on(table.status, table.createdAt, table.id),
+    index('OutboundEmailAudit_contentExpiresAt_id_idx').on(table.contentExpiresAt, table.id),
+    index('OutboundEmailAudit_expiresAt_id_idx').on(table.expiresAt, table.id),
+    index('OutboundEmailAudit_erasureRequestedAt_id_idx').on(table.erasureRequestedAt, table.id),
+    index('OutboundEmailAudit_contentDeleteRetryAt_id_idx').on(
+      table.contentDeleteRetryAt,
+      table.id,
+    ),
+  ],
+)
+
+export const outboundEmailAuditErasureIntent = pgTable(
+  'OutboundEmailAuditErasureIntent',
+  {
+    id: text('id')
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    userId: text('userId'),
+    userHash: text('userHash').notNull(),
+    recipientMac: text('recipientMac').notNull(),
+    createdAt: timestamp('createdAt', { precision: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`)
+      .$defaultFn(utcNow),
+    activatedAt: timestamp('activatedAt', { precision: 3 }),
+    checkedAt: timestamp('checkedAt', { precision: 3 }),
+    expiresAt: timestamp('expiresAt', { precision: 3 }).notNull(),
+  },
+  (table) => [
+    index('OutboundEmailAuditErasureIntent_userId_idx').on(table.userId),
+    index('OutboundEmailAuditErasureIntent_recipientMac_activatedAt_idx').on(
+      table.recipientMac,
+      table.activatedAt,
+    ),
+    index('OutboundEmailAuditErasureIntent_userHash_activatedAt_idx').on(
+      table.userHash,
+      table.activatedAt,
+    ),
+    index('OutboundEmailAuditErasureIntent_checkedAt_id_idx').on(table.checkedAt, table.id),
+    index('OutboundEmailAuditErasureIntent_expiresAt_idx').on(table.expiresAt),
+  ],
+)
+
 export const webhook = pgTable(
   'Webhook',
   {
@@ -601,6 +734,7 @@ export const response = pgTable(
     ttc: jsonb('ttc').notNull().default({}),
     meta: jsonb('meta').notNull().default({}),
     ingestFlags: jsonb('ingest_flags'),
+    outcome: responseOutcomeEnum('outcome'),
     contactAttributes: jsonb('contactAttributes'),
     singleUseId: text('singleUseId'),
     language: text('language'),
@@ -2809,6 +2943,8 @@ export const relations = defineRelations(
     creativeDailyPageStat,
     creativeTrigger,
     creativeLanguage,
+    outboundEmailAudit,
+    outboundEmailAuditErasureIntent,
     webhook,
     contactAttribute,
     contactAttributeKey,

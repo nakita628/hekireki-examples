@@ -31,6 +31,8 @@ public partial class Organization
 
     public bool AiTelemetryEnabled { get; set; } = true;
 
+    public bool AccessAuditLogEnabled { get; set; } = false;
+
     public List<string>? FeatureFlagOrgDefaults { get; set; } = new List<string>();
 
     public string? SfdcOrgId { get; set; }

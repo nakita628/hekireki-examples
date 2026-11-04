@@ -365,6 +365,7 @@ export const organizations = pgTable('organizations', {
   cloudFreeTierUsageThresholdState: text('cloud_free_tier_usage_threshold_state'),
   aiFeaturesEnabled: boolean('ai_features_enabled').notNull().default(false),
   aiTelemetryEnabled: boolean('ai_telemetry_enabled').notNull().default(true),
+  accessAuditLogEnabled: boolean('access_audit_log_enabled').notNull().default(false),
   featureFlagOrgDefaults: text('feature_flag_org_defaults').array().default([]),
   sfdcOrgId: text('sfdc_org_id'),
 })
@@ -3637,6 +3638,8 @@ export const topicClusteringRuns = pgTable(
     startedAt: timestamp('started_at', { withTimezone: true, precision: 3 }),
     finishedAt: timestamp('finished_at', { withTimezone: true, precision: 3 }),
     topicVersionIds: text('topic_version_ids').array().default([]),
+    ruleId: text('rule_id'),
+    batchActionId: text('batch_action_id'),
   },
   (table) => [
     index('topic_clustering_runs_serving_map_idx').on(
@@ -3646,6 +3649,16 @@ export const topicClusteringRuns = pgTable(
       table.facetVersion,
       table.createdAt,
       table.id,
+    ),
+    index('topic_clustering_runs_rule_serving_map_idx').on(
+      table.projectId,
+      table.ruleId,
+      table.facetId,
+      table.status,
+    ),
+    index('topic_clustering_runs_project_id_batch_action_id_idx').on(
+      table.projectId,
+      table.batchActionId,
     ),
     foreignKey({
       name: 'topic_clustering_runs_project_id_fkey',

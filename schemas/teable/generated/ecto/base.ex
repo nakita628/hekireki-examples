@@ -6,7 +6,7 @@ defmodule Teable.Base do
 
   @type t :: %__MODULE__{
           id: String.t(),
-          name: String.t(),
+          name: String.t() | nil,
           order: float(),
           icon: String.t() | nil,
           schema_pass: String.t() | nil,

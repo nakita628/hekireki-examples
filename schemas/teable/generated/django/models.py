@@ -253,7 +253,7 @@ class PinResource(models.Model):
 class Base(models.Model):
     id = models.TextField(primary_key=True, default=None)
     space = models.ForeignKey("Space", on_delete=models.RESTRICT, related_name="base_group", db_index=False)
-    name = models.TextField()
+    name = models.TextField(null=True)
     order = models.FloatField()
     icon = models.TextField(null=True)
     schema_pass = models.TextField(null=True)
@@ -415,6 +415,7 @@ class Field(models.Model):
 class ComputedUpdateOutbox(models.Model):
     id = models.TextField(primary_key=True, default=None)
     base_id = models.TextField()
+    worker_lane = models.TextField(default="production")
     seed_table_id = models.TextField()
     seed_record_ids = models.JSONField(null=True)
     change_type = models.TextField()
@@ -448,6 +449,7 @@ class ComputedUpdateOutbox(models.Model):
         db_table = "computed_update_outbox"
         indexes = [
             models.Index(fields=["status", "next_run_at"]),
+            models.Index(fields=["worker_lane", "status", "next_run_at"]),
             models.Index(fields=["base_id", "seed_table_id"]),
             models.Index(fields=["plan_hash"]),
             models.Index(fields=["run_id"]),
@@ -500,6 +502,7 @@ class ComputedUpdateStageLedger(models.Model):
 class ComputedUpdateDeadLetter(models.Model):
     id = models.TextField(primary_key=True, default=None)
     base_id = models.TextField()
+    worker_lane = models.TextField(default="production")
     seed_table_id = models.TextField()
     seed_record_ids = models.JSONField(null=True)
     change_type = models.TextField()
@@ -537,6 +540,16 @@ class ComputedUpdateDeadLetter(models.Model):
             models.Index(fields=["plan_hash"]),
             models.Index(fields=["run_id"]),
         ]
+
+
+class ComputedUpdateDeadLetterSeed(models.Model):
+    pk = models.CompositePrimaryKey("task_id", "table_id", "record_id")
+    task = models.ForeignKey("ComputedUpdateDeadLetter", on_delete=models.CASCADE, related_name="seeds", db_index=False)
+    table_id = models.TextField()
+    record_id = models.TextField()
+
+    class Meta:
+        db_table = "computed_update_dead_letter_seed"
 
 
 class ComputedUpdateRunHistory(models.Model):
@@ -1292,6 +1305,12 @@ class Template(models.Model):
     publish_info = models.JSONField(null=True)
     visit_count = models.IntegerField(default=0)
     kind = models.TextField(null=True)
+    version = models.IntegerField(default=1)
+    manifest = models.JSONField(null=True)
+    review = models.JSONField(null=True)
+    history = models.JSONField(null=True)
+    parent_template_id = models.TextField(null=True)
+    slug = models.TextField(null=True, unique=True)
     objects = AutoNowQuerySet.as_manager()
 
     class Meta:
@@ -1309,10 +1328,16 @@ class TemplateCategory(models.Model):
     last_modified_time = UtcDateTimeField(null=True, auto_now=True)
     last_modified_by = models.TextField(null=True)
     order = models.FloatField()
+    parent_id = models.TextField(null=True)
+    kind = models.TextField(default="industry")
+    key = models.TextField(null=True, unique=True)
     objects = AutoNowQuerySet.as_manager()
 
     class Meta:
         db_table = "template_category"
+        indexes = [
+            models.Index(fields=["parent_id"]),
+        ]
 
 
 class Task(models.Model):

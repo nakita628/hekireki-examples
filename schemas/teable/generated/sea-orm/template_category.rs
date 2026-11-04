@@ -15,6 +15,11 @@ pub struct Model {
     pub last_modified_time: Option<DateTime>,
     pub last_modified_by: Option<String>,
     pub order: f64,
+    pub parent_id: Option<String>,
+    #[sea_orm(default_value = "industry")]
+    pub kind: String,
+    #[sea_orm(unique)]
+    pub key: Option<String>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

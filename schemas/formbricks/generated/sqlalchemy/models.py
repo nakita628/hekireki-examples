@@ -123,6 +123,79 @@ class CreativeLanguage(Base):
     language: Mapped["Language"] = relationship(back_populates="creative_languages")
     creative: Mapped["Creative"] = relationship(back_populates="languages")
 
+class OutboundEmailAudit(Base):
+    __tablename__ = "OutboundEmailAudit"
+
+    id: Mapped[str] = mapped_column(primary_key=True, default=lambda: str(uuid_mod.uuid4()))
+    created_at: Mapped[datetime] = mapped_column("createdAt", default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
+    updated_at: Mapped[datetime] = mapped_column("updatedAt", default=utc_now, onupdate=utc_now)
+    expires_at: Mapped[datetime] = mapped_column("expiresAt")
+    content_expires_at: Mapped[datetime] = mapped_column("contentExpiresAt")
+    environment: Mapped[str]
+    email_type: Mapped[str] = mapped_column("emailType")
+    trigger: Mapped[str]
+    actor_kind: Mapped[str] = mapped_column("actorKind")
+    actor_user_id: Mapped[Optional[str]] = mapped_column("actorUserId")
+    configured_by_user_id: Mapped[Optional[str]] = mapped_column("configuredByUserId")
+    actor_user_hash: Mapped[Optional[str]] = mapped_column("actorUserHash")
+    configured_by_user_hash: Mapped[Optional[str]] = mapped_column("configuredByUserHash")
+    organization_id: Mapped[Optional[str]] = mapped_column("organizationId")
+    survey_id: Mapped[Optional[str]] = mapped_column("surveyId")
+    response_id: Mapped[Optional[str]] = mapped_column("responseId")
+    follow_up_id: Mapped[Optional[str]] = mapped_column("followUpId")
+    workflow_id: Mapped[Optional[str]] = mapped_column("workflowId")
+    workflow_run_id: Mapped[Optional[str]] = mapped_column("workflowRunId")
+    invite_id: Mapped[Optional[str]] = mapped_column("inviteId")
+    recipient_mac: Mapped[Optional[str]] = mapped_column("recipientMac")
+    ses_message_hash: Mapped[Optional[str]] = mapped_column("sesMessageHash")
+    snapshot_key: Mapped[Optional[str]] = mapped_column("snapshotKey")
+    snapshot_sha256: Mapped[Optional[str]] = mapped_column("snapshotSha256")
+    status: Mapped[str] = mapped_column(default="prepared", server_default=text("'prepared'"))
+    status_recorded_at: Mapped[Optional[datetime]] = mapped_column("statusRecordedAt")
+    audit_gap: Mapped[bool] = mapped_column("auditGap", default=False, server_default=text("false"))
+    erasure_requested_at: Mapped[Optional[datetime]] = mapped_column("erasureRequestedAt")
+    erased_at: Mapped[Optional[datetime]] = mapped_column("erasedAt")
+    content_delete_retry_at: Mapped[Optional[datetime]] = mapped_column("contentDeleteRetryAt")
+    content_delete_failures: Mapped[int] = mapped_column("contentDeleteFailures", default=0, server_default=text("0"))
+
+    __table_args__ = (
+        Index("OutboundEmailAudit_environment_createdAt_id_idx", "environment", "createdAt", "id"),
+        Index("OutboundEmailAudit_organizationId_createdAt_id_idx", "organizationId", "createdAt", "id"),
+        Index("OutboundEmailAudit_surveyId_createdAt_id_idx", "surveyId", "createdAt", "id"),
+        Index("OutboundEmailAudit_responseId_createdAt_id_idx", "responseId", "createdAt", "id"),
+        Index("OutboundEmailAudit_actorUserId_createdAt_id_idx", "actorUserId", "createdAt", "id"),
+        Index("OutboundEmailAudit_configuredByUserId_createdAt_id_idx", "configuredByUserId", "createdAt", "id"),
+        Index("OutboundEmailAudit_actorUserHash_createdAt_id_idx", "actorUserHash", "createdAt", "id"),
+        Index("OutboundEmailAudit_configuredByUserHash_createdAt_id_idx", "configuredByUserHash", "createdAt", "id"),
+        Index("OutboundEmailAudit_recipientMac_createdAt_id_idx", "recipientMac", "createdAt", "id"),
+        Index("OutboundEmailAudit_sesMessageHash_idx", "sesMessageHash"),
+        Index("OutboundEmailAudit_status_createdAt_id_idx", "status", "createdAt", "id"),
+        Index("OutboundEmailAudit_contentExpiresAt_id_idx", "contentExpiresAt", "id"),
+        Index("OutboundEmailAudit_expiresAt_id_idx", "expiresAt", "id"),
+        Index("OutboundEmailAudit_erasureRequestedAt_id_idx", "erasureRequestedAt", "id"),
+        Index("OutboundEmailAudit_contentDeleteRetryAt_id_idx", "contentDeleteRetryAt", "id"),
+    )
+
+class OutboundEmailAuditErasureIntent(Base):
+    __tablename__ = "OutboundEmailAuditErasureIntent"
+
+    id: Mapped[str] = mapped_column(primary_key=True, default=lambda: str(uuid_mod.uuid4()))
+    user_id: Mapped[Optional[str]] = mapped_column("userId")
+    user_hash: Mapped[str] = mapped_column("userHash")
+    recipient_mac: Mapped[str] = mapped_column("recipientMac")
+    created_at: Mapped[datetime] = mapped_column("createdAt", default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
+    activated_at: Mapped[Optional[datetime]] = mapped_column("activatedAt")
+    checked_at: Mapped[Optional[datetime]] = mapped_column("checkedAt")
+    expires_at: Mapped[datetime] = mapped_column("expiresAt")
+
+    __table_args__ = (
+        Index("OutboundEmailAuditErasureIntent_userId_idx", "userId"),
+        Index("OutboundEmailAuditErasureIntent_recipientMac_activatedAt_idx", "recipientMac", "activatedAt"),
+        Index("OutboundEmailAuditErasureIntent_userHash_activatedAt_idx", "userHash", "activatedAt"),
+        Index("OutboundEmailAuditErasureIntent_checkedAt_id_idx", "checkedAt", "id"),
+        Index("OutboundEmailAuditErasureIntent_expiresAt_idx", "expiresAt"),
+    )
+
 class Webhook(Base):
     __tablename__ = "Webhook"
 
@@ -220,6 +293,7 @@ class Response(Base):
     ttc: Mapped[dict[str, Any]] = mapped_column(JSONB, default=lambda: {}, server_default=text("'{}'"))
     meta: Mapped[dict[str, Any]] = mapped_column(JSONB, default=lambda: {}, server_default=text("'{}'"))
     ingest_flags: Mapped[Optional[dict[str, Any]]] = mapped_column(JSONB(none_as_null=True))
+    outcome: Mapped[Optional[str]] = mapped_column(Enum("lowQuality", name="ResponseOutcome"))
     contact_attributes: Mapped[Optional[dict[str, Any]]] = mapped_column("contactAttributes", JSONB(none_as_null=True))
     single_use_id: Mapped[Optional[str]] = mapped_column("singleUseId")
     language: Mapped[Optional[str]]
@@ -1259,7 +1333,7 @@ class DeletionCleanup(Base):
     id: Mapped[str] = mapped_column(primary_key=True)
     created_at: Mapped[datetime] = mapped_column(default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
     updated_at: Mapped[datetime] = mapped_column(default=utc_now, onupdate=utc_now)
-    kind: Mapped[str] = mapped_column(Enum("hubSurvey", "hubResponses", "storageFiles", "storageSurveyFolder", name="DeletionCleanupKind"))
+    kind: Mapped[str] = mapped_column(Enum("hubSurvey", "hubResponses", "storageFiles", "storageSurveyFolder", "hubResponseOutcome", name="DeletionCleanupKind"))
     organization_id: Mapped[str] = mapped_column("organizationId")
     workspace_id: Mapped[str] = mapped_column("workspaceId")
     survey_id: Mapped[str] = mapped_column("surveyId")

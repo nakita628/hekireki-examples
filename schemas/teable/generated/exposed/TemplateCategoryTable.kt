@@ -13,5 +13,12 @@ object TemplateCategoryTable : IdTable<String>("template_category") {
     val lastModifiedTime = pgTimestamp("last_modified_time", 3).nullable().clientDefault { Instant.now().truncatedTo(ChronoUnit.MILLIS) }
     val lastModifiedBy = text("last_modified_by").nullable()
     val order = double("order")
+    val parentId = text("parent_id").nullable()
+    val kind = text("kind").default("industry")
+    val key = text("key").nullable().uniqueIndex("template_category_key_key")
     override val primaryKey = PrimaryKey(id, name = "template_category_pkey")
+
+    init {
+        index("template_category_parent_id_idx", false, parentId)
+    }
 }

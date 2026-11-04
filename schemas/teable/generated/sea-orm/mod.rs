@@ -16,6 +16,7 @@ pub mod computed_table_activity;
 pub mod computed_task_field_ref;
 pub mod computed_update_change_frontier;
 pub mod computed_update_dead_letter;
+pub mod computed_update_dead_letter_seed;
 pub mod computed_update_outbox;
 pub mod computed_update_outbox_seed;
 pub mod computed_update_pause_scope;

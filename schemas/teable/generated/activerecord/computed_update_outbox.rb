@@ -3,6 +3,7 @@ class ComputedUpdateOutbox < ApplicationRecord
   self.implicit_order_column = "created_at"
 
   attribute :id, default: -> { Cuid.generate }
+  attribute :worker_lane, default: "production"
   attribute :attempts, default: 0
   attribute :max_attempts, default: 8
   attribute :estimated_complexity, default: 0

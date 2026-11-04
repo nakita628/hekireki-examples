@@ -1,6 +1,6 @@
 // Teable: Teable no-code database: spaces, bases, tables, fields, views and records.
 //
-// Imported from https://github.com/teableio/teable/blob/b6ae0a1ab8a9c7ce8b6eef16b1af27cc770c2cd9/packages/db-main-prisma/prisma/postgres/schema.prisma
+// Imported from https://github.com/teableio/teable/blob/f8be01fadb86790d3d3a878bedd10cf949f9a8f8/packages/db-main-prisma/prisma/postgres/schema.prisma
 // (MIT license) by tools/import/import-schema.mjs, which dropped the original
 // generator blocks and the datasource's connection URLs and added the hekireki generators below.
 // The models, enums and `///` comments are the project's own, as they are at that commit.
@@ -288,7 +288,7 @@ model PinResource {
 model Base {
   id               String      @id @default(cuid())
   spaceId          String      @map("space_id")
-  name             String
+  name             String?
   order            Float
   icon             String?
   schemaPass       String?     @map("schema_pass")
@@ -442,6 +442,7 @@ model Field {
 model ComputedUpdateOutbox {
   id                 String   @id @default(cuid())
   baseId             String   @map("base_id")
+  workerLane         String   @default("production") @map("worker_lane")
   seedTableId        String   @map("seed_table_id")
   seedRecordIds      Json?    @map("seed_record_ids")
   changeType         String   @map("change_type")
@@ -473,6 +474,7 @@ model ComputedUpdateOutbox {
   seeds ComputedUpdateOutboxSeed[]
 
   @@index([status, nextRunAt])
+  @@index([workerLane, status, nextRunAt])
   @@index([baseId, seedTableId])
   @@index([planHash])
   @@index([runId])
@@ -527,6 +529,7 @@ model ComputedUpdateStageLedger {
 model ComputedUpdateDeadLetter {
   id                 String   @id
   baseId             String   @map("base_id")
+  workerLane         String   @default("production") @map("worker_lane")
   seedTableId        String   @map("seed_table_id")
   seedRecordIds      Json?    @map("seed_record_ids")
   changeType         String   @map("change_type")
@@ -556,11 +559,22 @@ model ComputedUpdateDeadLetter {
   failedAt           DateTime @map("failed_at")
   createdAt          DateTime @map("created_at")
   updatedAt          DateTime @map("updated_at")
+  seeds ComputedUpdateDeadLetterSeed[]
 
   @@index([baseId, seedTableId])
   @@index([planHash])
   @@index([runId])
   @@map("computed_update_dead_letter")
+}
+
+model ComputedUpdateDeadLetterSeed {
+  taskId   String @map("task_id")
+  tableId  String @map("table_id")
+  recordId String @map("record_id")
+  task ComputedUpdateDeadLetter @relation(fields: [taskId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@id([taskId, tableId, recordId])
+  @@map("computed_update_dead_letter_seed")
 }
 
 /// Completion ledger for computed-update outbox tasks (lineage / latency
@@ -1247,9 +1261,14 @@ model Template {
   usageCount          Int       @default(0) @map("usage_count")
   publishInfo         Json?     @map("publish_info")
   visitCount          Int       @default(0) @map("visit_count")
-  // `template` (default) or `solution`: a solution is used through the setup wizard
-  // (connect the integrations it needs) rather than opened as a plain copy.
+  // Unused since the solution kind was retired; dropped once production no longer reads it.
   kind                String?   @map("kind")
+  version             Int       @default(1) @map("version")
+  manifest            Json?     @map("manifest")
+  review              Json?     @map("review")
+  history             Json?     @map("history")
+  parentTemplateId    String?   @map("parent_template_id")
+  slug                String?   @unique @map("slug")
 
   @@unique([baseId])
   @@map("template")
@@ -1263,7 +1282,11 @@ model TemplateCategory {
   lastModifiedTime DateTime? @updatedAt @map("last_modified_time")
   lastModifiedBy   String?   @map("last_modified_by")
   order            Float     @map("order")
+  parentId         String?   @map("parent_id")
+  kind             String    @default("industry") @map("kind")
+  key              String?   @unique @map("key")
 
+  @@index([parentId])
   @@map("template_category")
 }
 

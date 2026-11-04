@@ -162,6 +162,49 @@ erDiagram
         boolean default
         boolean enabled
     }
+    OutboundEmailAudit {
+        string id PK
+        datetime createdAt
+        datetime updatedAt
+        datetime expiresAt
+        datetime contentExpiresAt
+        string environment
+        string emailType
+        string trigger
+        string actorKind
+        string actorUserId
+        string configuredByUserId
+        string actorUserHash
+        string configuredByUserHash
+        string organizationId
+        string surveyId
+        string responseId
+        string followUpId
+        string workflowId
+        string workflowRunId
+        string inviteId
+        string recipientMac
+        string sesMessageHash
+        string snapshotKey
+        string snapshotSha256
+        string status
+        datetime statusRecordedAt
+        boolean auditGap
+        datetime erasureRequestedAt
+        datetime erasedAt
+        datetime contentDeleteRetryAt
+        int contentDeleteFailures
+    }
+    OutboundEmailAuditErasureIntent {
+        string id PK
+        string userId
+        string userHash
+        string recipientMac
+        datetime createdAt
+        datetime activatedAt
+        datetime checkedAt
+        datetime expiresAt
+    }
     Webhook {
         string id PK
         string name
@@ -215,6 +258,7 @@ erDiagram
         json ttc "[ResponseTtc]"
         json meta "[ResponseMeta]"
         json ingestFlags "Why a value in `data` will not read back as its declared Embedded Data type — a failed coercion or a truncated oversize value (ENG-1845). Server-computed on every ingest and never accepted from the client. Null means no ingest boundary has written it, which is not the same claim as an empty list: without this column a wrong-typed value is indistinguishable from an absent one, and surfacing that in the UI (v2) would have nothing to read. [ResponseIngestFlags]"
+        responseoutcome outcome "A reviewer's verdict on the response; null means none. `lowQuality` hides it from the Analysis export by default and from Feedback Records, and nothing else: it is never deleted and every count, list, webhook and integration still includes it (ENG-6780)."
         json contactAttributes "[ResponseContactAttributes]"
         string singleUseId UK
         string language
@@ -745,7 +789,7 @@ erDiagram
         string workspaceId
         string surveyId
         string[] tenantIds "Hub kinds: the organisation's feedback directories, read inside the delete's transaction."
-        string[] responseIds "`hubResponses`: the deleted responses whose records go."
+        string[] responseIds "`hubResponses`: the deleted responses whose records go. `hubResponseOutcome`: exactly one live response."
         string[] fileKeys "`storageFiles`: the object keys or URLs to delete."
         int attempts
         datetime nextAttemptAt "Not drained before this, so a late pipeline write can't slip in behind a survey's cleanup."

@@ -170,7 +170,7 @@ Table pin_resource {
 Table base {
   id String [pk]
   space_id String [not null]
-  name String [not null]
+  name String
   order Float [not null]
   icon String
   schema_pass String
@@ -291,6 +291,7 @@ Table field {
 Table computed_update_outbox {
   id String [pk]
   base_id String [not null]
+  worker_lane String [default: 'production', not null]
   seed_table_id String [not null]
   seed_record_ids Json
   change_type String [not null]
@@ -370,6 +371,7 @@ Cleared when the chain\'s stage completes or the chain dead-letters.'''
 Table computed_update_dead_letter {
   id String [pk]
   base_id String [not null]
+  worker_lane String [default: 'production', not null]
   seed_table_id String [not null]
   seed_record_ids Json
   change_type String [not null]
@@ -399,6 +401,16 @@ Table computed_update_dead_letter {
   failed_at DateTime [not null]
   created_at DateTime [not null]
   updated_at DateTime [not null]
+}
+
+Table computed_update_dead_letter_seed {
+  task_id String [not null]
+  table_id String [not null]
+  record_id String [not null]
+
+  indexes {
+    (task_id, table_id, record_id) [pk]
+  }
 }
 
 Table computed_update_run_history {
@@ -958,6 +970,12 @@ Table template {
   publish_info Json
   visit_count Int [default: 0, not null]
   kind String
+  version Int [default: 1, not null]
+  manifest Json
+  review Json
+  history Json
+  parent_template_id String
+  slug String [unique]
 }
 
 Table template_category {
@@ -968,6 +986,9 @@ Table template_category {
   last_modified_time DateTime
   last_modified_by String
   order Float [not null]
+  parent_id String
+  kind String [default: 'industry', not null]
+  key String [unique]
 }
 
 Table task {
@@ -1101,6 +1122,8 @@ Ref table_meta_base_id_fk: table_meta.base_id > base.id
 Ref field_table_id_fk: field.table_id > table_meta.id
 
 Ref computed_update_outbox_seed_task_id_fk: computed_update_outbox_seed.task_id > computed_update_outbox.id [delete: cascade]
+
+Ref computed_update_dead_letter_seed_task_id_fk: computed_update_dead_letter_seed.task_id > computed_update_dead_letter.id [delete: cascade, update: cascade]
 
 Ref view_table_id_fk: view.table_id > table_meta.id
 

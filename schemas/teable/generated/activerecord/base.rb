@@ -8,7 +8,6 @@ class Base < ApplicationRecord
   enum :provision_state, { pending: "pending", ready: "ready", error: "error", deleting: "deleting" }, default: :ready,
                                                                                                        validate: true
 
-  validates :name, presence: true
   validates :order, presence: true
   validates :created_by, presence: true
 

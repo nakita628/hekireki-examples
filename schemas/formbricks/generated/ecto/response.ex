@@ -13,6 +13,7 @@ defmodule Formbricks.Response do
           ttc: map(),
           meta: map(),
           ingest_flags: map() | nil,
+          outcome: atom() | nil,
           contact_attributes: map() | nil,
           single_use_id: String.t() | nil,
           language: String.t() | nil,
@@ -35,6 +36,7 @@ defmodule Formbricks.Response do
     field(:ttc, :map, default: %{})
     field(:meta, :map, default: %{})
     field(:ingest_flags, :map)
+    field(:outcome, Ecto.Enum, values: [:lowQuality])
     field(:contact_attributes, :map, source: :contactAttributes)
     field(:single_use_id, :string, source: :singleUseId)
     field(:language, :string)

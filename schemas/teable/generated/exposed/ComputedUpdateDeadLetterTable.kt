@@ -7,6 +7,7 @@ import org.jetbrains.exposed.v1.json.jsonb
 object ComputedUpdateDeadLetterTable : IdTable<String>("computed_update_dead_letter") {
     override val id = text("id").entityId()
     val baseId = text("base_id")
+    val workerLane = text("worker_lane").default("production")
     val seedTableId = text("seed_table_id")
     val seedRecordIds = jsonb<String>("seed_record_ids", { it }, { it }).nullable()
     val changeType = text("change_type")

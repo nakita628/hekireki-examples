@@ -13,6 +13,7 @@ class ComputedUpdateOutboxEntity(
     companion object : EntityClass<String, ComputedUpdateOutboxEntity>(ComputedUpdateOutboxTable)
 
     var baseId by ComputedUpdateOutboxTable.baseId
+    var workerLane by ComputedUpdateOutboxTable.workerLane
     var seedTableId by ComputedUpdateOutboxTable.seedTableId
     var seedRecordIds by ComputedUpdateOutboxTable.seedRecordIds
     var changeType by ComputedUpdateOutboxTable.changeType

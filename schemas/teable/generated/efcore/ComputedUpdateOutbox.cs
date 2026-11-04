@@ -11,6 +11,8 @@ public partial class ComputedUpdateOutbox
 
     public string BaseId { get; set; } = null!;
 
+    public string WorkerLane { get; set; } = "production";
+
     public string SeedTableId { get; set; } = null!;
 
     public string? SeedRecordIds { get; set; }

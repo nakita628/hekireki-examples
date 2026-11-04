@@ -19,4 +19,10 @@ public partial class TemplateCategory
     public string? LastModifiedBy { get; set; }
 
     public double Order { get; set; }
+
+    public string? ParentId { get; set; }
+
+    public string Kind { get; set; } = "industry";
+
+    public string? Key { get; set; }
 }

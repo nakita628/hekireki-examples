@@ -319,7 +319,7 @@ export const base = pgTable(
       .primaryKey()
       .$defaultFn(() => cuid()),
     spaceId: text('space_id').notNull(),
-    name: text('name').notNull(),
+    name: text('name'),
     order: doublePrecision('order').notNull(),
     icon: text('icon'),
     schemaPass: text('schema_pass'),
@@ -529,6 +529,7 @@ export const computedUpdateOutbox = pgTable(
       .primaryKey()
       .$defaultFn(() => cuid()),
     baseId: text('base_id').notNull(),
+    workerLane: text('worker_lane').notNull().default('production'),
     seedTableId: text('seed_table_id').notNull(),
     seedRecordIds: jsonb('seed_record_ids'),
     changeType: text('change_type').notNull(),
@@ -565,6 +566,11 @@ export const computedUpdateOutbox = pgTable(
   },
   (table) => [
     index('computed_update_outbox_status_next_run_at_idx').on(table.status, table.nextRunAt),
+    index('computed_update_outbox_worker_lane_status_next_run_at_idx').on(
+      table.workerLane,
+      table.status,
+      table.nextRunAt,
+    ),
     index('computed_update_outbox_base_id_seed_table_id_idx').on(table.baseId, table.seedTableId),
     index('computed_update_outbox_plan_hash_idx').on(table.planHash),
     index('computed_update_outbox_run_id_idx').on(table.runId),
@@ -644,6 +650,7 @@ export const computedUpdateDeadLetter = pgTable(
   {
     id: text('id').primaryKey(),
     baseId: text('base_id').notNull(),
+    workerLane: text('worker_lane').notNull().default('production'),
     seedTableId: text('seed_table_id').notNull(),
     seedRecordIds: jsonb('seed_record_ids'),
     changeType: text('change_type').notNull(),
@@ -681,6 +688,28 @@ export const computedUpdateDeadLetter = pgTable(
     ),
     index('computed_update_dead_letter_plan_hash_idx').on(table.planHash),
     index('computed_update_dead_letter_run_id_idx').on(table.runId),
+  ],
+)
+
+export const computedUpdateDeadLetterSeed = pgTable(
+  'computed_update_dead_letter_seed',
+  {
+    taskId: text('task_id').notNull(),
+    tableId: text('table_id').notNull(),
+    recordId: text('record_id').notNull(),
+  },
+  (table) => [
+    primaryKey({
+      name: 'computed_update_dead_letter_seed_pkey',
+      columns: [table.taskId, table.tableId, table.recordId],
+    }),
+    foreignKey({
+      name: 'computed_update_dead_letter_seed_task_id_fkey',
+      columns: [table.taskId],
+      foreignColumns: [computedUpdateDeadLetter.id],
+    })
+      .onDelete('cascade')
+      .onUpdate('cascade'),
   ],
 )
 
@@ -1711,8 +1740,17 @@ export const template = pgTable(
     publishInfo: jsonb('publish_info'),
     visitCount: integer('visit_count').notNull().default(0),
     kind: text('kind'),
+    version: integer('version').notNull().default(1),
+    manifest: jsonb('manifest'),
+    review: jsonb('review'),
+    history: jsonb('history'),
+    parentTemplateId: text('parent_template_id'),
+    slug: text('slug'),
   },
-  (table) => [uniqueIndex('template_base_id_key').on(table.baseId)],
+  (table) => [
+    uniqueIndex('template_slug_key').on(table.slug),
+    uniqueIndex('template_base_id_key').on(table.baseId),
+  ],
 )
 
 export const templateCategory = pgTable(
@@ -1730,8 +1768,15 @@ export const templateCategory = pgTable(
     lastModifiedTime: timestamp('last_modified_time', { precision: 3 }).$onUpdate(utcNow),
     lastModifiedBy: text('last_modified_by'),
     order: doublePrecision('order').notNull(),
+    parentId: text('parent_id'),
+    kind: text('kind').notNull().default('industry'),
+    key: text('key'),
   },
-  (table) => [uniqueIndex('template_category_name_key').on(table.name)],
+  (table) => [
+    uniqueIndex('template_category_name_key').on(table.name),
+    uniqueIndex('template_category_key_key').on(table.key),
+    index('template_category_parent_id_idx').on(table.parentId),
+  ],
 )
 
 export const task = pgTable(
@@ -1953,6 +1998,7 @@ export const relations = defineRelations(
     computedUpdateChangeFrontier,
     computedUpdateStageLedger,
     computedUpdateDeadLetter,
+    computedUpdateDeadLetterSeed,
     computedUpdateRunHistory,
     computedUpdatePauseScope,
     computedFieldActivity,
@@ -2081,6 +2127,14 @@ export const relations = defineRelations(
       task: r.one.computedUpdateOutbox({
         from: r.computedUpdateOutboxSeed.taskId,
         to: r.computedUpdateOutbox.id,
+        optional: false,
+      }),
+    },
+    computedUpdateDeadLetter: { seeds: r.many.computedUpdateDeadLetterSeed() },
+    computedUpdateDeadLetterSeed: {
+      task: r.one.computedUpdateDeadLetter({
+        from: r.computedUpdateDeadLetterSeed.taskId,
+        to: r.computedUpdateDeadLetter.id,
         optional: false,
       }),
     },

@@ -32,4 +32,8 @@ public partial class TopicClusteringRun
     public DateTime? FinishedAt { get; set; }
 
     public List<string>? TopicVersionIds { get; set; } = new List<string>();
+
+    public string? RuleId { get; set; }
+
+    public string? BatchActionId { get; set; }
 }

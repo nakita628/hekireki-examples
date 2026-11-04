@@ -30,6 +30,14 @@ pub struct Model {
     #[sea_orm(default_value = 0)]
     pub visit_count: i32,
     pub kind: Option<String>,
+    #[sea_orm(default_value = 1)]
+    pub version: i32,
+    pub manifest: Option<Json>,
+    pub review: Option<Json>,
+    pub history: Option<Json>,
+    pub parent_template_id: Option<String>,
+    #[sea_orm(unique)]
+    pub slug: Option<String>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

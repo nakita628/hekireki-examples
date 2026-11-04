@@ -387,6 +387,7 @@ class Organization(models.Model):
     cloud_free_tier_usage_threshold_state = models.TextField(null=True)
     ai_features_enabled = models.BooleanField(default=False)
     ai_telemetry_enabled = models.BooleanField(default=True)
+    access_audit_log_enabled = models.BooleanField(default=False)
     feature_flag_org_defaults = ArrayField(models.TextField(), default=list)
     sfdc_org_id = models.TextField(null=True)
     objects = AutoNowQuerySet.as_manager()
@@ -2054,9 +2055,13 @@ class TopicClusteringRun(models.Model):
     started_at = models.DateTimeField(null=True)
     finished_at = models.DateTimeField(null=True)
     topic_version_ids = ArrayField(models.TextField(), default=list)
+    rule_id = models.TextField(null=True)
+    batch_action_id = models.TextField(null=True)
 
     class Meta:
         db_table = "topic_clustering_runs"
         indexes = [
             models.Index(fields=["project", "facet_id", "status", "-facet_version", "-created_at", "-id"]),
+            models.Index(fields=["project", "rule_id", "facet_id", "status"]),
+            models.Index(fields=["project", "batch_action_id"]),
         ]

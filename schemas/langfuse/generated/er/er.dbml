@@ -312,6 +312,7 @@ Table organizations {
   cloud_free_tier_usage_threshold_state String
   ai_features_enabled Boolean [default: false, not null]
   ai_telemetry_enabled Boolean [default: true, not null]
+  access_audit_log_enabled Boolean [default: false, not null]
   feature_flag_org_defaults String[] [not null]
   sfdc_org_id String
 }
@@ -1517,6 +1518,8 @@ Table topic_clustering_runs {
   started_at DateTime
   finished_at DateTime
   topic_version_ids String[] [not null]
+  rule_id String
+  batch_action_id String
 }
 
 Ref Account_user_id_fk: Account.user_id > users.id [delete: cascade]

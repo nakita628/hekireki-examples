@@ -37,11 +37,18 @@ class Template extends Model
         'publish_info',
         'visit_count',
         'kind',
+        'version',
+        'manifest',
+        'review',
+        'history',
+        'parent_template_id',
+        'slug',
     ];
 
     protected $attributes = [
         'usage_count' => 0,
         'visit_count' => 0,
+        'version' => 1,
     ];
 
     protected $casts = [
@@ -53,6 +60,10 @@ class Template extends Model
         'usage_count' => 'integer',
         'publish_info' => 'array',
         'visit_count' => 'integer',
+        'version' => 'integer',
+        'manifest' => 'array',
+        'review' => 'array',
+        'history' => 'array',
     ];
 
     public function save(array $options = [])

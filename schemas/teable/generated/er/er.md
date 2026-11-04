@@ -12,6 +12,7 @@ erDiagram
     base ||--o{ table_meta : "(id) - (baseId)"
     table_meta ||--o{ field : "(id) - (tableId)"
     computed_update_outbox ||--o{ computed_update_outbox_seed : "(id) - (taskId)"
+    computed_update_dead_letter ||--o{ computed_update_dead_letter_seed : "(id) - (taskId)"
     table_meta ||--o{ view : "(id) - (tableId)"
     users ||--o{ account : "(id) - (userId)"
     oauth_app ||--o{ oauth_app_authorized : "(clientId) - (clientId)"
@@ -232,6 +233,7 @@ erDiagram
     computed_update_outbox {
         string id PK
         string baseId
+        string workerLane
         string seedTableId
         json seedRecordIds
         string changeType
@@ -283,6 +285,7 @@ erDiagram
     computed_update_dead_letter {
         string id PK
         string baseId
+        string workerLane
         string seedTableId
         json seedRecordIds
         string changeType
@@ -312,6 +315,11 @@ erDiagram
         datetime failedAt
         datetime createdAt
         datetime updatedAt
+    }
+    computed_update_dead_letter_seed {
+        string taskId PK, FK
+        string tableId PK
+        string recordId PK
     }
     computed_update_run_history {
         string taskId PK
@@ -774,6 +782,12 @@ erDiagram
         json publishInfo
         int visitCount
         string kind
+        int version
+        json manifest
+        json review
+        json history
+        string parentTemplateId
+        string slug UK
     }
     template_category {
         string id PK
@@ -783,6 +797,9 @@ erDiagram
         datetime lastModifiedTime
         string lastModifiedBy
         float order
+        string parentId
+        string kind
+        string key UK
     }
     task {
         string id PK

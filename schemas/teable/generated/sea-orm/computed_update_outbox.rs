@@ -9,6 +9,8 @@ pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: String,
     pub base_id: String,
+    #[sea_orm(default_value = "production")]
+    pub worker_lane: String,
     pub seed_table_id: String,
     pub seed_record_ids: Option<Json>,
     pub change_type: String,

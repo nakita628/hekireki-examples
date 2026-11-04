@@ -46,6 +46,10 @@ Enum ContactAttributeDataType {
   date
 }
 
+Enum ResponseOutcome {
+  lowQuality
+}
+
 Enum SurveyStatus {
   draft
   inProgress
@@ -218,6 +222,7 @@ Enum DeletionCleanupKind {
   hubResponses
   storageFiles
   storageSurveyFolder
+  hubResponseOutcome
 }
 
 Enum RetentionEntity {
@@ -377,6 +382,57 @@ Table CreativeLanguage {
   Note: 'The languages a creative\'s texts are written in. Mirrors `SurveyLanguage`; exactly one is the default.'
 }
 
+Table OutboundEmailAudit {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  expiresAt DateTime [not null]
+  contentExpiresAt DateTime [not null]
+  environment String [not null]
+  emailType String [not null]
+  trigger String [not null]
+  actorKind String [not null]
+  actorUserId String
+  configuredByUserId String
+  actorUserHash String
+  configuredByUserHash String
+  organizationId String
+  surveyId String
+  responseId String
+  followUpId String
+  workflowId String
+  workflowRunId String
+  inviteId String
+  recipientMac String
+  sesMessageHash String
+  snapshotKey String
+  snapshotSha256 String
+  status String [default: 'prepared', not null]
+  statusRecordedAt DateTime
+  auditGap Boolean [default: false, not null]
+  erasureRequestedAt DateTime
+  erasedAt DateTime
+  contentDeleteRetryAt DateTime
+  contentDeleteFailures Int [default: 0, not null]
+
+  Note: '''Metadata for an outbound email attempt. Content and recipient addresses are never stored here.
+Identifiers are deliberately not foreign keys so erasure can scrub a row without retaining source data.'''
+}
+
+Table OutboundEmailAuditErasureIntent {
+  id String [pk]
+  userId String
+  userHash String [not null]
+  recipientMac String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  activatedAt DateTime
+  checkedAt DateTime
+  expiresAt DateTime [not null]
+
+  Note: '''Holds an account erasure request across an in-flight email send. The address is never stored.
+The user id is removed once deletion is confirmed; one-way recovery keys expire after 90 days.'''
+}
+
 Table Webhook {
   id String [pk]
   name String
@@ -488,6 +544,9 @@ from the client. Null means no ingest boundary has written it, which is not the 
 an empty list: without this column a wrong-typed value is indistinguishable from an absent one,
 and surfacing that in the UI (v2) would have nothing to read.
 [ResponseIngestFlags]''']
+  outcome ResponseOutcome [note: '''A reviewer\'s verdict on the response; null means none. `lowQuality` hides it from the Analysis
+export by default and from Feedback Records, and nothing else: it is never deleted and every
+count, list, webhook and integration still includes it (ENG-6780).''']
   contactAttributes Json [note: '[ResponseContactAttributes]']
   singleUseId String
   language String
@@ -1586,7 +1645,7 @@ Table DeletionCleanup {
   workspaceId String [not null]
   surveyId String [not null]
   tenantIds String[] [not null, note: 'Hub kinds: the organisation\'s feedback directories, read inside the delete\'s transaction.']
-  responseIds String[] [not null, note: '`hubResponses`: the deleted responses whose records go.']
+  responseIds String[] [not null, note: '`hubResponses`: the deleted responses whose records go. `hubResponseOutcome`: exactly one live response.']
   fileKeys String[] [not null, note: '`storageFiles`: the object keys or URLs to delete.']
   attempts Int [default: 0, not null]
   nextAttemptAt DateTime [default: `now()`, not null, note: 'Not drained before this, so a late pipeline write can\'t slip in behind a survey\'s cleanup.']

@@ -1,6 +1,7 @@
 class ComputedUpdateDeadLetter < ApplicationRecord
   self.table_name = "computed_update_dead_letter"
 
+  attribute :worker_lane, default: "production"
   attribute :attempts, default: 0
   attribute :max_attempts, default: 8
   attribute :estimated_complexity, default: 0
@@ -19,4 +20,7 @@ class ComputedUpdateDeadLetter < ApplicationRecord
   validates :plan_hash, presence: true
   validates :run_id, presence: true
   validates :failed_at, presence: true
+
+  has_many :seeds, class_name: "ComputedUpdateDeadLetterSeed", foreign_key: "task_id", inverse_of: :task,
+                   dependent: :destroy
 end

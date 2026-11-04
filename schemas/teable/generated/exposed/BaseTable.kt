@@ -16,7 +16,7 @@ object BaseTable : IdTable<String>("base") {
             onUpdate = ReferenceOption.CASCADE,
             fkName = "base_space_id_fkey",
         )
-    val name = text("name")
+    val name = text("name").nullable()
     val order = double("order")
     val icon = text("icon").nullable()
     val schemaPass = text("schema_pass").nullable()

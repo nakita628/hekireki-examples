@@ -118,6 +118,10 @@ class ContactAttributeDataType(models.TextChoices):
     date = "date"
 
 
+class ResponseOutcome(models.TextChoices):
+    lowQuality = "lowQuality"
+
+
 class SurveyStatus(models.TextChoices):
     draft = "draft"
     inProgress = "inProgress"
@@ -290,6 +294,7 @@ class DeletionCleanupKind(models.TextChoices):
     hubResponses = "hubResponses"
     storageFiles = "storageFiles"
     storageSurveyFolder = "storageSurveyFolder"
+    hubResponseOutcome = "hubResponseOutcome"
 
 
 class RetentionEntity(models.TextChoices):
@@ -446,6 +451,82 @@ class CreativeLanguage(models.Model):
         ]
 
 
+class OutboundEmailAudit(models.Model):
+    id = models.TextField(primary_key=True, default=uuid4_str)
+    created_at = UtcDateTimeField(db_column="createdAt", default=timezone.now)
+    updated_at = UtcDateTimeField(db_column="updatedAt", auto_now=True)
+    expires_at = UtcDateTimeField(db_column="expiresAt")
+    content_expires_at = UtcDateTimeField(db_column="contentExpiresAt")
+    environment = models.TextField()
+    email_type = models.TextField(db_column="emailType")
+    trigger = models.TextField()
+    actor_kind = models.TextField(db_column="actorKind")
+    actor_user_id = models.TextField(null=True, db_column="actorUserId")
+    configured_by_user_id = models.TextField(null=True, db_column="configuredByUserId")
+    actor_user_hash = models.TextField(null=True, db_column="actorUserHash")
+    configured_by_user_hash = models.TextField(null=True, db_column="configuredByUserHash")
+    organization_id = models.TextField(null=True, db_column="organizationId")
+    survey_id = models.TextField(null=True, db_column="surveyId")
+    response_id = models.TextField(null=True, db_column="responseId")
+    follow_up_id = models.TextField(null=True, db_column="followUpId")
+    workflow_id = models.TextField(null=True, db_column="workflowId")
+    workflow_run_id = models.TextField(null=True, db_column="workflowRunId")
+    invite_id = models.TextField(null=True, db_column="inviteId")
+    recipient_mac = models.TextField(null=True, db_column="recipientMac")
+    ses_message_hash = models.TextField(null=True, db_column="sesMessageHash")
+    snapshot_key = models.TextField(null=True, db_column="snapshotKey")
+    snapshot_sha256 = models.TextField(null=True, db_column="snapshotSha256")
+    status = models.TextField(default="prepared")
+    status_recorded_at = UtcDateTimeField(null=True, db_column="statusRecordedAt")
+    audit_gap = models.BooleanField(db_column="auditGap", default=False)
+    erasure_requested_at = UtcDateTimeField(null=True, db_column="erasureRequestedAt")
+    erased_at = UtcDateTimeField(null=True, db_column="erasedAt")
+    content_delete_retry_at = UtcDateTimeField(null=True, db_column="contentDeleteRetryAt")
+    content_delete_failures = models.IntegerField(db_column="contentDeleteFailures", default=0)
+    objects = AutoNowQuerySet.as_manager()
+
+    class Meta:
+        db_table = "OutboundEmailAudit"
+        indexes = [
+            models.Index(fields=["environment", "created_at", "id"]),
+            models.Index(fields=["organization_id", "created_at", "id"]),
+            models.Index(fields=["survey_id", "created_at", "id"]),
+            models.Index(fields=["response_id", "created_at", "id"]),
+            models.Index(fields=["actor_user_id", "created_at", "id"]),
+            models.Index(fields=["configured_by_user_id", "created_at", "id"]),
+            models.Index(fields=["actor_user_hash", "created_at", "id"]),
+            models.Index(fields=["configured_by_user_hash", "created_at", "id"]),
+            models.Index(fields=["recipient_mac", "created_at", "id"]),
+            models.Index(fields=["ses_message_hash"]),
+            models.Index(fields=["status", "created_at", "id"]),
+            models.Index(fields=["content_expires_at", "id"]),
+            models.Index(fields=["expires_at", "id"]),
+            models.Index(fields=["erasure_requested_at", "id"]),
+            models.Index(fields=["content_delete_retry_at", "id"]),
+        ]
+
+
+class OutboundEmailAuditErasureIntent(models.Model):
+    id = models.TextField(primary_key=True, default=uuid4_str)
+    user_id = models.TextField(null=True, db_column="userId")
+    user_hash = models.TextField(db_column="userHash")
+    recipient_mac = models.TextField(db_column="recipientMac")
+    created_at = UtcDateTimeField(db_column="createdAt", default=timezone.now)
+    activated_at = UtcDateTimeField(null=True, db_column="activatedAt")
+    checked_at = UtcDateTimeField(null=True, db_column="checkedAt")
+    expires_at = UtcDateTimeField(db_column="expiresAt")
+
+    class Meta:
+        db_table = "OutboundEmailAuditErasureIntent"
+        indexes = [
+            models.Index(fields=["user_id"]),
+            models.Index(fields=["recipient_mac", "activated_at"]),
+            models.Index(fields=["user_hash", "activated_at"]),
+            models.Index(fields=["checked_at", "id"]),
+            models.Index(fields=["expires_at"]),
+        ]
+
+
 class Webhook(models.Model):
     id = models.TextField(primary_key=True, default=None)
     name = models.TextField(null=True)
@@ -539,6 +620,7 @@ class Response(models.Model):
     ttc = models.JSONField(default=dict)
     meta = models.JSONField(default=dict)
     ingest_flags = models.JSONField(null=True)
+    outcome = models.TextField(choices=ResponseOutcome.choices, null=True)
     contact_attributes = models.JSONField(null=True, db_column="contactAttributes")
     single_use_id = models.TextField(null=True, db_column="singleUseId")
     language = models.TextField(null=True)

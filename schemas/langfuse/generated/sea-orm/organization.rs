@@ -21,6 +21,8 @@ pub struct Model {
     pub ai_features_enabled: bool,
     #[sea_orm(default_value = true)]
     pub ai_telemetry_enabled: bool,
+    #[sea_orm(default_value = false)]
+    pub access_audit_log_enabled: bool,
     pub feature_flag_org_defaults: Vec<String>,
     pub sfdc_org_id: Option<String>,
 }

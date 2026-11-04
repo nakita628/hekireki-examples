@@ -17,4 +17,7 @@ public enum DeletionCleanupKind
 
     [PgName("storageSurveyFolder")]
     StorageSurveyFolder,
+
+    [PgName("hubResponseOutcome")]
+    HubResponseOutcome,
 }

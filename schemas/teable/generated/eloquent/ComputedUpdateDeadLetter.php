@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ComputedUpdateDeadLetter extends Model
 {
@@ -17,6 +18,7 @@ class ComputedUpdateDeadLetter extends Model
     protected $fillable = [
         'id',
         'base_id',
+        'worker_lane',
         'seed_table_id',
         'seed_record_ids',
         'change_type',
@@ -47,6 +49,7 @@ class ComputedUpdateDeadLetter extends Model
     ];
 
     protected $attributes = [
+        'worker_lane' => 'production',
         'attempts' => 0,
         'max_attempts' => 8,
         'estimated_complexity' => 0,
@@ -73,4 +76,9 @@ class ComputedUpdateDeadLetter extends Model
         'trace_data' => 'array',
         'failed_at' => 'datetime',
     ];
+
+    public function seeds(): HasMany
+    {
+        return $this->hasMany(ComputedUpdateDeadLetterSeed::class, 'task_id');
+    }
 }

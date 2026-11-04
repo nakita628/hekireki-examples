@@ -10,6 +10,7 @@ class ComputedUpdateDeadLetterEntity(
     companion object : EntityClass<String, ComputedUpdateDeadLetterEntity>(ComputedUpdateDeadLetterTable)
 
     var baseId by ComputedUpdateDeadLetterTable.baseId
+    var workerLane by ComputedUpdateDeadLetterTable.workerLane
     var seedTableId by ComputedUpdateDeadLetterTable.seedTableId
     var seedRecordIds by ComputedUpdateDeadLetterTable.seedRecordIds
     var changeType by ComputedUpdateDeadLetterTable.changeType
@@ -39,4 +40,5 @@ class ComputedUpdateDeadLetterEntity(
     var failedAt by ComputedUpdateDeadLetterTable.failedAt
     var createdAt by ComputedUpdateDeadLetterTable.createdAt
     var updatedAt by ComputedUpdateDeadLetterTable.updatedAt
+    val seeds by ComputedUpdateDeadLetterSeedEntity referrersOn ComputedUpdateDeadLetterSeedTable.taskId
 }

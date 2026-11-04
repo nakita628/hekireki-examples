@@ -23,6 +23,8 @@ export type ContactAttributeType = 'default' | 'custom'
 
 export type ContactAttributeDataType = 'string' | 'number' | 'date'
 
+export type ResponseOutcome = 'lowQuality'
+
 export type SurveyStatus = 'draft' | 'inProgress' | 'paused' | 'completed'
 
 export type SurveyAttributeFilterCondition = 'equals' | 'notEquals'
@@ -91,6 +93,7 @@ export type DeletionCleanupKind =
   | 'hubResponses'
   | 'storageFiles'
   | 'storageSurveyFolder'
+  | 'hubResponseOutcome'
 
 export type RetentionEntity = 'responses' | 'surveys' | 'members'
 
@@ -166,6 +169,51 @@ export interface CreativeLanguage {
   enabled: Generated<boolean>
 }
 
+export interface OutboundEmailAudit {
+  id: string
+  createdAt: Generated<Timestamp>
+  updatedAt: Timestamp
+  expiresAt: Timestamp
+  contentExpiresAt: Timestamp
+  environment: string
+  emailType: string
+  trigger: string
+  actorKind: string
+  actorUserId: string | null
+  configuredByUserId: string | null
+  actorUserHash: string | null
+  configuredByUserHash: string | null
+  organizationId: string | null
+  surveyId: string | null
+  responseId: string | null
+  followUpId: string | null
+  workflowId: string | null
+  workflowRunId: string | null
+  inviteId: string | null
+  recipientMac: string | null
+  sesMessageHash: string | null
+  snapshotKey: string | null
+  snapshotSha256: string | null
+  status: Generated<string>
+  statusRecordedAt: Timestamp | null
+  auditGap: Generated<boolean>
+  erasureRequestedAt: Timestamp | null
+  erasedAt: Timestamp | null
+  contentDeleteRetryAt: Timestamp | null
+  contentDeleteFailures: Generated<number>
+}
+
+export interface OutboundEmailAuditErasureIntent {
+  id: string
+  userId: string | null
+  userHash: string
+  recipientMac: string
+  createdAt: Generated<Timestamp>
+  activatedAt: Timestamp | null
+  checkedAt: Timestamp | null
+  expiresAt: Timestamp
+}
+
 export interface Webhook {
   id: string
   name: string | null
@@ -223,6 +271,7 @@ export interface Response {
   ttc: Generated<unknown>
   meta: Generated<unknown>
   ingest_flags: unknown
+  outcome: ResponseOutcome | null
   contactAttributes: unknown
   singleUseId: string | null
   language: string | null
@@ -1040,6 +1089,8 @@ export interface DB {
   CreativeDailyPageStat: CreativeDailyPageStat
   CreativeTrigger: CreativeTrigger
   CreativeLanguage: CreativeLanguage
+  OutboundEmailAudit: OutboundEmailAudit
+  OutboundEmailAuditErasureIntent: OutboundEmailAuditErasureIntent
   Webhook: Webhook
   ContactAttribute: ContactAttribute
   ContactAttributeKey: ContactAttributeKey

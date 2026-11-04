@@ -53,6 +53,8 @@ public partial class TeableContext : DbContext
 
     public virtual DbSet<ComputedUpdateDeadLetter> ComputedUpdateDeadLetters { get; set; }
 
+    public virtual DbSet<ComputedUpdateDeadLetterSeed> ComputedUpdateDeadLetterSeeds { get; set; }
+
     public virtual DbSet<ComputedUpdateRunHistory> ComputedUpdateRunHistories { get; set; }
 
     public virtual DbSet<ComputedUpdatePauseScope> ComputedUpdatePauseScopes { get; set; }
@@ -804,6 +806,8 @@ public partial class TeableContext : DbContext
 
             entity.HasIndex(e => new { e.Status, e.NextRunAt }, "computed_update_outbox_status_next_run_at_idx");
 
+            entity.HasIndex(e => new { e.WorkerLane, e.Status, e.NextRunAt }, "computed_update_outbox_worker_lane_status_next_run_at_idx");
+
             entity.HasIndex(e => new { e.BaseId, e.SeedTableId }, "computed_update_outbox_base_id_seed_table_id_idx");
 
             entity.HasIndex(e => e.PlanHash, "computed_update_outbox_plan_hash_idx");
@@ -814,6 +818,10 @@ public partial class TeableContext : DbContext
                 .HasValueGenerator<CuidGenerator>()
                 .HasColumnName("id");
             entity.Property(e => e.BaseId).HasColumnName("base_id");
+            entity.Property(e => e.WorkerLane)
+                .ValueGeneratedNever()
+                .HasDefaultValue("production")
+                .HasColumnName("worker_lane");
             entity.Property(e => e.SeedTableId).HasColumnName("seed_table_id");
             entity.Property(e => e.SeedRecordIds)
                 .HasColumnType("jsonb")
@@ -965,6 +973,10 @@ public partial class TeableContext : DbContext
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.BaseId).HasColumnName("base_id");
+            entity.Property(e => e.WorkerLane)
+                .ValueGeneratedNever()
+                .HasDefaultValue("production")
+                .HasColumnName("worker_lane");
             entity.Property(e => e.SeedTableId).HasColumnName("seed_table_id");
             entity.Property(e => e.SeedRecordIds)
                 .HasColumnType("jsonb")
@@ -1049,6 +1061,22 @@ public partial class TeableContext : DbContext
                 .HasConversion<UtcClockConverter>()
                 .HasColumnType("timestamp(3) without time zone")
                 .HasColumnName("updated_at");
+        });
+
+        modelBuilder.Entity<ComputedUpdateDeadLetterSeed>(entity =>
+        {
+            entity.HasKey(e => new { e.TaskId, e.TableId, e.RecordId }).HasName("computed_update_dead_letter_seed_pkey");
+
+            entity.ToTable("computed_update_dead_letter_seed");
+
+            entity.Property(e => e.TaskId).HasColumnName("task_id");
+            entity.Property(e => e.TableId).HasColumnName("table_id");
+            entity.Property(e => e.RecordId).HasColumnName("record_id");
+
+            entity.HasOne(d => d.Task).WithMany(p => p.Seeds)
+                .HasForeignKey(d => d.TaskId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("computed_update_dead_letter_seed_task_id_fkey");
         });
 
         modelBuilder.Entity<ComputedUpdateRunHistory>(entity =>
@@ -2362,6 +2390,8 @@ public partial class TeableContext : DbContext
 
             entity.ToTable("template");
 
+            entity.HasIndex(e => e.Slug, "template_slug_key").IsUnique();
+
             entity.HasIndex(e => e.BaseId, "template_base_id_key").IsUnique();
 
             entity.Property(e => e.Id)
@@ -2402,6 +2432,21 @@ public partial class TeableContext : DbContext
                 .HasDefaultValue(0)
                 .HasColumnName("visit_count");
             entity.Property(e => e.Kind).HasColumnName("kind");
+            entity.Property(e => e.Version)
+                .ValueGeneratedNever()
+                .HasDefaultValue(1)
+                .HasColumnName("version");
+            entity.Property(e => e.Manifest)
+                .HasColumnType("jsonb")
+                .HasColumnName("manifest");
+            entity.Property(e => e.Review)
+                .HasColumnType("jsonb")
+                .HasColumnName("review");
+            entity.Property(e => e.History)
+                .HasColumnType("jsonb")
+                .HasColumnName("history");
+            entity.Property(e => e.ParentTemplateId).HasColumnName("parent_template_id");
+            entity.Property(e => e.Slug).HasColumnName("slug");
         });
 
         modelBuilder.Entity<TemplateCategory>(entity =>
@@ -2411,6 +2456,10 @@ public partial class TeableContext : DbContext
             entity.ToTable("template_category");
 
             entity.HasIndex(e => e.Name, "template_category_name_key").IsUnique();
+
+            entity.HasIndex(e => e.Key, "template_category_key_key").IsUnique();
+
+            entity.HasIndex(e => e.ParentId, "template_category_parent_id_idx");
 
             entity.Property(e => e.Id)
                 .HasValueGenerator<CuidGenerator>()
@@ -2429,6 +2478,12 @@ public partial class TeableContext : DbContext
                 .HasColumnName("last_modified_time");
             entity.Property(e => e.LastModifiedBy).HasColumnName("last_modified_by");
             entity.Property(e => e.Order).HasColumnName("order");
+            entity.Property(e => e.ParentId).HasColumnName("parent_id");
+            entity.Property(e => e.Kind)
+                .ValueGeneratedNever()
+                .HasDefaultValue("industry")
+                .HasColumnName("kind");
+            entity.Property(e => e.Key).HasColumnName("key");
         });
 
         modelBuilder.Entity<Task>(entity =>

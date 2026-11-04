@@ -39,6 +39,8 @@ pub use super::oauth_resource::Entity as oauthResource;
 pub use super::online_upgrade_state::Entity as OnlineUpgradeState;
 pub use super::organization::Entity as Organization;
 pub use super::organization_billing::Entity as OrganizationBilling;
+pub use super::outbound_email_audit::Entity as OutboundEmailAudit;
+pub use super::outbound_email_audit_erasure_intent::Entity as OutboundEmailAuditErasureIntent;
 pub use super::password_reset_token::Entity as PasswordResetToken;
 pub use super::response::Entity as Response;
 pub use super::response_quota_link::Entity as ResponseQuotaLink;

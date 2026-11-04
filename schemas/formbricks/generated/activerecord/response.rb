@@ -9,6 +9,8 @@ class Response < ApplicationRecord
   attribute :ttc, default: -> { JSON.parse("{}") }
   attribute :meta, default: -> { JSON.parse("{}") }
 
+  enum :outcome, { low_quality: "lowQuality" }, validate: { allow_nil: true }
+
   validates :singleUseId, uniqueness: { scope: :surveyId, allow_nil: true }
   validates :displayId, uniqueness: { allow_nil: true }
 

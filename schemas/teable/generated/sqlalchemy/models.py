@@ -198,7 +198,7 @@ class Base_(Base):
 
     id: Mapped[str] = mapped_column(primary_key=True)
     space_id: Mapped[str] = mapped_column(ForeignKey("space.id", ondelete="RESTRICT", onupdate="CASCADE", name="base_space_id_fkey"))
-    name: Mapped[str]
+    name: Mapped[Optional[str]]
     order: Mapped[float]
     icon: Mapped[Optional[str]]
     schema_pass: Mapped[Optional[str]]
@@ -364,6 +364,7 @@ class ComputedUpdateOutbox(Base):
 
     id: Mapped[str] = mapped_column(primary_key=True)
     base_id: Mapped[str]
+    worker_lane: Mapped[str] = mapped_column(default="production", server_default=text("'production'"))
     seed_table_id: Mapped[str]
     seed_record_ids: Mapped[Optional[dict[str, Any]]] = mapped_column(JSONB(none_as_null=True))
     change_type: Mapped[str]
@@ -394,6 +395,7 @@ class ComputedUpdateOutbox(Base):
 
     __table_args__ = (
         Index("computed_update_outbox_status_next_run_at_idx", "status", "next_run_at"),
+        Index("computed_update_outbox_worker_lane_status_next_run_at_idx", "worker_lane", "status", "next_run_at"),
         Index("computed_update_outbox_base_id_seed_table_id_idx", "base_id", "seed_table_id"),
         Index("computed_update_outbox_plan_hash_idx", "plan_hash"),
         Index("computed_update_outbox_run_id_idx", "run_id"),
@@ -443,6 +445,7 @@ class ComputedUpdateDeadLetter(Base):
 
     id: Mapped[str] = mapped_column(primary_key=True)
     base_id: Mapped[str]
+    worker_lane: Mapped[str] = mapped_column(default="production", server_default=text("'production'"))
     seed_table_id: Mapped[str]
     seed_record_ids: Mapped[Optional[dict[str, Any]]] = mapped_column(JSONB(none_as_null=True))
     change_type: Mapped[str]
@@ -478,6 +481,17 @@ class ComputedUpdateDeadLetter(Base):
         Index("computed_update_dead_letter_plan_hash_idx", "plan_hash"),
         Index("computed_update_dead_letter_run_id_idx", "run_id"),
     )
+
+    seeds: Mapped[list["ComputedUpdateDeadLetterSeed"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="task")
+
+class ComputedUpdateDeadLetterSeed(Base):
+    __tablename__ = "computed_update_dead_letter_seed"
+
+    task_id: Mapped[str] = mapped_column(ForeignKey("computed_update_dead_letter.id", ondelete="CASCADE", onupdate="CASCADE", name="computed_update_dead_letter_seed_task_id_fkey"), primary_key=True)
+    table_id: Mapped[str] = mapped_column(primary_key=True)
+    record_id: Mapped[str] = mapped_column(primary_key=True)
+
+    task: Mapped["ComputedUpdateDeadLetter"] = relationship(back_populates="seeds")
 
 class ComputedUpdateRunHistory(Base):
     __tablename__ = "computed_update_run_history"
@@ -1221,8 +1235,15 @@ class Template(Base):
     publish_info: Mapped[Optional[dict[str, Any]]] = mapped_column(JSONB(none_as_null=True))
     visit_count: Mapped[int] = mapped_column(default=0, server_default=text("0"))
     kind: Mapped[Optional[str]]
+    version: Mapped[int] = mapped_column(default=1, server_default=text("1"))
+    manifest: Mapped[Optional[dict[str, Any]]] = mapped_column(JSONB(none_as_null=True))
+    review: Mapped[Optional[dict[str, Any]]] = mapped_column(JSONB(none_as_null=True))
+    history: Mapped[Optional[dict[str, Any]]] = mapped_column(JSONB(none_as_null=True))
+    parent_template_id: Mapped[Optional[str]]
+    slug: Mapped[Optional[str]]
 
     __table_args__ = (
+        Index("template_slug_key", "slug", unique=True),
         Index("template_base_id_key", "base_id", unique=True),
     )
 
@@ -1236,9 +1257,14 @@ class TemplateCategory(Base):
     last_modified_time: Mapped[Optional[datetime]] = mapped_column(default=utc_now, onupdate=utc_now)
     last_modified_by: Mapped[Optional[str]]
     order: Mapped[float]
+    parent_id: Mapped[Optional[str]]
+    kind: Mapped[str] = mapped_column(default="industry", server_default=text("'industry'"))
+    key: Mapped[Optional[str]]
 
     __table_args__ = (
         Index("template_category_name_key", "name", unique=True),
+        Index("template_category_key_key", "key", unique=True),
+        Index("template_category_parent_id_idx", "parent_id"),
     )
 
 class Task(Base):

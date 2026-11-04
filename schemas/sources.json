@@ -26,7 +26,7 @@
   "langfuse": {
     "repo": "langfuse/langfuse",
     "path": "packages/shared/prisma/schema.prisma",
-    "commit": "497818fc717cf3668fcd37544f4ff0c5887f5bb9",
+    "commit": "0659e55045dc7e98c63c5017d82eb7e49db3636e",
     "license": "MIT",
     "app": "Langfuse",
     "description": "Langfuse LLM observability: organizations, projects, traces, prompts, datasets and evaluations."
@@ -98,7 +98,7 @@
   "teable": {
     "repo": "teableio/teable",
     "path": "packages/db-main-prisma/prisma/postgres/schema.prisma",
-    "commit": "b6ae0a1ab8a9c7ce8b6eef16b1af27cc770c2cd9",
+    "commit": "f8be01fadb86790d3d3a878bedd10cf949f9a8f8",
     "license": "MIT",
     "app": "Teable",
     "description": "Teable no-code database: spaces, bases, tables, fields, views and records."
@@ -122,7 +122,7 @@
   "formbricks": {
     "repo": "formbricks/formbricks",
     "path": "packages/database/schema/",
-    "commit": "f1611e781ea2473ceb9e9ad5be4e7456529bf533",
+    "commit": "31f391b3797f9f45f7ebaceb27e801b29fd69203",
     "license": "AGPL-3.0",
     "app": "Formbricks",
     "description": "Formbricks surveys: organizations, environments, surveys, responses and contacts.",
@@ -137,5 +137,13 @@
     "license": "Apache-2.0",
     "app": "Trigger",
     "description": "Trigger.dev background jobs: organizations, projects, tasks, runs, queues and deployments."
+  },
+  "anythingllm": {
+    "repo": "Mintplex-Labs/anything-llm",
+    "path": "server/prisma/schema.prisma",
+    "commit": "061a58f2ebf7c93953694047e85011eb41a44d70",
+    "license": "MIT",
+    "app": "AnythingLLM",
+    "description": "AnythingLLM local AI workspace: users, workspaces, documents, chats, embeddings and agents, on SQLite."
   }
 }

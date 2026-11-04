@@ -144,6 +144,92 @@ func (CreativeLanguage) TableName() string {
 	return "CreativeLanguage"
 }
 
+type OutboundEmailAudit struct {
+	ID                    string    `gorm:"column:id;primaryKey;type:char(36);index:OutboundEmailAudit_environment_createdAt_id_idx;index:OutboundEmailAudit_organizationId_createdAt_id_idx;index:OutboundEmailAudit_surveyId_createdAt_id_idx;index:OutboundEmailAudit_responseId_createdAt_id_idx;index:OutboundEmailAudit_actorUserId_createdAt_id_idx;index:OutboundEmailAudit_configuredByUserId_createdAt_id_idx;index:OutboundEmailAudit_actorUserHash_createdAt_id_idx;index:OutboundEmailAudit_configuredByUserHash_createdAt_id_idx;index:OutboundEmailAudit_recipientMac_createdAt_id_idx;index:OutboundEmailAudit_status_createdAt_id_idx;index:OutboundEmailAudit_contentExpiresAt_id_idx;index:OutboundEmailAudit_expiresAt_id_idx;index:OutboundEmailAudit_erasureRequestedAt_id_idx;index:OutboundEmailAudit_contentDeleteRetryAt_id_idx" json:"id"`
+	CreatedAt             DateTime  `gorm:"column:createdAt;index:OutboundEmailAudit_environment_createdAt_id_idx;index:OutboundEmailAudit_organizationId_createdAt_id_idx;index:OutboundEmailAudit_surveyId_createdAt_id_idx;index:OutboundEmailAudit_responseId_createdAt_id_idx;index:OutboundEmailAudit_actorUserId_createdAt_id_idx;index:OutboundEmailAudit_configuredByUserId_createdAt_id_idx;index:OutboundEmailAudit_actorUserHash_createdAt_id_idx;index:OutboundEmailAudit_configuredByUserHash_createdAt_id_idx;index:OutboundEmailAudit_recipientMac_createdAt_id_idx;index:OutboundEmailAudit_status_createdAt_id_idx;autoCreateTime:false;not null" json:"createdAt"`
+	UpdatedAt             DateTime  `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
+	ExpiresAt             DateTime  `gorm:"column:expiresAt;index:OutboundEmailAudit_expiresAt_id_idx;not null" json:"expiresAt"`
+	ContentExpiresAt      DateTime  `gorm:"column:contentExpiresAt;index:OutboundEmailAudit_contentExpiresAt_id_idx;not null" json:"contentExpiresAt"`
+	Environment           string    `gorm:"column:environment;index:OutboundEmailAudit_environment_createdAt_id_idx;not null" json:"environment"`
+	EmailType             string    `gorm:"column:emailType;not null" json:"emailType"`
+	Trigger               string    `gorm:"column:trigger;not null" json:"trigger"`
+	ActorKind             string    `gorm:"column:actorKind;not null" json:"actorKind"`
+	ActorUserID           *string   `gorm:"column:actorUserId;index:OutboundEmailAudit_actorUserId_createdAt_id_idx" json:"actorUserId"`
+	ConfiguredByUserID    *string   `gorm:"column:configuredByUserId;index:OutboundEmailAudit_configuredByUserId_createdAt_id_idx" json:"configuredByUserId"`
+	ActorUserHash         *string   `gorm:"column:actorUserHash;index:OutboundEmailAudit_actorUserHash_createdAt_id_idx" json:"actorUserHash"`
+	ConfiguredByUserHash  *string   `gorm:"column:configuredByUserHash;index:OutboundEmailAudit_configuredByUserHash_createdAt_id_idx" json:"configuredByUserHash"`
+	OrganizationID        *string   `gorm:"column:organizationId;index:OutboundEmailAudit_organizationId_createdAt_id_idx" json:"organizationId"`
+	SurveyID              *string   `gorm:"column:surveyId;index:OutboundEmailAudit_surveyId_createdAt_id_idx" json:"surveyId"`
+	ResponseID            *string   `gorm:"column:responseId;index:OutboundEmailAudit_responseId_createdAt_id_idx" json:"responseId"`
+	FollowUpID            *string   `gorm:"column:followUpId" json:"followUpId"`
+	WorkflowID            *string   `gorm:"column:workflowId" json:"workflowId"`
+	WorkflowRunID         *string   `gorm:"column:workflowRunId" json:"workflowRunId"`
+	InviteID              *string   `gorm:"column:inviteId" json:"inviteId"`
+	RecipientMac          *string   `gorm:"column:recipientMac;index:OutboundEmailAudit_recipientMac_createdAt_id_idx" json:"recipientMac"`
+	SesMessageHash        *string   `gorm:"column:sesMessageHash;index:OutboundEmailAudit_sesMessageHash_idx" json:"sesMessageHash"`
+	SnapshotKey           *string   `gorm:"column:snapshotKey" json:"snapshotKey"`
+	SnapshotSha256        *string   `gorm:"column:snapshotSha256" json:"snapshotSha256"`
+	Status                *string   `gorm:"column:status;index:OutboundEmailAudit_status_createdAt_id_idx;default:'prepared';not null" json:"status"`
+	StatusRecordedAt      *DateTime `gorm:"column:statusRecordedAt" json:"statusRecordedAt"`
+	AuditGap              bool      `gorm:"column:auditGap;default:false;not null" json:"auditGap"`
+	ErasureRequestedAt    *DateTime `gorm:"column:erasureRequestedAt;index:OutboundEmailAudit_erasureRequestedAt_id_idx" json:"erasureRequestedAt"`
+	ErasedAt              *DateTime `gorm:"column:erasedAt" json:"erasedAt"`
+	ContentDeleteRetryAt  *DateTime `gorm:"column:contentDeleteRetryAt;index:OutboundEmailAudit_contentDeleteRetryAt_id_idx" json:"contentDeleteRetryAt"`
+	ContentDeleteFailures int       `gorm:"column:contentDeleteFailures;default:0;not null" json:"contentDeleteFailures"`
+}
+
+func (OutboundEmailAudit) TableName() string {
+	return "OutboundEmailAudit"
+}
+
+func (m *OutboundEmailAudit) BeforeCreate(tx *gorm.DB) error {
+	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
+	if m.ID == "" {
+		m.ID = uuid.NewString()
+	}
+	if m.CreatedAt.IsZero() {
+		m.CreatedAt = DateTime{Time: now}
+	}
+	if m.UpdatedAt.IsZero() {
+		m.UpdatedAt = DateTime{Time: now}
+	}
+	return nil
+}
+
+func (*OutboundEmailAudit) BeforeUpdate(tx *gorm.DB) error {
+	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
+	if !tx.Statement.Changed("UpdatedAt") {
+		tx.Statement.SetColumn("UpdatedAt", DateTime{Time: now})
+	}
+	return nil
+}
+
+type OutboundEmailAuditErasureIntent struct {
+	ID           string    `gorm:"column:id;primaryKey;type:char(36);index:OutboundEmailAuditErasureIntent_checkedAt_id_idx" json:"id"`
+	UserID       *string   `gorm:"column:userId;index:OutboundEmailAuditErasureIntent_userId_idx" json:"userId"`
+	UserHash     string    `gorm:"column:userHash;index:OutboundEmailAuditErasureIntent_userHash_activatedAt_idx;not null" json:"userHash"`
+	RecipientMac string    `gorm:"column:recipientMac;index:OutboundEmailAuditErasureIntent_recipientMac_activatedAt_idx;not null" json:"recipientMac"`
+	CreatedAt    DateTime  `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
+	ActivatedAt  *DateTime `gorm:"column:activatedAt;index:OutboundEmailAuditErasureIntent_recipientMac_activatedAt_idx;index:OutboundEmailAuditErasureIntent_userHash_activatedAt_idx" json:"activatedAt"`
+	CheckedAt    *DateTime `gorm:"column:checkedAt;index:OutboundEmailAuditErasureIntent_checkedAt_id_idx" json:"checkedAt"`
+	ExpiresAt    DateTime  `gorm:"column:expiresAt;index:OutboundEmailAuditErasureIntent_expiresAt_idx;not null" json:"expiresAt"`
+}
+
+func (OutboundEmailAuditErasureIntent) TableName() string {
+	return "OutboundEmailAuditErasureIntent"
+}
+
+func (m *OutboundEmailAuditErasureIntent) BeforeCreate(tx *gorm.DB) error {
+	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
+	if m.ID == "" {
+		m.ID = uuid.NewString()
+	}
+	if m.CreatedAt.IsZero() {
+		m.CreatedAt = DateTime{Time: now}
+	}
+	return nil
+}
+
 type Webhook struct {
 	ID          string   `gorm:"column:id;primaryKey" json:"id"`
 	Name        *string  `gorm:"column:name" json:"name"`
@@ -315,6 +401,7 @@ type Response struct {
 	Ttc               datatypes.JSON `gorm:"column:ttc;default:'{}';not null" json:"ttc"`
 	Meta              datatypes.JSON `gorm:"column:meta;default:'{}';not null" json:"meta"`
 	IngestFlags       datatypes.JSON `gorm:"column:ingest_flags" json:"ingest_flags"`
+	Outcome           *string        `gorm:"column:outcome" json:"outcome"`
 	ContactAttributes datatypes.JSON `gorm:"column:contactAttributes" json:"contactAttributes"`
 	SingleUseID       *string        `gorm:"column:singleUseId;uniqueIndex:Response_surveyId_singleUseId_key" json:"singleUseId"`
 	Language          *string        `gorm:"column:language" json:"language"`

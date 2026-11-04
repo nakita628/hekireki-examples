@@ -23,6 +23,7 @@ object OrganizationTable : IdTable<String>("organizations") {
     val cloudFreeTierUsageThresholdState = text("cloud_free_tier_usage_threshold_state").nullable()
     val aiFeaturesEnabled = bool("ai_features_enabled").default(false)
     val aiTelemetryEnabled = bool("ai_telemetry_enabled").default(true)
+    val accessAuditLogEnabled = bool("access_audit_log_enabled").default(false)
     val featureFlagOrgDefaults = array("feature_flag_org_defaults", TextColumnType()).nullable().databaseDefault("'{}'") { emptyList() }
     val sfdcOrgId = text("sfdc_org_id").nullable()
     override val primaryKey = PrimaryKey(id, name = "organizations_pkey")

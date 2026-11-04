@@ -10,6 +10,7 @@ import java.time.temporal.ChronoUnit
 object ComputedUpdateOutboxTable : IdTable<String>("computed_update_outbox") {
     override val id = text("id").clientDefault { CUID.randomCUID1().toString() }.entityId()
     val baseId = text("base_id")
+    val workerLane = text("worker_lane").default("production")
     val seedTableId = text("seed_table_id")
     val seedRecordIds = jsonb<String>("seed_record_ids", { it }, { it }).nullable()
     val changeType = text("change_type")
@@ -41,6 +42,7 @@ object ComputedUpdateOutboxTable : IdTable<String>("computed_update_outbox") {
 
     init {
         index("computed_update_outbox_status_next_run_at_idx", false, status, nextRunAt)
+        index("computed_update_outbox_worker_lane_status_next_run_at_idx", false, workerLane, status, nextRunAt)
         index("computed_update_outbox_base_id_seed_table_id_idx", false, baseId, seedTableId)
         index("computed_update_outbox_plan_hash_idx", false, planHash)
         index("computed_update_outbox_run_id_idx", false, runId)

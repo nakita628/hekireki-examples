@@ -34,6 +34,7 @@ object PrismaSchema {
             ComputedUpdateChangeFrontierTable,
             ComputedUpdateStageLedgerTable,
             ComputedUpdateDeadLetterTable,
+            ComputedUpdateDeadLetterSeedTable,
             ComputedUpdateRunHistoryTable,
             ComputedUpdatePauseScopeTable,
             ComputedFieldActivityTable,

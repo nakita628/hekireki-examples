@@ -493,6 +493,10 @@ public partial class LangfuseContext : DbContext
                 .ValueGeneratedNever()
                 .HasDefaultValue(true)
                 .HasColumnName("ai_telemetry_enabled");
+            entity.Property(e => e.AccessAuditLogEnabled)
+                .ValueGeneratedNever()
+                .HasDefaultValue(false)
+                .HasColumnName("access_audit_log_enabled");
             entity.Property(e => e.FeatureFlagOrgDefaults)
                 .ValueGeneratedNever()
                 .HasDefaultValue(new List<string>())
@@ -4225,6 +4229,10 @@ public partial class LangfuseContext : DbContext
 
             entity.HasIndex(e => new { e.ProjectId, e.FacetId, e.Status, e.FacetVersion, e.CreatedAt, e.Id }, "topic_clustering_runs_serving_map_idx").IsDescending(false, false, false, true, true, true);
 
+            entity.HasIndex(e => new { e.ProjectId, e.RuleId, e.FacetId, e.Status }, "topic_clustering_runs_rule_serving_map_idx");
+
+            entity.HasIndex(e => new { e.ProjectId, e.BatchActionId }, "topic_clustering_runs_project_id_batch_action_id_idx");
+
             entity.Property(e => e.Id)
                 .HasValueGenerator<CuidGenerator>()
                 .HasColumnName("id");
@@ -4259,6 +4267,8 @@ public partial class LangfuseContext : DbContext
                 .ValueGeneratedNever()
                 .HasDefaultValue(new List<string>())
                 .HasColumnName("topic_version_ids");
+            entity.Property(e => e.RuleId).HasColumnName("rule_id");
+            entity.Property(e => e.BatchActionId).HasColumnName("batch_action_id");
 
             entity.HasOne(d => d.Project).WithMany(p => p.TopicClusteringRuns)
                 .HasForeignKey(d => d.ProjectId)

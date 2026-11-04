@@ -20,4 +20,6 @@ class TopicClusteringRunEntity(
     var startedAt by TopicClusteringRunTable.startedAt
     var finishedAt by TopicClusteringRunTable.finishedAt
     var topicVersionIds by TopicClusteringRunTable.topicVersionIds
+    var ruleId by TopicClusteringRunTable.ruleId
+    var batchActionId by TopicClusteringRunTable.batchActionId
 }

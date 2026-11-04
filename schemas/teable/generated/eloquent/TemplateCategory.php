@@ -24,6 +24,13 @@ class TemplateCategory extends Model
         'created_by',
         'last_modified_by',
         'order',
+        'parent_id',
+        'kind',
+        'key',
+    ];
+
+    protected $attributes = [
+        'kind' => 'industry',
     ];
 
     protected $casts = [

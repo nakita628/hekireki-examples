@@ -12,10 +12,27 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
-  <ItemGroup>
+  <!--
+    check.sh passes HekirekiProvider from the schema's datasource. One provider per restore:
+    referencing all three together fails before the generated C# is compiled. Pomelo 9.0.0 only
+    accepts Microsoft.EntityFrameworkCore.Relational 9.0.x (NU1608 once Npgsql pulls 10.0.4), its
+    MySqlConnector 2.4.0 is GHSA-473q-m89c-ghf8 (NU1902), and Microsoft.EntityFrameworkCore.Sqlite
+    10.0.3 pulls SQLitePCLRaw.lib.e_sqlite3 2.1.11, GHSA-2m69-gcr7-jv3q (NU1903).
+    PostgreSQL and SQLite stay on EF Core 10. SQLite 10.0.14 depends on SQLitePCLRaw 2.1.13.
+    MySQL stays on Pomelo 9 and takes MySqlConnector 2.6.2 directly so restore does not pick 2.4.0.
+  -->
+  <!-- Prisma accepts both "postgresql" and "postgres" (teable's schema uses the short form). -->
+  <ItemGroup Condition="'$(HekirekiProvider)' == 'postgresql' Or '$(HekirekiProvider)' == 'postgres'">
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(HekirekiProvider)' == 'mysql'">
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="9.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.3" />
+    <PackageReference Include="MySqlConnector" Version="2.6.2" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(HekirekiProvider)' == 'sqlite'">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.14" />
+  </ItemGroup>
+  <ItemGroup>
     <!-- ulid() and cuid() / cuid(2) defaults are generated with these. -->
     <PackageReference Include="Ulid" Version="1.4.1" />
     <PackageReference Include="cuid.net" Version="7.1.0" />

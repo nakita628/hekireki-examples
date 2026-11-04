@@ -189,6 +189,7 @@ export interface Organization {
   cloud_free_tier_usage_threshold_state: string | null
   ai_features_enabled: Generated<boolean>
   ai_telemetry_enabled: Generated<boolean>
+  access_audit_log_enabled: Generated<boolean>
   feature_flag_org_defaults: Generated<string[]>
   sfdc_org_id: string | null
 }
@@ -1229,6 +1230,8 @@ export interface TopicClusteringRun {
   started_at: Timestamp | null
   finished_at: Timestamp | null
   topic_version_ids: Generated<string[]>
+  rule_id: string | null
+  batch_action_id: string | null
 }
 
 export interface DB {

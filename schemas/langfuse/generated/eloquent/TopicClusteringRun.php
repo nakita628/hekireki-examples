@@ -28,6 +28,8 @@ class TopicClusteringRun extends \Illuminate\Database\Eloquent\Model
         'started_at',
         'finished_at',
         'topic_version_ids',
+        'rule_id',
+        'batch_action_id',
     ];
 
     protected $attributes = [

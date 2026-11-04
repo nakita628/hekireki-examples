@@ -7,4 +7,5 @@ enum class DeletionCleanupKind(
     HUB_RESPONSES("hubResponses"),
     STORAGE_FILES("storageFiles"),
     STORAGE_SURVEY_FOLDER("storageSurveyFolder"),
+    HUB_RESPONSE_OUTCOME("hubResponseOutcome"),
 }

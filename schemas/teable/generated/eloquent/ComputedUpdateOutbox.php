@@ -18,6 +18,7 @@ class ComputedUpdateOutbox extends Model
     protected $fillable = [
         'id',
         'base_id',
+        'worker_lane',
         'seed_table_id',
         'seed_record_ids',
         'change_type',
@@ -46,6 +47,7 @@ class ComputedUpdateOutbox extends Model
     ];
 
     protected $attributes = [
+        'worker_lane' => 'production',
         'attempts' => 0,
         'max_attempts' => 8,
         'estimated_complexity' => 0,

@@ -15,6 +15,7 @@ pub use super::computed_table_activity::Entity as ComputedTableActivity;
 pub use super::computed_task_field_ref::Entity as ComputedTaskFieldRef;
 pub use super::computed_update_change_frontier::Entity as ComputedUpdateChangeFrontier;
 pub use super::computed_update_dead_letter::Entity as ComputedUpdateDeadLetter;
+pub use super::computed_update_dead_letter_seed::Entity as ComputedUpdateDeadLetterSeed;
 pub use super::computed_update_outbox::Entity as ComputedUpdateOutbox;
 pub use super::computed_update_outbox_seed::Entity as ComputedUpdateOutboxSeed;
 pub use super::computed_update_pause_scope::Entity as ComputedUpdatePauseScope;

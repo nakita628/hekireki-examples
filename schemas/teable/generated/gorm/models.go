@@ -273,7 +273,7 @@ func (m *PinResource) BeforeCreate(tx *gorm.DB) error {
 type Base struct {
 	ID               string    `gorm:"column:id;primaryKey" json:"id"`
 	SpaceID          string    `gorm:"column:space_id;index:base_space_id_idx;not null" json:"space_id"`
-	Name             string    `gorm:"column:name;not null" json:"name"`
+	Name             *string   `gorm:"column:name" json:"name"`
 	Order            float64   `gorm:"column:order;index:base_order_idx;not null" json:"order"`
 	Icon             *string   `gorm:"column:icon" json:"icon"`
 	SchemaPass       *string   `gorm:"column:schema_pass" json:"schema_pass"`
@@ -510,15 +510,16 @@ func (*Field) BeforeUpdate(tx *gorm.DB) error {
 type ComputedUpdateOutbox struct {
 	ID                      string                     `gorm:"column:id;primaryKey" json:"id"`
 	BaseID                  string                     `gorm:"column:base_id;index:computed_update_outbox_base_id_seed_table_id_idx;not null" json:"base_id"`
+	WorkerLane              *string                    `gorm:"column:worker_lane;index:computed_update_outbox_worker_lane_status_next_run_at_idx;default:'production';not null" json:"worker_lane"`
 	SeedTableID             string                     `gorm:"column:seed_table_id;index:computed_update_outbox_base_id_seed_table_id_idx;not null" json:"seed_table_id"`
 	SeedRecordIds           datatypes.JSON             `gorm:"column:seed_record_ids" json:"seed_record_ids"`
 	ChangeType              string                     `gorm:"column:change_type;not null" json:"change_type"`
 	Steps                   datatypes.JSON             `gorm:"column:steps" json:"steps"`
 	Edges                   datatypes.JSON             `gorm:"column:edges" json:"edges"`
-	Status                  string                     `gorm:"column:status;index:computed_update_outbox_status_next_run_at_idx;not null" json:"status"`
+	Status                  string                     `gorm:"column:status;index:computed_update_outbox_status_next_run_at_idx;index:computed_update_outbox_worker_lane_status_next_run_at_idx;not null" json:"status"`
 	Attempts                int                        `gorm:"column:attempts;default:0;not null" json:"attempts"`
 	MaxAttempts             *int                       `gorm:"column:max_attempts;default:8;not null" json:"max_attempts"`
-	NextRunAt               DateTime                   `gorm:"column:next_run_at;index:computed_update_outbox_status_next_run_at_idx;not null" json:"next_run_at"`
+	NextRunAt               DateTime                   `gorm:"column:next_run_at;index:computed_update_outbox_status_next_run_at_idx;index:computed_update_outbox_worker_lane_status_next_run_at_idx;not null" json:"next_run_at"`
 	LockedAt                *DateTime                  `gorm:"column:locked_at" json:"locked_at"`
 	LockedBy                *string                    `gorm:"column:locked_by" json:"locked_by"`
 	LastError               *string                    `gorm:"column:last_error" json:"last_error"`
@@ -613,41 +614,54 @@ func (ComputedUpdateStageLedger) TableName() string {
 }
 
 type ComputedUpdateDeadLetter struct {
-	ID                      string         `gorm:"column:id;primaryKey" json:"id"`
-	BaseID                  string         `gorm:"column:base_id;index:computed_update_dead_letter_base_id_seed_table_id_idx;not null" json:"base_id"`
-	SeedTableID             string         `gorm:"column:seed_table_id;index:computed_update_dead_letter_base_id_seed_table_id_idx;not null" json:"seed_table_id"`
-	SeedRecordIds           datatypes.JSON `gorm:"column:seed_record_ids" json:"seed_record_ids"`
-	ChangeType              string         `gorm:"column:change_type;not null" json:"change_type"`
-	Steps                   datatypes.JSON `gorm:"column:steps" json:"steps"`
-	Edges                   datatypes.JSON `gorm:"column:edges" json:"edges"`
-	Status                  string         `gorm:"column:status;not null" json:"status"`
-	Attempts                int            `gorm:"column:attempts;default:0;not null" json:"attempts"`
-	MaxAttempts             *int           `gorm:"column:max_attempts;default:8;not null" json:"max_attempts"`
-	NextRunAt               DateTime       `gorm:"column:next_run_at;not null" json:"next_run_at"`
-	LockedAt                *DateTime      `gorm:"column:locked_at" json:"locked_at"`
-	LockedBy                *string        `gorm:"column:locked_by" json:"locked_by"`
-	LastError               *string        `gorm:"column:last_error" json:"last_error"`
-	EstimatedComplexity     int            `gorm:"column:estimated_complexity;default:0;not null" json:"estimated_complexity"`
-	PlanHash                string         `gorm:"column:plan_hash;index:computed_update_dead_letter_plan_hash_idx;not null" json:"plan_hash"`
-	DirtyStats              datatypes.JSON `gorm:"column:dirty_stats" json:"dirty_stats"`
-	RunID                   string         `gorm:"column:run_id;index:computed_update_dead_letter_run_id_idx;not null" json:"run_id"`
-	OriginRunIds            []string       `gorm:"column:origin_run_ids;serializer:json;not null" json:"origin_run_ids"`
-	RunTotalSteps           int            `gorm:"column:run_total_steps;default:0;not null" json:"run_total_steps"`
-	RunCompletedStepsBefore int            `gorm:"column:run_completed_steps_before;default:0;not null" json:"run_completed_steps_before"`
-	AffectedTableIds        []string       `gorm:"column:affected_table_ids;serializer:json;not null" json:"affected_table_ids"`
-	AffectedFieldIds        []string       `gorm:"column:affected_field_ids;serializer:json;not null" json:"affected_field_ids"`
-	SyncMaxLevel            *int           `gorm:"column:sync_max_level" json:"sync_max_level"`
-	SourceChangedAt         *DateTime      `gorm:"column:source_changed_at" json:"source_changed_at"`
-	StageDepth              int            `gorm:"column:stage_depth;default:0;not null" json:"stage_depth"`
-	PredecessorTaskID       *string        `gorm:"column:predecessor_task_id" json:"predecessor_task_id"`
-	TraceData               datatypes.JSON `gorm:"column:trace_data" json:"trace_data"`
-	FailedAt                DateTime       `gorm:"column:failed_at;not null" json:"failed_at"`
-	CreatedAt               DateTime       `gorm:"column:created_at;autoCreateTime:false;not null" json:"created_at"`
-	UpdatedAt               DateTime       `gorm:"column:updated_at;autoUpdateTime:false;not null" json:"updated_at"`
+	ID                      string                         `gorm:"column:id;primaryKey" json:"id"`
+	BaseID                  string                         `gorm:"column:base_id;index:computed_update_dead_letter_base_id_seed_table_id_idx;not null" json:"base_id"`
+	WorkerLane              *string                        `gorm:"column:worker_lane;default:'production';not null" json:"worker_lane"`
+	SeedTableID             string                         `gorm:"column:seed_table_id;index:computed_update_dead_letter_base_id_seed_table_id_idx;not null" json:"seed_table_id"`
+	SeedRecordIds           datatypes.JSON                 `gorm:"column:seed_record_ids" json:"seed_record_ids"`
+	ChangeType              string                         `gorm:"column:change_type;not null" json:"change_type"`
+	Steps                   datatypes.JSON                 `gorm:"column:steps" json:"steps"`
+	Edges                   datatypes.JSON                 `gorm:"column:edges" json:"edges"`
+	Status                  string                         `gorm:"column:status;not null" json:"status"`
+	Attempts                int                            `gorm:"column:attempts;default:0;not null" json:"attempts"`
+	MaxAttempts             *int                           `gorm:"column:max_attempts;default:8;not null" json:"max_attempts"`
+	NextRunAt               DateTime                       `gorm:"column:next_run_at;not null" json:"next_run_at"`
+	LockedAt                *DateTime                      `gorm:"column:locked_at" json:"locked_at"`
+	LockedBy                *string                        `gorm:"column:locked_by" json:"locked_by"`
+	LastError               *string                        `gorm:"column:last_error" json:"last_error"`
+	EstimatedComplexity     int                            `gorm:"column:estimated_complexity;default:0;not null" json:"estimated_complexity"`
+	PlanHash                string                         `gorm:"column:plan_hash;index:computed_update_dead_letter_plan_hash_idx;not null" json:"plan_hash"`
+	DirtyStats              datatypes.JSON                 `gorm:"column:dirty_stats" json:"dirty_stats"`
+	RunID                   string                         `gorm:"column:run_id;index:computed_update_dead_letter_run_id_idx;not null" json:"run_id"`
+	OriginRunIds            []string                       `gorm:"column:origin_run_ids;serializer:json;not null" json:"origin_run_ids"`
+	RunTotalSteps           int                            `gorm:"column:run_total_steps;default:0;not null" json:"run_total_steps"`
+	RunCompletedStepsBefore int                            `gorm:"column:run_completed_steps_before;default:0;not null" json:"run_completed_steps_before"`
+	AffectedTableIds        []string                       `gorm:"column:affected_table_ids;serializer:json;not null" json:"affected_table_ids"`
+	AffectedFieldIds        []string                       `gorm:"column:affected_field_ids;serializer:json;not null" json:"affected_field_ids"`
+	SyncMaxLevel            *int                           `gorm:"column:sync_max_level" json:"sync_max_level"`
+	SourceChangedAt         *DateTime                      `gorm:"column:source_changed_at" json:"source_changed_at"`
+	StageDepth              int                            `gorm:"column:stage_depth;default:0;not null" json:"stage_depth"`
+	PredecessorTaskID       *string                        `gorm:"column:predecessor_task_id" json:"predecessor_task_id"`
+	TraceData               datatypes.JSON                 `gorm:"column:trace_data" json:"trace_data"`
+	FailedAt                DateTime                       `gorm:"column:failed_at;not null" json:"failed_at"`
+	CreatedAt               DateTime                       `gorm:"column:created_at;autoCreateTime:false;not null" json:"created_at"`
+	UpdatedAt               DateTime                       `gorm:"column:updated_at;autoUpdateTime:false;not null" json:"updated_at"`
+	Seeds                   []ComputedUpdateDeadLetterSeed `gorm:"foreignKey:TaskID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 }
 
 func (ComputedUpdateDeadLetter) TableName() string {
 	return "computed_update_dead_letter"
+}
+
+type ComputedUpdateDeadLetterSeed struct {
+	TaskID   string                    `gorm:"column:task_id;primaryKey" json:"task_id"`
+	TableID  string                    `gorm:"column:table_id;primaryKey" json:"table_id"`
+	RecordID string                    `gorm:"column:record_id;primaryKey" json:"record_id"`
+	Task     *ComputedUpdateDeadLetter `gorm:"foreignKey:TaskID"`
+}
+
+func (ComputedUpdateDeadLetterSeed) TableName() string {
+	return "computed_update_dead_letter_seed"
 }
 
 type ComputedUpdateRunHistory struct {
@@ -1872,6 +1886,12 @@ type Template struct {
 	PublishInfo         datatypes.JSON `gorm:"column:publish_info" json:"publish_info"`
 	VisitCount          int            `gorm:"column:visit_count;default:0;not null" json:"visit_count"`
 	Kind                *string        `gorm:"column:kind" json:"kind"`
+	Version             *int           `gorm:"column:version;default:1;not null" json:"version"`
+	Manifest            datatypes.JSON `gorm:"column:manifest" json:"manifest"`
+	Review              datatypes.JSON `gorm:"column:review" json:"review"`
+	History             datatypes.JSON `gorm:"column:history" json:"history"`
+	ParentTemplateID    *string        `gorm:"column:parent_template_id" json:"parent_template_id"`
+	Slug                *string        `gorm:"column:slug;uniqueIndex" json:"slug"`
 }
 
 func (Template) TableName() string {
@@ -1908,6 +1928,9 @@ type TemplateCategory struct {
 	LastModifiedTime *DateTime `gorm:"column:last_modified_time" json:"last_modified_time"`
 	LastModifiedBy   *string   `gorm:"column:last_modified_by" json:"last_modified_by"`
 	Order            float64   `gorm:"column:order;not null" json:"order"`
+	ParentID         *string   `gorm:"column:parent_id;index:template_category_parent_id_idx" json:"parent_id"`
+	Kind             *string   `gorm:"column:kind;default:'industry';not null" json:"kind"`
+	Key              *string   `gorm:"column:key;uniqueIndex" json:"key"`
 }
 
 func (TemplateCategory) TableName() string {

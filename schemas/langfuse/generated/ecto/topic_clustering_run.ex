@@ -14,6 +14,8 @@ defmodule Langfuse.TopicClusteringRun do
           started_at: DateTime.t() | nil,
           finished_at: DateTime.t() | nil,
           topic_version_ids: [String.t()],
+          rule_id: String.t() | nil,
+          batch_action_id: String.t() | nil,
           inserted_at: DateTime.t(),
           project: Langfuse.Project.t() | nil
         }
@@ -28,6 +30,8 @@ defmodule Langfuse.TopicClusteringRun do
     field(:started_at, Langfuse.PrismaDateTime)
     field(:finished_at, Langfuse.PrismaDateTime)
     field(:topic_version_ids, {:array, :string})
+    field(:rule_id, :string)
+    field(:batch_action_id, :string)
     belongs_to(:project, Langfuse.Project, foreign_key: :project_id, type: :string)
     timestamps(inserted_at_source: :created_at, updated_at: false)
   end

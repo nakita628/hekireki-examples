@@ -8,7 +8,7 @@ class DeletionCleanup < ApplicationRecord
   attribute :fileKeys, default: -> { [] }
   attribute :attempts, default: 0
 
-  enum :kind, { hub_survey: "hubSurvey", hub_responses: "hubResponses", storage_files: "storageFiles", storage_survey_folder: "storageSurveyFolder" },
+  enum :kind, { hub_survey: "hubSurvey", hub_responses: "hubResponses", storage_files: "storageFiles", storage_survey_folder: "storageSurveyFolder", hub_response_outcome: "hubResponseOutcome" },
        validate: true
 
   validates :organizationId, presence: true

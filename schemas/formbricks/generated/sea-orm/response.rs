@@ -1,3 +1,4 @@
+use super::response_outcome::ResponseOutcome;
 use chrono::SubsecRound;
 use sea_orm::entity::prelude::*;
 use sea_orm::Set;
@@ -27,6 +28,7 @@ pub struct Model {
     #[sea_orm(default_value = "{}")]
     pub meta: Json,
     pub ingest_flags: Option<Json>,
+    pub outcome: Option<ResponseOutcome>,
     #[sea_orm(column_name = "contactAttributes")]
     pub contact_attributes: Option<Json>,
     #[sea_orm(column_name = "singleUseId")]

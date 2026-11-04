@@ -10,7 +10,7 @@ pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: String,
     pub space_id: String,
-    pub name: String,
+    pub name: Option<String>,
     pub order: f64,
     pub icon: Option<String>,
     pub schema_pass: Option<String>,

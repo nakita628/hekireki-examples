@@ -16,4 +16,6 @@ pub enum DeletionCleanupKind {
     Storagefiles,
     #[sea_orm(string_value = "storageSurveyFolder")]
     Storagesurveyfolder,
+    #[sea_orm(string_value = "hubResponseOutcome")]
+    Hubresponseoutcome,
 }

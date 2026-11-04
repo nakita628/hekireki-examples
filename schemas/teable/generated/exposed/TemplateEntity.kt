@@ -31,6 +31,12 @@ class TemplateEntity(
     var publishInfo by TemplateTable.publishInfo
     var visitCount by TemplateTable.visitCount
     var kind by TemplateTable.kind
+    var version by TemplateTable.version
+    var manifest by TemplateTable.manifest
+    var review by TemplateTable.review
+    var history by TemplateTable.history
+    var parentTemplateId by TemplateTable.parentTemplateId
+    var slug by TemplateTable.slug
 
     override fun flush(batch: EntityBatchUpdate?): Boolean {
         if (writeValues.isNotEmpty()) {

@@ -73,6 +73,9 @@ async function importSchema(name, source) {
   // Drop every top-level `generator ... { ... }` block and the connection lines of the datasource.
   const blocks = []
   const previewFeatures = new Set()
+  // Read from the datasource block itself. A commented-out example above it (AnythingLLM ships a
+  // PostgreSQL datasource in comments over the live SQLite one) must not decide the provider.
+  let datasourceProvider
   const lines = original.split('\n')
   let i = 0
   while (i < lines.length) {
@@ -94,6 +97,8 @@ async function importSchema(name, source) {
       i++
       while (i < lines.length && !/^\}/.test(lines[i])) {
         if (!/^\s*(url|directUrl|shadowDatabaseUrl)\s*=/.test(lines[i])) blocks.push(lines[i])
+        const providerLine = lines[i].match(/^\s*provider\s*=\s*"(\w+)"/)
+        if (providerLine) datasourceProvider = providerLine[1]
         i++
       }
       blocks.push(lines[i])
@@ -104,7 +109,7 @@ async function importSchema(name, source) {
     i++
   }
   const body = blocks.join('\n').replace(/^\n+/, '')
-  const provider = body.match(/datasource\s+\w+\s*\{[^]*?provider\s*=\s*"(\w+)"/)?.[1]
+  const provider = datasourceProvider
   if (!provider) throw new Error('no datasource provider found')
   // Prisma takes `postgres` for `postgresql`.
   const postgres = provider === 'postgresql' || provider === 'postgres'

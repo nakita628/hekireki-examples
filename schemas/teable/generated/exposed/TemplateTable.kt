@@ -28,5 +28,11 @@ object TemplateTable : IdTable<String>("template") {
     val publishInfo = jsonb<String>("publish_info", { it }, { it }).nullable()
     val visitCount = integer("visit_count").default(0)
     val kind = text("kind").nullable()
+    val version = integer("version").default(1)
+    val manifest = jsonb<String>("manifest", { it }, { it }).nullable()
+    val review = jsonb<String>("review", { it }, { it }).nullable()
+    val history = jsonb<String>("history", { it }, { it }).nullable()
+    val parentTemplateId = text("parent_template_id").nullable()
+    val slug = text("slug").nullable().uniqueIndex("template_slug_key")
     override val primaryKey = PrimaryKey(id, name = "template_pkey")
 }

@@ -4,6 +4,7 @@ class Organization < ApplicationRecord
   attribute :id, default: -> { Cuid.generate }
   attribute :ai_features_enabled, default: false
   attribute :ai_telemetry_enabled, default: true
+  attribute :access_audit_log_enabled, default: false
   attribute :feature_flag_org_defaults, default: -> { [] }
 
   validates :name, presence: true

@@ -23,6 +23,7 @@ class OrganizationEntity(
     var cloudFreeTierUsageThresholdState by OrganizationTable.cloudFreeTierUsageThresholdState
     var aiFeaturesEnabled by OrganizationTable.aiFeaturesEnabled
     var aiTelemetryEnabled by OrganizationTable.aiTelemetryEnabled
+    var accessAuditLogEnabled by OrganizationTable.accessAuditLogEnabled
     var featureFlagOrgDefaults by OrganizationTable.featureFlagOrgDefaults
     var sfdcOrgId by OrganizationTable.sfdcOrgId
     val organizationMemberships by OrganizationMembershipEntity referrersOn OrganizationMembershipTable.orgId

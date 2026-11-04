@@ -8,9 +8,12 @@ lang_checks(
     harness = [
         "tsconfig.json",
         "//checks:common.sh",
+        "//:node_modules/@paralleldrive/cuid2",
         "//:node_modules/@types/node",
+        "//:node_modules/cuid",
         "//:node_modules/drizzle-orm",
         "//:node_modules/kysely",
         "//:node_modules/typescript",
+        "//:node_modules/uuid",
     ],
 )

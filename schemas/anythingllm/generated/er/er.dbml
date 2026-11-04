@@ -1,0 +1,431 @@
+Table api_keys {
+  id Int [pk, increment]
+  name String
+  secret String [unique]
+  createdBy Int
+  createdAt DateTime [default: `now()`, not null]
+  lastUpdatedAt DateTime [default: `now()`, not null]
+}
+
+Table workspace_documents {
+  id Int [pk, increment]
+  docId String [unique, not null]
+  filename String [not null]
+  docpath String [not null]
+  workspaceId Int [not null]
+  metadata String
+  pinned Boolean [default: false]
+  watched Boolean [default: false]
+  createdAt DateTime [default: `now()`, not null]
+  lastUpdatedAt DateTime [default: `now()`, not null]
+}
+
+Table invites {
+  id Int [pk, increment]
+  code String [unique, not null]
+  status String [default: 'pending', not null]
+  claimedBy Int
+  workspaceIds String
+  createdAt DateTime [default: `now()`, not null]
+  createdBy Int [not null]
+  lastUpdatedAt DateTime [default: `now()`, not null]
+}
+
+Table system_settings {
+  id Int [pk, increment]
+  label String [unique, not null]
+  value String
+  createdAt DateTime [default: `now()`, not null]
+  lastUpdatedAt DateTime [default: `now()`, not null]
+}
+
+Table users {
+  id Int [pk, increment]
+  username String [unique]
+  password String [not null]
+  pfpFilename String
+  role String [default: 'default', not null]
+  suspended Int [default: 0, not null]
+  seen_recovery_codes Boolean [default: false]
+  createdAt DateTime [default: `now()`, not null]
+  lastUpdatedAt DateTime [default: `now()`, not null]
+  dailyMessageLimit Int
+  bio String [default: '']
+  web_push_subscription_config String
+}
+
+Table recovery_codes {
+  id Int [pk, increment]
+  user_id Int [not null]
+  code_hash String [not null]
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Table password_reset_tokens {
+  id Int [pk, increment]
+  user_id Int [not null]
+  token String [unique, not null]
+  expiresAt DateTime [not null]
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Table document_vectors {
+  id Int [pk, increment]
+  docId String [not null]
+  vectorId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  lastUpdatedAt DateTime [default: `now()`, not null]
+}
+
+Table workspaces {
+  id Int [pk, increment]
+  name String [not null]
+  slug String [unique, not null]
+  vectorTag String
+  createdAt DateTime [default: `now()`, not null]
+  openAiTemp Float
+  openAiHistory Int [default: 20, not null]
+  lastUpdatedAt DateTime [default: `now()`, not null]
+  openAiPrompt String
+  similarityThreshold Float [default: 0.25]
+  chatProvider String
+  chatModel String
+  topN Int [default: 4]
+  chatMode String [default: 'chat']
+  pfpFilename String
+  agentProvider String
+  agentModel String
+  queryRefusalResponse String
+  vectorSearchMode String [default: 'default']
+  router_id Int
+}
+
+Table workspace_threads {
+  id Int [pk, increment]
+  name String [not null]
+  slug String [unique, not null]
+  workspace_id Int [not null]
+  user_id Int
+  createdAt DateTime [default: `now()`, not null]
+  lastUpdatedAt DateTime [default: `now()`, not null]
+}
+
+Table workspace_suggested_messages {
+  id Int [pk, increment]
+  workspaceId Int [not null]
+  heading String [not null]
+  message String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  lastUpdatedAt DateTime [default: `now()`, not null]
+}
+
+Table workspace_chats {
+  id Int [pk, increment]
+  workspaceId Int [not null]
+  prompt String [not null]
+  response String [not null]
+  include Boolean [default: true, not null]
+  user_id Int
+  thread_id Int
+  api_session_id String
+  createdAt DateTime [default: `now()`, not null]
+  lastUpdatedAt DateTime [default: `now()`, not null]
+  feedbackScore Boolean
+  memory_processed Boolean
+}
+
+Table workspace_agent_invocations {
+  id Int [pk, increment]
+  uuid String [unique, not null]
+  prompt String [not null]
+  closed Boolean [default: false, not null]
+  user_id Int
+  thread_id Int
+  workspace_id Int [not null]
+  createdAt DateTime [default: `now()`, not null]
+  lastUpdatedAt DateTime [default: `now()`, not null]
+}
+
+Table workspace_users {
+  id Int [pk, increment]
+  user_id Int [not null]
+  workspace_id Int [not null]
+  createdAt DateTime [default: `now()`, not null]
+  lastUpdatedAt DateTime [default: `now()`, not null]
+}
+
+Table cache_data {
+  id Int [pk, increment]
+  name String [not null]
+  data String [not null]
+  belongsTo String
+  byId Int
+  expiresAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+  lastUpdatedAt DateTime [default: `now()`, not null]
+}
+
+Table embed_configs {
+  id Int [pk, increment]
+  uuid String [unique, not null]
+  enabled Boolean [default: false, not null]
+  chat_mode String [default: 'query', not null]
+  allowlist_domains String
+  allow_model_override Boolean [default: false, not null]
+  allow_temperature_override Boolean [default: false, not null]
+  allow_prompt_override Boolean [default: false, not null]
+  max_chats_per_day Int
+  max_chats_per_session Int
+  message_limit Int [default: 20]
+  workspace_id Int [not null]
+  createdBy Int
+  usersId Int
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Table embed_chats {
+  id Int [pk, increment]
+  prompt String [not null]
+  response String [not null]
+  session_id String [not null]
+  include Boolean [default: true, not null]
+  connection_information String
+  embed_id Int [not null]
+  usersId Int
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Table event_logs {
+  id Int [pk, increment]
+  event String [not null]
+  metadata String
+  userId Int
+  occurredAt DateTime [default: `now()`, not null]
+}
+
+Table slash_command_presets {
+  id Int [pk, increment]
+  command String [not null]
+  prompt String [not null]
+  description String [not null]
+  uid Int [default: 0, not null]
+  userId Int
+  createdAt DateTime [default: `now()`, not null]
+  lastUpdatedAt DateTime [default: `now()`, not null]
+
+  indexes {
+    (uid, command) [unique]
+  }
+}
+
+Table document_sync_queues {
+  id Int [pk, increment]
+  staleAfterMs Int [default: 604800000, not null]
+  nextSyncAt DateTime [not null]
+  createdAt DateTime [default: `now()`, not null]
+  lastSyncedAt DateTime [default: `now()`, not null]
+  workspaceDocId Int [unique, not null]
+}
+
+Table document_sync_executions {
+  id Int [pk, increment]
+  queueId Int [not null]
+  status String [default: 'unknown', not null]
+  result String
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Table browser_extension_api_keys {
+  id Int [pk, increment]
+  key String [unique, not null]
+  user_id Int
+  createdAt DateTime [default: `now()`, not null]
+  lastUpdatedAt DateTime [not null]
+}
+
+Table temporary_auth_tokens {
+  id Int [pk, increment]
+  token String [unique, not null]
+  userId Int [not null]
+  expiresAt DateTime [not null]
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Table system_prompt_variables {
+  id Int [pk, increment]
+  key String [unique, not null]
+  value String
+  description String
+  type String [default: 'system', not null]
+  userId Int
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table prompt_history {
+  id Int [pk, increment]
+  workspaceId Int [not null]
+  prompt String [not null]
+  modifiedBy Int
+  modifiedAt DateTime [default: `now()`, not null]
+}
+
+Table desktop_mobile_devices {
+  id Int [pk, increment]
+  deviceOs String [not null]
+  deviceName String [not null]
+  token String [unique, not null]
+  approved Boolean [default: false, not null]
+  userId Int
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Table workspace_parsed_files {
+  id Int [pk, increment]
+  filename String [unique, not null]
+  workspaceId Int [not null]
+  userId Int
+  threadId Int
+  metadata String
+  tokenCountEstimate Int [default: 0]
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Table external_communication_connectors {
+  id Int [pk, increment]
+  type String [unique, not null]
+  config String [default: '{}', not null]
+  active Boolean [default: false, not null]
+  createdAt DateTime [default: `now()`, not null]
+  lastUpdatedAt DateTime [default: `now()`, not null]
+}
+
+Table scheduled_jobs {
+  id Int [pk, increment]
+  name String [not null]
+  prompt String [not null]
+  tools String
+  schedule String [not null]
+  enabled Boolean [default: true, not null]
+  lastRunAt DateTime
+  nextRunAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+}
+
+Table scheduled_job_runs {
+  id Int [pk, increment]
+  jobId Int [not null]
+  status String [default: 'queued', not null]
+  result String
+  error String
+  startedAt DateTime [default: `now()`, not null]
+  completedAt DateTime
+  readAt DateTime
+}
+
+Table memories {
+  id Int [pk, increment]
+  user_id Int
+  workspace_id Int
+  scope String [default: 'workspace', not null]
+  content String [not null]
+  last_used_at DateTime
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+}
+
+Table model_routers {
+  id Int [pk, increment]
+  name String [unique, not null]
+  description String
+  fallback_provider String [not null]
+  fallback_model String [not null]
+  cooldown_seconds Int [default: 30, not null]
+  created_by Int
+  createdAt DateTime [default: `now()`, not null]
+  lastUpdatedAt DateTime [default: `now()`, not null]
+}
+
+Table model_router_rules {
+  id Int [pk, increment]
+  router_id Int [not null]
+  enabled Boolean [default: true, not null]
+  priority Int [not null]
+  type String [default: 'calculated', not null]
+  title String [not null]
+  description String
+  condition_logic String
+  conditions String
+  route_provider String [not null]
+  route_model String [not null]
+  created_by Int
+  createdAt DateTime [default: `now()`, not null]
+  lastUpdatedAt DateTime [default: `now()`, not null]
+
+  indexes {
+    (router_id, title) [unique]
+  }
+}
+
+Ref workspace_documents_workspaceId_fk: workspace_documents.workspaceId > workspaces.id
+
+Ref recovery_codes_user_id_fk: recovery_codes.user_id > users.id [delete: cascade]
+
+Ref password_reset_tokens_user_id_fk: password_reset_tokens.user_id > users.id [delete: cascade]
+
+Ref workspace_threads_workspace_id_fk: workspace_threads.workspace_id > workspaces.id [delete: cascade]
+
+Ref workspace_threads_user_id_fk: workspace_threads.user_id > users.id [delete: cascade]
+
+Ref workspace_suggested_messages_workspaceId_fk: workspace_suggested_messages.workspaceId > workspaces.id [delete: cascade]
+
+Ref workspace_chats_user_id_fk: workspace_chats.user_id > users.id [delete: cascade, update: cascade]
+
+Ref workspace_agent_invocations_user_id_fk: workspace_agent_invocations.user_id > users.id [delete: cascade, update: cascade]
+
+Ref workspace_agent_invocations_workspace_id_fk: workspace_agent_invocations.workspace_id > workspaces.id [delete: cascade, update: cascade]
+
+Ref workspace_users_workspace_id_fk: workspace_users.workspace_id > workspaces.id [delete: cascade, update: cascade]
+
+Ref workspace_users_user_id_fk: workspace_users.user_id > users.id [delete: cascade, update: cascade]
+
+Ref embed_configs_workspace_id_fk: embed_configs.workspace_id > workspaces.id [delete: cascade]
+
+Ref embed_configs_usersId_fk: embed_configs.usersId > users.id
+
+Ref embed_chats_embed_id_fk: embed_chats.embed_id > embed_configs.id [delete: cascade]
+
+Ref embed_chats_usersId_fk: embed_chats.usersId > users.id
+
+Ref slash_command_presets_userId_fk: slash_command_presets.userId > users.id [delete: cascade]
+
+Ref document_sync_queues_workspaceDocId_fk: document_sync_queues.workspaceDocId - workspace_documents.id [delete: cascade]
+
+Ref document_sync_executions_queueId_fk: document_sync_executions.queueId > document_sync_queues.id [delete: cascade]
+
+Ref browser_extension_api_keys_user_id_fk: browser_extension_api_keys.user_id > users.id [delete: cascade]
+
+Ref temporary_auth_tokens_userId_fk: temporary_auth_tokens.userId > users.id [delete: cascade]
+
+Ref system_prompt_variables_userId_fk: system_prompt_variables.userId > users.id [delete: cascade]
+
+Ref prompt_history_workspaceId_fk: prompt_history.workspaceId > workspaces.id [delete: cascade]
+
+Ref prompt_history_modifiedBy_fk: prompt_history.modifiedBy > users.id
+
+Ref desktop_mobile_devices_userId_fk: desktop_mobile_devices.userId > users.id [delete: cascade]
+
+Ref workspace_parsed_files_workspaceId_fk: workspace_parsed_files.workspaceId > workspaces.id [delete: cascade]
+
+Ref workspace_parsed_files_userId_fk: workspace_parsed_files.userId > users.id [delete: cascade]
+
+Ref workspace_parsed_files_threadId_fk: workspace_parsed_files.threadId > workspace_threads.id [delete: cascade]
+
+Ref scheduled_job_runs_jobId_fk: scheduled_job_runs.jobId > scheduled_jobs.id [delete: cascade]
+
+Ref memories_user_id_fk: memories.user_id > users.id [delete: cascade]
+
+Ref memories_workspace_id_fk: memories.workspace_id > workspaces.id [delete: cascade]
+
+Ref model_router_rules_router_id_fk: model_router_rules.router_id > model_routers.id [delete: cascade]

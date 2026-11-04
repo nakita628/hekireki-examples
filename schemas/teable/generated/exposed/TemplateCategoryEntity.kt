@@ -18,6 +18,9 @@ class TemplateCategoryEntity(
     var lastModifiedTime by TemplateCategoryTable.lastModifiedTime
     var lastModifiedBy by TemplateCategoryTable.lastModifiedBy
     var order by TemplateCategoryTable.order
+    var parentId by TemplateCategoryTable.parentId
+    var kind by TemplateCategoryTable.kind
+    var key by TemplateCategoryTable.key
 
     override fun flush(batch: EntityBatchUpdate?): Boolean {
         if (writeValues.isNotEmpty()) {

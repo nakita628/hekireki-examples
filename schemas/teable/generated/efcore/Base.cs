@@ -11,7 +11,7 @@ public partial class Base
 
     public string SpaceId { get; set; } = null!;
 
-    public string Name { get; set; } = null!;
+    public string? Name { get; set; }
 
     public double Order { get; set; }
 

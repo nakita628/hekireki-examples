@@ -6,6 +6,7 @@ defmodule Teable.ComputedUpdateDeadLetter do
   @type t :: %__MODULE__{
           id: String.t(),
           base_id: String.t(),
+          worker_lane: String.t(),
           seed_table_id: String.t(),
           seed_record_ids: map() | nil,
           change_type: String.t(),
@@ -34,12 +35,14 @@ defmodule Teable.ComputedUpdateDeadLetter do
           trace_data: map() | nil,
           failed_at: DateTime.t(),
           created_at: DateTime.t(),
-          updated_at: DateTime.t()
+          updated_at: DateTime.t(),
+          seeds: [Teable.ComputedUpdateDeadLetterSeed.t()]
         }
 
   schema "computed_update_dead_letter" do
     field(:id, :string, primary_key: true)
     field(:base_id, :string)
+    field(:worker_lane, :string, default: "production")
     field(:seed_table_id, :string)
     field(:seed_record_ids, :map)
     field(:change_type, :string)
@@ -69,5 +72,6 @@ defmodule Teable.ComputedUpdateDeadLetter do
     field(:failed_at, Teable.PrismaDateTime)
     field(:created_at, Teable.PrismaDateTime)
     field(:updated_at, Teable.PrismaDateTime)
+    has_many(:seeds, Teable.ComputedUpdateDeadLetterSeed, foreign_key: :task_id)
   end
 end

@@ -34,6 +34,7 @@ object ResponseTable : IdTable<String>("\"Response\"") {
     val ttc = jsonb<String>("ttc", { it }, { it }).default("{}")
     val meta = jsonb<String>("meta", { it }, { it }).default("{}")
     val ingestFlags = jsonb<String>("ingest_flags", { it }, { it }).nullable()
+    val outcome = pgEnum("outcome", "\"ResponseOutcome\"", ResponseOutcome.entries, ResponseOutcome::dbName).nullable()
     val contactAttributes = jsonb<String>("contactAttributes", { it }, { it }).nullable()
     val singleUseId = text("singleUseId").nullable()
     val language = text("language").nullable()

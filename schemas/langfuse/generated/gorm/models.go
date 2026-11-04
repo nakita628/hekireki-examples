@@ -159,6 +159,7 @@ type Organization struct {
 	CloudFreeTierUsageThresholdState *string                  `gorm:"column:cloud_free_tier_usage_threshold_state" json:"cloud_free_tier_usage_threshold_state"`
 	AiFeaturesEnabled                bool                     `gorm:"column:ai_features_enabled;default:false;not null" json:"ai_features_enabled"`
 	AiTelemetryEnabled               *bool                    `gorm:"column:ai_telemetry_enabled;default:true;not null" json:"ai_telemetry_enabled"`
+	AccessAuditLogEnabled            bool                     `gorm:"column:access_audit_log_enabled;default:false;not null" json:"access_audit_log_enabled"`
 	FeatureFlagOrgDefaults           []string                 `gorm:"column:feature_flag_org_defaults;serializer:json;not null" json:"feature_flag_org_defaults"`
 	SfdcOrgID                        *string                  `gorm:"column:sfdc_org_id" json:"sfdc_org_id"`
 	OrganizationMemberships          []OrganizationMembership `gorm:"foreignKey:OrgID;constraint:OnDelete:CASCADE"`
@@ -3238,16 +3239,18 @@ func (*CloudSpendAlert) BeforeUpdate(tx *gorm.DB) error {
 
 type TopicClusteringRun struct {
 	ID              string         `gorm:"column:id;primaryKey;index:topic_clustering_runs_serving_map_idx" json:"id"`
-	ProjectID       string         `gorm:"column:project_id;index:topic_clustering_runs_serving_map_idx;not null" json:"project_id"`
-	FacetID         string         `gorm:"column:facet_id;index:topic_clustering_runs_serving_map_idx;not null" json:"facet_id"`
+	ProjectID       string         `gorm:"column:project_id;index:topic_clustering_runs_serving_map_idx;index:topic_clustering_runs_rule_serving_map_idx;index:topic_clustering_runs_project_id_batch_action_id_idx;not null" json:"project_id"`
+	FacetID         string         `gorm:"column:facet_id;index:topic_clustering_runs_serving_map_idx;index:topic_clustering_runs_rule_serving_map_idx;not null" json:"facet_id"`
 	FacetVersion    int            `gorm:"column:facet_version;index:topic_clustering_runs_serving_map_idx;not null" json:"facet_version"`
-	Status          *string        `gorm:"column:status;index:topic_clustering_runs_serving_map_idx;default:'pending';not null" json:"status"`
+	Status          *string        `gorm:"column:status;index:topic_clustering_runs_serving_map_idx;index:topic_clustering_runs_rule_serving_map_idx;default:'pending';not null" json:"status"`
 	Config          datatypes.JSON `gorm:"column:config;default:'{}';not null" json:"config"`
 	Error           *string        `gorm:"column:error" json:"error"`
 	CreatedAt       DateTime       `gorm:"column:created_at;index:topic_clustering_runs_serving_map_idx;type:timestamptz(3);autoCreateTime:false;not null" json:"created_at"`
 	StartedAt       *DateTime      `gorm:"column:started_at;type:timestamptz(3)" json:"started_at"`
 	FinishedAt      *DateTime      `gorm:"column:finished_at;type:timestamptz(3)" json:"finished_at"`
 	TopicVersionIds []string       `gorm:"column:topic_version_ids;serializer:json;not null" json:"topic_version_ids"`
+	RuleID          *string        `gorm:"column:rule_id;index:topic_clustering_runs_rule_serving_map_idx" json:"rule_id"`
+	BatchActionID   *string        `gorm:"column:batch_action_id;index:topic_clustering_runs_project_id_batch_action_id_idx" json:"batch_action_id"`
 	Project         *Project
 	Facet           *EvaluatorVersion `gorm:"foreignKey:FacetID,FacetVersion;references:EvaluatorID,Version"`
 }

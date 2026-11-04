@@ -26,6 +26,7 @@ class Organization extends \Illuminate\Database\Eloquent\Model
         'cloud_free_tier_usage_threshold_state',
         'ai_features_enabled',
         'ai_telemetry_enabled',
+        'access_audit_log_enabled',
         'feature_flag_org_defaults',
         'sfdc_org_id',
     ];
@@ -33,6 +34,7 @@ class Organization extends \Illuminate\Database\Eloquent\Model
     protected $attributes = [
         'ai_features_enabled' => false,
         'ai_telemetry_enabled' => true,
+        'access_audit_log_enabled' => false,
     ];
 
     protected $casts = [
@@ -43,6 +45,7 @@ class Organization extends \Illuminate\Database\Eloquent\Model
         'cloud_current_cycle_usage' => 'integer',
         'ai_features_enabled' => 'boolean',
         'ai_telemetry_enabled' => 'boolean',
+        'access_audit_log_enabled' => 'boolean',
     ];
 
     public function save(array $options = [])

@@ -25,6 +25,7 @@ class ResponseEntity(
     var ttc by ResponseTable.ttc
     var meta by ResponseTable.meta
     var ingestFlags by ResponseTable.ingestFlags
+    var outcome by ResponseTable.outcome
     val tags by TagsOnResponsesEntity referrersOn TagsOnResponsesTable.responseId
     val quotaLinks by ResponseQuotaLinkEntity referrersOn ResponseQuotaLinkTable.responseId
     var contactAttributes by ResponseTable.contactAttributes

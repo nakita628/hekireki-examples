@@ -156,7 +156,7 @@ export interface PinResource {
 export interface Base {
   id: string
   space_id: string
-  name: string
+  name: string | null
   order: number
   icon: string | null
   schema_pass: string | null
@@ -273,6 +273,7 @@ export interface Field {
 export interface ComputedUpdateOutbox {
   id: string
   base_id: string
+  worker_lane: Generated<string>
   seed_table_id: string
   seed_record_ids: unknown
   change_type: string
@@ -328,6 +329,7 @@ export interface ComputedUpdateStageLedger {
 export interface ComputedUpdateDeadLetter {
   id: string
   base_id: string
+  worker_lane: Generated<string>
   seed_table_id: string
   seed_record_ids: unknown
   change_type: string
@@ -357,6 +359,12 @@ export interface ComputedUpdateDeadLetter {
   failed_at: Timestamp
   created_at: Timestamp
   updated_at: Timestamp
+}
+
+export interface ComputedUpdateDeadLetterSeed {
+  task_id: string
+  table_id: string
+  record_id: string
 }
 
 export interface ComputedUpdateRunHistory {
@@ -857,6 +865,12 @@ export interface Template {
   publish_info: unknown
   visit_count: Generated<number>
   kind: string | null
+  version: Generated<number>
+  manifest: unknown
+  review: unknown
+  history: unknown
+  parent_template_id: string | null
+  slug: string | null
 }
 
 export interface TemplateCategory {
@@ -867,6 +881,9 @@ export interface TemplateCategory {
   last_modified_time: ColumnType<Date | null, Date | string, Date | string | null>
   last_modified_by: string | null
   order: number
+  parent_id: string | null
+  kind: Generated<string>
+  key: string | null
 }
 
 export interface Task {
@@ -974,6 +991,7 @@ export interface DB {
   computed_update_change_frontier: ComputedUpdateChangeFrontier
   computed_update_stage_ledger: ComputedUpdateStageLedger
   computed_update_dead_letter: ComputedUpdateDeadLetter
+  computed_update_dead_letter_seed: ComputedUpdateDeadLetterSeed
   computed_update_run_history: ComputedUpdateRunHistory
   computed_update_pause_scope: ComputedUpdatePauseScope
   computed_field_activity: ComputedFieldActivity

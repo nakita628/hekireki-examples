@@ -24,6 +24,12 @@ defmodule Teable.Template do
           publish_info: map() | nil,
           visit_count: integer(),
           kind: String.t() | nil,
+          version: integer(),
+          manifest: map() | nil,
+          review: map() | nil,
+          history: map() | nil,
+          parent_template_id: String.t() | nil,
+          slug: String.t() | nil,
           updated_at: DateTime.t() | nil
         }
 
@@ -47,6 +53,12 @@ defmodule Teable.Template do
     field(:publish_info, :map)
     field(:visit_count, :integer, default: 0)
     field(:kind, :string)
+    field(:version, :integer, default: 1)
+    field(:manifest, :map)
+    field(:review, :map)
+    field(:history, :map)
+    field(:parent_template_id, :string)
+    field(:slug, :string)
     timestamps(inserted_at: false, updated_at_source: :last_modified_time)
   end
 end

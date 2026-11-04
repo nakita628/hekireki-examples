@@ -15,6 +15,7 @@ defmodule Langfuse.Organization do
           cloud_free_tier_usage_threshold_state: String.t() | nil,
           ai_features_enabled: boolean(),
           ai_telemetry_enabled: boolean(),
+          access_audit_log_enabled: boolean(),
           feature_flag_org_defaults: [String.t()],
           sfdc_org_id: String.t() | nil,
           inserted_at: DateTime.t(),
@@ -43,6 +44,7 @@ defmodule Langfuse.Organization do
     field(:cloud_free_tier_usage_threshold_state, :string)
     field(:ai_features_enabled, :boolean, default: false)
     field(:ai_telemetry_enabled, :boolean, default: true)
+    field(:access_audit_log_enabled, :boolean, default: false)
     field(:feature_flag_org_defaults, {:array, :string})
     field(:sfdc_org_id, :string)
     has_one(:gateway_config, Langfuse.GatewayConfig, foreign_key: :organization_id)

@@ -11,6 +11,9 @@ defmodule Teable.TemplateCategory do
           created_by: String.t(),
           last_modified_by: String.t() | nil,
           order: float(),
+          parent_id: String.t() | nil,
+          kind: String.t(),
+          key: String.t() | nil,
           updated_at: DateTime.t() | nil
         }
 
@@ -21,6 +24,9 @@ defmodule Teable.TemplateCategory do
     field(:created_by, :string)
     field(:last_modified_by, :string)
     field(:order, :float)
+    field(:parent_id, :string)
+    field(:kind, :string, default: "industry")
+    field(:key, :string)
     timestamps(inserted_at: false, updated_at_source: :last_modified_time)
   end
 end
