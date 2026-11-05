@@ -1,0 +1,689 @@
+Enum ProjectType {
+  website
+  app
+  backend
+}
+
+Enum ProjectScope {
+  all
+  selected
+}
+
+Enum AccessLevel {
+  read
+  write
+  admin
+}
+
+Enum ClientType {
+  read
+  write
+  root
+}
+
+Enum Interval {
+  hour
+  day
+  month
+  minute
+  week
+}
+
+Enum ChartType {
+  linear
+  bar
+  histogram
+  pie
+  metric
+  area
+  map
+  funnel
+  retention
+  conversion
+  sankey
+}
+
+Enum Metric {
+  sum
+  average
+  min
+  max
+  count
+}
+
+Enum IntegrationType {
+  app
+  mail
+  custom
+}
+
+Enum ImportStatus {
+  pending
+  processing
+  completed
+  failed
+}
+
+Enum InsightState {
+  active
+  suppressed
+  closed
+}
+
+Table __code_migrations {
+  id String [pk]
+  name String [unique, not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+}
+
+Table conversations {
+  id String [pk]
+  projectId String [not null]
+  organizationId String [not null]
+  userId String [not null]
+  title String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+}
+
+Table chat_messages {
+  id String [pk]
+  conversationId String [not null]
+  role String [not null]
+  parts Json [not null, note: '[IPrismaUIMessageParts]']
+  metadata Json [note: '[IPrismaChatMessageMetadata]']
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Table organizations {
+  id String [pk]
+  name String [not null]
+  slug String [unique]
+  createdByUserId String
+  timezone String
+  onboarding String [default: 'completed']
+  attribution Json [note: '[IPrismaOrganizationAttribution]']
+  subscriptionId String
+  subscriptionCustomerId String
+  subscriptionPriceId String
+  subscriptionProductId String
+  subscriptionStatus String [note: '[IPrismaSubscriptionStatus]']
+  subscriptionStartsAt DateTime
+  subscriptionEndsAt DateTime
+  subscriptionCanceledAt DateTime
+  subscriptionCreatedByUserId String
+  subscriptionPeriodEventsCount Int [default: 0, not null]
+  subscriptionPeriodEventsCountExceededAt DateTime
+  subscriptionPeriodEventsLimit Int [default: 0, not null]
+  subscriptionInterval String
+  subscriptionCancelReason String [note: '[IPrismaCancellationReason]']
+  subscriptionCancelComment String
+  subscriptionSaveDiscountAppliedAt DateTime
+  subscriptionPauseAtPeriodEnd Boolean [default: false, not null]
+  subscriptionResumesAt DateTime
+  subscriptionFirstStartedAt DateTime
+  usageWarningSentAt DateTime
+  usageExceededSentAt DateTime
+  subscriptionDiscount Json [note: '[IPrismaSubscriptionDiscount]']
+  windDownStartedAt DateTime
+  windDownStep String [note: '[IPrismaWindDownStep]']
+  deleteAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+}
+
+Table users {
+  id String [pk]
+  email String [unique, not null]
+  firstName String
+  lastName String
+  name String
+  emailVerified Boolean [default: false, not null]
+  image String
+  twoFactorEnabled Boolean [default: false, not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+  deletedAt DateTime
+}
+
+Table user_totp {
+  id String [pk]
+  userId String [unique, not null]
+  secret String [not null]
+  recoveryCodes String[] [not null]
+  enabledAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+}
+
+Table two_factor {
+  id String [pk]
+  userId String [unique, not null]
+  secret String [not null]
+  backupCodes String [not null]
+  verified Boolean [default: true, not null]
+  failedVerificationCount Int [default: 0, not null]
+  lockedUntil DateTime
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+}
+
+Table two_factor_challenges {
+  id String [pk]
+  userId String [not null]
+  expiresAt DateTime [not null]
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Table accounts {
+  id String [pk]
+  userId String [not null]
+  email String
+  provider String [not null]
+  providerId String
+  accountId String
+  idToken String
+  accessToken String
+  refreshToken String
+  accessTokenExpiresAt DateTime
+  refreshTokenExpiresAt DateTime
+  scope String
+  password String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+}
+
+Table sessions {
+  id String [pk]
+  token String [unique]
+  userId String [not null]
+  expiresAt DateTime [not null]
+  ipAddress String
+  userAgent String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+}
+
+Table verifications {
+  id String [pk]
+  identifier String [not null]
+  value String [not null]
+  expiresAt DateTime [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+}
+
+Table members {
+  id String [pk]
+  role String [not null]
+  email String [not null]
+  userId String
+  invitedById String
+  organizationId String [not null]
+  projectScope ProjectScope [default: 'all', not null]
+  meta Json
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+
+  indexes {
+    (organizationId, userId) [unique]
+  }
+}
+
+Table member_projects {
+  memberId String [not null]
+  projectId String [not null]
+  level AccessLevel
+  createdAt DateTime [default: `now()`, not null]
+
+  indexes {
+    (memberId, projectId) [pk]
+  }
+}
+
+Table invites {
+  id String [pk]
+  email String [not null]
+  createdById String [not null]
+  organizationId String [not null]
+  projectAccess Json [default: '[]', not null, note: '[IPrismaInviteProjectAccess]']
+  projectScope ProjectScope [default: 'all', not null]
+  expiresAt DateTime [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+  role String [not null]
+}
+
+Table projects {
+  id String [pk]
+  name String [not null]
+  organizationId String [not null]
+  eventsCount Int [default: 0, not null]
+  types ProjectType[] [not null]
+  domain String
+  cors String[] [not null]
+  crossDomain Boolean [default: false, not null]
+  allowUnsafeRevenueTracking Boolean [default: false, not null]
+  aiStoreContent Boolean [default: true, not null]
+  filters Json [default: '[]', not null, note: '[IPrismaProjectFilters]']
+  firstEventAt DateTime
+  noDataNotifiedAt DateTime
+  dataStoppedNotifiedAt DateTime
+  deleteAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+}
+
+Table cohorts {
+  id String [pk]
+  name String [not null]
+  description String
+  projectId String [not null]
+  definition Json [default: '{}', not null, note: '[IPrismaCohortDefinition]']
+  isStatic Boolean [default: false, not null]
+  profileCount Int [default: 0, not null]
+  lastComputedAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+}
+
+Table salts {
+  salt String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+}
+
+Table clients {
+  id String [pk]
+  name String [not null]
+  secret String
+  type ClientType [default: 'write', not null]
+  projectId String
+  organizationId String [not null]
+  ignoreCorsAndSecret Boolean [default: false, not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+}
+
+Table dashboards {
+  id String [pk]
+  name String [not null]
+  organizationId String [not null]
+  projectId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+}
+
+Table reports {
+  id String [pk]
+  name String [not null]
+  interval Interval [not null]
+  range String [default: '30d', not null]
+  chartType ChartType [not null]
+  lineType String [default: 'monotone', not null]
+  breakdowns Json [not null]
+  events Json [not null]
+  globalFilters Json [default: '[]', not null]
+  formula String
+  unit String
+  metric Metric [default: 'sum', not null]
+  projectId String [not null]
+  previous Boolean [default: false, not null]
+  criteria String
+  funnelGroup String
+  funnelWindow Float
+  options Json [note: '[IReportOptions]']
+  display Json [note: 'How a dashboard tile shows the report: { view: \'chart\' | \'table\' }']
+  visibleSeries String[] [not null]
+  startDate String
+  endDate String
+  dashboardId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+}
+
+Table report_layouts {
+  id String [pk]
+  reportId String [unique, not null]
+  gridColumns Int [default: 12, not null]
+  x Int [default: 0, not null]
+  y Int [default: 0, not null]
+  w Int [default: 8, not null]
+  h Int [default: 6, not null]
+  minW Int [default: 4]
+  minH Int [default: 4]
+  maxW Int
+  maxH Int
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+}
+
+Table shares {
+  id String [unique, not null]
+  projectId String [unique, not null]
+  organizationId String [not null]
+  public Boolean [default: false, not null]
+  password String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+}
+
+Table share_dashboards {
+  id String [unique, not null]
+  dashboardId String [unique, not null]
+  organizationId String [not null]
+  projectId String [not null]
+  public Boolean [default: false, not null]
+  password String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+}
+
+Table share_reports {
+  id String [unique, not null]
+  reportId String [unique, not null]
+  organizationId String [not null]
+  projectId String [not null]
+  public Boolean [default: false, not null]
+  password String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+}
+
+Table share_widgets {
+  id String [unique, not null]
+  projectId String [not null]
+  organizationId String [not null]
+  public Boolean [default: true, not null]
+  options Json [not null, note: '[IPrismaWidgetOptions]']
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+}
+
+Table event_meta {
+  id String [pk]
+  name String [not null]
+  conversion Boolean
+  color String
+  icon String
+  projectId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+
+  indexes {
+    (name, projectId) [unique]
+  }
+}
+
+Table custom_events {
+  id String [pk]
+  name String [not null]
+  items Json [not null, note: '[IPrismaCustomEventItems]']
+  projectId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+
+  indexes {
+    (projectId, name) [unique]
+  }
+}
+
+Table references {
+  id String [pk]
+  title String [not null]
+  description String
+  date DateTime [default: `now()`, not null]
+  projectId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+}
+
+Table notification_rules {
+  id String [pk]
+  name String [not null]
+  projectId String [not null]
+  sendToApp Boolean [default: false, not null]
+  sendToEmail Boolean [default: false, not null]
+  config Json [not null, note: '[IPrismaNotificationRuleConfig]']
+  template String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+}
+
+Table notifications {
+  id String [pk]
+  projectId String [not null]
+  title String [not null]
+  message String [not null]
+  isReadAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+  sendToApp Boolean [default: false, not null]
+  sendToEmail Boolean [default: false, not null]
+  integrationId String
+  notificationRuleId String
+  payload Json [note: '[IPrismaNotificationPayload]']
+}
+
+Table integrations {
+  id String [pk]
+  name String [not null]
+  config Json [not null, note: '[IPrismaIntegrationConfig]']
+  organizationId String [not null]
+  projectId String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+}
+
+Table export_watermarks {
+  id String [pk]
+  projectId String [not null]
+  integrationId String [not null]
+  lastInsertedAt DateTime [not null]
+  lastEventId String [default: '', not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+
+  indexes {
+    (projectId, integrationId) [unique]
+  }
+}
+
+Table reset_password {
+  id String [pk]
+  accountId String [not null]
+  expiresAt DateTime [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+}
+
+Table imports {
+  id String [pk]
+  projectId String [not null]
+  jobId String
+  status ImportStatus [not null]
+  statusMessage String
+  errorMessage String
+  config Json [not null, note: '[IPrismaImportConfig]']
+  totalEvents Int [default: 0, not null]
+  processedEvents Int [default: 0, not null]
+  currentStep String
+  currentBatch String
+  createdAt DateTime [default: `now()`, not null]
+  completedAt DateTime
+  updatedAt DateTime [default: `now()`, not null]
+}
+
+Table project_insights {
+  id String [pk]
+  projectId String [not null]
+  moduleKey String [not null]
+  dimensionKey String [not null]
+  windowKind String [not null]
+  state InsightState [default: 'active', not null]
+  title String [not null]
+  summary String
+  displayName String [default: '', not null]
+  payload Json [default: '{}', not null, note: '[IPrismaProjectInsightPayload]']
+  direction String
+  impactScore Float [default: 0, not null]
+  severityBand String
+  relevanceScore Float
+  aiSummary String
+  aiCategory String
+  emailWorthy Boolean [default: false, not null]
+  referenceWorthy Boolean [default: false, not null]
+  enrichedAt DateTime
+  enrichVersion Int
+  version Int [default: 1, not null]
+  threadId String [not null]
+  windowStart DateTime
+  windowEnd DateTime
+  firstDetectedAt DateTime [default: `now()`, not null]
+  lastUpdatedAt DateTime [default: `now()`, not null]
+  lastSeenAt DateTime [default: `now()`, not null]
+
+  indexes {
+    (projectId, moduleKey, dimensionKey, windowKind, state) [unique]
+  }
+}
+
+Table insight_events {
+  id String [pk]
+  insightId String [not null]
+  eventKind String [not null]
+  changeFrom Json
+  changeTo Json
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Table gsc_connections {
+  id String [pk]
+  projectId String [unique, not null]
+  siteUrl String [default: '', not null]
+  accessToken String [not null]
+  refreshToken String [not null]
+  accessTokenExpiresAt DateTime
+  lastSyncedAt DateTime
+  lastSyncStatus String
+  lastSyncError String
+  backfillStatus String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+}
+
+Table email_unsubscribes {
+  id String [pk]
+  email String [not null]
+  category String [not null]
+  createdAt DateTime [default: `now()`, not null]
+
+  indexes {
+    (email, category) [unique]
+  }
+}
+
+Ref conversations_projectId_fk: conversations.projectId > projects.id [delete: cascade]
+
+Ref conversations_organizationId_fk: conversations.organizationId > organizations.id [delete: cascade]
+
+Ref conversations_userId_fk: conversations.userId > users.id [delete: cascade]
+
+Ref chat_messages_conversationId_fk: chat_messages.conversationId > conversations.id [delete: cascade]
+
+Ref organizations_createdByUserId_fk: organizations.createdByUserId > users.id [delete: set null]
+
+Ref organizations_subscriptionCreatedByUserId_fk: organizations.subscriptionCreatedByUserId > users.id
+
+Ref user_totp_userId_fk: user_totp.userId - users.id [delete: cascade]
+
+Ref two_factor_userId_fk: two_factor.userId - users.id [delete: cascade]
+
+Ref two_factor_challenges_userId_fk: two_factor_challenges.userId > users.id [delete: cascade]
+
+Ref accounts_userId_fk: accounts.userId > users.id [delete: cascade]
+
+Ref sessions_userId_fk: sessions.userId > users.id [delete: cascade]
+
+Ref members_userId_fk: members.userId > users.id [delete: cascade]
+
+Ref members_invitedById_fk: members.invitedById > users.id [delete: set null]
+
+Ref members_organizationId_fk: members.organizationId > organizations.id [delete: cascade]
+
+Ref member_projects_memberId_fk: member_projects.memberId > members.id [delete: cascade]
+
+Ref member_projects_projectId_fk: member_projects.projectId > projects.id [delete: cascade]
+
+Ref invites_createdById_fk: invites.createdById > users.id [delete: cascade]
+
+Ref invites_organizationId_fk: invites.organizationId > organizations.id [delete: cascade]
+
+Ref projects_organizationId_fk: projects.organizationId > organizations.id [delete: cascade]
+
+Ref cohorts_projectId_fk: cohorts.projectId > projects.id [delete: cascade]
+
+Ref clients_projectId_fk: clients.projectId > projects.id [delete: cascade]
+
+Ref clients_organizationId_fk: clients.organizationId > organizations.id [delete: cascade]
+
+Ref dashboards_organizationId_fk: dashboards.organizationId > organizations.id [delete: cascade]
+
+Ref dashboards_projectId_fk: dashboards.projectId > projects.id [delete: cascade]
+
+Ref reports_projectId_fk: reports.projectId > projects.id [delete: cascade]
+
+Ref reports_dashboardId_fk: reports.dashboardId > dashboards.id [delete: cascade]
+
+Ref report_layouts_reportId_fk: report_layouts.reportId - reports.id [delete: cascade]
+
+Ref shares_projectId_fk: shares.projectId - projects.id [delete: cascade]
+
+Ref shares_organizationId_fk: shares.organizationId > organizations.id [delete: cascade]
+
+Ref share_dashboards_dashboardId_fk: share_dashboards.dashboardId - dashboards.id [delete: cascade]
+
+Ref share_dashboards_organizationId_fk: share_dashboards.organizationId > organizations.id [delete: cascade]
+
+Ref share_dashboards_projectId_fk: share_dashboards.projectId > projects.id [delete: cascade]
+
+Ref share_reports_reportId_fk: share_reports.reportId - reports.id [delete: cascade]
+
+Ref share_reports_organizationId_fk: share_reports.organizationId > organizations.id [delete: cascade]
+
+Ref share_reports_projectId_fk: share_reports.projectId > projects.id [delete: cascade]
+
+Ref share_widgets_projectId_fk: share_widgets.projectId > projects.id [delete: cascade]
+
+Ref share_widgets_organizationId_fk: share_widgets.organizationId > organizations.id [delete: cascade]
+
+Ref event_meta_projectId_fk: event_meta.projectId > projects.id [delete: cascade]
+
+Ref custom_events_projectId_fk: custom_events.projectId > projects.id [delete: cascade]
+
+Ref references_projectId_fk: references.projectId > projects.id [delete: cascade]
+
+Ref notification_rules_projectId_fk: notification_rules.projectId > projects.id [delete: cascade]
+
+Ref notifications_projectId_fk: notifications.projectId > projects.id [delete: cascade]
+
+Ref notifications_integrationId_fk: notifications.integrationId > integrations.id [delete: cascade]
+
+Ref notifications_notificationRuleId_fk: notifications.notificationRuleId > notification_rules.id [delete: cascade]
+
+Ref integrations_organizationId_fk: integrations.organizationId > organizations.id [delete: cascade]
+
+Ref integrations_projectId_fk: integrations.projectId > projects.id [delete: cascade]
+
+Ref export_watermarks_projectId_fk: export_watermarks.projectId > projects.id [delete: cascade]
+
+Ref export_watermarks_integrationId_fk: export_watermarks.integrationId > integrations.id [delete: cascade]
+
+Ref reset_password_accountId_fk: reset_password.accountId > accounts.id [delete: cascade]
+
+Ref imports_projectId_fk: imports.projectId > projects.id [delete: cascade]
+
+Ref insight_events_insightId_fk: insight_events.insightId > project_insights.id [delete: cascade]
+
+Ref gsc_connections_projectId_fk: gsc_connections.projectId - projects.id [delete: cascade]

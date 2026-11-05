@@ -156,5 +156,21 @@
     "skip": {
       "eloquent": "a relation field named `refresh` (OauthAccessToken.refresh) collides with Eloquent's Model::refresh(), which hekireki-eloquent refuses"
     }
+  },
+  "openpanel": {
+    "repo": "openpanel-dev/openpanel",
+    "path": "packages/db/prisma/schema.prisma",
+    "commit": "130d9c0dd03e7b5d4b1837b9f80e57d42c1b11f8",
+    "license": "AGPL-3.0",
+    "app": "OpenPanel",
+    "description": "OpenPanel product analytics: organizations, projects, dashboards, reports, clients and integrations."
+  },
+  "chibisafe": {
+    "repo": "chibisafe/chibisafe",
+    "path": "packages/backend/src/prisma/schema.prisma",
+    "commit": "a857345c3d9cf1b5182eccce79564e353d4ea793",
+    "license": "MIT",
+    "app": "Chibisafe",
+    "description": "Chibisafe file uploader: users, files, albums, tags, snippets and short links, on SQLite."
   }
 }

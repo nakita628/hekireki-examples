@@ -1,0 +1,31 @@
+#nullable enable
+
+using System;
+using System.Collections.Generic;
+
+namespace OpenPanel.Models;
+
+public partial class Conversation
+{
+    public string Id { get; set; } = null!;
+
+    public string ProjectId { get; set; } = null!;
+
+    public virtual Project Project { get; set; } = null!;
+
+    public string OrganizationId { get; set; } = null!;
+
+    public virtual Organization Organization { get; set; } = null!;
+
+    public string UserId { get; set; } = null!;
+
+    public virtual User User { get; set; } = null!;
+
+    public string? Title { get; set; }
+
+    public DateTime CreatedAt { get; set; }
+
+    public DateTime UpdatedAt { get; set; }
+
+    public virtual ICollection<ChatMessage> Messages { get; set; } = new List<ChatMessage>();
+}

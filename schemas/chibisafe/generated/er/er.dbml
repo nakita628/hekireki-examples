@@ -1,0 +1,180 @@
+Table users {
+  id Int [pk, increment]
+  uuid String [unique, not null]
+  username String [unique, not null]
+  password String [not null]
+  enabled Boolean [default: true, not null]
+  storageQuota String [default: '0', not null]
+  apiKey String [unique]
+  passwordEditedAt DateTime
+  apiKeyEditedAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+  editedAt DateTime
+}
+
+Table roles {
+  id Int [pk, increment]
+  name String [unique, not null]
+}
+
+Table files {
+  id Int [pk, increment]
+  uuid String [unique, not null]
+  userId Int
+  name String [not null]
+  original String [not null]
+  type String [not null]
+  size String [not null]
+  hash String [not null]
+  ip String [not null]
+  sourceUrl String
+  isS3 Boolean [default: false, not null]
+  isWatched Boolean [default: false, not null]
+  createdAt DateTime [default: `now()`, not null]
+  editedAt DateTime
+  quarantine Boolean [default: false, not null]
+}
+
+Table quarantineFiles {
+  fileId String [unique, not null]
+  name String [not null]
+  reason String
+}
+
+Table snippets {
+  id Int [pk, increment]
+  uuid String [unique, not null]
+  userId Int
+  identifier String [unique, not null]
+  name String [not null]
+  description String
+  content String [not null]
+  language String [not null]
+  parentUuid String
+  createdAt DateTime [default: `now()`, not null]
+  editedAt DateTime
+}
+
+Table shortenedLinks {
+  id Int [pk, increment]
+  uuid String [unique, not null]
+  userId Int
+  identifier String [unique, not null]
+  destination String [not null]
+  views Int [default: 0, not null]
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Table albums {
+  id Int [pk, increment]
+  uuid String [unique, not null]
+  userId Int [not null]
+  name String [not null]
+  description String
+  zippedAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+  editedAt DateTime
+  nsfw Boolean [default: false, not null]
+  sortOrder String
+}
+
+Table bans {
+  id Int [pk, increment]
+  ip String [not null]
+  reason String
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Table links {
+  id Int [pk, increment]
+  uuid String [unique, not null]
+  userId Int [not null]
+  albumId Int [not null]
+  identifier String [unique, not null]
+  views Int [default: 0, not null]
+  enabled Boolean [default: true, not null]
+  enableDownload Boolean [default: false, not null]
+  expiresAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+  editedAt DateTime
+}
+
+Table settings {
+  id Int [pk, increment]
+  rateLimitWindow Int [not null]
+  rateLimitMax Int [not null]
+  secret String [not null]
+  serviceName String [not null]
+  chunkSize String [not null]
+  chunkedUploadsTimeout Int [not null]
+  maxSize String [not null]
+  generateZips Boolean [not null]
+  generateOriginalFileNameWithIdentifier Boolean [default: false, not null]
+  generatedFilenameLength Int [not null]
+  generatedAlbumLength Int [not null]
+  generatedLinksLength Int [default: 8, not null]
+  saveDuplicatesToAlbum Boolean [default: false, not null]
+  blockedExtensions String [not null]
+  blockNoExtension Boolean [not null]
+  publicMode Boolean [not null]
+  userAccounts Boolean [not null]
+  disableStatisticsCron Boolean [not null]
+  disableUpdateCheck Boolean [default: false, not null]
+  backgroundImageURL String [not null]
+  logoURL String [not null]
+  metaDescription String [not null]
+  metaKeywords String [not null]
+  metaTwitterHandle String [not null]
+  metaDomain String [default: '', not null]
+  serveUploadsFrom String [default: '', not null]
+  enableMixedCaseFilenames Boolean [default: true, not null]
+  usersStorageQuota String [default: '0', not null]
+  useNetworkStorage Boolean [default: false, not null]
+  useMinimalHomepage Boolean [default: false, not null]
+  useUrlShortener Boolean [default: false, not null]
+  generateThumbnails Boolean [default: true, not null]
+  privacyPolicyPageContent String [default: '', not null]
+  termsOfServicePageContent String [default: '', not null]
+  rulesPageContent String [default: '', not null]
+  S3Region String [default: '', not null]
+  S3Bucket String [default: '', not null]
+  S3AccessKey String [default: '', not null]
+  S3SecretKey String [default: '', not null]
+  S3Endpoint String [default: '', not null]
+  S3PathStyle Boolean [default: false, not null]
+  S3PublicUrl String [default: '', not null]
+  defaultSortOrder String [default: 'createdAt:desc', not null]
+}
+
+Table statistics {
+  id Int [pk, increment]
+  batchId Int
+  type String
+  data String
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Table tags {
+  id Int [pk, increment]
+  uuid String [unique, not null]
+  userId Int [not null]
+  name String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  editedAt DateTime
+}
+
+Table invites {
+  id Int [pk, increment]
+  createdBy String [not null]
+  usedBy String
+  code String [unique, not null]
+  used Boolean [default: false, not null]
+  createdAt DateTime [default: `now()`, not null]
+  editedAt DateTime
+}
+
+Ref files_userId_fk: files.userId > users.id
+
+Ref quarantineFiles_fileId_fk: quarantineFiles.fileId - files.uuid
+
+Ref shortenedLinks_userId_fk: shortenedLinks.userId > users.id

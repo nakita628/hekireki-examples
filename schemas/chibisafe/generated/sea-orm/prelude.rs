@@ -1,0 +1,13 @@
+pub use super::albums::Entity as albums;
+pub use super::bans::Entity as bans;
+pub use super::files::Entity as files;
+pub use super::invites::Entity as invites;
+pub use super::links::Entity as links;
+pub use super::quarantine_files::Entity as quarantineFiles;
+pub use super::roles::Entity as roles;
+pub use super::settings::Entity as settings;
+pub use super::shortened_links::Entity as shortenedLinks;
+pub use super::snippets::Entity as snippets;
+pub use super::statistics::Entity as statistics;
+pub use super::tags::Entity as tags;
+pub use super::users::Entity as users;

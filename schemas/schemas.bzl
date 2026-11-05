@@ -23,6 +23,8 @@ SCHEMAS = {
     "triggerdev": "postgresql",
     "anythingllm": "sqlite",
     "inboxzero": "postgresql",
+    "openpanel": "postgresql",
+    "chibisafe": "sqlite",
 }
 
 # The generators left out of a schema (`skip` in sources.json): the generator refuses it.

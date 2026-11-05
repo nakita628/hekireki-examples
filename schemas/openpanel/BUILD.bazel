@@ -1,0 +1,12 @@
+load("//tools/hekireki:defs.bzl", "hekireki_generate")
+
+package(default_visibility = ["//visibility:public"])
+
+exports_files(["schema.prisma"])
+
+# `bazel build :generate` runs hekireki; `bazel run :generate.write` commits the result under
+# generated/; `bazel test :generate.test` holds the committed copy to a fresh generation.
+hekireki_generate(
+    name = "generate",
+    schema = "schema.prisma",
+)
