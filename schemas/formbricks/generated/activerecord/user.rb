@@ -46,4 +46,5 @@ class User < ApplicationRecord
   has_many :exemptions_revoked, class_name: "RetentionExemption", foreign_key: "revokedById", inverse_of: :revoked_by,
                                 dependent: :nullify
   has_many :retention_notices, foreign_key: "userId", inverse_of: :user, dependent: :destroy
+  has_many :attachment_exports, foreign_key: "requestedById", inverse_of: :requested_by, dependent: :nullify
 end

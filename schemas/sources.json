@@ -2,7 +2,7 @@
   "taxonomy": {
     "repo": "shadcn-ui/taxonomy",
     "path": "prisma/schema.prisma",
-    "commit": "03ef292d26f1f96dfbd9d2773284c370e3fec7e4",
+    "commit": "298a8857c7128a0d121e7f699dfd729f23b3966d",
     "license": "MIT",
     "app": "Taxonomy",
     "description": "shadcn's Next.js 13 app-directory example: NextAuth's tables and a Post."
@@ -10,7 +10,7 @@
   "umami": {
     "repo": "umami-software/umami",
     "path": "prisma/schema.prisma",
-    "commit": "b185837063f4d63ffe01f565e5791c69b3c9c424",
+    "commit": "559e3c607c23d2c72d9bd4f6481bda428255323c",
     "license": "MIT",
     "app": "Umami",
     "description": "Umami web analytics: websites, sessions, events and the reports over them."
@@ -18,7 +18,7 @@
   "hoppscotch": {
     "repo": "hoppscotch/hoppscotch",
     "path": "packages/hoppscotch-backend/prisma/schema.prisma",
-    "commit": "4789a0f2fae484aa7bc1233603d66b97b8ebfd8b",
+    "commit": "39d25650bdb4e86464b2cd69174c567b86f57892",
     "license": "MIT",
     "app": "Hoppscotch",
     "description": "Hoppscotch's backend: users, teams, collections, requests and environments."
@@ -26,7 +26,7 @@
   "langfuse": {
     "repo": "langfuse/langfuse",
     "path": "packages/shared/prisma/schema.prisma",
-    "commit": "0659e55045dc7e98c63c5017d82eb7e49db3636e",
+    "commit": "728e69371ec7667e24602c2b1d87a8c60cfc6404",
     "license": "MIT",
     "app": "Langfuse",
     "description": "Langfuse LLM observability: organizations, projects, traces, prompts, datasets and evaluations."
@@ -34,7 +34,7 @@
   "calcom": {
     "repo": "calcom/cal.com",
     "path": "packages/prisma/schema.prisma",
-    "commit": "91341cbba403460fac033f95003ce2e2911d4a4e",
+    "commit": "2eb48eccd8aca8a0c0ffabf28cf92e298b33ecee",
     "license": "MIT",
     "app": "Calcom",
     "description": "Cal.com scheduling: users, teams, event types, bookings, availability and integrations."
@@ -50,7 +50,7 @@
   "ghostfolio": {
     "repo": "ghostfolio/ghostfolio",
     "path": "prisma/schema.prisma",
-    "commit": "fb8b12aa7eb2a9f28dc92ec18d7c951743782746",
+    "commit": "f3840ed29ae634c5f484529718975401ae940608",
     "license": "AGPL-3.0",
     "app": "Ghostfolio",
     "description": "Ghostfolio wealth management: users, accounts, orders, symbol profiles and market data."
@@ -82,7 +82,7 @@
   "rallly": {
     "repo": "lukevella/rallly",
     "path": "packages/database/prisma/",
-    "commit": "78bc44572e7bd4fa3f1907d8afc87c3c1a4c6188",
+    "commit": "eee2caa04af3902a871c9292ad33c9eccf6896d4",
     "license": "AGPL-3.0",
     "app": "Rallly",
     "description": "Rallly scheduling polls: users, spaces, polls, options, participants and votes."
@@ -90,7 +90,7 @@
   "documenso": {
     "repo": "documenso/documenso",
     "path": "packages/prisma/schema.prisma",
-    "commit": "86a0ff2da8d6eaf251a05eeb0fc32c06bbe49d29",
+    "commit": "91e73d59281254ad0e258adc861a337c85da60d0",
     "license": "AGPL-3.0",
     "app": "Documenso",
     "description": "Documenso document signing: users, teams, documents, recipients, fields and signatures."
@@ -106,7 +106,7 @@
   "postiz": {
     "repo": "gitroomhq/postiz-app",
     "path": "libraries/nestjs-libraries/src/database/prisma/schema.prisma",
-    "commit": "e424fb587e0ae87a2428a0586cb00af6facd0d1d",
+    "commit": "bd8353f09f8dbaec54f15985f26d34b56ac69636",
     "license": "AGPL-3.0",
     "app": "Postiz",
     "description": "Postiz social media scheduling: organizations, integrations, posts, comments and media."
@@ -122,7 +122,7 @@
   "formbricks": {
     "repo": "formbricks/formbricks",
     "path": "packages/database/schema/",
-    "commit": "31f391b3797f9f45f7ebaceb27e801b29fd69203",
+    "commit": "7cddb162bb4615b68561d90a7dbde4c5985213f0",
     "license": "AGPL-3.0",
     "app": "Formbricks",
     "description": "Formbricks surveys: organizations, environments, surveys, responses and contacts.",
@@ -141,9 +141,20 @@
   "anythingllm": {
     "repo": "Mintplex-Labs/anything-llm",
     "path": "server/prisma/schema.prisma",
-    "commit": "061a58f2ebf7c93953694047e85011eb41a44d70",
+    "commit": "e76048b57c7217f4e04b028c2752e7e1a4a76a03",
     "license": "MIT",
     "app": "AnythingLLM",
     "description": "AnythingLLM local AI workspace: users, workspaces, documents, chats, embeddings and agents, on SQLite."
+  },
+  "inboxzero": {
+    "repo": "elie222/inbox-zero",
+    "path": "apps/web/prisma/schema.prisma",
+    "commit": "423a835622c483ab5594469a2c6eada40a4054af",
+    "license": "AGPL-3.0-with-additional-terms",
+    "app": "InboxZero",
+    "description": "Inbox Zero email assistant: users, email accounts, threads, rules, drafts and digests.",
+    "skip": {
+      "eloquent": "a relation field named `refresh` (OauthAccessToken.refresh) collides with Eloquent's Model::refresh(), which hekireki-eloquent refuses"
+    }
   }
 }

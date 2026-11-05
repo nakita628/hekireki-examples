@@ -48,7 +48,8 @@ defmodule Formbricks.User do
           retention_policies_updated: [Formbricks.RetentionPolicy.t()],
           exemptions_created: [Formbricks.RetentionExemption.t()],
           exemptions_revoked: [Formbricks.RetentionExemption.t()],
-          retention_notices: [Formbricks.RetentionNotice.t()]
+          retention_notices: [Formbricks.RetentionNotice.t()],
+          attachment_exports: [Formbricks.AttachmentExport.t()]
         }
 
   schema "User" do
@@ -94,6 +95,7 @@ defmodule Formbricks.User do
     has_many(:exemptions_created, Formbricks.RetentionExemption, foreign_key: :created_by_id, references: :id)
     has_many(:exemptions_revoked, Formbricks.RetentionExemption, foreign_key: :revoked_by_id, references: :id)
     has_many(:retention_notices, Formbricks.RetentionNotice, foreign_key: :user_id, references: :id)
+    has_many(:attachment_exports, Formbricks.AttachmentExport, foreign_key: :requested_by_id, references: :id)
     timestamps(inserted_at_source: :created_at)
   end
 end

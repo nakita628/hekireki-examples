@@ -4,6 +4,8 @@ pub mod action_type;
 pub mod api_key;
 pub mod api_key_permission;
 pub mod api_key_workspace;
+pub mod attachment_export;
+pub mod attachment_export_status;
 pub mod authzed_projection_outbox;
 pub mod authzed_projection_scope_state;
 pub mod bootstrap_admin_marker;

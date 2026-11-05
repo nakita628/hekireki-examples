@@ -485,6 +485,7 @@ class Survey(Base):
     retention_exemptions: Mapped[list["RetentionExemption"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="survey")
     retention_notices: Mapped[list["RetentionNotice"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="survey")
     creatives: Mapped[list["Creative"]] = relationship(passive_deletes="all", overlaps="creatives,workspace", back_populates="survey")
+    attachment_exports: Mapped[list["AttachmentExport"]] = relationship(cascade="all, delete", passive_deletes=True, overlaps="attachment_exports,workspace", back_populates="survey")
     retention_restore: Mapped[Optional["RetentionSurveyRestore"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="survey")
 
 class SurveyQuota(Base):
@@ -624,6 +625,7 @@ class Workspace(Base):
     charts: Mapped[list["Chart"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="workspace")
     dashboards: Mapped[list["Dashboard"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="workspace")
     creatives: Mapped[list["Creative"]] = relationship(cascade="all, delete", passive_deletes=True, overlaps="creatives,survey", back_populates="workspace")
+    attachment_exports: Mapped[list["AttachmentExport"]] = relationship(cascade="all, delete", passive_deletes=True, overlaps="attachment_exports,survey", back_populates="workspace")
     surveys: Mapped[list["Survey"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="workspace")
     contacts: Mapped[list["Contact"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="workspace")
     action_classes: Mapped[list["ActionClass"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="workspace")
@@ -1110,6 +1112,7 @@ class User(Base):
     exemptions_created: Mapped[list["RetentionExemption"]] = relationship(foreign_keys="RetentionExemption.created_by_id", back_populates="created_by")
     exemptions_revoked: Mapped[list["RetentionExemption"]] = relationship(foreign_keys="RetentionExemption.revoked_by_id", back_populates="revoked_by")
     retention_notices: Mapped[list["RetentionNotice"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="user")
+    attachment_exports: Mapped[list["AttachmentExport"]] = relationship(back_populates="requested_by")
     two_factor: Mapped[Optional["TwoFactor"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="user")
     password_reset_token: Mapped[Optional["PasswordResetToken"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="user")
 
@@ -1348,6 +1351,42 @@ class DeletionCleanup(Base):
         Index("DeletionCleanup_nextAttemptAt_idx", "nextAttemptAt"),
         Index("DeletionCleanup_organizationId_created_at_idx", "organizationId", "created_at"),
     )
+
+class AttachmentExport(Base):
+    __tablename__ = "AttachmentExport"
+
+    id: Mapped[str] = mapped_column(primary_key=True)
+    created_at: Mapped[datetime] = mapped_column(default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
+    updated_at: Mapped[datetime] = mapped_column(default=utc_now, onupdate=utc_now)
+    survey_id: Mapped[str] = mapped_column("surveyId")
+    workspace_id: Mapped[str] = mapped_column("workspaceId", ForeignKey("Workspace.id", ondelete="CASCADE", onupdate="CASCADE", name="AttachmentExport_workspaceId_fkey"))
+    requested_by_id: Mapped[Optional[str]] = mapped_column("requestedById", ForeignKey("User.id", ondelete="SET NULL", onupdate="CASCADE", name="AttachmentExport_requestedById_fkey"))
+    status: Mapped[str] = mapped_column(Enum("queued", "running", "completed", "failed", "expired", name="AttachmentExportStatus"), default="queued", server_default=text("'queued'"))
+    filter_criteria: Mapped[Optional[dict[str, Any]]] = mapped_column("filterCriteria", JSONB(none_as_null=True))
+    time_zone: Mapped[str] = mapped_column("timeZone")
+    dispatch_count: Mapped[int] = mapped_column("dispatchCount", default=0, server_default=text("0"))
+    file_count: Mapped[int] = mapped_column("fileCount")
+    response_count: Mapped[int] = mapped_column("responseCount")
+    included_file_count: Mapped[Optional[int]] = mapped_column("includedFileCount")
+    total_bytes: Mapped[Optional[int]] = mapped_column("totalBytes", BigInteger)
+    truncated: Mapped[bool] = mapped_column(default=False, server_default=text("false"))
+    storage_key: Mapped[Optional[str]] = mapped_column("storageKey")
+    error_code: Mapped[Optional[str]] = mapped_column("errorCode")
+    started_at: Mapped[Optional[datetime]] = mapped_column("startedAt")
+    finished_at: Mapped[Optional[datetime]] = mapped_column("finishedAt")
+    expires_at: Mapped[Optional[datetime]] = mapped_column("expiresAt")
+
+    __table_args__ = (
+        Index("AttachmentExport_surveyId_requestedById_created_at_idx", "surveyId", "requestedById", "created_at"),
+        Index("AttachmentExport_status_created_at_idx", "status", "created_at"),
+        Index("AttachmentExport_expiresAt_idx", "expiresAt"),
+        Index("AttachmentExport_workspaceId_idx", "workspaceId"),
+        ForeignKeyConstraint(["surveyId", "workspaceId"], ["Survey.id", "Survey.workspaceId"], ondelete="CASCADE", onupdate="CASCADE", name="AttachmentExport_surveyId_workspaceId_fkey"),
+    )
+
+    survey: Mapped["Survey"] = relationship(overlaps="attachment_exports,workspace", back_populates="attachment_exports")
+    workspace: Mapped["Workspace"] = relationship(overlaps="attachment_exports,survey", back_populates="attachment_exports")
+    requested_by: Mapped[Optional["User"]] = relationship(back_populates="attachment_exports")
 
 class FeedbackSource(Base):
     __tablename__ = "FeedbackSource"

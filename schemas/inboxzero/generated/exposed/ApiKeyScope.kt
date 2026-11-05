@@ -1,0 +1,13 @@
+package inboxzero.models
+
+enum class ApiKeyScope(
+    val dbName: String,
+) {
+    STATS_READ("STATS_READ"),
+    RULES_READ("RULES_READ"),
+    RULES_WRITE("RULES_WRITE"),
+    SETTINGS_READ("SETTINGS_READ"),
+    SETTINGS_WRITE("SETTINGS_WRITE"),
+    ASSISTANT_CHAT("ASSISTANT_CHAT"),
+    SENDERS_UNSUBSCRIBE("SENDERS_UNSUBSCRIBE"),
+}

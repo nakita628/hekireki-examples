@@ -1,6 +1,6 @@
 // Umami: Umami web analytics: websites, sessions, events and the reports over them.
 //
-// Imported from https://github.com/umami-software/umami/blob/b185837063f4d63ffe01f565e5791c69b3c9c424/prisma/schema.prisma
+// Imported from https://github.com/umami-software/umami/blob/559e3c607c23d2c72d9bd4f6481bda428255323c/prisma/schema.prisma
 // (MIT license) by tools/import/import-schema.mjs, which dropped the original
 // generator blocks and the datasource's connection URLs and added the hekireki generators below.
 // The models, enums and `///` comments are the project's own, as they are at that commit.

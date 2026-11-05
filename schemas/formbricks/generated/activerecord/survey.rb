@@ -62,4 +62,6 @@ class Survey < ApplicationRecord
   has_many :retention_notices, foreign_key: "surveyId", inverse_of: :survey, dependent: :destroy
   has_many :creatives, foreign_key: [ :surveyId, :workspaceId ], primary_key: [ :id, :workspaceId ], inverse_of: :survey,
                        dependent: :restrict_with_error
+  has_many :attachment_exports, foreign_key: [ :surveyId, :workspaceId ], primary_key: [ :id, :workspaceId ],
+                                inverse_of: :survey, dependent: :destroy
 end

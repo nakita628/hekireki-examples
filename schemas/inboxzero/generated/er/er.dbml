@@ -1,0 +1,2421 @@
+Enum SignupIntent {
+  AI_ASSISTANT
+  MAIL_CLIENT
+  BOTH
+}
+
+Enum ApiKeyScope {
+  STATS_READ
+  RULES_READ
+  RULES_WRITE
+  SETTINGS_READ
+  SETTINGS_WRITE
+  ASSISTANT_CHAT
+  SENDERS_UNSUBSCRIBE
+}
+
+Enum ScheduledEmailStatus {
+  PENDING
+  PROCESSING
+  SENT
+  BLOCKED_AUTH
+  UNCERTAIN
+  FAILED
+  CANCELLED
+}
+
+Enum EmailReminderStatus {
+  NONE
+  PENDING
+  PROCESSING
+  COMPLETED
+  CANCELLED
+}
+
+Enum MeetingJoinRule {
+  ALL
+  EXTERNAL_ONLY
+  HOST_ONLY
+  OFF
+}
+
+Enum MeetingRecordingStatus {
+  PENDING
+  SCHEDULED
+  CANCELLING
+  JOINING
+  IN_WAITING_ROOM
+  IN_CALL
+  RECORDING
+  CALL_ENDED
+  DONE
+  FAILED
+  CANCELLED
+}
+
+Enum MeetingProcessingStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+Enum McpAuthType {
+  OAUTH
+  API_TOKEN
+  NONE
+}
+
+Enum MobilePushPlatform {
+  android
+  ios
+}
+
+Enum MobilePushTokenType {
+  expo
+  apns
+  fcm
+}
+
+Enum ActionType {
+  ARCHIVE
+  LABEL
+  REPLY
+  SEND_EMAIL
+  FORWARD
+  DRAFT_EMAIL
+  DRAFT_MESSAGING_CHANNEL
+  NOTIFY_MESSAGING_CHANNEL
+  MARK_SPAM
+  CALL_WEBHOOK
+  MARK_READ
+  STAR
+  DELETE
+  DIGEST
+  MOVE_FOLDER
+  NOTIFY_SENDER
+  INTEGRATION
+}
+
+Enum MessagingMessageStatus {
+  SENT
+  DRAFT_SENT
+  DRAFT_EDITED
+  DISMISSED
+  EXPIRED
+  FAILED
+}
+
+Enum Frequency {
+  NEVER
+  DAILY
+  WEEKLY
+}
+
+Enum MailLayout {
+  LIST
+  SPLIT
+}
+
+Enum MailSplitFilterKind {
+  UNREAD
+  STARRED
+  LABEL
+  CATEGORY
+  FROM
+  OLDER_THAN
+}
+
+Enum DraftReplyConfidence {
+  ALL_EMAILS
+  STANDARD
+  HIGH_CONFIDENCE
+}
+
+Enum DraftEmailStatus {
+  PENDING
+  LIKELY_SENT
+  REPLIED_WITHOUT_DRAFT
+  CLEANED_UP_UNUSED
+  MISSING_FROM_PROVIDER
+  USER_EDITED
+  CLEANUP_SKIPPED
+}
+
+Enum ReplyMemoryKind {
+  FACT
+  PREFERENCE
+  PROCEDURE
+}
+
+Enum ReplyMemoryScopeType {
+  GLOBAL
+  SENDER
+  DOMAIN
+  TOPIC
+}
+
+Enum NewsletterStatus {
+  APPROVED
+  UNSUBSCRIBED
+  AUTO_ARCHIVED
+}
+
+Enum ColdEmailStatus {
+  AI_LABELED_COLD
+  USER_REJECTED_COLD
+}
+
+Enum DocumentFilingStatus {
+  PROCESSING
+  PENDING
+  FILED
+  REJECTED
+  ERROR
+  PREVIEW
+}
+
+Enum AttachmentSourceType {
+  FILE
+  FOLDER
+}
+
+Enum ColdEmailSetting {
+  DISABLED
+  LIST
+  LABEL
+  ARCHIVE_AND_LABEL
+  ARCHIVE_AND_READ_AND_LABEL
+}
+
+Enum PremiumTier {
+  BASIC_MONTHLY
+  BASIC_ANNUALLY
+  PRO_MONTHLY
+  PRO_ANNUALLY
+  BUSINESS_MONTHLY
+  BUSINESS_ANNUALLY
+  PLUS_MONTHLY
+  PLUS_ANNUALLY
+  BUSINESS_PLUS_MONTHLY
+  BUSINESS_PLUS_ANNUALLY
+  COPILOT_MONTHLY
+  LIFETIME
+}
+
+Enum ExecutedRuleStatus {
+  APPLIED
+  APPLYING
+  REJECTED
+  PENDING
+  SKIPPED
+  ERROR
+}
+
+Enum ExecutedActionStatus {
+  SUCCEEDED
+  FAILED
+  SKIPPED
+}
+
+Enum GroupItemType {
+  FROM
+  SUBJECT
+  BODY
+}
+
+Enum CategoryFilterType {
+  INCLUDE
+  EXCLUDE
+}
+
+Enum LogicalOperator {
+  AND
+  OR
+}
+
+Enum ThreadTrackerType {
+  AWAITING
+  NEEDS_REPLY
+  NEEDS_ACTION
+}
+
+Enum ProcessorType {
+  LEMON_SQUEEZY
+  STRIPE
+}
+
+Enum CleanAction {
+  ARCHIVE
+  MARK_READ
+}
+
+Enum SystemType {
+  TO_REPLY
+  FYI
+  AWAITING_REPLY
+  ACTIONED
+  COLD_EMAIL
+  NEWSLETTER
+  MARKETING
+  CALENDAR
+  RECEIPT
+  NOTIFICATION
+  OTP
+}
+
+Enum ReferralStatus {
+  PENDING
+  COMPLETED
+}
+
+Enum DigestStatus {
+  PENDING
+  PROCESSING
+  SENT
+  FAILED
+}
+
+Enum ScheduledActionStatus {
+  PENDING
+  EXECUTING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+Enum SnoozedThreadStatus {
+  PREPARING
+  PENDING
+  EXECUTING
+  COMPLETED
+  CANCELLED
+}
+
+Enum EmailSendOperationStatus {
+  PROCESSING
+  SENT
+  UNCERTAIN
+}
+
+Enum SchedulingStatus {
+  PENDING
+  SCHEDULED
+  FAILED
+}
+
+Enum MeetingBriefingStatus {
+  PENDING
+  SENT
+  FAILED
+  SKIPPED
+}
+
+Enum BookingLinkLocationType {
+  IN_PERSON
+  GOOGLE_MEET
+  MICROSOFT_TEAMS
+  PHONE
+  CUSTOM
+}
+
+Enum BookingStatus {
+  PENDING_PROVIDER_EVENT
+  CONFIRMED
+  CANCELED
+  FAILED
+}
+
+Enum GroupItemSource {
+  AI
+  USER
+  LABEL_REMOVED
+  LABEL_ADDED
+}
+
+Enum ClassificationFeedbackEventType {
+  LABEL_ADDED
+  LABEL_REMOVED
+}
+
+Enum MessagingProvider {
+  SLACK
+  TEAMS
+  TELEGRAM
+}
+
+Enum MessagingRoutePurpose {
+  RULE_NOTIFICATIONS
+  SCHEDULED_CHECK_INS
+  MEETING_BRIEFS
+  DOCUMENT_FILINGS
+  DIGESTS
+  FOLLOW_UPS
+}
+
+Enum MessagingRouteTargetType {
+  CHANNEL
+  DIRECT_MESSAGE
+}
+
+Enum AutomationJobRunStatus {
+  PENDING
+  RUNNING
+  SENT
+  SKIPPED
+  FAILED
+}
+
+Enum ConversationStatus {
+  ACTIVE
+  STOPPED
+}
+
+Enum ConversationActivityKind {
+  INVITED
+  COMMENT
+  MENTION
+}
+
+Table Account {
+  password String
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  userId String [not null]
+  provider String [not null]
+  type String [default: 'oidc', not null]
+  providerAccountId String [not null]
+  refresh_token String
+  refreshTokenExpiresAt DateTime
+  access_token String
+  expires_at DateTime [default: `now()`]
+  disconnectedAt DateTime
+  token_type String
+  scope String
+  id_token String
+  session_state String
+
+  indexes {
+    (provider, providerAccountId) [unique]
+  }
+}
+
+Table Session {
+  id String [pk]
+  sessionToken String [unique, not null]
+  userId String [not null]
+  expires DateTime [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  emailOtp Boolean [default: false, not null]
+  emailOtpVersion Int [default: 0, not null]
+  ipAddress String
+  userAgent String
+  activeOrganizationId String
+}
+
+Table User {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  name String
+  email String [unique, not null]
+  emailVerified Boolean [default: false]
+  image String
+  completedOnboardingAt DateTime
+  signupIntent SignupIntent
+  onboardingAnswers Json
+  lastLogin DateTime
+  utms Json
+  errorMessages Json
+  announcementDismissedAt DateTime
+  dismissedHints String[] [not null]
+  surveyFeatures String[] [not null]
+  surveyRole String
+  surveyGoal String
+  surveyCompanySize Int
+  surveySource String
+  surveyImprovements String
+  mcpServerEnabled Boolean [default: false, not null]
+  mcpTokenVersion Int [default: 0, not null]
+  emailOtpEnabled Boolean [default: false, not null]
+  emailOtpVersion Int [default: 0, not null]
+  aiProvider String
+  aiModel String
+  aiApiKey String
+  decisionModelEnabled Boolean
+  webhookSecret String
+  referralCode String [unique]
+  premiumId String
+  premiumAdminId String
+  scimAccessDisabled Boolean [default: false, not null]
+}
+
+Table EmailAccount {
+  id String [pk]
+  email String [unique, not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  name String
+  image String
+  sortOrder Int
+  about String
+  writingStyle String
+  signature String
+  sentSignatureScan Json
+  sentSignatureScannedAt DateTime
+  includeReferralSignature Boolean [default: false, not null]
+  includeSentWithSignature Boolean [default: true, not null]
+  sentMessageOpenTrackingEnabled Boolean [default: true, not null]
+  watchEmailsExpirationDate DateTime
+  watchEmailsSubscriptionId String
+  watchEmailsSubscriptionHistory Json
+  lastSyncedHistoryId String
+  behaviorProfile Json
+  personaAnalysis Json
+  role String
+  timezone String
+  calendarBookingLink String
+  draftDocsUrls String[] [not null]
+  statsEmailFrequency Frequency [default: 'WEEKLY', not null]
+  summaryEmailFrequency Frequency [default: 'WEEKLY', not null]
+  lastSummaryEmailAt DateTime
+  lastInboxHealthEmailAt DateTime
+  coldEmailBlocker ColdEmailSetting
+  coldEmailDigest Boolean [default: false, not null]
+  coldEmailPrompt String
+  rulesPrompt String
+  autoCategorizeSenders Boolean [default: false, not null]
+  multiRuleSelectionEnabled Boolean [default: false, not null]
+  sensitiveDataPolicy String
+  draftReplyConfidence DraftReplyConfidence [default: 'ALL_EMAILS', not null]
+  draftCleanupDays Int [default: 14]
+  allowHiddenAiDraftLinks Boolean [default: false, not null]
+  rulesRevision Int [default: 0, not null]
+  mailLayout MailLayout [default: 'LIST', not null]
+  mailExpandedPreview Boolean [default: false, not null]
+  includeInAllAccounts Boolean [default: true, not null]
+  meetingBriefingsEnabled Boolean [default: false, not null]
+  meetingBriefingsMinutesBefore Int [default: 240, not null]
+  meetingBriefsSendEmail Boolean [default: true, not null]
+  meetingRecorderEnabled Boolean [default: false, not null]
+  meetingRecorderJoinRule MeetingJoinRule [default: 'ALL', not null]
+  meetingRecorderRecapEmailEnabled Boolean [default: true, not null]
+  meetingRecorderFollowUpDraftEnabled Boolean [default: true, not null]
+  filingEnabled Boolean [default: false, not null]
+  filingPrompt String
+  filingConfirmationSendEmail Boolean [default: true, not null]
+  followUpAwaitingReplyDays Float
+  followUpNeedsReplyDays Float
+  followUpAutoDraftEnabled Boolean [default: true, not null]
+  digestSendEmail Boolean [default: true, not null]
+  learnedWritingStyle String
+  userId String [not null]
+  accountId String [unique, not null]
+}
+
+Table MailSplit {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  name String [not null]
+  order Int [not null]
+  matchAll Boolean [default: true, not null, note: '''Whether every filter must match, or any one of them ("Show mail matching
+all/any of these conditions"). A split with no filters is the plain inbox.''']
+  emailAccountId String [not null]
+
+  indexes {
+    (emailAccountId, name) [unique]
+  }
+}
+
+Table MailSplitFilter {
+  id String [pk]
+  kind MailSplitFilterKind [not null]
+  value String
+  order Int [not null]
+  mailSplitId String [not null]
+
+  indexes {
+    (mailSplitId, order) [unique]
+  }
+
+  Note: '''One condition row in the split builder. A split may hold several of the same
+kind (two senders, two labels), so kind is deliberately not unique per split.'''
+}
+
+Table Organization {
+  id String [pk]
+  name String [not null]
+  slug String [unique, not null]
+  logo String
+  metadata Json
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table OrganizationRule {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  organizationId String [not null]
+  enabled Boolean [default: true, not null]
+  name String [not null]
+  instructions String
+  runOnThreads Boolean [default: false, not null]
+  conditionalOperator LogicalOperator [default: 'AND', not null]
+  from String
+  to String
+  subject String
+  body String
+
+  indexes {
+    (organizationId, name) [unique]
+  }
+}
+
+Table OrganizationRuleAction {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  organizationRuleId String [not null]
+  type ActionType [not null]
+  label String
+  subject String
+  content String
+  to String
+  cc String
+  bcc String
+  url String
+  folderName String
+  delayInMinutes Int
+  staticAttachments Json
+}
+
+Table Member {
+  id String [pk]
+  organizationId String [not null]
+  emailAccountId String [unique, not null]
+  role String [default: 'member', not null]
+  allowOrgAdminAnalytics Boolean [default: false, not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (organizationId, emailAccountId) [unique]
+  }
+}
+
+Table Conversation {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  organizationId String [not null]
+  publisherId String [not null]
+  threadId String [not null]
+  status ConversationStatus [default: 'ACTIVE', not null]
+  revision Int [default: 0, not null]
+  generation Int [default: 1, not null]
+
+  indexes {
+    (publisherId, threadId) [unique]
+  }
+}
+
+Table ConversationParticipant {
+  id String [pk]
+  conversationId String [not null]
+  memberId String [not null]
+  generation Int [not null]
+  active Boolean [default: true, not null]
+  readRevision Int [default: 0, not null]
+  muted Boolean [default: false, not null]
+  createdAt DateTime [default: `now()`, not null]
+
+  indexes {
+    (conversationId, memberId, generation) [unique]
+  }
+}
+
+Table ConversationComment {
+  id String [pk]
+  conversationId String [not null]
+  authorMemberId String
+  clientMutationId String [not null]
+  body String [not null]
+  revision Int [not null]
+  deletedAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+
+  indexes {
+    (conversationId, revision) [unique]
+    (conversationId, authorMemberId, clientMutationId) [unique]
+  }
+}
+
+Table ConversationActivity {
+  id String [pk]
+  participantId String [not null]
+  commentId String
+  kind ConversationActivityKind [not null]
+  revision Int [not null]
+  createdAt DateTime [default: `now()`, not null]
+
+  indexes {
+    (participantId, kind, revision) [unique]
+  }
+}
+
+Table invitation {
+  id String [pk]
+  organizationId String [not null]
+  email String [not null]
+  role String
+  status String [not null]
+  expiresAt DateTime [not null]
+  inviterId String [not null]
+}
+
+Table verification {
+  id String [pk]
+  identifier String [not null]
+  value String [not null]
+  expiresAt DateTime [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
+}
+
+Table ssoProvider {
+  userId String
+  id String [pk]
+  issuer String [not null]
+  oidcConfig String
+  samlConfig String
+  emailAccountId String
+  providerId String [unique, not null]
+  organizationId String [unique]
+  domain String [not null]
+}
+
+Table Digest {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  emailAccountId String [not null]
+  sentAt DateTime
+  status DigestStatus [default: 'PENDING', not null]
+}
+
+Table DigestItem {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  messageId String [not null]
+  threadId String [not null]
+  content String [not null]
+  digestId String [not null]
+  actionId String
+  coldEmailId String
+
+  indexes {
+    (digestId, threadId, messageId) [unique]
+  }
+}
+
+Table Schedule {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  intervalDays Int
+  occurrences Int
+  daysOfWeek Int
+  timeOfDay DateTime
+  emailAccountId String [unique, not null]
+  lastOccurrenceAt DateTime
+  nextOccurrenceAt DateTime
+}
+
+Table Premium {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  pendingInvites String[] [not null]
+  lemonSqueezyRenewsAt DateTime
+  lemonSqueezyCustomerId Int
+  lemonSqueezySubscriptionId Int
+  lemonSqueezySubscriptionItemId Int
+  lemonSqueezyOrderId Int
+  lemonSqueezyProductId Int
+  lemonSqueezyVariantId Int
+  lemonLicenseKey String
+  lemonLicenseInstanceId String
+  lemonSubscriptionStatus String
+  stripeCustomerId String [unique]
+  stripeSubscriptionId String [unique]
+  stripeSubscriptionItemId String [unique]
+  stripePriceId String
+  stripeProductId String
+  stripeSubscriptionStatus String
+  stripeCancelAt DateTime
+  stripeCancelAtPeriodEnd Boolean
+  stripeRenewsAt DateTime
+  stripeTrialEnd DateTime
+  stripeTrialConversionInvoiceId String
+  stripeTrialConvertedAt DateTime
+  stripeCancellationInitiatedAt DateTime
+  stripeCanceledAt DateTime
+  stripeEndedAt DateTime
+  stripeCancellationFeedback String
+  stripeCancellationComment String
+  stripeAiOverageLastInvoiceId String
+  stripeAiOverageLastPeriodEnd DateTime
+  stripeAiOverageLastUnits Int
+  stripeInvoiceEmailsEnabled Boolean [default: false, not null]
+  appleOriginalTransactionId String [unique]
+  appleLatestTransactionId String [unique]
+  appleProductId String
+  appleSubscriptionGroupIdentifier String
+  appleAppAccountToken String
+  appleSubscriptionStatus String
+  appleEnvironment String
+  applePurchaseDate DateTime
+  appleExpiresAt DateTime
+  appleRevokedAt DateTime
+  appleOfferDiscountType String
+  adminGrantExpiresAt DateTime
+  adminGrantTier PremiumTier
+  tier PremiumTier
+  emailAccountsAccess Int
+  unsubscribeMonth Int
+  unsubscribeCredits Int
+  aiMonth Int
+  aiCredits Int
+}
+
+Table PendingPremiumGrant {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  email String [unique, not null]
+  tier PremiumTier [not null]
+  count Int [default: 1, not null]
+  emailAccountsAccess Int
+}
+
+Table VerificationToken {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  identifier String [not null]
+  token String [unique, not null]
+  expires DateTime [not null]
+
+  indexes {
+    (identifier, token) [unique]
+  }
+}
+
+Table Label {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  gmailLabelId String [not null]
+  name String [not null]
+  description String
+  enabled Boolean [default: true, not null]
+  emailAccountId String [not null]
+
+  indexes {
+    (gmailLabelId, emailAccountId) [unique]
+    (name, emailAccountId) [unique]
+  }
+}
+
+Table Rule {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  name String [not null]
+  enabled Boolean [default: true, not null]
+  automate Boolean [default: true, not null]
+  runOnThreads Boolean [default: false, not null]
+  emailAccountId String [not null]
+  organizationRuleId String
+  organizationRuleMemberEnabled Boolean
+  conditionalOperator LogicalOperator [default: 'AND', not null]
+  instructions String
+  groupId String [unique]
+  from String
+  to String
+  subject String
+  body String
+  categoryFilterType CategoryFilterType
+  systemType SystemType
+  promptText String
+
+  indexes {
+    (id, emailAccountId) [unique]
+    (name, emailAccountId) [unique]
+    (emailAccountId, systemType) [unique]
+    (emailAccountId, organizationRuleId) [unique]
+  }
+}
+
+Table Action {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  type ActionType [not null]
+  ruleId String [not null]
+  emailAccountId String [not null]
+  messagingChannelId String
+  messagingChannelEmailAccountId String
+  label String
+  labelId String
+  subject String
+  content String
+  to String
+  cc String
+  bcc String
+  url String
+  folderName String
+  folderId String
+  delayInMinutes Int
+  staticAttachments Json
+  integrationName String
+  integrationToolName String
+  integrationArgs Json
+}
+
+Table RuleHistory {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  ruleId String [not null]
+  version Int [not null]
+  triggerType String [not null]
+  promptText String
+  name String [not null]
+  instructions String
+  enabled Boolean [not null]
+  automate Boolean [not null]
+  runOnThreads Boolean [not null]
+  conditionalOperator String [not null]
+  from String
+  to String
+  subject String
+  body String
+  categoryFilterType String
+  systemType String
+  actions Json [not null]
+  categoryFilters Json
+
+  indexes {
+    (ruleId, version) [unique]
+  }
+}
+
+Table ExecutedRule {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  threadId String [not null]
+  messageId String [not null]
+  status ExecutedRuleStatus [not null]
+  automated Boolean [not null]
+  reason String
+  matchMetadata Json
+  ruleId String
+  emailAccountId String [not null]
+}
+
+Table ExecutedAction {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  type ActionType [not null]
+  executionStatus ExecutedActionStatus
+  executionStartedAt DateTime
+  executedAt DateTime
+  executionError Json
+  sentMessageIds String[] [not null]
+  executedRuleId String [not null]
+  messagingChannelId String
+  messagingMessageId String
+  messagingMessageSentAt DateTime
+  messagingMessageStatus MessagingMessageStatus
+  label String
+  labelId String
+  subject String
+  content String
+  to String
+  cc String
+  bcc String
+  url String
+  folderName String
+  folderId String
+  staticAttachments Json
+  selectedAttachments Json
+  integrationName String
+  integrationToolName String
+  integrationArgs Json
+  draftId String
+  draftStatus DraftEmailStatus
+  wasDraftSent Boolean
+  draftModelProvider String
+  draftModelName String
+  draftPipelineVersion Int
+  draftContextMetadata Json
+}
+
+Table ScheduledAction {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  executedRuleId String [not null]
+  actionType ActionType [not null]
+  messageId String [not null]
+  threadId String [not null]
+  scheduledFor DateTime [not null]
+  emailAccountId String [not null]
+  status ScheduledActionStatus [default: 'PENDING', not null]
+  schedulingStatus SchedulingStatus [default: 'PENDING', not null]
+  label String
+  labelId String
+  subject String
+  content String
+  to String
+  cc String
+  bcc String
+  url String
+  folderName String
+  folderId String
+  scheduledId String
+  staticAttachments Json
+  selectedAttachments Json
+  executedAt DateTime
+  executedActionId String [unique]
+}
+
+Table SnoozedThread {
+  id String [pk]
+  updatedAt DateTime [not null]
+  threadId String [not null]
+  scheduledFor DateTime [not null]
+  status SnoozedThreadStatus [default: 'PENDING', not null]
+  clientMutationId String
+  emailAccountId String [not null]
+
+  indexes {
+    (emailAccountId, clientMutationId) [unique]
+  }
+}
+
+Table ScheduledEmail {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  emailAccountId String [not null]
+  clientMutationId String [not null]
+  payloadHash String [not null]
+  payload Json [not null]
+  threadId String
+  sendAt DateTime [not null]
+  status ScheduledEmailStatus [default: 'PENDING', not null]
+  processingStartedAt DateTime
+  executionQueuedAt DateTime
+  sentAt DateTime
+  error String
+  remindAt DateTime
+  reminderStatus EmailReminderStatus [default: 'NONE', not null]
+  reminderStartedAt DateTime
+  heldForUndo Boolean [default: false, not null]
+  draftMessageIds String[] [not null]
+
+  indexes {
+    (emailAccountId, clientMutationId) [unique]
+  }
+}
+
+Table EmailSendOperation {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  clientMutationId String [not null]
+  payloadHash String [not null]
+  status EmailSendOperationStatus [default: 'PROCESSING', not null]
+  processingStartedAt DateTime [default: `now()`, not null]
+  result Json
+  emailAccountId String [not null]
+
+  indexes {
+    (emailAccountId, clientMutationId) [unique]
+  }
+}
+
+Table SentMessageOpen {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  token String [unique, not null]
+  emailAccountId String [not null]
+  threadId String
+  messageId String
+  firstOpenedAt DateTime
+  lastOpenedAt DateTime
+  openCount Int [default: 0, not null]
+
+  indexes {
+    (emailAccountId, messageId) [unique]
+  }
+}
+
+Table Group {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  name String [not null]
+  prompt String
+  emailAccountId String [not null]
+
+  indexes {
+    (name, emailAccountId) [unique]
+  }
+}
+
+Table GroupItem {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  groupId String
+  type GroupItemType [not null]
+  value String [not null]
+  exclude Boolean [default: false, not null]
+  reason String
+  threadId String
+  messageId String
+  source GroupItemSource
+
+  indexes {
+    (groupId, type, value) [unique]
+  }
+}
+
+Table ClassificationFeedback {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  sender String [not null]
+  eventType ClassificationFeedbackEventType [not null]
+  ruleId String [not null]
+  emailAccountId String [not null]
+  threadId String [not null]
+  messageId String [not null]
+
+  indexes {
+    (emailAccountId, sender, ruleId, messageId, eventType) [unique]
+  }
+}
+
+Table Category {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  name String [not null]
+  description String
+  emailAccountId String [not null]
+
+  indexes {
+    (name, emailAccountId) [unique]
+  }
+}
+
+Table Newsletter {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  email String [not null]
+  name String
+  status NewsletterStatus
+  patternAnalyzed Boolean [default: false, not null]
+  lastAnalyzedAt DateTime
+  emailAccountId String [not null]
+  categoryId String
+
+  indexes {
+    (email, emailAccountId) [unique]
+  }
+}
+
+Table ColdEmail {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  fromEmail String [not null]
+  messageId String
+  threadId String
+  status ColdEmailStatus
+  reason String
+  emailAccountId String [not null]
+
+  indexes {
+    (emailAccountId, fromEmail) [unique]
+  }
+}
+
+Table EmailMessage {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  threadId String [not null]
+  messageId String [not null]
+  date DateTime [not null]
+  from String [not null]
+  fromName String
+  fromDomain String [not null]
+  to String [not null]
+  unsubscribeLink String
+  read Boolean [not null]
+  sent Boolean [not null]
+  draft Boolean [not null]
+  inbox Boolean [not null]
+  emailAccountId String [not null]
+
+  indexes {
+    (emailAccountId, threadId, messageId) [unique]
+  }
+}
+
+Table ResponseTime {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  threadId String [not null]
+  sentMessageId String [not null]
+  receivedMessageId String [not null]
+  responseTimeMins Int [not null]
+  receivedAt DateTime [not null]
+  sentAt DateTime [not null]
+  emailAccountId String [not null]
+
+  indexes {
+    (emailAccountId, sentMessageId) [unique]
+  }
+}
+
+Table ThreadTracker {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  sentAt DateTime [not null]
+  threadId String [not null]
+  messageId String [not null]
+  resolved Boolean [default: false, not null]
+  type ThreadTrackerType [not null]
+  followUpAppliedAt DateTime
+  followUpDraftId String
+  followUpDraftContent String
+  followUpDraftCreatedAt DateTime
+  followUpNotifications Json
+  emailAccountId String [not null]
+
+  indexes {
+    (emailAccountId, threadId, messageId) [unique]
+  }
+}
+
+Table CleanupJob {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  action CleanAction [default: 'ARCHIVE', not null]
+  daysOld Int [default: 7, not null]
+  instructions String
+  skipReply Boolean
+  skipStarred Boolean
+  skipCalendar Boolean
+  skipReceipt Boolean
+  skipAttachment Boolean
+  skipConversation Boolean
+  emailAccountId String [not null]
+}
+
+Table CleanupThread {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  threadId String [not null]
+  archived Boolean [not null]
+  jobId String [not null]
+  emailAccountId String [not null]
+}
+
+Table Knowledge {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  title String [not null]
+  content String [not null]
+  emailAccountId String [not null]
+
+  indexes {
+    (emailAccountId, title) [unique]
+  }
+}
+
+Table Snippet {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  shortcut String [not null]
+  content String [not null]
+  emailAccountId String [not null]
+
+  indexes {
+    (emailAccountId, shortcut) [unique]
+  }
+}
+
+Table EmailSignature {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  name String [not null]
+  html String [not null]
+  emailAccountId String [not null]
+
+  indexes {
+    (emailAccountId, name) [unique]
+  }
+}
+
+Table ReplyMemory {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  content String [not null]
+  kind ReplyMemoryKind [not null]
+  scopeType ReplyMemoryScopeType [not null]
+  scopeValue String [not null]
+  isLearnedStyleEvidence Boolean [default: false, not null]
+  emailAccountId String [not null]
+
+  indexes {
+    (emailAccountId, kind, scopeType, scopeValue, content) [unique]
+  }
+}
+
+Table ReplyMemorySource {
+  createdAt DateTime [default: `now()`, not null]
+  learnedWritingStyleAnalyzedAt DateTime
+  replyMemoryId String [not null]
+  draftSendLogId String [not null]
+
+  indexes {
+    (replyMemoryId, draftSendLogId) [pk]
+  }
+}
+
+Table ApiKey {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  name String
+  hashedKey String [unique, not null]
+  isActive Boolean [default: true, not null]
+  expiresAt DateTime
+  lastUsedAt DateTime
+  scopes ApiKeyScope[] [not null]
+  userId String [not null]
+  emailAccountId String
+}
+
+Table EmailToken {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  token String [unique, not null]
+  expiresAt DateTime [not null]
+  emailAccountId String [not null]
+}
+
+Table Payment {
+  id String [pk]
+  createdAt DateTime [not null]
+  updatedAt DateTime [not null]
+  premiumId String
+  processorType ProcessorType [default: 'LEMON_SQUEEZY', not null]
+  processorId String [unique]
+  processorSubscriptionId String
+  processorCustomerId String
+  amount Int [not null]
+  currency String [not null]
+  status String [not null]
+  tax Int [not null]
+  taxInclusive Boolean [not null]
+  refunded Boolean [default: false, not null]
+  refundedAt DateTime
+  refundedAmount Int
+  billingReason String
+  invoiceEmailSentAt DateTime
+}
+
+Table DraftSendLog {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  executedActionId String [unique, not null]
+  sentMessageId String [not null]
+  similarityScore Float [not null]
+  bodySimilarityScore Float
+  bodySimilarityStatus String
+  similarityMetadata Json
+  sentText String
+  replyMemorySentText String
+  replyMemoryAttemptCount Int [default: 0, not null]
+  replyMemoryProcessedAt DateTime
+}
+
+Table Chat {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  deletedAt DateTime
+  name String
+  compactionCount Int [default: 0, not null]
+  lastSeenRulesRevision Int
+  activeStreamId String
+  activeStreamStartedAt DateTime
+  emailAccountId String [not null]
+}
+
+Table ChatMessage {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  role String [not null]
+  parts Json [not null]
+  metadata Json
+  chatId String [not null]
+}
+
+Table ChatCompaction {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  summary String [not null]
+  messageCount Int [not null]
+  compactedBeforeCreatedAt DateTime [not null]
+  chatId String [not null]
+}
+
+Table ChatMemory {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  content String [not null]
+  chatId String
+  emailAccountId String [not null]
+}
+
+Table CalendarConnection {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  provider String [not null]
+  email String [not null]
+  accessToken String
+  refreshToken String
+  expiresAt DateTime
+  isConnected Boolean [default: true, not null]
+  emailAccountId String [not null]
+
+  indexes {
+    (emailAccountId, provider, email) [unique]
+  }
+}
+
+Table Calendar {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  calendarId String [not null]
+  name String [not null]
+  description String
+  primary Boolean [default: false, not null]
+  isEnabled Boolean [default: true, not null]
+  timezone String
+  connectionId String [not null]
+
+  indexes {
+    (connectionId, calendarId) [unique]
+  }
+}
+
+Table BookingLink {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  slug String [unique, not null]
+  title String [not null]
+  description String
+  isActive Boolean [default: true, not null]
+  durationMinutes Int [not null]
+  slotIntervalMinutes Int [not null]
+  locationType BookingLinkLocationType [default: 'CUSTOM', not null]
+  locationValue String
+  minimumNoticeMinutes Int [default: 120, not null]
+  maxDaysAhead Int [default: 90, not null]
+  emailAccountId String [unique, not null]
+  destinationCalendarId String
+  availabilityScheduleId String [not null]
+}
+
+Table AvailabilitySchedule {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  name String [not null]
+  isDefault Boolean [default: false, not null]
+  timezone String [default: 'UTC', not null]
+  emailAccountId String [not null]
+
+  indexes {
+    (id, emailAccountId) [unique]
+  }
+}
+
+Table AvailabilityWindow {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  weekday Int [not null]
+  startMinutes Int [not null]
+  endMinutes Int [not null]
+  availabilityScheduleId String [not null]
+}
+
+Table Booking {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  guestName String [not null]
+  guestEmail String [not null]
+  guestNote String
+  startTime DateTime [not null]
+  endTime DateTime [not null]
+  status BookingStatus [default: 'PENDING_PROVIDER_EVENT', not null]
+  provider String
+  providerConnectionId String
+  providerCalendarId String
+  providerEventId String
+  videoConferenceLink String
+  cancelTokenHash String [not null]
+  cancellationReason String
+  idempotencyToken String
+  bookingLinkId String [not null]
+  emailAccountId String [not null]
+
+  indexes {
+    (bookingLinkId, idempotencyToken) [unique]
+  }
+}
+
+Table MeetingBriefing {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  calendarEventId String [not null]
+  eventTitle String [not null]
+  eventStartTime DateTime [not null]
+  guestCount Int [not null]
+  status MeetingBriefingStatus [not null]
+  emailAccountId String [not null]
+
+  indexes {
+    (emailAccountId, calendarEventId) [unique]
+  }
+}
+
+Table ContactResearch {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  email String [not null]
+  researchStartedAt DateTime [not null]
+  found Boolean [not null]
+  role String
+  confidence String
+  company Json
+  sources String[] [not null]
+}
+
+Table MeetingRecording {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  botProvider String [default: 'recall', not null]
+  externalBotId String
+  botName String
+  externalRecordingId String
+  transcriptRequestedAt DateTime
+  externalTranscriptId String
+  meetingUrl String [not null]
+  normalizedMeetingUrl String [not null]
+  activeKey String
+  meetingStartTime DateTime [not null]
+  status MeetingRecordingStatus [default: 'PENDING', not null]
+  failureReason String
+  transcript Json
+  transcriptFetchedAt DateTime
+  mediaDeletedAt DateTime
+  emailAccountId String [not null]
+
+  indexes {
+    (botProvider, externalBotId) [unique]
+    (activeKey, meetingStartTime) [unique]
+  }
+}
+
+Table Meeting {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  calendarEventId String [not null]
+  eventTitle String [not null]
+  startTime DateTime [not null]
+  endTime DateTime [not null]
+  attendees Json [not null]
+  organizerEmail String
+  joinOverride Boolean
+  processingStatus MeetingProcessingStatus [default: 'PENDING', not null]
+  processingAttempts Int [default: 0, not null]
+  summary Json
+  followUpDraftStartedAt DateTime
+  followUpDraftId String
+  recapSentAt DateTime
+  recordingId String
+  emailAccountId String [not null]
+
+  indexes {
+    (emailAccountId, calendarEventId) [unique]
+    (emailAccountId, recordingId) [unique]
+  }
+}
+
+Table MessagingChannel {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  provider MessagingProvider [not null]
+  isConnected Boolean [default: true, not null]
+  teamId String [not null]
+  teamName String
+  providerUserId String
+  botUserId String
+  accessToken String
+  refreshToken String
+  expiresAt DateTime
+  emailAccountId String [not null]
+
+  indexes {
+    (emailAccountId, provider, teamId) [unique]
+    (id, emailAccountId) [unique]
+  }
+}
+
+Table MessagingRoute {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  purpose MessagingRoutePurpose [not null]
+  targetType MessagingRouteTargetType [not null]
+  targetId String [not null]
+  messagingChannelId String [not null]
+
+  indexes {
+    (messagingChannelId, purpose) [unique]
+  }
+}
+
+Table AutomationJob {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  name String [not null]
+  enabled Boolean [default: true, not null]
+  prompt String
+  cronExpression String [not null]
+  nextRunAt DateTime [not null]
+  messagingChannelId String [not null]
+  emailAccountId String [unique, not null]
+}
+
+Table AutomationJobRun {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  status AutomationJobRunStatus [default: 'PENDING', not null]
+  scheduledFor DateTime [not null]
+  processedAt DateTime
+  outboundMessage String
+  providerMessageId String
+  error String
+  automationJobId String [not null]
+
+  indexes {
+    (automationJobId, scheduledFor) [unique]
+  }
+}
+
+Table DriveConnection {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  provider String [not null]
+  email String [not null]
+  accessToken String
+  refreshToken String
+  expiresAt DateTime
+  isConnected Boolean [default: true, not null]
+  emailAccountId String [not null]
+
+  indexes {
+    (emailAccountId, provider) [unique]
+  }
+}
+
+Table FilingFolder {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  folderId String [not null]
+  folderName String [not null]
+  folderPath String [not null]
+  driveConnectionId String [not null]
+  emailAccountId String [not null]
+
+  indexes {
+    (emailAccountId, folderId) [unique]
+  }
+}
+
+Table DocumentFiling {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  messageId String [not null]
+  attachmentId String [not null]
+  filename String [not null]
+  folderId String
+  folderPath String [not null]
+  fileId String
+  reasoning String
+  confidence Float
+  status DocumentFilingStatus [default: 'FILED', not null]
+  wasAsked Boolean [default: false, not null]
+  wasCorrected Boolean [default: false, not null]
+  originalPath String
+  correctedAt DateTime
+  feedbackPositive Boolean
+  feedbackAt DateTime
+  notificationMessageId String [unique]
+  notificationSentAt DateTime
+  notificationBatchId String
+  driveConnectionId String [not null]
+  emailAccountId String [not null]
+
+  indexes {
+    (emailAccountId, messageId, attachmentId) [unique]
+  }
+}
+
+Table AttachmentSource {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  name String [not null]
+  type AttachmentSourceType [not null]
+  sourceId String [not null]
+  sourcePath String
+  ruleId String [not null]
+  driveConnectionId String [not null]
+
+  indexes {
+    (ruleId, driveConnectionId, type, sourceId) [unique]
+  }
+}
+
+Table AttachmentDocument {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  attachmentSourceId String [not null]
+  fileId String [not null]
+  name String [not null]
+  mimeType String [not null]
+  modifiedAt DateTime
+  summary String
+  content String
+  metadata Json
+  indexedAt DateTime
+  error String
+
+  indexes {
+    (attachmentSourceId, fileId) [unique]
+  }
+}
+
+Table Referral {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  referrerUserId String [not null]
+  referredUserId String [unique, not null]
+  referralCodeUsed String [not null]
+  status ReferralStatus [default: 'PENDING', not null]
+  rewardGrantedAt DateTime
+  stripeBalanceTransactionId String
+  rewardAmount Int
+}
+
+Table McpIntegration {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  name String [unique, not null]
+  registeredServerUrl String
+  registeredAuthorizationUrl String
+  registeredTokenUrl String
+  oauthClientId String
+  oauthClientSecret String
+  displayName String
+  serverUrl String
+  authType McpAuthType
+  emailAccountId String
+}
+
+Table McpConnection {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  name String [not null]
+  isActive Boolean [default: true, not null]
+  accessToken String
+  refreshToken String
+  apiKey String
+  expiresAt DateTime
+  integrationId String [not null]
+  emailAccountId String
+
+  indexes {
+    (emailAccountId, integrationId) [unique]
+  }
+}
+
+Table McpTool {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  name String [not null]
+  description String
+  schema Json
+  isEnabled Boolean [default: true, not null]
+  isWrite Boolean [default: false, not null]
+  connectionId String [not null]
+
+  indexes {
+    (connectionId, name) [unique]
+  }
+}
+
+Table MobilePushToken {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  token String [unique, not null]
+  platform MobilePushPlatform [not null]
+  tokenType MobilePushTokenType [default: 'expo', not null]
+  appVersion String
+  userId String [not null]
+}
+
+Table MobilePushDelivery {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  deduplicationKey String [not null]
+  mobilePushTokenId String [not null]
+
+  indexes {
+    (deduplicationKey, mobilePushTokenId) [unique]
+  }
+}
+
+Table OauthClient {
+  id String [pk]
+  clientId String [unique, not null]
+  clientSecret String
+  clientDiscoveryId String
+  disabled Boolean [default: false]
+  skipConsent Boolean
+  enableEndSession Boolean
+  subjectType String
+  scopes String[] [not null]
+  clientCredentialsScopes String[] [not null]
+  userId String
+  createdAt DateTime
+  updatedAt DateTime
+  name String
+  uri String
+  icon String
+  contacts String[] [not null]
+  tos String
+  policy String
+  softwareId String
+  softwareVersion String
+  softwareStatement String
+  redirectUris String[] [not null]
+  postLogoutRedirectUris String[] [not null]
+  backchannelLogoutUri String
+  backchannelLogoutSessionRequired Boolean
+  tokenEndpointAuthMethod String
+  applicationType String
+  jwks String
+  jwksUri String
+  grantTypes String[] [not null]
+  responseTypes String[] [not null]
+  requirePKCE Boolean
+  dpopBoundAccessTokens Boolean [default: false]
+  referenceId String
+  metadata Json
+}
+
+Table OauthRefreshToken {
+  id String [pk]
+  token String [unique, not null]
+  clientId String [not null]
+  sessionId String
+  userId String [not null]
+  referenceId String
+  authorizationCodeId String
+  resources String[] [not null]
+  requestedUserInfoClaims String[] [not null]
+  expiresAt DateTime [not null]
+  createdAt DateTime [not null]
+  revoked DateTime
+  rotatedAt DateTime
+  rotationReplayResponse String
+  rotationReplayExpiresAt DateTime
+  authTime DateTime
+  confirmation Json
+  scopes String[] [not null]
+}
+
+Table OauthAccessToken {
+  id String [pk]
+  token String [unique, not null]
+  clientId String [not null]
+  sessionId String
+  userId String
+  referenceId String
+  authorizationCodeId String
+  resources String[] [not null]
+  requestedUserInfoClaims String[] [not null]
+  refreshId String
+  expiresAt DateTime [not null]
+  createdAt DateTime [not null]
+  revoked DateTime
+  confirmation Json
+  scopes String[] [not null]
+}
+
+Table OauthConsent {
+  id String [pk]
+  clientId String [not null]
+  userId String
+  referenceId String
+  resources String[] [not null]
+  requestedUserInfoClaims String[] [not null]
+  scopes String[] [not null]
+  createdAt DateTime [not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (clientId, userId) [unique]
+  }
+}
+
+Table Jwks {
+  id String [pk]
+  publicKey String [not null]
+  privateKey String [not null]
+  createdAt DateTime [not null]
+  expiresAt DateTime
+  alg String
+  crv String
+}
+
+Table OauthResource {
+  id String [pk]
+  identifier String [unique, not null]
+  name String [not null]
+  accessTokenTtl Int
+  refreshTokenTtl Int
+  signingAlgorithm String
+  signingKeyId String
+  allowedScopes String[] [not null]
+  customClaims Json
+  dpopBoundAccessTokensRequired Boolean [default: false]
+  disabled Boolean [default: false]
+  createdAt DateTime
+  updatedAt DateTime
+  policyVersion Int [default: 1]
+  metadata Json
+}
+
+Table OauthClientResource {
+  id String [pk]
+  clientId String [not null]
+  resourceId String [not null]
+  metadata Json
+  createdAt DateTime
+
+  indexes {
+    (clientId, resourceId) [unique]
+  }
+}
+
+Table OauthClientAssertion {
+  id String [pk]
+  expiresAt DateTime [not null]
+}
+
+Table scimManagedConnection {
+  id String [pk]
+  creationRequestId String [unique, not null]
+  connectionId String [unique, not null]
+  provisioningDomainId String [not null]
+  status String [not null]
+  revision Int [not null]
+  createdAt DateTime [not null]
+  createdBy String [not null]
+  decommissionStartedAt DateTime
+  decommissionStartedBy String
+  decommissionedAt DateTime
+  decommissionedBy String
+}
+
+Table scimManagedCredential {
+  id String [pk]
+  connectionRecordId String [not null]
+  credentialId String [unique, not null]
+  tokenDigest String [not null]
+  hashVersion String [not null]
+  activeSlotKey String [unique, not null]
+  status String [not null]
+  serializedScopes String [not null]
+  expiresAt DateTime [not null]
+  createdAt DateTime [not null]
+  createdBy String [not null]
+  lastUsedAt DateTime
+  revokedAt DateTime
+  revokedBy String
+  decommissionedAt DateTime
+}
+
+Table scimManagedConnectionEvent {
+  id String [pk]
+  connectionRecordId String [not null]
+  eventKey String [unique, not null]
+  sequence Int [not null]
+  type String [not null]
+  actorId String [not null]
+  credentialId String
+  createdAt DateTime [not null]
+}
+
+Table scimConnectionBinding {
+  id String [pk]
+  connectionId String [not null]
+  connectionKey String [unique, not null]
+  provisioningDomainId String [not null]
+  createdAt DateTime [not null]
+  decommissionedAt DateTime
+  decommissionStatus String [default: 'active', not null]
+  decommissionCursorUserId String
+  decommissionReconciledUserCount Int [default: 0, not null]
+  decommissionBatchCount Int [default: 0, not null]
+  decommissionRevision Int [default: 0, not null]
+  decommissionCompletedAt DateTime
+  decommissionLeaseId String
+  decommissionLeaseExpiresAt DateTime
+}
+
+Table scimIdentityTombstone {
+  id String [pk]
+  connectionId String [not null]
+  provisioningDomainId String [not null]
+  externalId String [not null]
+  externalIdKey String [unique, not null]
+  userId String [not null]
+  profile String [not null]
+  deletedAt DateTime [not null]
+}
+
+Table scimSubject {
+  id String [pk]
+  userId String [unique, not null]
+  profileSourceId String
+  revision Int [not null]
+  createdAt DateTime [not null]
+  updatedAt DateTime [not null]
+}
+
+Table scimUser {
+  id String [pk]
+  connectionId String [not null]
+  provisioningDomainId String [not null]
+  userId String [not null]
+  connectionUserKey String [unique, not null]
+  userName String [not null]
+  userNameKey String [unique, not null]
+  primaryEmail String [not null]
+  workEmailValueIndex String [not null]
+  emailValueIndex String [not null]
+  displayName String [not null]
+  formattedName String [not null]
+  givenName String
+  familyName String
+  serializedEmails String [not null]
+  serializedAttributes String
+  externalId String
+  externalIdKey String [unique]
+  active Boolean [not null]
+  orderKey String [unique, not null]
+  createdAt DateTime [not null]
+  updatedAt DateTime [not null]
+}
+
+Table scimProjectionGrant {
+  id String [pk]
+  connectionId String [not null]
+  provisioningDomainId String [not null]
+  scimUserId String [not null]
+  userId String [not null]
+  sourceKind String [not null]
+  sourceId String [not null]
+  sourceValue String
+  role String [not null]
+  grantKey String [unique, not null]
+  createdAt DateTime [not null]
+  updatedAt DateTime [not null]
+}
+
+Table scimGroup {
+  id String [pk]
+  connectionId String [not null]
+  provisioningDomainId String [not null]
+  revision Int [default: 0, not null]
+  displayName String [not null]
+  displayNameKey String [unique, not null]
+  externalId String
+  externalIdKey String [unique]
+  orderKey String [unique, not null]
+  createdAt DateTime [not null]
+  updatedAt DateTime [not null]
+}
+
+Table scimGroupMember {
+  id String [pk]
+  connectionId String [not null]
+  groupId String [not null]
+  scimUserId String [not null]
+  membershipKey String [unique, not null]
+  createdAt DateTime [not null]
+}
+
+Table ScimIdentityLink {
+  id String [pk]
+  connectionId String [not null]
+  externalId String [not null]
+  userId String [not null]
+
+  indexes {
+    (connectionId, externalId) [unique]
+  }
+}
+
+Table LoopsEmailSource {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  emailMessageId String [unique]
+  loopId String
+  loopName String
+  campaignId String
+  campaignName String
+  sourceType String
+  eventTime DateTime
+}
+
+Ref Account_userId_fk: Account.userId > User.id [delete: cascade]
+
+Ref Session_userId_fk: Session.userId > User.id [delete: cascade]
+
+Ref Session_activeOrganizationId_fk: Session.activeOrganizationId > Organization.id [delete: set null]
+
+Ref User_premiumId_fk: User.premiumId > Premium.id
+
+Ref User_premiumAdminId_fk: User.premiumAdminId > Premium.id
+
+Ref EmailAccount_userId_fk: EmailAccount.userId > User.id [delete: cascade]
+
+Ref EmailAccount_accountId_fk: EmailAccount.accountId - Account.id [delete: cascade]
+
+Ref MailSplit_emailAccountId_fk: MailSplit.emailAccountId > EmailAccount.id [delete: cascade]
+
+Ref MailSplitFilter_mailSplitId_fk: MailSplitFilter.mailSplitId > MailSplit.id [delete: cascade]
+
+Ref OrganizationRule_organizationId_fk: OrganizationRule.organizationId > Organization.id [delete: cascade]
+
+Ref OrganizationRuleAction_organizationRuleId_fk: OrganizationRuleAction.organizationRuleId > OrganizationRule.id [delete: cascade]
+
+Ref Member_organizationId_fk: Member.organizationId > Organization.id [delete: cascade]
+
+Ref Member_emailAccountId_fk: Member.emailAccountId > EmailAccount.id [delete: restrict]
+
+Ref Conversation_organizationId_fk: Conversation.organizationId > Organization.id [delete: cascade]
+
+Ref Conversation_publisherId_fk: Conversation.publisherId > Member.id [delete: cascade]
+
+Ref ConversationParticipant_conversationId_fk: ConversationParticipant.conversationId > Conversation.id [delete: cascade]
+
+Ref ConversationParticipant_memberId_fk: ConversationParticipant.memberId > Member.id [delete: cascade]
+
+Ref ConversationComment_conversationId_fk: ConversationComment.conversationId > Conversation.id [delete: cascade]
+
+Ref ConversationComment_authorMemberId_fk: ConversationComment.authorMemberId > Member.id [delete: set null]
+
+Ref ConversationActivity_participantId_fk: ConversationActivity.participantId > ConversationParticipant.id [delete: cascade]
+
+Ref ConversationActivity_commentId_fk: ConversationActivity.commentId > ConversationComment.id [delete: set null]
+
+Ref invitation_organizationId_fk: invitation.organizationId > Organization.id [delete: cascade]
+
+Ref invitation_inviterId_fk: invitation.inviterId > EmailAccount.id [delete: cascade]
+
+Ref ssoProvider_userId_fk: ssoProvider.userId > User.id [delete: set null]
+
+Ref ssoProvider_emailAccountId_fk: ssoProvider.emailAccountId > EmailAccount.id [delete: cascade]
+
+Ref ssoProvider_organizationId_fk: ssoProvider.organizationId - Organization.id [delete: cascade]
+
+Ref Digest_emailAccountId_fk: Digest.emailAccountId > EmailAccount.id [delete: cascade]
+
+Ref DigestItem_digestId_fk: DigestItem.digestId > Digest.id [delete: cascade]
+
+Ref DigestItem_actionId_fk: DigestItem.actionId > ExecutedAction.id [delete: cascade]
+
+Ref DigestItem_coldEmailId_fk: DigestItem.coldEmailId > ColdEmail.id
+
+Ref Schedule_emailAccountId_fk: Schedule.emailAccountId - EmailAccount.id [delete: cascade]
+
+Ref Label_emailAccountId_fk: Label.emailAccountId > EmailAccount.id [delete: cascade]
+
+Ref Rule_emailAccountId_fk: Rule.emailAccountId > EmailAccount.id [delete: cascade]
+
+Ref Rule_organizationRuleId_fk: Rule.organizationRuleId > OrganizationRule.id [delete: cascade]
+
+Ref Rule_groupId_fk: Rule.groupId - Group.id [delete: cascade]
+
+Ref Action_(ruleId, emailAccountId)_fk: Action.(ruleId, emailAccountId) > Rule.(id, emailAccountId) [delete: cascade]
+
+Ref Action_emailAccountId_fk: Action.emailAccountId > EmailAccount.id [delete: cascade]
+
+Ref Action_(messagingChannelId, messagingChannelEmailAccountId)_fk: Action.(messagingChannelId, messagingChannelEmailAccountId) > MessagingChannel.(id, emailAccountId) [delete: set null]
+
+Ref RuleHistory_ruleId_fk: RuleHistory.ruleId > Rule.id [delete: cascade]
+
+Ref ExecutedRule_ruleId_fk: ExecutedRule.ruleId > Rule.id
+
+Ref ExecutedRule_emailAccountId_fk: ExecutedRule.emailAccountId > EmailAccount.id [delete: cascade]
+
+Ref ExecutedAction_executedRuleId_fk: ExecutedAction.executedRuleId > ExecutedRule.id [delete: cascade]
+
+Ref ExecutedAction_messagingChannelId_fk: ExecutedAction.messagingChannelId > MessagingChannel.id [delete: set null]
+
+Ref ScheduledAction_executedRuleId_fk: ScheduledAction.executedRuleId > ExecutedRule.id [delete: cascade]
+
+Ref ScheduledAction_executedActionId_fk: ScheduledAction.executedActionId - ExecutedAction.id [delete: cascade]
+
+Ref ScheduledAction_emailAccountId_fk: ScheduledAction.emailAccountId > EmailAccount.id [delete: cascade]
+
+Ref SnoozedThread_emailAccountId_fk: SnoozedThread.emailAccountId > EmailAccount.id [delete: cascade]
+
+Ref ScheduledEmail_emailAccountId_fk: ScheduledEmail.emailAccountId > EmailAccount.id [delete: cascade]
+
+Ref EmailSendOperation_emailAccountId_fk: EmailSendOperation.emailAccountId > EmailAccount.id [delete: cascade]
+
+Ref SentMessageOpen_emailAccountId_fk: SentMessageOpen.emailAccountId > EmailAccount.id [delete: cascade]
+
+Ref Group_emailAccountId_fk: Group.emailAccountId > EmailAccount.id [delete: cascade]
+
+Ref GroupItem_groupId_fk: GroupItem.groupId > Group.id [delete: cascade]
+
+Ref ClassificationFeedback_ruleId_fk: ClassificationFeedback.ruleId > Rule.id [delete: cascade]
+
+Ref ClassificationFeedback_emailAccountId_fk: ClassificationFeedback.emailAccountId > EmailAccount.id [delete: cascade]
+
+Ref Category_emailAccountId_fk: Category.emailAccountId > EmailAccount.id [delete: cascade]
+
+Ref Newsletter_emailAccountId_fk: Newsletter.emailAccountId > EmailAccount.id [delete: cascade]
+
+Ref Newsletter_categoryId_fk: Newsletter.categoryId > Category.id
+
+Ref ColdEmail_emailAccountId_fk: ColdEmail.emailAccountId > EmailAccount.id [delete: cascade]
+
+Ref EmailMessage_emailAccountId_fk: EmailMessage.emailAccountId > EmailAccount.id [delete: cascade]
+
+Ref ResponseTime_emailAccountId_fk: ResponseTime.emailAccountId > EmailAccount.id [delete: cascade]
+
+Ref ThreadTracker_emailAccountId_fk: ThreadTracker.emailAccountId > EmailAccount.id [delete: cascade]
+
+Ref CleanupJob_emailAccountId_fk: CleanupJob.emailAccountId > EmailAccount.id [delete: cascade]
+
+Ref CleanupThread_jobId_fk: CleanupThread.jobId > CleanupJob.id [delete: cascade]
+
+Ref CleanupThread_emailAccountId_fk: CleanupThread.emailAccountId > EmailAccount.id [delete: cascade]
+
+Ref Knowledge_emailAccountId_fk: Knowledge.emailAccountId > EmailAccount.id [delete: cascade]
+
+Ref Snippet_emailAccountId_fk: Snippet.emailAccountId > EmailAccount.id [delete: cascade]
+
+Ref EmailSignature_emailAccountId_fk: EmailSignature.emailAccountId > EmailAccount.id [delete: cascade]
+
+Ref ReplyMemory_emailAccountId_fk: ReplyMemory.emailAccountId > EmailAccount.id [delete: cascade]
+
+Ref ReplyMemorySource_replyMemoryId_fk: ReplyMemorySource.replyMemoryId > ReplyMemory.id [delete: cascade]
+
+Ref ReplyMemorySource_draftSendLogId_fk: ReplyMemorySource.draftSendLogId > DraftSendLog.id [delete: cascade]
+
+Ref ApiKey_userId_fk: ApiKey.userId > User.id [delete: cascade]
+
+Ref ApiKey_emailAccountId_fk: ApiKey.emailAccountId > EmailAccount.id [delete: cascade]
+
+Ref EmailToken_emailAccountId_fk: EmailToken.emailAccountId > EmailAccount.id [delete: cascade]
+
+Ref Payment_premiumId_fk: Payment.premiumId > Premium.id [delete: set null]
+
+Ref DraftSendLog_executedActionId_fk: DraftSendLog.executedActionId - ExecutedAction.id [delete: cascade]
+
+Ref Chat_emailAccountId_fk: Chat.emailAccountId > EmailAccount.id [delete: cascade]
+
+Ref ChatMessage_chatId_fk: ChatMessage.chatId > Chat.id [delete: cascade]
+
+Ref ChatCompaction_chatId_fk: ChatCompaction.chatId > Chat.id [delete: cascade]
+
+Ref ChatMemory_chatId_fk: ChatMemory.chatId > Chat.id [delete: set null]
+
+Ref ChatMemory_emailAccountId_fk: ChatMemory.emailAccountId > EmailAccount.id [delete: cascade]
+
+Ref CalendarConnection_emailAccountId_fk: CalendarConnection.emailAccountId > EmailAccount.id [delete: cascade]
+
+Ref Calendar_connectionId_fk: Calendar.connectionId > CalendarConnection.id [delete: cascade]
+
+Ref BookingLink_emailAccountId_fk: BookingLink.emailAccountId > EmailAccount.id [delete: cascade]
+
+Ref BookingLink_destinationCalendarId_fk: BookingLink.destinationCalendarId > Calendar.id [delete: set null]
+
+Ref BookingLink_(availabilityScheduleId, emailAccountId)_fk: BookingLink.(availabilityScheduleId, emailAccountId) > AvailabilitySchedule.(id, emailAccountId) [delete: no action]
+
+Ref AvailabilitySchedule_emailAccountId_fk: AvailabilitySchedule.emailAccountId > EmailAccount.id [delete: cascade]
+
+Ref AvailabilityWindow_availabilityScheduleId_fk: AvailabilityWindow.availabilityScheduleId > AvailabilitySchedule.id [delete: cascade]
+
+Ref Booking_bookingLinkId_fk: Booking.bookingLinkId > BookingLink.id [delete: cascade]
+
+Ref Booking_emailAccountId_fk: Booking.emailAccountId > EmailAccount.id [delete: cascade]
+
+Ref MeetingBriefing_emailAccountId_fk: MeetingBriefing.emailAccountId > EmailAccount.id [delete: cascade]
+
+Ref MeetingRecording_emailAccountId_fk: MeetingRecording.emailAccountId > EmailAccount.id [delete: cascade]
+
+Ref Meeting_recordingId_fk: Meeting.recordingId > MeetingRecording.id [delete: set null]
+
+Ref Meeting_emailAccountId_fk: Meeting.emailAccountId > EmailAccount.id [delete: cascade]
+
+Ref MessagingChannel_emailAccountId_fk: MessagingChannel.emailAccountId > EmailAccount.id [delete: cascade]
+
+Ref MessagingRoute_messagingChannelId_fk: MessagingRoute.messagingChannelId > MessagingChannel.id [delete: cascade]
+
+Ref AutomationJob_(messagingChannelId, emailAccountId)_fk: AutomationJob.(messagingChannelId, emailAccountId) > MessagingChannel.(id, emailAccountId) [delete: cascade]
+
+Ref AutomationJobRun_automationJobId_fk: AutomationJobRun.automationJobId > AutomationJob.id [delete: cascade]
+
+Ref DriveConnection_emailAccountId_fk: DriveConnection.emailAccountId > EmailAccount.id [delete: cascade]
+
+Ref FilingFolder_driveConnectionId_fk: FilingFolder.driveConnectionId > DriveConnection.id [delete: cascade]
+
+Ref FilingFolder_emailAccountId_fk: FilingFolder.emailAccountId > EmailAccount.id [delete: cascade]
+
+Ref DocumentFiling_driveConnectionId_fk: DocumentFiling.driveConnectionId > DriveConnection.id [delete: cascade]
+
+Ref DocumentFiling_emailAccountId_fk: DocumentFiling.emailAccountId > EmailAccount.id [delete: cascade]
+
+Ref AttachmentSource_ruleId_fk: AttachmentSource.ruleId > Rule.id [delete: cascade]
+
+Ref AttachmentSource_driveConnectionId_fk: AttachmentSource.driveConnectionId > DriveConnection.id [delete: cascade]
+
+Ref AttachmentDocument_attachmentSourceId_fk: AttachmentDocument.attachmentSourceId > AttachmentSource.id [delete: cascade]
+
+Ref Referral_referrerUserId_fk: Referral.referrerUserId > User.id [delete: cascade]
+
+Ref Referral_referredUserId_fk: Referral.referredUserId - User.id [delete: cascade]
+
+Ref McpIntegration_emailAccountId_fk: McpIntegration.emailAccountId > EmailAccount.id [delete: cascade]
+
+Ref McpConnection_integrationId_fk: McpConnection.integrationId > McpIntegration.id [delete: cascade]
+
+Ref McpConnection_emailAccountId_fk: McpConnection.emailAccountId > EmailAccount.id [delete: cascade]
+
+Ref McpTool_connectionId_fk: McpTool.connectionId > McpConnection.id [delete: cascade]
+
+Ref MobilePushToken_userId_fk: MobilePushToken.userId > User.id [delete: cascade]
+
+Ref MobilePushDelivery_mobilePushTokenId_fk: MobilePushDelivery.mobilePushTokenId > MobilePushToken.id [delete: cascade]
+
+Ref OauthClient_userId_fk: OauthClient.userId > User.id [delete: cascade]
+
+Ref OauthRefreshToken_clientId_fk: OauthRefreshToken.clientId > OauthClient.clientId [delete: cascade]
+
+Ref OauthRefreshToken_sessionId_fk: OauthRefreshToken.sessionId > Session.id [delete: set null]
+
+Ref OauthRefreshToken_userId_fk: OauthRefreshToken.userId > User.id [delete: cascade]
+
+Ref OauthAccessToken_clientId_fk: OauthAccessToken.clientId > OauthClient.clientId [delete: cascade]
+
+Ref OauthAccessToken_sessionId_fk: OauthAccessToken.sessionId > Session.id [delete: set null]
+
+Ref OauthAccessToken_userId_fk: OauthAccessToken.userId > User.id [delete: cascade]
+
+Ref OauthAccessToken_refreshId_fk: OauthAccessToken.refreshId > OauthRefreshToken.id [delete: cascade]
+
+Ref OauthConsent_clientId_fk: OauthConsent.clientId > OauthClient.clientId [delete: cascade]
+
+Ref OauthConsent_userId_fk: OauthConsent.userId > User.id [delete: cascade]
+
+Ref OauthClientResource_clientId_fk: OauthClientResource.clientId > OauthClient.clientId [delete: cascade]
+
+Ref OauthClientResource_resourceId_fk: OauthClientResource.resourceId > OauthResource.identifier [delete: cascade]
+
+Ref scimManagedCredential_connectionRecordId_fk: scimManagedCredential.connectionRecordId > scimManagedConnection.id [delete: cascade]
+
+Ref scimManagedConnectionEvent_connectionRecordId_fk: scimManagedConnectionEvent.connectionRecordId > scimManagedConnection.id [delete: cascade]
+
+Ref scimIdentityTombstone_userId_fk: scimIdentityTombstone.userId > User.id [delete: cascade]
+
+Ref scimSubject_userId_fk: scimSubject.userId - User.id [delete: cascade]
+
+Ref scimUser_userId_fk: scimUser.userId > User.id [delete: cascade]
+
+Ref scimProjectionGrant_scimUserId_fk: scimProjectionGrant.scimUserId > scimUser.id [delete: cascade]
+
+Ref scimProjectionGrant_userId_fk: scimProjectionGrant.userId > User.id [delete: cascade]
+
+Ref scimGroupMember_groupId_fk: scimGroupMember.groupId > scimGroup.id [delete: cascade]
+
+Ref scimGroupMember_scimUserId_fk: scimGroupMember.scimUserId > scimUser.id [delete: cascade]
+
+Ref ScimIdentityLink_userId_fk: ScimIdentityLink.userId > User.id [delete: cascade]

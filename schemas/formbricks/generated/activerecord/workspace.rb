@@ -27,6 +27,7 @@ class Workspace < ApplicationRecord
   has_many :charts, foreign_key: "workspaceId", inverse_of: :workspace, dependent: :destroy
   has_many :dashboards, foreign_key: "workspaceId", inverse_of: :workspace, dependent: :destroy
   has_many :creatives, foreign_key: "workspaceId", inverse_of: :workspace, dependent: :destroy
+  has_many :attachment_exports, foreign_key: "workspaceId", inverse_of: :workspace, dependent: :destroy
   has_many :surveys, foreign_key: "workspaceId", inverse_of: :workspace, dependent: :destroy
   has_many :contacts, foreign_key: "workspaceId", inverse_of: :workspace, dependent: :destroy
   has_many :action_classes, foreign_key: "workspaceId", inverse_of: :workspace, dependent: :destroy

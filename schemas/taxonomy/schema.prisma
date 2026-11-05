@@ -1,6 +1,6 @@
 // Taxonomy: shadcn's Next.js 13 app-directory example: NextAuth's tables and a Post.
 //
-// Imported from https://github.com/shadcn-ui/taxonomy/blob/03ef292d26f1f96dfbd9d2773284c370e3fec7e4/prisma/schema.prisma
+// Imported from https://github.com/shadcn-ui/taxonomy/blob/298a8857c7128a0d121e7f699dfd729f23b3966d/prisma/schema.prisma
 // (MIT license) by tools/import/import-schema.mjs, which dropped the original
 // generator blocks and the datasource's connection URLs and added the hekireki generators below.
 // The models, enums and `///` comments are the project's own, as they are at that commit.

@@ -95,6 +95,8 @@ export type DeletionCleanupKind =
   | 'storageSurveyFolder'
   | 'hubResponseOutcome'
 
+export type AttachmentExportStatus = 'queued' | 'running' | 'completed' | 'failed' | 'expired'
+
 export type RetentionEntity = 'responses' | 'surveys' | 'members'
 
 export type RetentionSurveyCondition = 'noResponse' | 'noChange' | 'createdBefore'
@@ -854,6 +856,29 @@ export interface DeletionCleanup {
   lastError: string | null
 }
 
+export interface AttachmentExport {
+  id: string
+  created_at: Generated<Timestamp>
+  updated_at: Timestamp
+  surveyId: string
+  workspaceId: string
+  requestedById: string | null
+  status: Generated<AttachmentExportStatus>
+  filterCriteria: unknown
+  timeZone: string
+  dispatchCount: Generated<number>
+  fileCount: number
+  responseCount: number
+  includedFileCount: number | null
+  totalBytes: bigint | null
+  truncated: Generated<boolean>
+  storageKey: string | null
+  errorCode: string | null
+  startedAt: Timestamp | null
+  finishedAt: Timestamp | null
+  expiresAt: Timestamp | null
+}
+
 export interface FeedbackSource {
   id: string
   created_at: Generated<Timestamp>
@@ -1141,6 +1166,7 @@ export interface DB {
   Dashboard: Dashboard
   DashboardWidget: DashboardWidget
   DeletionCleanup: DeletionCleanup
+  AttachmentExport: AttachmentExport
   FeedbackSource: FeedbackSource
   FeedbackSourceFormbricksMapping: FeedbackSourceFormbricksMapping
   FeedbackSourceFieldMapping: FeedbackSourceFieldMapping

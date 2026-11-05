@@ -72,6 +72,8 @@ pub enum Relation {
     Dashboards,
     #[sea_orm(has_many = "super::creative::Entity")]
     Creatives,
+    #[sea_orm(has_many = "super::attachment_export::Entity")]
+    AttachmentExports,
     #[sea_orm(has_many = "super::survey::Entity")]
     Surveys,
     #[sea_orm(has_many = "super::contact::Entity")]
@@ -143,6 +145,12 @@ impl Related<super::dashboard::Entity> for Entity {
 impl Related<super::creative::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Creatives.def()
+    }
+}
+
+impl Related<super::attachment_export::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::AttachmentExports.def()
     }
 }
 

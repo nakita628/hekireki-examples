@@ -65,6 +65,8 @@ public partial class Workspace
 
     public virtual ICollection<Creative> Creatives { get; set; } = new List<Creative>();
 
+    public virtual ICollection<AttachmentExport> AttachmentExports { get; set; } = new List<AttachmentExport>();
+
     public virtual ICollection<Survey> Surveys { get; set; } = new List<Survey>();
 
     public virtual ICollection<Contact> Contacts { get; set; } = new List<Contact>();

@@ -1,6 +1,6 @@
 // Documenso: Documenso document signing: users, teams, documents, recipients, fields and signatures.
 //
-// Imported from https://github.com/documenso/documenso/blob/86a0ff2da8d6eaf251a05eeb0fc32c06bbe49d29/packages/prisma/schema.prisma
+// Imported from https://github.com/documenso/documenso/blob/91e73d59281254ad0e258adc861a337c85da60d0/packages/prisma/schema.prisma
 // (AGPL-3.0 license) by tools/import/import-schema.mjs, which dropped the original
 // generator blocks and the datasource's connection URLs and added the hekireki generators below.
 // The models, enums and `///` comments are the project's own, as they are at that commit.

@@ -173,6 +173,8 @@ pub enum Relation {
     RetentionNotices,
     #[sea_orm(has_many = "super::creative::Entity")]
     Creatives,
+    #[sea_orm(has_many = "super::attachment_export::Entity")]
+    AttachmentExports,
     #[sea_orm(has_one = "super::retention_survey_restore::Entity")]
     RetentionRestore,
 }
@@ -270,6 +272,12 @@ impl Related<super::retention_notice::Entity> for Entity {
 impl Related<super::creative::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Creatives.def()
+    }
+}
+
+impl Related<super::attachment_export::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::AttachmentExports.def()
     }
 }
 

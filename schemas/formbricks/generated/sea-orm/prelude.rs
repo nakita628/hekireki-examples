@@ -2,6 +2,7 @@ pub use super::account::Entity as Account;
 pub use super::action_class::Entity as ActionClass;
 pub use super::api_key::Entity as ApiKey;
 pub use super::api_key_workspace::Entity as ApiKeyWorkspace;
+pub use super::attachment_export::Entity as AttachmentExport;
 pub use super::authzed_projection_outbox::Entity as AuthzedProjectionOutbox;
 pub use super::authzed_projection_scope_state::Entity as AuthzedProjectionScopeState;
 pub use super::chart::Entity as Chart;

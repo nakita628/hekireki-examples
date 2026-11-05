@@ -117,6 +117,8 @@ pub enum Relation {
     ExemptionsRevoked,
     #[sea_orm(has_many = "super::retention_notice::Entity")]
     RetentionNotices,
+    #[sea_orm(has_many = "super::attachment_export::Entity")]
+    AttachmentExports,
     #[sea_orm(has_one = "super::two_factor::Entity")]
     TwoFactor,
     #[sea_orm(has_one = "super::password_reset_token::Entity")]
@@ -234,6 +236,12 @@ impl Related<super::retention_exemption::Entity> for Entity {
 impl Related<super::retention_notice::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::RetentionNotices.def()
+    }
+}
+
+impl Related<super::attachment_export::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::AttachmentExports.def()
     }
 }
 

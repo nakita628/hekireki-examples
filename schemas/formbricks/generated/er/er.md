@@ -82,6 +82,9 @@ erDiagram
     User |o--o{ Dashboard : "(id) - (createdBy)"
     Dashboard ||--o{ DashboardWidget : "(id) - (dashboardId)"
     Chart ||--o{ DashboardWidget : "(id) - (chartId)"
+    Survey ||--o{ AttachmentExport : "(id) - (surveyId)"
+    Workspace ||--o{ AttachmentExport : "(id) - (workspaceId)"
+    User |o--o{ AttachmentExport : "(id) - (requestedById)"
     Workspace ||--o{ FeedbackSource : "(id) - (workspaceId)"
     FeedbackDirectory ||--o{ FeedbackSource : "(id) - (feedbackDirectoryId)"
     User |o--o{ FeedbackSource : "(id) - (createdBy)"
@@ -794,6 +797,28 @@ erDiagram
         int attempts
         datetime nextAttemptAt "Not drained before this, so a late pipeline write can't slip in behind a survey's cleanup."
         string lastError "The last failure: a short code and message, never record or file content."
+    }
+    AttachmentExport {
+        string id PK
+        datetime createdAt
+        datetime updatedAt
+        string surveyId FK
+        string workspaceId FK
+        string requestedById FK
+        attachmentexportstatus status
+        json filterCriteria "The response filter at request time, a `TResponseFilterCriteria`; null exports every response."
+        string timeZone "IANA zone the archive's folder names are stamped in: the org's display zone at request time."
+        int dispatchCount "Bumped on every enqueue and part of the job id, so a re-dispatch never dedupes against a job an older pod dropped as unknown during a rolling upgrade."
+        int fileCount "The pre-flight's counts, shown while the archive builds."
+        int responseCount
+        int includedFileCount "What the archive actually holds, once built."
+        bigint totalBytes
+        boolean truncated
+        string storageKey
+        string errorCode "A short code (`stale`, `storage_upload_failed`, …), never a message or file name."
+        datetime startedAt
+        datetime finishedAt
+        datetime expiresAt
     }
     FeedbackSource {
         string id PK, UK

@@ -50,6 +50,7 @@ class UserEntity(
     val exemptionsCreated by RetentionExemptionEntity optionalReferrersOn RetentionExemptionTable.createdById
     val exemptionsRevoked by RetentionExemptionEntity optionalReferrersOn RetentionExemptionTable.revokedById
     val retentionNotices by RetentionNoticeEntity optionalReferrersOn RetentionNoticeTable.userId
+    val attachmentExports by AttachmentExportEntity optionalReferrersOn AttachmentExportTable.requestedById
     var lastLoginAt by UserTable.lastLoginAt
     var isActive by UserTable.isActive
     var reactivatedAt by UserTable.reactivatedAt

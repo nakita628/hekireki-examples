@@ -225,6 +225,14 @@ Enum DeletionCleanupKind {
   hubResponseOutcome
 }
 
+Enum AttachmentExportStatus {
+  queued
+  running
+  completed
+  failed
+  expired
+}
+
 Enum RetentionEntity {
   responses
   surveys
@@ -1657,6 +1665,38 @@ transaction as the delete, so a delete that commits always gets its cleanup and 
 queues nothing. A worker drains it with retries, never giving up, and deletes each row once done.'''
 }
 
+Table AttachmentExport {
+  id String [pk]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  surveyId String [not null]
+  workspaceId String [not null]
+  requestedById String
+  status AttachmentExportStatus [default: 'queued', not null]
+  filterCriteria Json [note: 'The response filter at request time, a `TResponseFilterCriteria`; null exports every response.']
+  timeZone String [not null, note: 'IANA zone the archive\'s folder names are stamped in: the org\'s display zone at request time.']
+  dispatchCount Int [default: 0, not null, note: '''Bumped on every enqueue and part of the job id, so a re-dispatch never dedupes against a job an
+older pod dropped as unknown during a rolling upgrade.''']
+  fileCount Int [not null, note: 'The pre-flight\'s counts, shown while the archive builds.']
+  responseCount Int [not null]
+  includedFileCount Int [note: 'What the archive actually holds, once built.']
+  totalBytes BigInt
+  truncated Boolean [default: false, not null]
+  storageKey String
+  errorCode String [note: 'A short code (`stale`, `storage_upload_failed`, …), never a message or file name.']
+  startedAt DateTime
+  finishedAt DateTime
+  expiresAt DateTime
+
+  Note: '''A survey\'s response attachments built into one ZIP in object storage by a background job and
+downloaded through a short-lived presigned URL, so an interrupted download can resume (ENG-6862).
+Only the requester reads it. The reconcile job deletes the archive at `expiresAt`; deleting the
+survey deletes it with the survey\'s storage prefix.
+
+A partial unique index in the migration allows one queued or running export per requester and
+survey, so a double click returns the export already in flight.'''
+}
+
 Table FeedbackSource {
   id String [pk]
   created_at DateTime [default: `now()`, not null]
@@ -2228,6 +2268,12 @@ Ref Dashboard_createdBy_fk: Dashboard.createdBy > User.id [delete: set null]
 Ref DashboardWidget_dashboardId_fk: DashboardWidget.dashboardId > Dashboard.id [delete: cascade]
 
 Ref DashboardWidget_chartId_fk: DashboardWidget.chartId > Chart.id [delete: cascade]
+
+Ref AttachmentExport_(surveyId, workspaceId)_fk: AttachmentExport.(surveyId, workspaceId) > Survey.(id, workspaceId) [delete: cascade]
+
+Ref AttachmentExport_workspaceId_fk: AttachmentExport.workspaceId > Workspace.id [delete: cascade]
+
+Ref AttachmentExport_requestedById_fk: AttachmentExport.requestedById > User.id [delete: set null]
 
 Ref FeedbackSource_workspaceId_fk: FeedbackSource.workspaceId > Workspace.id [delete: cascade]
 

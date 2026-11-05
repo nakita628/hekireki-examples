@@ -40,6 +40,7 @@ class WorkspaceEntity(
     val charts by ChartEntity referrersOn ChartTable.workspaceId
     val dashboards by DashboardEntity referrersOn DashboardTable.workspaceId
     val creatives by CreativeEntity referrersOn CreativeTable.workspaceId
+    val attachmentExports by AttachmentExportEntity referrersOn AttachmentExportTable.workspaceId
     val surveys by SurveyEntity referrersOn SurveyTable.workspaceId
     val contacts by ContactEntity referrersOn ContactTable.workspaceId
     val actionClasses by ActionClassEntity referrersOn ActionClassTable.workspaceId

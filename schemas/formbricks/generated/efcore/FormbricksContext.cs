@@ -136,6 +136,8 @@ public partial class FormbricksContext : DbContext
 
     public virtual DbSet<DeletionCleanup> DeletionCleanups { get; set; }
 
+    public virtual DbSet<AttachmentExport> AttachmentExports { get; set; }
+
     public virtual DbSet<FeedbackSource> FeedbackSources { get; set; }
 
     public virtual DbSet<FeedbackSourceFormbricksMapping> FeedbackSourceFormbricksMappings { get; set; }
@@ -211,6 +213,7 @@ public partial class FormbricksContext : DbContext
         npgsql.MapEnum<FeedbackSourceElementScope>("FeedbackSourceElementScope");
         npgsql.MapEnum<HubFieldType>("HubFieldType");
         npgsql.MapEnum<DeletionCleanupKind>("DeletionCleanupKind");
+        npgsql.MapEnum<AttachmentExportStatus>("AttachmentExportStatus");
         npgsql.MapEnum<RetentionEntity>("RetentionEntity");
         npgsql.MapEnum<RetentionSurveyCondition>("RetentionSurveyCondition");
         npgsql.MapEnum<RetentionRunKind>("RetentionRunKind");
@@ -262,6 +265,7 @@ public partial class FormbricksContext : DbContext
         dataSource.MapEnum<FeedbackSourceElementScope>("FeedbackSourceElementScope");
         dataSource.MapEnum<HubFieldType>("HubFieldType");
         dataSource.MapEnum<DeletionCleanupKind>("DeletionCleanupKind");
+        dataSource.MapEnum<AttachmentExportStatus>("AttachmentExportStatus");
         dataSource.MapEnum<RetentionEntity>("RetentionEntity");
         dataSource.MapEnum<RetentionSurveyCondition>("RetentionSurveyCondition");
         dataSource.MapEnum<RetentionRunKind>("RetentionRunKind");
@@ -321,6 +325,7 @@ public partial class FormbricksContext : DbContext
         modelBuilder.HasPostgresEnum<FeedbackSourceElementScope>(name: "FeedbackSourceElementScope");
         modelBuilder.HasPostgresEnum<HubFieldType>(name: "HubFieldType");
         modelBuilder.HasPostgresEnum<DeletionCleanupKind>(name: "DeletionCleanupKind");
+        modelBuilder.HasPostgresEnum<AttachmentExportStatus>(name: "AttachmentExportStatus");
         modelBuilder.HasPostgresEnum<RetentionEntity>(name: "RetentionEntity");
         modelBuilder.HasPostgresEnum<RetentionSurveyCondition>(name: "RetentionSurveyCondition");
         modelBuilder.HasPostgresEnum<RetentionRunKind>(name: "RetentionRunKind");
@@ -2969,6 +2974,88 @@ public partial class FormbricksContext : DbContext
             entity.Property(e => e.LastError).HasColumnName("lastError");
         });
 
+        modelBuilder.Entity<AttachmentExport>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("AttachmentExport_pkey");
+
+            entity.ToTable("AttachmentExport");
+
+            entity.HasIndex(e => new { e.SurveyId, e.RequestedById, e.CreatedAt }, "AttachmentExport_surveyId_requestedById_created_at_idx");
+
+            entity.HasIndex(e => new { e.Status, e.CreatedAt }, "AttachmentExport_status_created_at_idx");
+
+            entity.HasIndex(e => e.ExpiresAt, "AttachmentExport_expiresAt_idx");
+
+            entity.HasIndex(e => e.WorkspaceId, "AttachmentExport_workspaceId_idx");
+
+            entity.Property(e => e.Id)
+                .HasValueGenerator<Cuid2Generator>()
+                .HasColumnName("id");
+            entity.Property(e => e.CreatedAt)
+                .HasValueGenerator<UtcNowGenerator>()
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("created_at");
+            entity.Property(e => e.UpdatedAt)
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("updated_at");
+            entity.Property(e => e.SurveyId).HasColumnName("surveyId");
+            entity.Property(e => e.WorkspaceId).HasColumnName("workspaceId");
+            entity.Property(e => e.RequestedById).HasColumnName("requestedById");
+            entity.Property(e => e.Status)
+                .ValueGeneratedNever()
+                .HasDefaultValue(AttachmentExportStatus.Queued)
+                .HasColumnName("status");
+            entity.Property(e => e.FilterCriteria)
+                .HasColumnType("jsonb")
+                .HasColumnName("filterCriteria");
+            entity.Property(e => e.TimeZone).HasColumnName("timeZone");
+            entity.Property(e => e.DispatchCount)
+                .ValueGeneratedNever()
+                .HasDefaultValue(0)
+                .HasColumnName("dispatchCount");
+            entity.Property(e => e.FileCount).HasColumnName("fileCount");
+            entity.Property(e => e.ResponseCount).HasColumnName("responseCount");
+            entity.Property(e => e.IncludedFileCount).HasColumnName("includedFileCount");
+            entity.Property(e => e.TotalBytes).HasColumnName("totalBytes");
+            entity.Property(e => e.Truncated)
+                .ValueGeneratedNever()
+                .HasDefaultValue(false)
+                .HasColumnName("truncated");
+            entity.Property(e => e.StorageKey).HasColumnName("storageKey");
+            entity.Property(e => e.ErrorCode).HasColumnName("errorCode");
+            entity.Property(e => e.StartedAt)
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("startedAt");
+            entity.Property(e => e.FinishedAt)
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("finishedAt");
+            entity.Property(e => e.ExpiresAt)
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("expiresAt");
+
+            entity.HasOne(d => d.Survey).WithMany(p => p.AttachmentExports)
+                .HasPrincipalKey(p => new { p.Id, p.WorkspaceId })
+                .HasForeignKey(d => new { d.SurveyId, d.WorkspaceId })
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("AttachmentExport_surveyId_workspaceId_fkey");
+
+            entity.HasOne(d => d.Workspace).WithMany(p => p.AttachmentExports)
+                .HasForeignKey(d => d.WorkspaceId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("AttachmentExport_workspaceId_fkey");
+
+            entity.HasOne(d => d.RequestedBy).WithMany(p => p.AttachmentExports)
+                .HasForeignKey(d => d.RequestedById)
+                .OnDelete(DeleteBehavior.SetNull)
+                .HasConstraintName("AttachmentExport_requestedById_fkey");
+        });
+
         modelBuilder.Entity<FeedbackSource>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("FeedbackSource_pkey");
@@ -4147,6 +4234,15 @@ public partial class FormbricksContext : DbContext
         }
 
         foreach (var entry in ChangeTracker.Entries<DeletionCleanup>())
+        {
+            if ((entry.State == EntityState.Added && entry.Entity.UpdatedAt == default)
+                || (entry.State == EntityState.Modified && !entry.Property(e => e.UpdatedAt).IsModified))
+            {
+                entry.Entity.UpdatedAt = now;
+            }
+        }
+
+        foreach (var entry in ChangeTracker.Entries<AttachmentExport>())
         {
             if ((entry.State == EntityState.Added && entry.Entity.UpdatedAt == default)
                 || (entry.State == EntityState.Modified && !entry.Property(e => e.UpdatedAt).IsModified))

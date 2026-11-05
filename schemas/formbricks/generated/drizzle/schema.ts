@@ -214,6 +214,14 @@ export const deletionCleanupKindEnum = pgEnum('DeletionCleanupKind', [
   'hubResponseOutcome',
 ])
 
+export const attachmentExportStatusEnum = pgEnum('AttachmentExportStatus', [
+  'queued',
+  'running',
+  'completed',
+  'failed',
+  'expired',
+])
+
 export const retentionEntityEnum = pgEnum('RetentionEntity', ['responses', 'surveys', 'members'])
 
 export const retentionSurveyConditionEnum = pgEnum('RetentionSurveyCondition', [
@@ -2260,6 +2268,68 @@ export const deletionCleanup = pgTable(
   ],
 )
 
+export const attachmentExport = pgTable(
+  'AttachmentExport',
+  {
+    id: text('id')
+      .primaryKey()
+      .$defaultFn(() => createId()),
+    createdAt: timestamp('created_at', { precision: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`)
+      .$defaultFn(utcNow),
+    updatedAt: timestamp('updated_at', { precision: 3 }).notNull().$onUpdate(utcNow),
+    surveyId: text('surveyId').notNull(),
+    workspaceId: text('workspaceId').notNull(),
+    requestedById: text('requestedById'),
+    status: attachmentExportStatusEnum('status').notNull().default('queued'),
+    filterCriteria: jsonb('filterCriteria'),
+    timeZone: text('timeZone').notNull(),
+    dispatchCount: integer('dispatchCount').notNull().default(0),
+    fileCount: integer('fileCount').notNull(),
+    responseCount: integer('responseCount').notNull(),
+    includedFileCount: integer('includedFileCount'),
+    totalBytes: bigint('totalBytes', { mode: 'bigint' }),
+    truncated: boolean('truncated').notNull().default(false),
+    storageKey: text('storageKey'),
+    errorCode: text('errorCode'),
+    startedAt: timestamp('startedAt', { precision: 3 }),
+    finishedAt: timestamp('finishedAt', { precision: 3 }),
+    expiresAt: timestamp('expiresAt', { precision: 3 }),
+  },
+  (table) => [
+    index('AttachmentExport_surveyId_requestedById_created_at_idx').on(
+      table.surveyId,
+      table.requestedById,
+      table.createdAt,
+    ),
+    index('AttachmentExport_status_created_at_idx').on(table.status, table.createdAt),
+    index('AttachmentExport_expiresAt_idx').on(table.expiresAt),
+    index('AttachmentExport_workspaceId_idx').on(table.workspaceId),
+    foreignKey({
+      name: 'AttachmentExport_surveyId_workspaceId_fkey',
+      columns: [table.surveyId, table.workspaceId],
+      foreignColumns: [survey.id, survey.workspaceId],
+    })
+      .onDelete('cascade')
+      .onUpdate('cascade'),
+    foreignKey({
+      name: 'AttachmentExport_workspaceId_fkey',
+      columns: [table.workspaceId],
+      foreignColumns: [workspace.id],
+    })
+      .onDelete('cascade')
+      .onUpdate('cascade'),
+    foreignKey({
+      name: 'AttachmentExport_requestedById_fkey',
+      columns: [table.requestedById],
+      foreignColumns: [user.id],
+    })
+      .onDelete('set null')
+      .onUpdate('cascade'),
+  ],
+)
+
 export const feedbackSource = pgTable(
   'FeedbackSource',
   {
@@ -2995,6 +3065,7 @@ export const relations = defineRelations(
     dashboard,
     dashboardWidget,
     deletionCleanup,
+    attachmentExport,
     feedbackSource,
     feedbackSourceFormbricksMapping,
     feedbackSourceFieldMapping,
@@ -3178,6 +3249,7 @@ export const relations = defineRelations(
         to: r.retentionSurveyRestore.surveyId,
       }),
       creatives: r.many.creative(),
+      attachmentExports: r.many.attachmentExport(),
     },
     surveyQuota: {
       survey: r.one.survey({ from: r.surveyQuota.surveyId, to: r.survey.id, optional: false }),
@@ -3227,6 +3299,7 @@ export const relations = defineRelations(
       charts: r.many.chart(),
       dashboards: r.many.dashboard(),
       creatives: r.many.creative(),
+      attachmentExports: r.many.attachmentExport(),
       surveys: r.many.survey(),
       contacts: r.many.contact(),
       actionClasses: r.many.actionClass(),
@@ -3390,6 +3463,7 @@ export const relations = defineRelations(
       exemptionsCreated: r.many.retentionExemption({ alias: 'retentionExemptionCreatedBy' }),
       exemptionsRevoked: r.many.retentionExemption({ alias: 'retentionExemptionRevokedBy' }),
       retentionNotices: r.many.retentionNotice(),
+      attachmentExports: r.many.attachmentExport(),
     },
     segment: {
       workspace: r.one.workspace({
@@ -3491,6 +3565,19 @@ export const relations = defineRelations(
         optional: false,
       }),
       chart: r.one.chart({ from: r.dashboardWidget.chartId, to: r.chart.id, optional: false }),
+    },
+    attachmentExport: {
+      survey: r.one.survey({
+        from: [r.attachmentExport.surveyId, r.attachmentExport.workspaceId],
+        to: [r.survey.id, r.survey.workspaceId],
+        optional: false,
+      }),
+      workspace: r.one.workspace({
+        from: r.attachmentExport.workspaceId,
+        to: r.workspace.id,
+        optional: false,
+      }),
+      requestedBy: r.one.user({ from: r.attachmentExport.requestedById, to: r.user.id }),
     },
     feedbackSource: {
       workspace: r.one.workspace({

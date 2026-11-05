@@ -1,6 +1,6 @@
 // Langfuse: Langfuse LLM observability: organizations, projects, traces, prompts, datasets and evaluations.
 //
-// Imported from https://github.com/langfuse/langfuse/blob/0659e55045dc7e98c63c5017d82eb7e49db3636e/packages/shared/prisma/schema.prisma
+// Imported from https://github.com/langfuse/langfuse/blob/728e69371ec7667e24602c2b1d87a8c60cfc6404/packages/shared/prisma/schema.prisma
 // (MIT license) by tools/import/import-schema.mjs, which dropped the original
 // generator blocks and the datasource's connection URLs and added the hekireki generators below.
 // The models, enums and `///` comments are the project's own, as they are at that commit.

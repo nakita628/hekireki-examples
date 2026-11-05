@@ -672,6 +672,7 @@ type Survey struct {
 	RetentionExemptions         []RetentionExemption              `gorm:"foreignKey:SurveyID;constraint:OnDelete:CASCADE"`
 	RetentionNotices            []RetentionNotice                 `gorm:"foreignKey:SurveyID;constraint:OnDelete:CASCADE"`
 	Creatives                   []Creative                        `gorm:"foreignKey:SurveyID,WorkspaceID;references:ID,WorkspaceID;constraint:OnUpdate:NO ACTION,OnDelete:NO ACTION"`
+	AttachmentExports           []AttachmentExport                `gorm:"foreignKey:SurveyID,WorkspaceID;references:ID,WorkspaceID;constraint:OnDelete:CASCADE"`
 	RetentionRestore            *RetentionSurveyRestore           `gorm:"foreignKey:SurveyID;constraint:OnDelete:CASCADE"`
 }
 
@@ -904,6 +905,7 @@ type Workspace struct {
 	Charts                      []Chart                      `gorm:"foreignKey:WorkspaceID;constraint:OnDelete:CASCADE"`
 	Dashboards                  []Dashboard                  `gorm:"foreignKey:WorkspaceID;constraint:OnDelete:CASCADE"`
 	Creatives                   []Creative                   `gorm:"foreignKey:WorkspaceID;constraint:OnDelete:CASCADE"`
+	AttachmentExports           []AttachmentExport           `gorm:"foreignKey:WorkspaceID;constraint:OnDelete:CASCADE"`
 	Surveys                     []Survey                     `gorm:"foreignKey:WorkspaceID;constraint:OnDelete:CASCADE"`
 	Contacts                    []Contact                    `gorm:"foreignKey:WorkspaceID;constraint:OnDelete:CASCADE"`
 	ActionClasses               []ActionClass                `gorm:"foreignKey:WorkspaceID;constraint:OnDelete:CASCADE"`
@@ -1574,6 +1576,7 @@ type User struct {
 	ExemptionsCreated         []RetentionExemption `gorm:"foreignKey:CreatedByID;constraint:OnDelete:SET NULL"`
 	ExemptionsRevoked         []RetentionExemption `gorm:"foreignKey:RevokedByID;constraint:OnDelete:SET NULL"`
 	RetentionNotices          []RetentionNotice    `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
+	AttachmentExports         []AttachmentExport   `gorm:"foreignKey:RequestedByID;constraint:OnDelete:SET NULL"`
 	TwoFactor                 *TwoFactor           `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
 	PasswordResetToken        *PasswordResetToken  `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
 }
@@ -2020,6 +2023,58 @@ func (m *DeletionCleanup) BeforeCreate(tx *gorm.DB) error {
 }
 
 func (*DeletionCleanup) BeforeUpdate(tx *gorm.DB) error {
+	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
+	if !tx.Statement.Changed("UpdatedAt") {
+		tx.Statement.SetColumn("UpdatedAt", DateTime{Time: now})
+	}
+	return nil
+}
+
+type AttachmentExport struct {
+	ID                string         `gorm:"column:id;primaryKey" json:"id"`
+	CreatedAt         DateTime       `gorm:"column:created_at;index:AttachmentExport_surveyId_requestedById_created_at_idx;index:AttachmentExport_status_created_at_idx;autoCreateTime:false;not null" json:"created_at"`
+	UpdatedAt         DateTime       `gorm:"column:updated_at;autoUpdateTime:false;not null" json:"updated_at"`
+	SurveyID          string         `gorm:"column:surveyId;index:AttachmentExport_surveyId_requestedById_created_at_idx;not null" json:"surveyId"`
+	WorkspaceID       string         `gorm:"column:workspaceId;index:AttachmentExport_workspaceId_idx;not null" json:"workspaceId"`
+	RequestedByID     *string        `gorm:"column:requestedById;index:AttachmentExport_surveyId_requestedById_created_at_idx" json:"requestedById"`
+	Status            string         `gorm:"column:status;index:AttachmentExport_status_created_at_idx;default:'queued';not null" json:"status"`
+	FilterCriteria    datatypes.JSON `gorm:"column:filterCriteria" json:"filterCriteria"`
+	TimeZone          string         `gorm:"column:timeZone;not null" json:"timeZone"`
+	DispatchCount     int            `gorm:"column:dispatchCount;default:0;not null" json:"dispatchCount"`
+	FileCount         int            `gorm:"column:fileCount;not null" json:"fileCount"`
+	ResponseCount     int            `gorm:"column:responseCount;not null" json:"responseCount"`
+	IncludedFileCount *int           `gorm:"column:includedFileCount" json:"includedFileCount"`
+	TotalBytes        *int64         `gorm:"column:totalBytes" json:"totalBytes"`
+	Truncated         bool           `gorm:"column:truncated;default:false;not null" json:"truncated"`
+	StorageKey        *string        `gorm:"column:storageKey" json:"storageKey"`
+	ErrorCode         *string        `gorm:"column:errorCode" json:"errorCode"`
+	StartedAt         *DateTime      `gorm:"column:startedAt" json:"startedAt"`
+	FinishedAt        *DateTime      `gorm:"column:finishedAt" json:"finishedAt"`
+	ExpiresAt         *DateTime      `gorm:"column:expiresAt;index:AttachmentExport_expiresAt_idx" json:"expiresAt"`
+	Survey            *Survey        `gorm:"foreignKey:SurveyID,WorkspaceID;references:ID,WorkspaceID"`
+	Workspace         *Workspace
+	RequestedBy       *User `gorm:"foreignKey:RequestedByID"`
+}
+
+func (AttachmentExport) TableName() string {
+	return "AttachmentExport"
+}
+
+func (m *AttachmentExport) BeforeCreate(tx *gorm.DB) error {
+	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
+	if m.ID == "" {
+		m.ID = cuid2.Generate()
+	}
+	if m.CreatedAt.IsZero() {
+		m.CreatedAt = DateTime{Time: now}
+	}
+	if m.UpdatedAt.IsZero() {
+		m.UpdatedAt = DateTime{Time: now}
+	}
+	return nil
+}
+
+func (*AttachmentExport) BeforeUpdate(tx *gorm.DB) error {
 	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
 	if !tx.Statement.Changed("UpdatedAt") {
 		tx.Statement.SetColumn("UpdatedAt", DateTime{Time: now})

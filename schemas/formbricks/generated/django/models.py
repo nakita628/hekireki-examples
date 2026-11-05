@@ -297,6 +297,14 @@ class DeletionCleanupKind(models.TextChoices):
     hubResponseOutcome = "hubResponseOutcome"
 
 
+class AttachmentExportStatus(models.TextChoices):
+    queued = "queued"
+    running = "running"
+    completed = "completed"
+    failed = "failed"
+    expired = "expired"
+
+
 class RetentionEntity(models.TextChoices):
     responses = "responses"
     surveys = "surveys"
@@ -1559,6 +1567,39 @@ class DeletionCleanup(models.Model):
         indexes = [
             models.Index(fields=["next_attempt_at"]),
             models.Index(fields=["organization_id", "created_at"]),
+        ]
+
+
+class AttachmentExport(models.Model):
+    id = models.TextField(primary_key=True, default=None)
+    created_at = UtcDateTimeField(default=timezone.now)
+    updated_at = UtcDateTimeField(auto_now=True)
+    survey_id = models.TextField(db_column="surveyId")
+    workspace = models.ForeignKey("Workspace", on_delete=models.CASCADE, related_name="attachment_exports", db_column="workspaceId", db_index=False)
+    requested_by = models.ForeignKey("User", on_delete=models.SET_NULL, related_name="attachment_exports", db_column="requestedById", null=True, db_index=False)
+    status = models.TextField(choices=AttachmentExportStatus.choices, default=AttachmentExportStatus.queued)
+    filter_criteria = models.JSONField(null=True, db_column="filterCriteria")
+    time_zone = models.TextField(db_column="timeZone")
+    dispatch_count = models.IntegerField(db_column="dispatchCount", default=0)
+    file_count = models.IntegerField(db_column="fileCount")
+    response_count = models.IntegerField(db_column="responseCount")
+    included_file_count = models.IntegerField(null=True, db_column="includedFileCount")
+    total_bytes = models.BigIntegerField(null=True, db_column="totalBytes")
+    truncated = models.BooleanField(default=False)
+    storage_key = models.TextField(null=True, db_column="storageKey")
+    error_code = models.TextField(null=True, db_column="errorCode")
+    started_at = UtcDateTimeField(null=True, db_column="startedAt")
+    finished_at = UtcDateTimeField(null=True, db_column="finishedAt")
+    expires_at = UtcDateTimeField(null=True, db_column="expiresAt")
+    objects = AutoNowQuerySet.as_manager()
+
+    class Meta:
+        db_table = "AttachmentExport"
+        indexes = [
+            models.Index(fields=["survey_id", "requested_by", "created_at"]),
+            models.Index(fields=["status", "created_at"]),
+            models.Index(fields=["expires_at"]),
+            models.Index(fields=["workspace"]),
         ]
 
 

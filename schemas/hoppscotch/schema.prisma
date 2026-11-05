@@ -1,6 +1,6 @@
 // Hoppscotch: Hoppscotch's backend: users, teams, collections, requests and environments.
 //
-// Imported from https://github.com/hoppscotch/hoppscotch/blob/4789a0f2fae484aa7bc1233603d66b97b8ebfd8b/packages/hoppscotch-backend/prisma/schema.prisma
+// Imported from https://github.com/hoppscotch/hoppscotch/blob/39d25650bdb4e86464b2cd69174c567b86f57892/packages/hoppscotch-backend/prisma/schema.prisma
 // (MIT license) by tools/import/import-schema.mjs, which dropped the original
 // generator blocks and the datasource's connection URLs and added the hekireki generators below.
 // The models, enums and `///` comments are the project's own, as they are at that commit.

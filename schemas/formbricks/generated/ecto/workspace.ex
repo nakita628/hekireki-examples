@@ -33,6 +33,7 @@ defmodule Formbricks.Workspace do
           charts: [Formbricks.Chart.t()],
           dashboards: [Formbricks.Dashboard.t()],
           creatives: [Formbricks.Creative.t()],
+          attachment_exports: [Formbricks.AttachmentExport.t()],
           surveys: [Formbricks.Survey.t()],
           contacts: [Formbricks.Contact.t()],
           action_classes: [Formbricks.ActionClass.t()],
@@ -75,6 +76,7 @@ defmodule Formbricks.Workspace do
     has_many(:charts, Formbricks.Chart, foreign_key: :workspace_id, references: :id)
     has_many(:dashboards, Formbricks.Dashboard, foreign_key: :workspace_id, references: :id)
     has_many(:creatives, Formbricks.Creative, foreign_key: :workspace_id, references: :id)
+    has_many(:attachment_exports, Formbricks.AttachmentExport, foreign_key: :workspace_id, references: :id)
     has_many(:surveys, Formbricks.Survey, foreign_key: :workspace_id, references: :id)
     has_many(:contacts, Formbricks.Contact, foreign_key: :workspace_id, references: :id)
     has_many(:action_classes, Formbricks.ActionClass, foreign_key: :workspace_id, references: :id)

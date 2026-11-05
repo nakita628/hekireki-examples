@@ -1,0 +1,12 @@
+package inboxzero.models
+
+enum class MessagingRoutePurpose(
+    val dbName: String,
+) {
+    RULE_NOTIFICATIONS("RULE_NOTIFICATIONS"),
+    SCHEDULED_CHECK_INS("SCHEDULED_CHECK_INS"),
+    MEETING_BRIEFS("MEETING_BRIEFS"),
+    DOCUMENT_FILINGS("DOCUMENT_FILINGS"),
+    DIGESTS("DIGESTS"),
+    FOLLOW_UPS("FOLLOW_UPS"),
+}

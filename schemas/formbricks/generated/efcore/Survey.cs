@@ -151,5 +151,7 @@ public partial class Survey
 
     public virtual ICollection<Creative> Creatives { get; set; } = new List<Creative>();
 
+    public virtual ICollection<AttachmentExport> AttachmentExports { get; set; } = new List<AttachmentExport>();
+
     public string? ShowConditions { get; set; }
 }

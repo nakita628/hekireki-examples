@@ -85,6 +85,8 @@ public partial class User
 
     public virtual ICollection<RetentionNotice> RetentionNotices { get; set; } = new List<RetentionNotice>();
 
+    public virtual ICollection<AttachmentExport> AttachmentExports { get; set; } = new List<AttachmentExport>();
+
     public DateTime? LastLoginAt { get; set; }
 
     public bool IsActive { get; set; } = true;
