@@ -180,5 +180,21 @@
     "license": "AGPL-3.0",
     "app": "TypeHero",
     "description": "TypeHero TypeScript practice: users, challenges, solutions, comments and tracks."
+  },
+  "workoutcool": {
+    "repo": "Snouzy/workout-cool",
+    "path": "prisma/schema.prisma",
+    "commit": "d52f9f62d2a5fcbb78d67a95dc8763f9a34dbf9e",
+    "license": "MIT",
+    "app": "WorkoutCool",
+    "description": "Workout Cool fitness coaching: users, exercises, workout sessions, programs and subscriptions."
+  },
+  "plunk": {
+    "repo": "useplunk/plunk",
+    "path": "packages/db/prisma/schema.prisma",
+    "commit": "2bda149c13f81c3c291e216dcb10d4161bb9bd35",
+    "license": "AGPL-3.0",
+    "app": "Plunk",
+    "description": "Plunk email platform: projects, contacts, templates, campaigns, workflows and emails."
   }
 }

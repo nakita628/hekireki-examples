@@ -16,7 +16,7 @@ class TaskEvent < ApplicationRecord
   enum :level, { trace: "TRACE", debug: "DEBUG", log: "LOG", info: "INFO", warn: "WARN", error: "ERROR" },
        default: :trace, prefix: true, validate: true
   enum :kind, { unspecified: "UNSPECIFIED", internal: "INTERNAL", server: "SERVER", client: "CLIENT", producer: "PRODUCER", consumer: "CONSUMER", unrecognized: "UNRECOGNIZED", log: "LOG" },
-       default: :internal, prefix: true, validate: true
+       default: :internal, validate: true
   enum :status, { unset: "UNSET", ok: "OK", error: "ERROR", unrecognized: "UNRECOGNIZED" }, default: :unset,
                                                                                             prefix: true, validate: true
   enum :environmentType, { production: "PRODUCTION", staging: "STAGING", development: "DEVELOPMENT", preview: "PREVIEW" },

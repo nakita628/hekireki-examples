@@ -1,0 +1,521 @@
+Enum ProjectDisabledReason {
+  PAYMENT_FAILED
+  EMAIL_REPUTATION
+  PHISHING_DETECTED
+  CARD_VERIFICATION_FAILED
+  CARD_VERIFICATION_REQUIRED
+  MANUAL
+}
+
+Enum CardVerificationStatus {
+  PENDING
+  VERIFIED
+  REQUIRES_ACTION
+  FAILED
+}
+
+Enum AuthMethod {
+  PASSWORD
+  GOOGLE_OAUTH
+  GITHUB_OAUTH
+}
+
+Enum Role {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+Enum TemplateType {
+  TRANSACTIONAL
+  MARKETING
+  HEADLESS
+}
+
+Enum TrackingMode {
+  ENABLED
+  DISABLED
+  MARKETING_ONLY
+}
+
+Enum CampaignStatus {
+  DRAFT
+  SCHEDULED
+  SENDING
+  SENT
+  CANCELLED
+}
+
+Enum CampaignAudienceType {
+  ALL
+  FILTERED
+  SEGMENT
+}
+
+Enum WorkflowTriggerType {
+  EVENT
+  MANUAL
+  SCHEDULE
+}
+
+Enum WorkflowStepType {
+  TRIGGER
+  SEND_EMAIL
+  DELAY
+  WAIT_FOR_EVENT
+  CONDITION
+  EXIT
+  WEBHOOK
+  UPDATE_CONTACT
+}
+
+Enum WorkflowExecutionStatus {
+  RUNNING
+  WAITING
+  COMPLETED
+  EXITED
+  FAILED
+  CANCELLED
+}
+
+Enum StepExecutionStatus {
+  PENDING
+  SCHEDULED
+  WAITING
+  RUNNING
+  COMPLETED
+  SKIPPED
+  FAILED
+}
+
+Enum SegmentType {
+  DYNAMIC
+  STATIC
+}
+
+Enum EmailSourceType {
+  TRANSACTIONAL
+  CAMPAIGN
+  WORKFLOW
+  INBOUND
+}
+
+Enum EmailStatus {
+  SCHEDULED
+  CANCELLED
+  PENDING
+  SENDING
+  SENT
+  DELIVERED
+  RECEIVED
+  OPENED
+  CLICKED
+  BOUNCED
+  COMPLAINED
+  FAILED
+}
+
+Table users {
+  id String [pk]
+  email String [unique, not null]
+  password String
+  type AuthMethod [not null]
+  emailVerified Boolean [default: false, not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table projects {
+  id String [pk]
+  name String [not null]
+  public String [unique, not null]
+  secret String [unique, not null]
+  disabled Boolean [default: false, not null]
+  disabledReason ProjectDisabledReason
+  customer String [unique]
+  subscription String [unique]
+  cardVerification CardVerificationStatus
+  cardVerificationIntent String
+  cardVerificationAt DateTime
+  cardVerificationSession String
+  cardVerificationPaymentMethod String
+  cardVerificationFingerprint String
+  cardVerificationAttempts Int [default: 0, not null]
+  billingLimitWorkflows Int
+  billingLimitCampaigns Int
+  billingLimitTransactional Int
+  billingLimitInbound Int
+  tracking TrackingMode [default: 'ENABLED', not null]
+  language String [default: 'en', not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table memberships {
+  userId String [not null]
+  projectId String [not null]
+  role Role [default: 'MEMBER', not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (userId, projectId) [pk]
+  }
+}
+
+Table domains {
+  id String [pk]
+  domain String [not null]
+  verified Boolean [default: false, not null]
+  dkimTokens Json
+  projectId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (projectId, domain) [unique]
+  }
+}
+
+Table contacts {
+  id String [pk]
+  email String [not null]
+  data Json
+  subscribed Boolean [default: true, not null]
+  snoozedUntil DateTime [note: '''When set, `subscribed = false` is temporary rather than permanent: the snooze
+sweep resubscribes the contact once this passes. Suppression itself is still
+carried entirely by `subscribed`, so every send path filters snoozed contacts
+out without knowing this column exists.
+
+Cleared by every other write to `subscribed` — including the bounce and
+complaint paths, so a suppressed address can never be woken back up.''']
+  projectId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (projectId, email) [unique]
+  }
+}
+
+Table templates {
+  id String [pk]
+  name String [not null]
+  description String
+  subject String [not null]
+  body String [not null]
+  from String [not null]
+  fromName String
+  replyTo String
+  type TemplateType [default: 'MARKETING', not null]
+  projectId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table segments {
+  id String [pk]
+  name String [not null]
+  description String
+  type SegmentType [default: 'DYNAMIC', not null]
+  condition Json
+  trackMembership Boolean [default: false, not null]
+  memberCount Int [default: 0, not null]
+  projectId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table segment_memberships {
+  contactId String [not null]
+  segmentId String [not null]
+  enteredAt DateTime [default: `now()`, not null]
+  exitedAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (contactId, segmentId) [pk]
+  }
+}
+
+Table campaigns {
+  id String [pk]
+  name String [not null]
+  description String
+  status CampaignStatus [default: 'DRAFT', not null]
+  subject String [not null]
+  body String [not null]
+  from String [not null]
+  fromName String
+  replyTo String
+  type TemplateType [default: 'MARKETING', not null]
+  audienceType CampaignAudienceType [default: 'ALL', not null]
+  audienceCondition Json
+  segmentId String
+  scheduledFor DateTime
+  totalRecipients Int [default: 0, not null]
+  sentCount Int [default: 0, not null]
+  deliveredCount Int [default: 0, not null]
+  openedCount Int [default: 0, not null]
+  clickedCount Int [default: 0, not null]
+  bouncedCount Int [default: 0, not null]
+  complainedCount Int [default: 0, not null]
+  unsubscribedCount Int [default: 0, not null]
+  archived Boolean [default: false, not null]
+  projectId String [not null]
+  sentAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table workflows {
+  id String [pk]
+  name String [not null]
+  description String
+  enabled Boolean [default: false, not null]
+  triggerType WorkflowTriggerType [not null]
+  triggerConfig Json
+  allowReentry Boolean [default: false, not null]
+  throttleWindowSeconds Int
+  throttleKey String
+  projectId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table workflow_steps {
+  id String [pk]
+  type WorkflowStepType [not null]
+  name String [not null]
+  position Json [not null]
+  config Json [not null]
+  workflowId String [not null]
+  templateId String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table workflow_transitions {
+  id String [pk]
+  fromStepId String [not null]
+  toStepId String [not null]
+  condition Json
+  priority Int [default: 0, not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table workflow_executions {
+  id String [pk]
+  workflowId String [not null]
+  contactId String [not null]
+  status WorkflowExecutionStatus [default: 'RUNNING', not null]
+  currentStepId String
+  exitReason String
+  context Json
+  startedAt DateTime [default: `now()`, not null]
+  completedAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table workflow_step_executions {
+  id String [pk]
+  executionId String [not null]
+  stepId String [not null]
+  status StepExecutionStatus [default: 'PENDING', not null]
+  scheduledFor DateTime
+  executeAfter DateTime
+  output Json
+  error String
+  startedAt DateTime
+  completedAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table emails {
+  id String [pk]
+  contactId String [not null]
+  toName String
+  subject String [not null]
+  body String [not null]
+  from String [not null]
+  fromName String
+  replyTo String
+  headers Json
+  attachments Json
+  messageId String [unique]
+  sourceType EmailSourceType [not null]
+  templateId String
+  campaignId String
+  workflowExecutionId String
+  workflowStepExecutionId String
+  status EmailStatus [default: 'PENDING', not null]
+  scheduledFor DateTime [note: '''When a transactional email sent with `delivery.at` is due. Only meaningful while the
+status is SCHEDULED; the delayed queue job is the timer and the scheduled-email sweep
+re-queues any row still SCHEDULED past this time. The partial index on SCHEDULED rows
+is built by the background index builder, not a migration (see background-index-builder.ts).''']
+  sentAt DateTime
+  deliveredAt DateTime
+  openedAt DateTime
+  clickedAt DateTime
+  bouncedAt DateTime
+  complainedAt DateTime
+  unsubscribedAt DateTime [note: '''When the recipient opted out from this email (unsubscribe or snooze). Only set for
+opt-outs attributed to a campaign email and counted in `Campaign.unsubscribedCount`,
+in the same transaction, so the stamped rows are the list behind that figure. Indexed
+by a partial index built in the background (see background-index-builder.ts).''']
+  opens Int [default: 0, not null]
+  clicks Int [default: 0, not null]
+  simulated Boolean [default: false, not null, note: '''The address handed to SES belonged to the mailbox simulator
+(`@simulator.amazonses.com`), stamped at send time from the address actually used --
+which is the recipient override when one is set, not necessarily `contact.email`.
+
+AWS itself excludes simulator mail from bounce rates, complaint rates, sending quotas
+and reputation metrics, so Plunk\'s security rates exclude it from both the numerator
+and the denominator. The events themselves are untouched: the webhook fires, the
+activity feed shows the bounce, the contact is still suppressed.''']
+  error String
+  projectId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table events {
+  id String [pk]
+  name String [not null]
+  data Json
+  projectId String [not null]
+  contactId String
+  emailId String
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Table idempotency_keys {
+  id String [pk]
+  key String [not null]
+  projectId String [not null]
+  method String [not null]
+  path String [not null]
+  statusCode Int
+  createdAt DateTime [default: `now()`, not null]
+  expiresAt DateTime [not null]
+
+  indexes {
+    (projectId, key) [unique]
+  }
+}
+
+Table throttle_claims {
+  id String [pk]
+  projectId String [not null]
+  key String [not null]
+  recipientKey String [not null]
+  contactId String
+  emailId String
+  workflowId String
+  windowSeconds Int
+  expiresAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (projectId, key, recipientKey) [unique]
+  }
+
+  Note: '''One transactional notification held for one recipient (or for the whole project) by a
+send with `delivery.throttle`. While it is held, the same notification is not sent again.
+
+The claim is taken by inserting (or taking over an expired) row, so the unique constraint
+decides the race between concurrent sends, like `IdempotencyKey`. It is held from the
+moment the send is accepted, re-anchored to the real send time once SES has the message,
+and released when the email never gets there (cancelled, or failed before sending).'''
+}
+
+Table api_requests {
+  id String [pk]
+  method String [not null]
+  path String [not null]
+  statusCode Int [not null]
+  duration Int [not null]
+  projectId String
+  userId String
+  authType String
+  ip String
+  userAgent String
+  errorCode String
+  errorMessage String
+  requestSize Int
+  responseSize Int
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Ref memberships_userId_fk: memberships.userId > users.id
+
+Ref memberships_projectId_fk: memberships.projectId > projects.id [delete: cascade]
+
+Ref domains_projectId_fk: domains.projectId > projects.id [delete: cascade]
+
+Ref contacts_projectId_fk: contacts.projectId > projects.id [delete: cascade]
+
+Ref templates_projectId_fk: templates.projectId > projects.id [delete: cascade]
+
+Ref segments_projectId_fk: segments.projectId > projects.id [delete: cascade]
+
+Ref segment_memberships_contactId_fk: segment_memberships.contactId > contacts.id [delete: cascade]
+
+Ref segment_memberships_segmentId_fk: segment_memberships.segmentId > segments.id [delete: cascade]
+
+Ref campaigns_segmentId_fk: campaigns.segmentId > segments.id
+
+Ref campaigns_projectId_fk: campaigns.projectId > projects.id [delete: cascade]
+
+Ref workflows_projectId_fk: workflows.projectId > projects.id [delete: cascade]
+
+Ref workflow_steps_workflowId_fk: workflow_steps.workflowId > workflows.id [delete: cascade]
+
+Ref workflow_steps_templateId_fk: workflow_steps.templateId > templates.id
+
+Ref workflow_transitions_fromStepId_fk: workflow_transitions.fromStepId > workflow_steps.id [delete: cascade]
+
+Ref workflow_transitions_toStepId_fk: workflow_transitions.toStepId > workflow_steps.id [delete: cascade]
+
+Ref workflow_executions_workflowId_fk: workflow_executions.workflowId > workflows.id [delete: cascade]
+
+Ref workflow_executions_contactId_fk: workflow_executions.contactId > contacts.id [delete: cascade]
+
+Ref workflow_executions_currentStepId_fk: workflow_executions.currentStepId > workflow_steps.id
+
+Ref workflow_step_executions_executionId_fk: workflow_step_executions.executionId > workflow_executions.id [delete: cascade]
+
+Ref workflow_step_executions_stepId_fk: workflow_step_executions.stepId > workflow_steps.id [delete: cascade]
+
+Ref emails_contactId_fk: emails.contactId > contacts.id [delete: cascade]
+
+Ref emails_templateId_fk: emails.templateId > templates.id
+
+Ref emails_campaignId_fk: emails.campaignId > campaigns.id [delete: cascade]
+
+Ref emails_workflowExecutionId_fk: emails.workflowExecutionId > workflow_executions.id [delete: cascade]
+
+Ref emails_workflowStepExecutionId_fk: emails.workflowStepExecutionId > workflow_step_executions.id [delete: cascade]
+
+Ref emails_projectId_fk: emails.projectId > projects.id [delete: cascade]
+
+Ref events_projectId_fk: events.projectId > projects.id [delete: cascade]
+
+Ref events_contactId_fk: events.contactId > contacts.id [delete: cascade]
+
+Ref events_emailId_fk: events.emailId > emails.id [delete: cascade]
+
+Ref idempotency_keys_projectId_fk: idempotency_keys.projectId > projects.id [delete: cascade]
+
+Ref throttle_claims_projectId_fk: throttle_claims.projectId > projects.id [delete: cascade]
+
+Ref throttle_claims_contactId_fk: throttle_claims.contactId > contacts.id [delete: cascade]
+
+Ref throttle_claims_workflowId_fk: throttle_claims.workflowId > workflows.id [delete: cascade]
+
+Ref api_requests_projectId_fk: api_requests.projectId > projects.id [delete: set null]
