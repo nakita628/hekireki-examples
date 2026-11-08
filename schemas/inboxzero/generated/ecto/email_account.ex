@@ -45,6 +45,7 @@ defmodule InboxZero.EmailAccount do
           rules_revision: integer(),
           mail_layout: atom(),
           mail_expanded_preview: boolean(),
+          mail_bundle_inbox: boolean() | nil,
           include_in_all_accounts: boolean(),
           meeting_briefings_enabled: boolean(),
           meeting_briefings_minutes_before: integer(),
@@ -154,6 +155,7 @@ defmodule InboxZero.EmailAccount do
     field(:rules_revision, :integer, default: 0, source: :rulesRevision)
     field(:mail_layout, Ecto.Enum, values: [:LIST, :SPLIT], default: :LIST, source: :mailLayout)
     field(:mail_expanded_preview, :boolean, default: false, source: :mailExpandedPreview)
+    field(:mail_bundle_inbox, :boolean, source: :mailBundleInbox)
     field(:include_in_all_accounts, :boolean, default: true, source: :includeInAllAccounts)
     field(:meeting_briefings_enabled, :boolean, default: false, source: :meetingBriefingsEnabled)
     field(:meeting_briefings_minutes_before, :integer, default: 240, source: :meetingBriefingsMinutesBefore)

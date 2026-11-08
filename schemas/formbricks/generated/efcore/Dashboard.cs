@@ -24,4 +24,6 @@ public partial class Dashboard
     public string? CreatedBy { get; set; }
 
     public virtual ICollection<DashboardWidget> Widgets { get; set; } = new List<DashboardWidget>();
+
+    public string Filters { get; set; } = "[]";
 }

@@ -42,4 +42,9 @@ class EnvelopeItem extends Model
     {
         return $this->hasMany(Field::class, 'envelopeItemId');
     }
+
+    public function contents(): HasMany
+    {
+        return $this->hasMany(EnvelopeContent::class, 'envelopeItemId');
+    }
 }

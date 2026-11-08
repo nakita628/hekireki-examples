@@ -29,6 +29,7 @@ class EnvelopeEntity(
     val envelopeItems by EnvelopeItemEntity referrersOn EnvelopeItemTable.envelopeId
     val recipients by RecipientEntity referrersOn RecipientTable.envelopeId
     val fields by FieldEntity referrersOn FieldTable.envelopeId
+    val contents by EnvelopeContentEntity referrersOn EnvelopeContentTable.envelopeId
     val shareLinks by DocumentShareLinkEntity referrersOn DocumentShareLinkTable.envelopeId
     val auditLogs by DocumentAuditLogEntity optionalReferrersOn DocumentAuditLogTable.envelopeId
     var authOptions by EnvelopeTable.authOptions

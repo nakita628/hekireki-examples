@@ -33,6 +33,8 @@ pub enum Relation {
     Envelope,
     #[sea_orm(has_many = "super::field::Entity")]
     Field,
+    #[sea_orm(has_many = "super::envelope_content::Entity")]
+    Contents,
 }
 
 impl Related<super::document_data::Entity> for Entity {
@@ -50,6 +52,12 @@ impl Related<super::envelope::Entity> for Entity {
 impl Related<super::field::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Field.def()
+    }
+}
+
+impl Related<super::envelope_content::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::Contents.def()
     }
 }
 

@@ -16,4 +16,5 @@ class EnvelopeItemEntity(
     var envelopeId by EnvelopeItemTable.envelopeId
     var envelope by EnvelopeEntity referencedOn EnvelopeItemTable.envelopeId
     val field by FieldEntity referrersOn FieldTable.envelopeItemId
+    val contents by EnvelopeContentEntity referrersOn EnvelopeContentTable.envelopeItemId
 }

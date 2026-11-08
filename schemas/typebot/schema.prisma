@@ -1,6 +1,6 @@
 // Typebot: Typebot chatbot builder: workspaces, typebots, results, answers and credentials.
 //
-// Imported from https://github.com/baptisteArno/typebot.io/blob/fd1dc34e0acdeca99d204fde6e692fed1879d9f5/packages/prisma/postgresql/schema.prisma
+// Imported from https://github.com/baptisteArno/typebot.io/blob/532c83e78cf2ad3c7b86e7db847456609e363213/packages/prisma/postgresql/schema.prisma
 // (FSL-1.1-Apache-2.0 license) by tools/import/import-schema.mjs, which dropped the original
 // generator blocks and the datasource's connection URLs and added the hekireki generators below.
 // The models, enums and `///` comments are the project's own, as they are at that commit.

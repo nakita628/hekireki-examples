@@ -21,15 +21,23 @@ class ExternalMediaStorageIntegration extends \Illuminate\Database\Eloquent\Mode
         'type',
         'bucket_name',
         'prefix',
+        'auth_type',
         'access_key_id',
         'secret_access_key',
+        'role_arn',
+        'external_id',
         'region',
         'endpoint',
         'force_path_style',
     ];
 
+    protected $attributes = [
+        'auth_type' => 'ACCESS_KEYS',
+    ];
+
     protected $casts = [
         'type' => ExternalMediaStorageIntegrationType::class,
+        'auth_type' => StorageIntegrationAuthType::class,
         'force_path_style' => 'boolean',
     ];
 

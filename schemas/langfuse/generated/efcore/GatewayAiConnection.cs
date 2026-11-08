@@ -1,6 +1,7 @@
 #nullable enable
 
 using System;
+using System.Collections.Generic;
 
 namespace Langfuse.Models;
 
@@ -25,6 +26,16 @@ public partial class GatewayAiConnection
     public GatewayConnectionStatus Status { get; set; } = GatewayConnectionStatus.Enabled;
 
     public string? AllowedModels { get; set; }
+
+    public string CustomModels { get; set; } = "[]";
+
+    public string? Config { get; set; }
+
+    public string? BaseURL { get; set; }
+
+    public string? ExtraHeaders { get; set; }
+
+    public List<string>? ExtraHeaderKeys { get; set; } = new List<string>();
 
     public DateTime CreatedAt { get; set; }
 

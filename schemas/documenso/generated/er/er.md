@@ -32,6 +32,9 @@ erDiagram
     EnvelopeItem ||--o{ Field : "(id) - (envelopeItemId)"
     Envelope ||--o{ Field : "(id) - (envelopeId)"
     Recipient ||--o{ Field : "(id) - (recipientId)"
+    EnvelopeItem ||--o{ EnvelopeContent : "(id) - (envelopeItemId)"
+    Envelope ||--o{ EnvelopeContent : "(id) - (envelopeId)"
+    DataContent |o--o{ EnvelopeContent : "(id) - (dataContentId)"
     Recipient ||--o{ Signature : "(id) - (recipientId)"
     Field ||--o| Signature : "(id) - (fieldId)"
     Recipient ||--o| CscCredential : "(id) - (recipientId)"
@@ -191,6 +194,8 @@ erDiagram
         int memberCount
         int envelopeItemCount
         int recipientCount
+        int envelopeContentCount
+        int envelopeContentImageCount
         json flags "[ClaimFlags] @zod.custom.use(ZClaimFlagsSchema)"
         json documentRateLimits "[RateLimitArray] @zod.custom.use(ZRateLimitArraySchema)"
         int documentQuota
@@ -209,6 +214,8 @@ erDiagram
         int memberCount
         int envelopeItemCount
         int recipientCount
+        int envelopeContentCount
+        int envelopeContentImageCount
         json flags "[ClaimFlags] @zod.custom.use(ZClaimFlagsSchema)"
         json documentRateLimits "[RateLimitArray] @zod.custom.use(ZRateLimitArraySchema)"
         int documentQuota
@@ -397,6 +404,19 @@ erDiagram
         string customText
         boolean inserted
         json fieldMeta "[FieldMeta] @zod.custom.use(ZFieldMetaNotOptionalSchema)"
+    }
+    EnvelopeContent {
+        string id PK
+        string envelopeId FK
+        string envelopeItemId FK
+        json contentMeta "[EnvelopeContentMeta] @zod.custom.use(ZEnvelopeContentMetaSchema)"
+        string dataContentId FK "Any number of contents may point at the same data content, e.g. a document created from a template shares the template's images."
+    }
+    DataContent {
+        string id PK
+        documentdatatype type "How `data` is stored, e.g. an S3 path or inline bytes."
+        string data
+        json metadata "[DataContentMeta] @zod.custom.use(ZDataContentMetaSchema)"
     }
     Signature {
         int id PK

@@ -218,6 +218,7 @@ class User(models.Model):
             models.UniqueConstraint(fields=["email", "provider_name"], name="User_email_providerName_key"),
         ]
         indexes = [
+            models.Index(fields=["provider_id", "provider_name"]),
             models.Index(fields=["last_read_notifications"]),
             models.Index(fields=["invite_id"]),
             models.Index(fields=["account"]),
@@ -647,8 +648,10 @@ class Post(models.Model):
             models.Index(fields=["batch_id"]),
             models.Index(fields=["deleted_at"]),
             models.Index(fields=["publish_date"]),
+            models.Index(fields=["publish_date", "state", "deleted_at", "parent_post", "integration", "organization", "creation_method"]),
             models.Index(fields=["state"]),
             models.Index(fields=["organization"]),
+            models.Index(fields=["organization", "publish_date"]),
             models.Index(fields=["parent_post"]),
             models.Index(fields=["submitted_for_order"]),
             models.Index(fields=["interval_in_days"]),
@@ -677,6 +680,7 @@ class Notifications(models.Model):
         indexes = [
             models.Index(fields=["created_at"]),
             models.Index(fields=["organization"]),
+            models.Index(fields=["organization", "created_at", "deleted_at"]),
             models.Index(fields=["deleted_at"]),
         ]
 
@@ -933,6 +937,7 @@ class Errors(models.Model):
         indexes = [
             models.Index(fields=["organization"]),
             models.Index(fields=["created_at"]),
+            models.Index(fields=["created_at", "platform"]),
         ]
 
 

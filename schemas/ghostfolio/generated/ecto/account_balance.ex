@@ -8,6 +8,7 @@ defmodule Ghostfolio.AccountBalance do
   @type t :: %__MODULE__{
           id: Ecto.UUID.t(),
           account_id: String.t(),
+          comment: String.t() | nil,
           date: DateTime.t(),
           user_id: String.t(),
           value: float(),
@@ -17,6 +18,7 @@ defmodule Ghostfolio.AccountBalance do
 
   schema "AccountBalance" do
     field(:account_id, :string, source: :accountId)
+    field(:comment, :string)
     field(:date, Ghostfolio.PrismaDateTime, autogenerate: true)
     field(:user_id, :string, source: :userId)
     field(:value, :float)

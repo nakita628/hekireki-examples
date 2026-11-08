@@ -140,6 +140,7 @@ export const organizationRoleEnum = pgEnum('OrganizationRole', [
   'manager',
   'member',
   'billing',
+  'dashboard_viewer',
 ])
 
 export const apiKeyPermissionEnum = pgEnum('ApiKeyPermission', ['read', 'write', 'manage'])
@@ -743,6 +744,7 @@ export const response = pgTable(
     meta: jsonb('meta').notNull().default({}),
     ingestFlags: jsonb('ingest_flags'),
     outcome: responseOutcomeEnum('outcome'),
+    notShown: jsonb('not_shown'),
     contactAttributes: jsonb('contactAttributes'),
     singleUseId: text('singleUseId'),
     language: text('language'),
@@ -1001,6 +1003,7 @@ export const survey = pgTable(
     customHeadScriptsMode: surveyScriptModeEnum('customHeadScriptsMode').default('add'),
     customCss: jsonb('customCss'),
     showConditions: jsonb('showConditions'),
+    startLogic: jsonb('startLogic'),
   },
   (table) => [
     uniqueIndex('Survey_slug_key').on(table.slug),
@@ -2177,6 +2180,7 @@ export const dashboard = pgTable(
     name: text('name').notNull(),
     workspaceId: text('workspaceId').notNull(),
     createdBy: text('createdBy'),
+    filters: jsonb('filters').notNull().default([]),
   },
   (table) => [
     index('Dashboard_workspaceId_created_at_idx').on(table.workspaceId, table.createdAt),

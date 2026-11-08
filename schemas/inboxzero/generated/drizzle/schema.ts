@@ -538,6 +538,7 @@ export const emailAccount = pgTable(
     rulesRevision: integer('rulesRevision').notNull().default(0),
     mailLayout: mailLayoutEnum('mailLayout').notNull().default('LIST'),
     mailExpandedPreview: boolean('mailExpandedPreview').notNull().default(false),
+    mailBundleInbox: boolean('mailBundleInbox'),
     includeInAllAccounts: boolean('includeInAllAccounts').notNull().default(true),
     meetingBriefingsEnabled: boolean('meetingBriefingsEnabled').notNull().default(false),
     meetingBriefingsMinutesBefore: integer('meetingBriefingsMinutesBefore').notNull().default(240),
@@ -604,6 +605,7 @@ export const mailSplit = pgTable(
     name: text('name').notNull(),
     order: integer('order').notNull(),
     matchAll: boolean('matchAll').notNull().default(true),
+    bundleInInbox: boolean('bundleInInbox').notNull().default(false),
     emailAccountId: text('emailAccountId').notNull(),
   },
   (table) => [

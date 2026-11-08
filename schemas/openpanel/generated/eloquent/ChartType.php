@@ -15,4 +15,5 @@ enum ChartType: string
     case retention = 'retention';
     case conversion = 'conversion';
     case sankey = 'sankey';
+    case distribution = 'distribution';
 }

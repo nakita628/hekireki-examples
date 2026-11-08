@@ -74,6 +74,10 @@ public partial class DocumensoContext : DbContext
 
     public virtual DbSet<Field> Fields { get; set; }
 
+    public virtual DbSet<EnvelopeContent> EnvelopeContents { get; set; }
+
+    public virtual DbSet<DataContent> DataContents { get; set; }
+
     public virtual DbSet<Signature> Signatures { get; set; }
 
     public virtual DbSet<CscCredential> CscCredentials { get; set; }
@@ -691,6 +695,8 @@ public partial class DocumensoContext : DbContext
             entity.Property(e => e.MemberCount).HasColumnName("memberCount");
             entity.Property(e => e.EnvelopeItemCount).HasColumnName("envelopeItemCount");
             entity.Property(e => e.RecipientCount).HasColumnName("recipientCount");
+            entity.Property(e => e.EnvelopeContentCount).HasColumnName("envelopeContentCount");
+            entity.Property(e => e.EnvelopeContentImageCount).HasColumnName("envelopeContentImageCount");
             entity.Property(e => e.Flags)
                 .HasColumnType("jsonb")
                 .HasColumnName("flags");
@@ -736,6 +742,8 @@ public partial class DocumensoContext : DbContext
             entity.Property(e => e.MemberCount).HasColumnName("memberCount");
             entity.Property(e => e.EnvelopeItemCount).HasColumnName("envelopeItemCount");
             entity.Property(e => e.RecipientCount).HasColumnName("recipientCount");
+            entity.Property(e => e.EnvelopeContentCount).HasColumnName("envelopeContentCount");
+            entity.Property(e => e.EnvelopeContentImageCount).HasColumnName("envelopeContentImageCount");
             entity.Property(e => e.Flags)
                 .HasColumnType("jsonb")
                 .HasColumnName("flags");
@@ -1417,6 +1425,54 @@ public partial class DocumensoContext : DbContext
                 .HasForeignKey(d => d.RecipientId)
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("Field_recipientId_fkey");
+        });
+
+        modelBuilder.Entity<EnvelopeContent>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("EnvelopeContent_pkey");
+
+            entity.ToTable("EnvelopeContent");
+
+            entity.HasIndex(e => e.EnvelopeId, "EnvelopeContent_envelopeId_idx");
+
+            entity.HasIndex(e => e.EnvelopeItemId, "EnvelopeContent_envelopeItemId_idx");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.EnvelopeId).HasColumnName("envelopeId");
+            entity.Property(e => e.EnvelopeItemId).HasColumnName("envelopeItemId");
+            entity.Property(e => e.ContentMeta)
+                .HasColumnType("jsonb")
+                .HasColumnName("contentMeta");
+            entity.Property(e => e.DataContentId).HasColumnName("dataContentId");
+
+            entity.HasOne(d => d.EnvelopeItem).WithMany(p => p.Contents)
+                .HasForeignKey(d => d.EnvelopeItemId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("EnvelopeContent_envelopeItemId_fkey");
+
+            entity.HasOne(d => d.Envelope).WithMany(p => p.Contents)
+                .HasForeignKey(d => d.EnvelopeId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("EnvelopeContent_envelopeId_fkey");
+
+            entity.HasOne(d => d.DataContent).WithMany(p => p.EnvelopeContents)
+                .HasForeignKey(d => d.DataContentId)
+                .OnDelete(DeleteBehavior.SetNull)
+                .HasConstraintName("EnvelopeContent_dataContentId_fkey");
+        });
+
+        modelBuilder.Entity<DataContent>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("DataContent_pkey");
+
+            entity.ToTable("DataContent");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Type).HasColumnName("type");
+            entity.Property(e => e.Data).HasColumnName("data");
+            entity.Property(e => e.Metadata)
+                .HasColumnType("jsonb")
+                .HasColumnName("metadata");
         });
 
         modelBuilder.Entity<Signature>(entity =>

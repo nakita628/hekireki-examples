@@ -24,16 +24,24 @@ class GatewayAiConnection extends \Illuminate\Database\Eloquent\Model
         'created_by_id',
         'status',
         'allowed_models',
+        'custom_models',
+        'config',
+        'base_url',
+        'extra_headers',
+        'extra_header_keys',
     ];
 
     protected $attributes = [
         'status' => 'enabled',
+        'custom_models' => '[]',
     ];
 
     protected $casts = [
         'provider' => GatewayProvider::class,
         'status' => GatewayConnectionStatus::class,
         'allowed_models' => 'array',
+        'custom_models' => 'array',
+        'config' => 'array',
     ];
 
     public function organization(): BelongsTo

@@ -5,4 +5,5 @@ enum class GatewayProvider(
 ) {
     OPENAI("openai"),
     ANTHROPIC("anthropic"),
+    BEDROCK("bedrock"),
 }

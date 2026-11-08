@@ -1,6 +1,6 @@
 // OpenPanel: OpenPanel product analytics: organizations, projects, dashboards, reports, clients and integrations.
 //
-// Imported from https://github.com/openpanel-dev/openpanel/blob/130d9c0dd03e7b5d4b1837b9f80e57d42c1b11f8/packages/db/prisma/schema.prisma
+// Imported from https://github.com/openpanel-dev/openpanel/blob/a5a6eb7d62c9579620ec5e3fbfd4ce760f3d8073/packages/db/prisma/schema.prisma
 // (AGPL-3.0 license) by tools/import/import-schema.mjs, which dropped the original
 // generator blocks and the datasource's connection URLs and added the hekireki generators below.
 // The models, enums and `///` comments are the project's own, as they are at that commit.
@@ -526,6 +526,7 @@ enum ChartType {
   retention
   conversion
   sankey
+  distribution
 }
 
 model Dashboard {
@@ -537,6 +538,7 @@ model Dashboard {
   project        Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
   reports        Report[]
   share          ShareDashboard?
+  filters        Json            @default("[]")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt

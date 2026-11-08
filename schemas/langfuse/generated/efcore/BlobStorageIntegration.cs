@@ -17,9 +17,15 @@ public partial class BlobStorageIntegration
 
     public string Prefix { get; set; } = null!;
 
+    public StorageIntegrationAuthType AuthType { get; set; } = StorageIntegrationAuthType.AccessKeys;
+
     public string? AccessKeyId { get; set; }
 
     public string? SecretAccessKey { get; set; }
+
+    public string? RoleArn { get; set; }
+
+    public string? ExternalId { get; set; }
 
     public string Region { get; set; } = null!;
 

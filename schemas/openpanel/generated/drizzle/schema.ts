@@ -51,6 +51,7 @@ export const chartTypeEnum = pgEnum('ChartType', [
   'retention',
   'conversion',
   'sankey',
+  'distribution',
 ])
 
 export const metricEnum = pgEnum('Metric', ['sum', 'average', 'min', 'max', 'count'])
@@ -688,6 +689,7 @@ export const dashboards = pgTable(
     name: text('name').notNull(),
     organizationId: text('organizationId').notNull(),
     projectId: text('projectId').notNull(),
+    filters: jsonb('filters').notNull().default([]),
     createdAt: timestamp('createdAt', { precision: 3 })
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`)

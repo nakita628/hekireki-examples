@@ -26,6 +26,7 @@ object NotificationsTable : IdTable<String>("\"Notifications\"") {
     init {
         index("\"Notifications_createdAt_idx\"", false, createdAt)
         index("\"Notifications_organizationId_idx\"", false, organizationId)
+        index("\"Notifications_organizationId_createdAt_deletedAt_idx\"", false, organizationId, createdAt, deletedAt)
         index("\"Notifications_deletedAt_idx\"", false, deletedAt)
     }
 }

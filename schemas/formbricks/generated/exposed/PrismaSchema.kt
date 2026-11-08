@@ -30,7 +30,7 @@ object PrismaSchema {
             "CREATE TYPE \"WidgetPlacement\" AS ENUM ('bottomLeft', 'bottomRight', 'topLeft', 'topRight', 'center')",
             "CREATE TYPE \"SurveyOverlay\" AS ENUM ('none', 'light', 'dark')",
             "CREATE TYPE \"BootstrapAdminMarker\" AS ENUM ('bootstrapAdmin')",
-            "CREATE TYPE \"OrganizationRole\" AS ENUM ('owner', 'manager', 'member', 'billing')",
+            "CREATE TYPE \"OrganizationRole\" AS ENUM ('owner', 'manager', 'member', 'billing', 'dashboard_viewer')",
             "CREATE TYPE \"ApiKeyPermission\" AS ENUM ('read', 'write', 'manage')",
             "CREATE TYPE \"IdentityProvider\" AS ENUM ('email', 'github', 'google', 'azuread', 'openid', 'saml')",
             "CREATE TYPE \"EmbeddedDataSource\" AS ENUM ('computed', 'ingested', 'reserved')",

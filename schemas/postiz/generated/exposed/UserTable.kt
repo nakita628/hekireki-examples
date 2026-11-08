@@ -45,6 +45,7 @@ object UserTable : IdTable<String>("\"User\"") {
     override val primaryKey = PrimaryKey(id, name = "\"User_pkey\"")
 
     init {
+        index("\"User_providerId_providerName_idx\"", false, providerId, providerName)
         index("\"User_lastReadNotifications_idx\"", false, lastReadNotifications)
         index("\"User_inviteId_idx\"", false, inviteId)
         index("\"User_account_idx\"", false, account)

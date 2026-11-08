@@ -29,6 +29,7 @@ export type ChartType =
   | 'retention'
   | 'conversion'
   | 'sankey'
+  | 'distribution'
 
 export type Metric = 'sum' | 'average' | 'min' | 'max' | 'count'
 
@@ -269,6 +270,7 @@ export interface Dashboard {
   name: string
   organizationId: string
   projectId: string
+  filters: Generated<unknown>
   createdAt: Generated<Timestamp>
   updatedAt: Generated<Timestamp>
 }

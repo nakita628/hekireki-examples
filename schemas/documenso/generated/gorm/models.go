@@ -351,24 +351,26 @@ func (*Subscription) BeforeUpdate(tx *gorm.DB) error {
 }
 
 type SubscriptionClaim struct {
-	ID                 string         `gorm:"column:id;primaryKey" json:"id"`
-	CreatedAt          DateTime       `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
-	UpdatedAt          DateTime       `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	Name               string         `gorm:"column:name;not null" json:"name"`
-	Locked             bool           `gorm:"column:locked;default:false;not null" json:"locked"`
-	TeamCount          int            `gorm:"column:teamCount;not null" json:"teamCount"`
-	MemberCount        int            `gorm:"column:memberCount;not null" json:"memberCount"`
-	EnvelopeItemCount  int            `gorm:"column:envelopeItemCount;not null" json:"envelopeItemCount"`
-	RecipientCount     int            `gorm:"column:recipientCount;not null" json:"recipientCount"`
-	Flags              datatypes.JSON `gorm:"column:flags;not null" json:"flags"`
-	DocumentRateLimits datatypes.JSON `gorm:"column:documentRateLimits;not null" json:"documentRateLimits"`
-	DocumentQuota      *int           `gorm:"column:documentQuota" json:"documentQuota"`
-	EmailRateLimits    datatypes.JSON `gorm:"column:emailRateLimits;not null" json:"emailRateLimits"`
-	EmailQuota         *int           `gorm:"column:emailQuota" json:"emailQuota"`
-	APIRateLimits      datatypes.JSON `gorm:"column:apiRateLimits;not null" json:"apiRateLimits"`
-	APIQuota           *int           `gorm:"column:apiQuota" json:"apiQuota"`
-	EmailTransportID   *string        `gorm:"column:emailTransportId" json:"emailTransportId"`
-	EmailTransport     *EmailTransport
+	ID                        string         `gorm:"column:id;primaryKey" json:"id"`
+	CreatedAt                 DateTime       `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
+	UpdatedAt                 DateTime       `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
+	Name                      string         `gorm:"column:name;not null" json:"name"`
+	Locked                    bool           `gorm:"column:locked;default:false;not null" json:"locked"`
+	TeamCount                 int            `gorm:"column:teamCount;not null" json:"teamCount"`
+	MemberCount               int            `gorm:"column:memberCount;not null" json:"memberCount"`
+	EnvelopeItemCount         int            `gorm:"column:envelopeItemCount;not null" json:"envelopeItemCount"`
+	RecipientCount            int            `gorm:"column:recipientCount;not null" json:"recipientCount"`
+	EnvelopeContentCount      int            `gorm:"column:envelopeContentCount;not null" json:"envelopeContentCount"`
+	EnvelopeContentImageCount int            `gorm:"column:envelopeContentImageCount;not null" json:"envelopeContentImageCount"`
+	Flags                     datatypes.JSON `gorm:"column:flags;not null" json:"flags"`
+	DocumentRateLimits        datatypes.JSON `gorm:"column:documentRateLimits;not null" json:"documentRateLimits"`
+	DocumentQuota             *int           `gorm:"column:documentQuota" json:"documentQuota"`
+	EmailRateLimits           datatypes.JSON `gorm:"column:emailRateLimits;not null" json:"emailRateLimits"`
+	EmailQuota                *int           `gorm:"column:emailQuota" json:"emailQuota"`
+	APIRateLimits             datatypes.JSON `gorm:"column:apiRateLimits;not null" json:"apiRateLimits"`
+	APIQuota                  *int           `gorm:"column:apiQuota" json:"apiQuota"`
+	EmailTransportID          *string        `gorm:"column:emailTransportId" json:"emailTransportId"`
+	EmailTransport            *EmailTransport
 }
 
 func (SubscriptionClaim) TableName() string {
@@ -406,6 +408,8 @@ type OrganisationClaim struct {
 	MemberCount                 int            `gorm:"column:memberCount;not null" json:"memberCount"`
 	EnvelopeItemCount           int            `gorm:"column:envelopeItemCount;not null" json:"envelopeItemCount"`
 	RecipientCount              int            `gorm:"column:recipientCount;not null" json:"recipientCount"`
+	EnvelopeContentCount        int            `gorm:"column:envelopeContentCount;not null" json:"envelopeContentCount"`
+	EnvelopeContentImageCount   int            `gorm:"column:envelopeContentImageCount;not null" json:"envelopeContentImageCount"`
 	Flags                       datatypes.JSON `gorm:"column:flags;not null" json:"flags"`
 	DocumentRateLimits          datatypes.JSON `gorm:"column:documentRateLimits;not null" json:"documentRateLimits"`
 	DocumentQuota               *int           `gorm:"column:documentQuota" json:"documentQuota"`
@@ -649,6 +653,7 @@ type Envelope struct {
 	EnvelopeItems           []EnvelopeItem       `gorm:"foreignKey:EnvelopeID;constraint:OnDelete:CASCADE"`
 	Recipients              []Recipient          `gorm:"foreignKey:EnvelopeID;constraint:OnDelete:CASCADE"`
 	Fields                  []Field              `gorm:"foreignKey:EnvelopeID;constraint:OnDelete:CASCADE"`
+	Contents                []EnvelopeContent    `gorm:"foreignKey:EnvelopeID;constraint:OnDelete:CASCADE"`
 	ShareLinks              []DocumentShareLink  `gorm:"foreignKey:EnvelopeID;constraint:OnDelete:CASCADE"`
 	AuditLogs               []DocumentAuditLog   `gorm:"foreignKey:EnvelopeID;constraint:OnDelete:SET NULL"`
 	EnvelopeAttachments     []EnvelopeAttachment `gorm:"foreignKey:EnvelopeID;constraint:OnDelete:CASCADE"`
@@ -686,7 +691,8 @@ type EnvelopeItem struct {
 	EnvelopeID     string `gorm:"column:envelopeId;index:EnvelopeItem_envelopeId_idx;not null" json:"envelopeId"`
 	DocumentData   *DocumentData
 	Envelope       *Envelope
-	Field          []Field `gorm:"foreignKey:EnvelopeItemID;constraint:OnDelete:CASCADE"`
+	Field          []Field           `gorm:"foreignKey:EnvelopeItemID;constraint:OnDelete:CASCADE"`
+	Contents       []EnvelopeContent `gorm:"foreignKey:EnvelopeItemID;constraint:OnDelete:CASCADE"`
 }
 
 func (EnvelopeItem) TableName() string {
@@ -874,6 +880,33 @@ func (m *Field) BeforeCreate(_ *gorm.DB) error {
 		m.SecondaryID = cuid.New()
 	}
 	return nil
+}
+
+type EnvelopeContent struct {
+	ID             string         `gorm:"column:id;primaryKey" json:"id"`
+	EnvelopeID     string         `gorm:"column:envelopeId;index:EnvelopeContent_envelopeId_idx;not null" json:"envelopeId"`
+	EnvelopeItemID string         `gorm:"column:envelopeItemId;index:EnvelopeContent_envelopeItemId_idx;not null" json:"envelopeItemId"`
+	ContentMeta    datatypes.JSON `gorm:"column:contentMeta;not null" json:"contentMeta"`
+	DataContentID  *string        `gorm:"column:dataContentId" json:"dataContentId"`
+	EnvelopeItem   *EnvelopeItem
+	Envelope       *Envelope
+	DataContent    *DataContent
+}
+
+func (EnvelopeContent) TableName() string {
+	return "EnvelopeContent"
+}
+
+type DataContent struct {
+	ID               string            `gorm:"column:id;primaryKey" json:"id"`
+	Type             string            `gorm:"column:type;not null" json:"type"`
+	Data             string            `gorm:"column:data;not null" json:"data"`
+	Metadata         datatypes.JSON    `gorm:"column:metadata;not null" json:"metadata"`
+	EnvelopeContents []EnvelopeContent `gorm:"foreignKey:DataContentID;constraint:OnDelete:SET NULL"`
+}
+
+func (DataContent) TableName() string {
+	return "DataContent"
 }
 
 type Signature struct {

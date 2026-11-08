@@ -528,6 +528,8 @@ export const subscriptionClaim = pgTable(
     memberCount: integer('memberCount').notNull(),
     envelopeItemCount: integer('envelopeItemCount').notNull(),
     recipientCount: integer('recipientCount').notNull(),
+    envelopeContentCount: integer('envelopeContentCount').notNull(),
+    envelopeContentImageCount: integer('envelopeContentImageCount').notNull(),
     flags: jsonb('flags').notNull(),
     documentRateLimits: jsonb('documentRateLimits').notNull(),
     documentQuota: integer('documentQuota'),
@@ -562,6 +564,8 @@ export const organisationClaim = pgTable(
     memberCount: integer('memberCount').notNull(),
     envelopeItemCount: integer('envelopeItemCount').notNull(),
     recipientCount: integer('recipientCount').notNull(),
+    envelopeContentCount: integer('envelopeContentCount').notNull(),
+    envelopeContentImageCount: integer('envelopeContentImageCount').notNull(),
     flags: jsonb('flags').notNull(),
     documentRateLimits: jsonb('documentRateLimits').notNull(),
     documentQuota: integer('documentQuota'),
@@ -1028,6 +1032,49 @@ export const field = pgTable(
       .onUpdate('cascade'),
   ],
 )
+
+export const envelopeContent = pgTable(
+  'EnvelopeContent',
+  {
+    id: text('id').primaryKey(),
+    envelopeId: text('envelopeId').notNull(),
+    envelopeItemId: text('envelopeItemId').notNull(),
+    contentMeta: jsonb('contentMeta').notNull(),
+    dataContentId: text('dataContentId'),
+  },
+  (table) => [
+    index('EnvelopeContent_envelopeId_idx').on(table.envelopeId),
+    index('EnvelopeContent_envelopeItemId_idx').on(table.envelopeItemId),
+    foreignKey({
+      name: 'EnvelopeContent_envelopeItemId_fkey',
+      columns: [table.envelopeItemId],
+      foreignColumns: [envelopeItem.id],
+    })
+      .onDelete('cascade')
+      .onUpdate('cascade'),
+    foreignKey({
+      name: 'EnvelopeContent_envelopeId_fkey',
+      columns: [table.envelopeId],
+      foreignColumns: [envelope.id],
+    })
+      .onDelete('cascade')
+      .onUpdate('cascade'),
+    foreignKey({
+      name: 'EnvelopeContent_dataContentId_fkey',
+      columns: [table.dataContentId],
+      foreignColumns: [dataContent.id],
+    })
+      .onDelete('set null')
+      .onUpdate('cascade'),
+  ],
+)
+
+export const dataContent = pgTable('DataContent', {
+  id: text('id').primaryKey(),
+  type: documentDataTypeEnum('type').notNull(),
+  data: text('data').notNull(),
+  metadata: jsonb('metadata').notNull(),
+})
 
 export const signature = pgTable(
   'Signature',
@@ -1815,6 +1862,8 @@ export const relations = defineRelations(
     envelopeAttachment,
     recipient,
     field,
+    envelopeContent,
+    dataContent,
     signature,
     cscCredential,
     cscSession,
@@ -1926,6 +1975,7 @@ export const relations = defineRelations(
       envelopeItems: r.many.envelopeItem(),
       recipients: r.many.recipient(),
       fields: r.many.field(),
+      contents: r.many.envelopeContent(),
       shareLinks: r.many.documentShareLink(),
       auditLogs: r.many.documentAuditLog(),
       directLink: r.one.templateDirectLink({
@@ -1954,6 +2004,7 @@ export const relations = defineRelations(
         optional: false,
       }),
       field: r.many.field(),
+      contents: r.many.envelopeContent(),
     },
     documentAuditLog: {
       envelope: r.one.envelope({ from: r.documentAuditLog.envelopeId, to: r.envelope.id }),
@@ -1999,6 +2050,23 @@ export const relations = defineRelations(
       }),
       signature: r.one.signature({ from: r.field.id, to: r.signature.fieldId }),
     },
+    envelopeContent: {
+      envelopeItem: r.one.envelopeItem({
+        from: r.envelopeContent.envelopeItemId,
+        to: r.envelopeItem.id,
+        optional: false,
+      }),
+      envelope: r.one.envelope({
+        from: r.envelopeContent.envelopeId,
+        to: r.envelope.id,
+        optional: false,
+      }),
+      dataContent: r.one.dataContent({
+        from: r.envelopeContent.dataContentId,
+        to: r.dataContent.id,
+      }),
+    },
+    dataContent: { envelopeContents: r.many.envelopeContent() },
     signature: {
       recipient: r.one.recipient({
         from: r.signature.recipientId,

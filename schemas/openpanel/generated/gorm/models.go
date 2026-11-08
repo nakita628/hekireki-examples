@@ -689,12 +689,13 @@ func (*Client) BeforeUpdate(tx *gorm.DB) error {
 }
 
 type Dashboard struct {
-	ID             string   `gorm:"column:id;primaryKey;default:gen_random_uuid()" json:"id"`
-	Name           string   `gorm:"column:name;not null" json:"name"`
-	OrganizationID string   `gorm:"column:organizationId;not null" json:"organizationId"`
-	ProjectID      string   `gorm:"column:projectId;not null" json:"projectId"`
-	CreatedAt      DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
-	UpdatedAt      DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
+	ID             string         `gorm:"column:id;primaryKey;default:gen_random_uuid()" json:"id"`
+	Name           string         `gorm:"column:name;not null" json:"name"`
+	OrganizationID string         `gorm:"column:organizationId;not null" json:"organizationId"`
+	ProjectID      string         `gorm:"column:projectId;not null" json:"projectId"`
+	Filters        datatypes.JSON `gorm:"column:filters;default:'[]';not null" json:"filters"`
+	CreatedAt      DateTime       `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
+	UpdatedAt      DateTime       `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
 	Organization   *Organization
 	Project        *Project
 	Reports        []Report        `gorm:"foreignKey:DashboardID;constraint:OnDelete:CASCADE"`

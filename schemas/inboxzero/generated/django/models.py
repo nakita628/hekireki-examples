@@ -557,6 +557,7 @@ class EmailAccount(models.Model):
     rules_revision = models.IntegerField(db_column="rulesRevision", default=0)
     mail_layout = models.TextField(choices=MailLayout.choices, db_column="mailLayout", default=MailLayout.LIST)
     mail_expanded_preview = models.BooleanField(db_column="mailExpandedPreview", default=False)
+    mail_bundle_inbox = models.BooleanField(null=True, db_column="mailBundleInbox")
     include_in_all_accounts = models.BooleanField(db_column="includeInAllAccounts", default=True)
     meeting_briefings_enabled = models.BooleanField(db_column="meetingBriefingsEnabled", default=False)
     meeting_briefings_minutes_before = models.IntegerField(db_column="meetingBriefingsMinutesBefore", default=240)
@@ -595,6 +596,7 @@ class MailSplit(models.Model):
     name = models.TextField()
     order = models.IntegerField()
     match_all = models.BooleanField(db_column="matchAll", default=True)
+    bundle_in_inbox = models.BooleanField(db_column="bundleInInbox", default=False)
     email_account = models.ForeignKey("EmailAccount", on_delete=models.CASCADE, related_name="mail_splits", db_column="emailAccountId", db_index=False)
     objects = AutoNowQuerySet.as_manager()
 

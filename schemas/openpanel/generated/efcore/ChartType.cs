@@ -38,4 +38,7 @@ public enum ChartType
 
     [PgName("sankey")]
     Sankey,
+
+    [PgName("distribution")]
+    Distribution,
 }

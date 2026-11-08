@@ -248,6 +248,8 @@ class SubscriptionClaim(Base):
     member_count: Mapped[int] = mapped_column("memberCount")
     envelope_item_count: Mapped[int] = mapped_column("envelopeItemCount")
     recipient_count: Mapped[int] = mapped_column("recipientCount")
+    envelope_content_count: Mapped[int] = mapped_column("envelopeContentCount")
+    envelope_content_image_count: Mapped[int] = mapped_column("envelopeContentImageCount")
     flags: Mapped[dict[str, Any]] = mapped_column(JSONB)
     document_rate_limits: Mapped[dict[str, Any]] = mapped_column("documentRateLimits", JSONB)
     document_quota: Mapped[Optional[int]] = mapped_column("documentQuota")
@@ -270,6 +272,8 @@ class OrganisationClaim(Base):
     member_count: Mapped[int] = mapped_column("memberCount")
     envelope_item_count: Mapped[int] = mapped_column("envelopeItemCount")
     recipient_count: Mapped[int] = mapped_column("recipientCount")
+    envelope_content_count: Mapped[int] = mapped_column("envelopeContentCount")
+    envelope_content_image_count: Mapped[int] = mapped_column("envelopeContentImageCount")
     flags: Mapped[dict[str, Any]] = mapped_column(JSONB)
     document_rate_limits: Mapped[dict[str, Any]] = mapped_column("documentRateLimits", JSONB)
     document_quota: Mapped[Optional[int]] = mapped_column("documentQuota")
@@ -437,6 +441,7 @@ class Envelope(Base):
     envelope_items: Mapped[list["EnvelopeItem"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="envelope")
     recipients: Mapped[list["Recipient"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="envelope")
     fields: Mapped[list["Field"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="envelope")
+    contents: Mapped[list["EnvelopeContent"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="envelope")
     share_links: Mapped[list["DocumentShareLink"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="envelope")
     audit_logs: Mapped[list["DocumentAuditLog"]] = relationship(back_populates="envelope")
     envelope_attachments: Mapped[list["EnvelopeAttachment"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="envelope")
@@ -459,6 +464,7 @@ class EnvelopeItem(Base):
     document_data: Mapped["DocumentData"] = relationship(back_populates="envelope_item")
     envelope: Mapped["Envelope"] = relationship(back_populates="envelope_items")
     field: Mapped[list["Field"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="envelope_item")
+    contents: Mapped[list["EnvelopeContent"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="envelope_item")
 
 class DocumentAuditLog(Base):
     __tablename__ = "DocumentAuditLog"
@@ -605,6 +611,34 @@ class Field(Base):
     envelope: Mapped["Envelope"] = relationship(back_populates="fields")
     recipient: Mapped["Recipient"] = relationship(back_populates="fields")
     signature: Mapped[Optional["Signature"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="field")
+
+class EnvelopeContent(Base):
+    __tablename__ = "EnvelopeContent"
+
+    id: Mapped[str] = mapped_column(primary_key=True)
+    envelope_id: Mapped[str] = mapped_column("envelopeId", ForeignKey("Envelope.id", ondelete="CASCADE", onupdate="CASCADE", name="EnvelopeContent_envelopeId_fkey"))
+    envelope_item_id: Mapped[str] = mapped_column("envelopeItemId", ForeignKey("EnvelopeItem.id", ondelete="CASCADE", onupdate="CASCADE", name="EnvelopeContent_envelopeItemId_fkey"))
+    content_meta: Mapped[dict[str, Any]] = mapped_column("contentMeta", JSONB)
+    data_content_id: Mapped[Optional[str]] = mapped_column("dataContentId", ForeignKey("DataContent.id", ondelete="SET NULL", onupdate="CASCADE", name="EnvelopeContent_dataContentId_fkey"))
+
+    __table_args__ = (
+        Index("EnvelopeContent_envelopeId_idx", "envelopeId"),
+        Index("EnvelopeContent_envelopeItemId_idx", "envelopeItemId"),
+    )
+
+    envelope_item: Mapped["EnvelopeItem"] = relationship(back_populates="contents")
+    envelope: Mapped["Envelope"] = relationship(back_populates="contents")
+    data_content: Mapped[Optional["DataContent"]] = relationship(back_populates="envelope_contents")
+
+class DataContent(Base):
+    __tablename__ = "DataContent"
+
+    id: Mapped[str] = mapped_column(primary_key=True)
+    type: Mapped[str] = mapped_column(Enum("S3_PATH", "BYTES", "BYTES_64", name="DocumentDataType"))
+    data: Mapped[str]
+    metadata_: Mapped[dict[str, Any]] = mapped_column("metadata", JSONB)
+
+    envelope_contents: Mapped[list["EnvelopeContent"]] = relationship(back_populates="data_content")
 
 class Signature(Base):
     __tablename__ = "Signature"

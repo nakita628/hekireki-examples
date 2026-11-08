@@ -229,6 +229,7 @@ public partial class GhostfolioContext : DbContext
             entity.HasIndex(e => new { e.AccountId, e.UserId, e.Date }, "AccountBalance_accountId_userId_date_key").IsUnique();
 
             entity.Property(e => e.AccountId).HasColumnName("accountId");
+            entity.Property(e => e.Comment).HasColumnName("comment");
             entity.Property(e => e.CreatedAt)
                 .HasValueGenerator<UtcNowGenerator>()
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")

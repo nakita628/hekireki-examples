@@ -17,6 +17,8 @@ object SubscriptionClaimTable : IdTable<String>("\"SubscriptionClaim\"") {
     val memberCount = integer("memberCount")
     val envelopeItemCount = integer("envelopeItemCount")
     val recipientCount = integer("recipientCount")
+    val envelopeContentCount = integer("envelopeContentCount")
+    val envelopeContentImageCount = integer("envelopeContentImageCount")
     val flags = jsonb<String>("flags", { it }, { it })
     val documentRateLimits = jsonb<String>("documentRateLimits", { it }, { it })
     val documentQuota = integer("documentQuota").nullable()

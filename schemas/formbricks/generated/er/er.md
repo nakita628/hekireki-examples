@@ -262,6 +262,7 @@ erDiagram
         json meta "[ResponseMeta]"
         json ingestFlags "Why a value in `data` will not read back as its declared Embedded Data type — a failed coercion or a truncated oversize value (ENG-1845). Server-computed on every ingest and never accepted from the client. Null means no ingest boundary has written it, which is not the same claim as an empty list: without this column a wrong-typed value is indistinguishable from an absent one, and surfacing that in the UI (v2) would have nothing to read. [ResponseIngestFlags]"
         responseoutcome outcome "A reviewer's verdict on the response; null means none. `lowQuality` hides it from the Analysis export by default and from Feedback Records, and nothing else: it is never deleted and every count, list, webhook and integration still includes it (ENG-6780)."
+        json notShown "What the respondent was not shown (ENG-6936, ADR 0029): the blocks and elements a show-if kept from them, and per element its options, matrix rows and columns, by stable ids. Written by the survey while they answer; null means unknown (older responses and bundles), read as before. Omitted from reads without a `select` (PRISMA_GLOBAL_OMIT), so it never reaches a v1/v2 payload, webhook or integration. [ResponseNotShown]"
         json contactAttributes "[ResponseContactAttributes]"
         string singleUseId UK
         string language
@@ -358,6 +359,7 @@ erDiagram
         surveyscriptmode customHeadScriptsMode
         json customCss "[CustomCssStored] Survey custom CSS (ENG-2949): source plus trusted compiled output, written only by the shared custom CSS save service. null = no survey CSS. Kept outside `styling` (M2.07)."
         json showConditions "[SurveyShowConditions] App surveys: conditions checked in the browser when a trigger fires (ENG-3873). null = no conditions, which is what every existing survey keeps."
+        json startLogic "[SurveyStartLogic] Rules before the first question (ENG-6932): block-rule format, run by the survey on load. null = none, which is what every existing survey keeps."
     }
     SurveyQuota {
         string id PK
@@ -773,6 +775,7 @@ erDiagram
         string name UK
         string workspaceId FK, UK
         string createdBy FK
+        json filters
     }
     DashboardWidget {
         string id PK

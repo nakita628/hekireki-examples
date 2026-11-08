@@ -1,6 +1,6 @@
 // Ghostfolio: Ghostfolio wealth management: users, accounts, orders, symbol profiles and market data.
 //
-// Imported from https://github.com/ghostfolio/ghostfolio/blob/f3840ed29ae634c5f484529718975401ae940608/prisma/schema.prisma
+// Imported from https://github.com/ghostfolio/ghostfolio/blob/d278362d394a1c49c9cc55e9db4be9a7fd17c7dd/prisma/schema.prisma
 // (AGPL-3.0 license) by tools/import/import-schema.mjs, which dropped the original
 // generator blocks and the datasource's connection URLs and added the hekireki generators below.
 // The models, enums and `///` comments are the project's own, as they are at that commit.
@@ -124,6 +124,7 @@ model Account {
 model AccountBalance {
   account   Account  @relation(fields: [accountId, userId], onDelete: Cascade, references: [id, userId])
   accountId String
+  comment   String?
   createdAt DateTime @default(now())
   date      DateTime @default(now())
   id        String   @id @default(uuid())

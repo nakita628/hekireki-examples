@@ -2,6 +2,7 @@ package openpanel.models
 
 import org.jetbrains.exposed.v1.core.ReferenceOption
 import org.jetbrains.exposed.v1.core.dao.id.IdTable
+import org.jetbrains.exposed.v1.json.jsonb
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
@@ -24,6 +25,7 @@ object DashboardTable : IdTable<String>("dashboards") {
             onUpdate = ReferenceOption.CASCADE,
             fkName = "\"dashboards_projectId_fkey\"",
         )
+    val filters = jsonb<String>("filters", { it }, { it }).default("[]")
     val createdAt = pgTimestamp("createdAt", 3).databaseDefault("CURRENT_TIMESTAMP") { Instant.now().truncatedTo(ChronoUnit.MILLIS) }
     val updatedAt = pgTimestamp("updatedAt", 3).databaseDefault("CURRENT_TIMESTAMP") { Instant.now().truncatedTo(ChronoUnit.MILLIS) }
     override val primaryKey = PrimaryKey(id, name = "dashboards_pkey")

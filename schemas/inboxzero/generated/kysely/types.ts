@@ -335,6 +335,7 @@ export interface EmailAccount {
   rulesRevision: Generated<number>
   mailLayout: Generated<MailLayout>
   mailExpandedPreview: Generated<boolean>
+  mailBundleInbox: boolean | null
   includeInAllAccounts: Generated<boolean>
   meetingBriefingsEnabled: Generated<boolean>
   meetingBriefingsMinutesBefore: Generated<number>
@@ -362,6 +363,7 @@ export interface MailSplit {
   name: string
   order: number
   matchAll: Generated<boolean>
+  bundleInInbox: Generated<boolean>
   emailAccountId: string
 }
 

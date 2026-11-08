@@ -4,6 +4,7 @@ class MailSplit < ApplicationRecord
 
   attribute :id, default: -> { Cuid.generate }
   attribute :matchAll, default: true
+  attribute :bundleInInbox, default: false
   alias_attribute :created_at, :createdAt
   alias_attribute :updated_at, :updatedAt
 

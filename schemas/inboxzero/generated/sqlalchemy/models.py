@@ -199,6 +199,7 @@ class EmailAccount(Base):
     rules_revision: Mapped[int] = mapped_column("rulesRevision", default=0, server_default=text("0"))
     mail_layout: Mapped[str] = mapped_column("mailLayout", Enum("LIST", "SPLIT", name="MailLayout"), default="LIST", server_default=text("'LIST'"))
     mail_expanded_preview: Mapped[bool] = mapped_column("mailExpandedPreview", default=False, server_default=text("false"))
+    mail_bundle_inbox: Mapped[Optional[bool]] = mapped_column("mailBundleInbox")
     include_in_all_accounts: Mapped[bool] = mapped_column("includeInAllAccounts", default=True, server_default=text("true"))
     meeting_briefings_enabled: Mapped[bool] = mapped_column("meetingBriefingsEnabled", default=False, server_default=text("false"))
     meeting_briefings_minutes_before: Mapped[int] = mapped_column("meetingBriefingsMinutesBefore", default=240, server_default=text("240"))
@@ -286,6 +287,7 @@ class MailSplit(Base):
     name: Mapped[str]
     order: Mapped[int]
     match_all: Mapped[bool] = mapped_column("matchAll", default=True, server_default=text("true"))
+    bundle_in_inbox: Mapped[bool] = mapped_column("bundleInInbox", default=False, server_default=text("false"))
     email_account_id: Mapped[str] = mapped_column("emailAccountId", ForeignKey("EmailAccount.id", ondelete="CASCADE", onupdate="CASCADE", name="MailSplit_emailAccountId_fkey"))
 
     __table_args__ = (

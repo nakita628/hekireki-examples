@@ -234,6 +234,7 @@ type EmailAccount struct {
 	RulesRevision                       int            `gorm:"column:rulesRevision;default:0;not null" json:"rulesRevision"`
 	MailLayout                          string         `gorm:"column:mailLayout;default:'LIST';not null" json:"mailLayout"`
 	MailExpandedPreview                 bool           `gorm:"column:mailExpandedPreview;default:false;not null" json:"mailExpandedPreview"`
+	MailBundleInbox                     *bool          `gorm:"column:mailBundleInbox" json:"mailBundleInbox"`
 	IncludeInAllAccounts                *bool          `gorm:"column:includeInAllAccounts;default:true;not null" json:"includeInAllAccounts"`
 	MeetingBriefingsEnabled             bool           `gorm:"column:meetingBriefingsEnabled;default:false;not null" json:"meetingBriefingsEnabled"`
 	MeetingBriefingsMinutesBefore       *int           `gorm:"column:meetingBriefingsMinutesBefore;default:240;not null" json:"meetingBriefingsMinutesBefore"`
@@ -335,6 +336,7 @@ type MailSplit struct {
 	Name           string   `gorm:"column:name;uniqueIndex:MailSplit_emailAccountId_name_key;not null" json:"name"`
 	Order          int      `gorm:"column:order;index:MailSplit_emailAccountId_order_idx;not null" json:"order"`
 	MatchAll       *bool    `gorm:"column:matchAll;default:true;not null" json:"matchAll"`
+	BundleInInbox  bool     `gorm:"column:bundleInInbox;default:false;not null" json:"bundleInInbox"`
 	EmailAccountID string   `gorm:"column:emailAccountId;uniqueIndex:MailSplit_emailAccountId_name_key;index:MailSplit_emailAccountId_order_idx;not null" json:"emailAccountId"`
 	EmailAccount   *EmailAccount
 	Filters        []MailSplitFilter `gorm:"foreignKey:MailSplitID;constraint:OnDelete:CASCADE"`

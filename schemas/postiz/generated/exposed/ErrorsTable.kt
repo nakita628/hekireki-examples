@@ -34,5 +34,6 @@ object ErrorsTable : IdTable<String>("\"Errors\"") {
     init {
         index("\"Errors_organizationId_idx\"", false, organizationId)
         index("\"Errors_createdAt_idx\"", false, createdAt)
+        index("\"Errors_createdAt_platform_idx\"", false, createdAt, platform)
     }
 }

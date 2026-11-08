@@ -55,6 +55,7 @@ object EmailAccountTable : IdTable<String>("\"EmailAccount\"") {
     val rulesRevision = integer("rulesRevision").default(0)
     val mailLayout = pgEnum("mailLayout", "\"MailLayout\"", MailLayout.entries, MailLayout::dbName).default(MailLayout.LIST)
     val mailExpandedPreview = bool("mailExpandedPreview").default(false)
+    val mailBundleInbox = bool("mailBundleInbox").nullable()
     val includeInAllAccounts = bool("includeInAllAccounts").default(true)
     val meetingBriefingsEnabled = bool("meetingBriefingsEnabled").default(false)
     val meetingBriefingsMinutesBefore = integer("meetingBriefingsMinutesBefore").default(240)

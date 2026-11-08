@@ -66,6 +66,8 @@ object PrismaSchema {
             EnvelopeAttachmentTable,
             RecipientTable,
             FieldTable,
+            EnvelopeContentTable,
+            DataContentTable,
             SignatureTable,
             CscCredentialTable,
             CscSessionTable,

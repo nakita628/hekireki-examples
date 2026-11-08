@@ -16,8 +16,11 @@ class ExternalMediaStorageIntegrationEntity(
     var type by ExternalMediaStorageIntegrationTable.type
     var bucketName by ExternalMediaStorageIntegrationTable.bucketName
     var prefix by ExternalMediaStorageIntegrationTable.prefix
+    var authType by ExternalMediaStorageIntegrationTable.authType
     var accessKeyId by ExternalMediaStorageIntegrationTable.accessKeyId
     var secretAccessKey by ExternalMediaStorageIntegrationTable.secretAccessKey
+    var roleArn by ExternalMediaStorageIntegrationTable.roleArn
+    var externalId by ExternalMediaStorageIntegrationTable.externalId
     var region by ExternalMediaStorageIntegrationTable.region
     var endpoint by ExternalMediaStorageIntegrationTable.endpoint
     var forcePathStyle by ExternalMediaStorageIntegrationTable.forcePathStyle

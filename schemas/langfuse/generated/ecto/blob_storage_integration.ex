@@ -8,8 +8,11 @@ defmodule Langfuse.BlobStorageIntegration do
           type: atom(),
           bucket_name: String.t(),
           prefix: String.t(),
+          auth_type: atom(),
           access_key_id: String.t() | nil,
           secret_access_key: String.t() | nil,
+          role_arn: String.t() | nil,
+          external_id: String.t() | nil,
           region: String.t(),
           endpoint: String.t() | nil,
           force_path_style: boolean(),
@@ -38,8 +41,11 @@ defmodule Langfuse.BlobStorageIntegration do
     field(:type, Ecto.Enum, values: [:S3, :S3_COMPATIBLE, :AZURE_BLOB_STORAGE, :GOOGLE_CLOUD_STORAGE])
     field(:bucket_name, :string)
     field(:prefix, :string)
+    field(:auth_type, Ecto.Enum, values: [:ACCESS_KEYS, :ROLE_ARN], default: :ACCESS_KEYS)
     field(:access_key_id, :string)
     field(:secret_access_key, :string)
+    field(:role_arn, :string)
+    field(:external_id, :string)
     field(:region, :string)
     field(:endpoint, :string)
     field(:force_path_style, :boolean)

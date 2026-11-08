@@ -113,6 +113,11 @@ class Envelope extends Model
         return $this->hasMany(Field::class, 'envelopeId');
     }
 
+    public function contents(): HasMany
+    {
+        return $this->hasMany(EnvelopeContent::class, 'envelopeId');
+    }
+
     public function shareLinks(): HasMany
     {
         return $this->hasMany(DocumentShareLink::class, 'envelopeId');

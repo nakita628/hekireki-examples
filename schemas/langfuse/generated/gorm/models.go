@@ -432,6 +432,11 @@ type GatewayAiConnection struct {
 	CreatedByID         *string        `gorm:"column:created_by_id" json:"created_by_id"`
 	Status              string         `gorm:"column:status;index:gateway_ai_conn_org_status_created_at_id_idx;default:'enabled';not null" json:"status"`
 	AllowedModels       datatypes.JSON `gorm:"column:allowed_models;type:jsonb" json:"allowed_models"`
+	CustomModels        datatypes.JSON `gorm:"column:custom_models;type:jsonb;default:'[]';not null" json:"custom_models"`
+	Config              datatypes.JSON `gorm:"column:config" json:"config"`
+	BaseURL             *string        `gorm:"column:base_url" json:"base_url"`
+	ExtraHeaders        *string        `gorm:"column:extra_headers" json:"extra_headers"`
+	ExtraHeaderKeys     []string       `gorm:"column:extra_header_keys;serializer:json;not null" json:"extra_header_keys"`
 	CreatedAt           DateTime       `gorm:"column:created_at;index:gateway_ai_conn_org_created_at_id_idx;index:gateway_ai_conn_org_status_created_at_id_idx;autoCreateTime:false;not null" json:"created_at"`
 	UpdatedAt           DateTime       `gorm:"column:updated_at;autoUpdateTime:false;not null" json:"updated_at"`
 	Organization        *Organization
@@ -2232,8 +2237,11 @@ type BlobStorageIntegration struct {
 	Type                          string         `gorm:"column:type;not null" json:"type"`
 	BucketName                    string         `gorm:"column:bucket_name;not null" json:"bucket_name"`
 	Prefix                        string         `gorm:"column:prefix;not null" json:"prefix"`
+	AuthType                      string         `gorm:"column:auth_type;default:'ACCESS_KEYS';not null" json:"auth_type"`
 	AccessKeyID                   *string        `gorm:"column:access_key_id" json:"access_key_id"`
 	SecretAccessKey               *string        `gorm:"column:secret_access_key" json:"secret_access_key"`
+	RoleArn                       *string        `gorm:"column:role_arn" json:"role_arn"`
+	ExternalID                    *string        `gorm:"column:external_id" json:"external_id"`
 	Region                        string         `gorm:"column:region;not null" json:"region"`
 	Endpoint                      *string        `gorm:"column:endpoint" json:"endpoint"`
 	ForcePathStyle                bool           `gorm:"column:force_path_style;not null" json:"force_path_style"`
@@ -2286,8 +2294,11 @@ type ExternalMediaStorageIntegration struct {
 	Type            string   `gorm:"column:type;not null" json:"type"`
 	BucketName      string   `gorm:"column:bucket_name;not null" json:"bucket_name"`
 	Prefix          *string  `gorm:"column:prefix" json:"prefix"`
+	AuthType        string   `gorm:"column:auth_type;default:'ACCESS_KEYS';not null" json:"auth_type"`
 	AccessKeyID     *string  `gorm:"column:access_key_id" json:"access_key_id"`
 	SecretAccessKey *string  `gorm:"column:secret_access_key" json:"secret_access_key"`
+	RoleArn         *string  `gorm:"column:role_arn" json:"role_arn"`
+	ExternalID      *string  `gorm:"column:external_id" json:"external_id"`
 	Region          string   `gorm:"column:region;not null" json:"region"`
 	Endpoint        *string  `gorm:"column:endpoint" json:"endpoint"`
 	ForcePathStyle  bool     `gorm:"column:force_path_style;not null" json:"force_path_style"`

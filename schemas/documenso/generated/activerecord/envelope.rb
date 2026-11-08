@@ -34,6 +34,8 @@ class Envelope < ApplicationRecord
   has_many :envelope_items, foreign_key: "envelopeId", inverse_of: :envelope, dependent: :destroy
   has_many :recipients, foreign_key: "envelopeId", inverse_of: :envelope, dependent: :destroy
   has_many :fields, foreign_key: "envelopeId", inverse_of: :envelope, dependent: :destroy
+  has_many :contents, class_name: "EnvelopeContent", foreign_key: "envelopeId", inverse_of: :envelope,
+                      dependent: :destroy
   has_many :share_links, class_name: "DocumentShareLink", foreign_key: "envelopeId", inverse_of: :envelope,
                          dependent: :destroy
   has_many :audit_logs, class_name: "DocumentAuditLog", foreign_key: "envelopeId", inverse_of: :envelope,

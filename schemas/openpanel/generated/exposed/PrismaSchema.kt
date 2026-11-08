@@ -12,7 +12,7 @@ object PrismaSchema {
             "CREATE TYPE \"AccessLevel\" AS ENUM ('read', 'write', 'admin')",
             "CREATE TYPE \"ClientType\" AS ENUM ('read', 'write', 'root')",
             "CREATE TYPE \"Interval\" AS ENUM ('hour', 'day', 'month', 'minute', 'week')",
-            "CREATE TYPE \"ChartType\" AS ENUM ('linear', 'bar', 'histogram', 'pie', 'metric', 'area', 'map', 'funnel', 'retention', 'conversion', 'sankey')",
+            "CREATE TYPE \"ChartType\" AS ENUM ('linear', 'bar', 'histogram', 'pie', 'metric', 'area', 'map', 'funnel', 'retention', 'conversion', 'sankey', 'distribution')",
             "CREATE TYPE \"Metric\" AS ENUM ('sum', 'average', 'min', 'max', 'count')",
             "CREATE TYPE \"IntegrationType\" AS ENUM ('app', 'mail', 'custom')",
             "CREATE TYPE \"ImportStatus\" AS ENUM ('pending', 'processing', 'completed', 'failed')",

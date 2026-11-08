@@ -53,7 +53,7 @@ export type SurveyOverlay = 'none' | 'light' | 'dark'
 
 export type BootstrapAdminMarker = 'bootstrapAdmin'
 
-export type OrganizationRole = 'owner' | 'manager' | 'member' | 'billing'
+export type OrganizationRole = 'owner' | 'manager' | 'member' | 'billing' | 'dashboard_viewer'
 
 export type ApiKeyPermission = 'read' | 'write' | 'manage'
 
@@ -274,6 +274,7 @@ export interface Response {
   meta: Generated<unknown>
   ingest_flags: unknown
   outcome: ResponseOutcome | null
+  not_shown: unknown
   contactAttributes: unknown
   singleUseId: string | null
   language: string | null
@@ -376,6 +377,7 @@ export interface Survey {
   customHeadScriptsMode: Generated<SurveyScriptMode | null>
   customCss: unknown
   showConditions: unknown
+  startLogic: unknown
 }
 
 export interface SurveyQuota {
@@ -828,6 +830,7 @@ export interface Dashboard {
   name: string
   workspaceId: string
   createdBy: string | null
+  filters: Generated<unknown>
 }
 
 export interface DashboardWidget {

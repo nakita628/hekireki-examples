@@ -248,6 +248,8 @@ export interface SubscriptionClaim {
   memberCount: number
   envelopeItemCount: number
   recipientCount: number
+  envelopeContentCount: number
+  envelopeContentImageCount: number
   flags: unknown
   documentRateLimits: unknown
   documentQuota: number | null
@@ -267,6 +269,8 @@ export interface OrganisationClaim {
   memberCount: number
   envelopeItemCount: number
   recipientCount: number
+  envelopeContentCount: number
+  envelopeContentImageCount: number
   flags: unknown
   documentRateLimits: unknown
   documentQuota: number | null
@@ -468,6 +472,21 @@ export interface Field {
   customText: string
   inserted: boolean
   fieldMeta: unknown
+}
+
+export interface EnvelopeContent {
+  id: string
+  envelopeId: string
+  envelopeItemId: string
+  contentMeta: unknown
+  dataContentId: string | null
+}
+
+export interface DataContent {
+  id: string
+  type: DocumentDataType
+  data: string
+  metadata: unknown
 }
 
 export interface Signature {
@@ -798,6 +817,8 @@ export interface DB {
   EnvelopeAttachment: EnvelopeAttachment
   Recipient: Recipient
   Field: Field
+  EnvelopeContent: EnvelopeContent
+  DataContent: DataContent
   Signature: Signature
   CscCredential: CscCredential
   CscSession: CscSession

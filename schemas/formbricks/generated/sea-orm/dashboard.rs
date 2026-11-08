@@ -15,6 +15,8 @@ pub struct Model {
     pub workspace_id: String,
     #[sea_orm(column_name = "createdBy")]
     pub created_by: Option<String>,
+    #[sea_orm(default_value = "[]")]
+    pub filters: Json,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

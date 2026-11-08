@@ -89,6 +89,8 @@ pub struct Model {
     pub mail_layout: MailLayout,
     #[sea_orm(column_name = "mailExpandedPreview", default_value = false)]
     pub mail_expanded_preview: bool,
+    #[sea_orm(column_name = "mailBundleInbox")]
+    pub mail_bundle_inbox: Option<bool>,
     #[sea_orm(column_name = "includeInAllAccounts", default_value = true)]
     pub include_in_all_accounts: bool,
     #[sea_orm(column_name = "meetingBriefingsEnabled", default_value = false)]

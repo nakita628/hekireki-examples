@@ -20,6 +20,8 @@ class SubscriptionClaimEntity(
     var memberCount by SubscriptionClaimTable.memberCount
     var envelopeItemCount by SubscriptionClaimTable.envelopeItemCount
     var recipientCount by SubscriptionClaimTable.recipientCount
+    var envelopeContentCount by SubscriptionClaimTable.envelopeContentCount
+    var envelopeContentImageCount by SubscriptionClaimTable.envelopeContentImageCount
     var flags by SubscriptionClaimTable.flags
     var documentRateLimits by SubscriptionClaimTable.documentRateLimits
     var documentQuota by SubscriptionClaimTable.documentQuota

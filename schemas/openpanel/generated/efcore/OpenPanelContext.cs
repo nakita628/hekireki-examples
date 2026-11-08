@@ -962,6 +962,11 @@ public partial class OpenPanelContext : DbContext
             entity.Property(e => e.Name).HasColumnName("name");
             entity.Property(e => e.OrganizationId).HasColumnName("organizationId");
             entity.Property(e => e.ProjectId).HasColumnName("projectId");
+            entity.Property(e => e.Filters)
+                .ValueGeneratedNever()
+                .HasDefaultValue("[]")
+                .HasColumnType("jsonb")
+                .HasColumnName("filters");
             entity.Property(e => e.CreatedAt)
                 .HasValueGenerator<UtcNowGenerator>()
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")

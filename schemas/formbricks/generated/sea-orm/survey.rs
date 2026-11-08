@@ -117,6 +117,8 @@ pub struct Model {
     pub custom_css: Option<Json>,
     #[sea_orm(column_name = "showConditions")]
     pub show_conditions: Option<Json>,
+    #[sea_orm(column_name = "startLogic")]
+    pub start_logic: Option<Json>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

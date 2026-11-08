@@ -21,8 +21,11 @@ class BlobStorageIntegration extends \Illuminate\Database\Eloquent\Model
         'type',
         'bucket_name',
         'prefix',
+        'auth_type',
         'access_key_id',
         'secret_access_key',
+        'role_arn',
+        'external_id',
         'region',
         'endpoint',
         'force_path_style',
@@ -45,6 +48,7 @@ class BlobStorageIntegration extends \Illuminate\Database\Eloquent\Model
     ];
 
     protected $attributes = [
+        'auth_type' => 'ACCESS_KEYS',
         'file_type' => 'CSV',
         'export_mode' => 'FULL_HISTORY',
         'export_source' => 'TRACES_OBSERVATIONS',
@@ -54,6 +58,7 @@ class BlobStorageIntegration extends \Illuminate\Database\Eloquent\Model
 
     protected $casts = [
         'type' => BlobStorageIntegrationType::class,
+        'auth_type' => StorageIntegrationAuthType::class,
         'force_path_style' => 'boolean',
         'next_sync_at' => 'datetime',
         'last_sync_at' => 'datetime',

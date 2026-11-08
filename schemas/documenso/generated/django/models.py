@@ -435,6 +435,8 @@ class SubscriptionClaim(models.Model):
     member_count = models.IntegerField(db_column="memberCount")
     envelope_item_count = models.IntegerField(db_column="envelopeItemCount")
     recipient_count = models.IntegerField(db_column="recipientCount")
+    envelope_content_count = models.IntegerField(db_column="envelopeContentCount")
+    envelope_content_image_count = models.IntegerField(db_column="envelopeContentImageCount")
     flags = models.JSONField()
     document_rate_limits = models.JSONField(db_column="documentRateLimits")
     document_quota = models.IntegerField(null=True, db_column="documentQuota")
@@ -458,6 +460,8 @@ class OrganisationClaim(models.Model):
     member_count = models.IntegerField(db_column="memberCount")
     envelope_item_count = models.IntegerField(db_column="envelopeItemCount")
     recipient_count = models.IntegerField(db_column="recipientCount")
+    envelope_content_count = models.IntegerField(db_column="envelopeContentCount")
+    envelope_content_image_count = models.IntegerField(db_column="envelopeContentImageCount")
     flags = models.JSONField()
     document_rate_limits = models.JSONField(db_column="documentRateLimits")
     document_quota = models.IntegerField(null=True, db_column="documentQuota")
@@ -767,6 +771,31 @@ class Field(models.Model):
             models.Index(fields=["envelope_item"]),
             models.Index(fields=["recipient"]),
         ]
+
+
+class EnvelopeContent(models.Model):
+    id = models.TextField(primary_key=True, default=None)
+    envelope = models.ForeignKey("Envelope", on_delete=models.CASCADE, related_name="contents", db_column="envelopeId", db_index=False)
+    envelope_item = models.ForeignKey("EnvelopeItem", on_delete=models.CASCADE, related_name="contents", db_column="envelopeItemId", db_index=False)
+    content_meta = models.JSONField(db_column="contentMeta")
+    data_content = models.ForeignKey("DataContent", on_delete=models.SET_NULL, related_name="envelope_contents", db_column="dataContentId", null=True, db_index=False)
+
+    class Meta:
+        db_table = "EnvelopeContent"
+        indexes = [
+            models.Index(fields=["envelope"]),
+            models.Index(fields=["envelope_item"]),
+        ]
+
+
+class DataContent(models.Model):
+    id = models.TextField(primary_key=True, default=None)
+    type = models.TextField(choices=DocumentDataType.choices)
+    data = models.TextField()
+    metadata = models.JSONField()
+
+    class Meta:
+        db_table = "DataContent"
 
 
 class Signature(models.Model):

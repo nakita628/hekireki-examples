@@ -91,6 +91,8 @@ public partial class EmailAccount
 
     public bool MailExpandedPreview { get; set; } = false;
 
+    public bool? MailBundleInbox { get; set; }
+
     public bool IncludeInAllAccounts { get; set; } = true;
 
     public bool MeetingBriefingsEnabled { get; set; } = false;

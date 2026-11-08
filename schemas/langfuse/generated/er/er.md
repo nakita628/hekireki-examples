@@ -256,6 +256,11 @@ erDiagram
         string createdById
         gatewayconnectionstatus status
         json allowedModels
+        json customModels
+        json config
+        string baseURL
+        string extraHeaders
+        string[] extraHeaderKeys
         datetime createdAt
         datetime updatedAt
     }
@@ -821,8 +826,11 @@ erDiagram
         blobstorageintegrationtype type
         string bucketName
         string prefix
+        storageintegrationauthtype authType
         string accessKeyId
         string secretAccessKey
+        string roleArn
+        string externalId
         string region
         string endpoint
         boolean forcePathStyle
@@ -850,8 +858,11 @@ erDiagram
         externalmediastorageintegrationtype type
         string bucketName
         string prefix
+        storageintegrationauthtype authType
         string accessKeyId
         string secretAccessKey
+        string roleArn
+        string externalId
         string region
         string endpoint
         boolean forcePathStyle

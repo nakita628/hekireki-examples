@@ -23,8 +23,13 @@ object ExternalMediaStorageIntegrationTable : IdTable<String>("external_media_st
         )
     val bucketName = text("bucket_name")
     val prefix = text("prefix").nullable()
+    val authType =
+        pgEnum("auth_type", "\"StorageIntegrationAuthType\"", StorageIntegrationAuthType.entries, StorageIntegrationAuthType::dbName)
+            .default(StorageIntegrationAuthType.ACCESS_KEYS)
     val accessKeyId = text("access_key_id").nullable()
     val secretAccessKey = text("secret_access_key").nullable()
+    val roleArn = text("role_arn").nullable()
+    val externalId = text("external_id").nullable()
     val region = text("region")
     val endpoint = text("endpoint").nullable()
     val forcePathStyle = bool("force_path_style")

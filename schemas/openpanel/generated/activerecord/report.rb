@@ -8,7 +8,7 @@ class Report < ApplicationRecord
   alias_attribute :updated_at, :updatedAt
 
   enum :interval, { hour: "hour", day: "day", month: "month", minute: "minute", week: "week" }, validate: true
-  enum :chartType, { linear: "linear", bar: "bar", histogram: "histogram", pie: "pie", metric: "metric", area: "area", map: "map", funnel: "funnel", retention: "retention", conversion: "conversion", sankey: "sankey" },
+  enum :chartType, { linear: "linear", bar: "bar", histogram: "histogram", pie: "pie", metric: "metric", area: "area", map: "map", funnel: "funnel", retention: "retention", conversion: "conversion", sankey: "sankey", distribution: "distribution" },
        prefix: true, validate: true
   enum :metric, { sum: "sum", average: "average", min: "min", max: "max", count: "count" }, default: :sum, prefix: true,
                                                                                             validate: true

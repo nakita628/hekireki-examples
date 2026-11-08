@@ -46,6 +46,7 @@ erDiagram
     }
     AccountBalance {
         string accountId FK, UK
+        string comment
         datetime createdAt
         datetime date UK
         string id PK

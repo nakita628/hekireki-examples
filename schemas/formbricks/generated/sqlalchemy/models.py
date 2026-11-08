@@ -294,6 +294,7 @@ class Response(Base):
     meta: Mapped[dict[str, Any]] = mapped_column(JSONB, default=lambda: {}, server_default=text("'{}'"))
     ingest_flags: Mapped[Optional[dict[str, Any]]] = mapped_column(JSONB(none_as_null=True))
     outcome: Mapped[Optional[str]] = mapped_column(Enum("lowQuality", name="ResponseOutcome"))
+    not_shown: Mapped[Optional[dict[str, Any]]] = mapped_column(JSONB(none_as_null=True))
     contact_attributes: Mapped[Optional[dict[str, Any]]] = mapped_column("contactAttributes", JSONB(none_as_null=True))
     single_use_id: Mapped[Optional[str]] = mapped_column("singleUseId")
     language: Mapped[Optional[str]]
@@ -456,6 +457,7 @@ class Survey(Base):
     custom_head_scripts_mode: Mapped[Optional[str]] = mapped_column("customHeadScriptsMode", Enum("add", "replace", name="SurveyScriptMode"), default="add", server_default=text("'add'"))
     custom_css: Mapped[Optional[dict[str, Any]]] = mapped_column("customCss", JSONB(none_as_null=True))
     show_conditions: Mapped[Optional[dict[str, Any]]] = mapped_column("showConditions", JSONB(none_as_null=True))
+    start_logic: Mapped[Optional[dict[str, Any]]] = mapped_column("startLogic", JSONB(none_as_null=True))
 
     __table_args__ = (
         Index("Survey_slug_key", "slug", unique=True),
@@ -685,7 +687,7 @@ class Membership(Base):
     organization_id: Mapped[str] = mapped_column("organizationId", ForeignKey("Organization.id", ondelete="CASCADE", onupdate="CASCADE", name="Membership_organizationId_fkey"), primary_key=True)
     user_id: Mapped[str] = mapped_column("userId", ForeignKey("User.id", ondelete="CASCADE", onupdate="CASCADE", name="Membership_userId_fkey"), primary_key=True)
     accepted: Mapped[bool] = mapped_column(default=False, server_default=text("false"))
-    role: Mapped[str] = mapped_column(Enum("owner", "manager", "member", "billing", name="OrganizationRole"), default="member", server_default=text("'member'"))
+    role: Mapped[str] = mapped_column(Enum("owner", "manager", "member", "billing", "dashboard_viewer", name="OrganizationRole"), default="member", server_default=text("'member'"))
 
     __table_args__ = (
         Index("Membership_organizationId_idx", "organizationId"),
@@ -705,7 +707,7 @@ class Invite(Base):
     acceptor_id: Mapped[Optional[str]] = mapped_column("acceptorId", ForeignKey("User.id", ondelete="CASCADE", onupdate="CASCADE", name="Invite_acceptorId_fkey"))
     created_at: Mapped[datetime] = mapped_column("createdAt", default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
     expires_at: Mapped[datetime] = mapped_column("expiresAt")
-    role: Mapped[str] = mapped_column(Enum("owner", "manager", "member", "billing", name="OrganizationRole"), default="member", server_default=text("'member'"))
+    role: Mapped[str] = mapped_column(Enum("owner", "manager", "member", "billing", "dashboard_viewer", name="OrganizationRole"), default="member", server_default=text("'member'"))
     team_ids: Mapped[list[str]] = mapped_column("teamIds", ARRAY(Text), nullable=True, default=lambda: [], server_default=text("ARRAY[]::text[]"))
 
     __table_args__ = (
@@ -1301,6 +1303,7 @@ class Dashboard(Base):
     name: Mapped[str]
     workspace_id: Mapped[str] = mapped_column("workspaceId", ForeignKey("Workspace.id", ondelete="CASCADE", onupdate="CASCADE", name="Dashboard_workspaceId_fkey"))
     created_by: Mapped[Optional[str]] = mapped_column("createdBy", ForeignKey("User.id", ondelete="SET NULL", onupdate="CASCADE", name="Dashboard_createdBy_fkey"))
+    filters: Mapped[dict[str, Any]] = mapped_column(JSONB, default=lambda: [], server_default=text("'[]'"))
 
     __table_args__ = (
         Index("Dashboard_workspaceId_created_at_idx", "workspaceId", "created_at"),

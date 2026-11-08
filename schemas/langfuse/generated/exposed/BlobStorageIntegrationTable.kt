@@ -19,8 +19,13 @@ object BlobStorageIntegrationTable : IdTable<String>("blob_storage_integrations"
     val type = pgEnum("type", "\"BlobStorageIntegrationType\"", BlobStorageIntegrationType.entries, BlobStorageIntegrationType::dbName)
     val bucketName = text("bucket_name")
     val prefix = text("prefix")
+    val authType =
+        pgEnum("auth_type", "\"StorageIntegrationAuthType\"", StorageIntegrationAuthType.entries, StorageIntegrationAuthType::dbName)
+            .default(StorageIntegrationAuthType.ACCESS_KEYS)
     val accessKeyId = text("access_key_id").nullable()
     val secretAccessKey = text("secret_access_key").nullable()
+    val roleArn = text("role_arn").nullable()
+    val externalId = text("external_id").nullable()
     val region = text("region")
     val endpoint = text("endpoint").nullable()
     val forcePathStyle = bool("force_path_style")

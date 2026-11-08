@@ -100,6 +100,7 @@ func (*Account) BeforeUpdate(tx *gorm.DB) error {
 
 type AccountBalance struct {
 	AccountID string   `gorm:"column:accountId;uniqueIndex:AccountBalance_accountId_userId_date_key;index:AccountBalance_accountId_idx;not null" json:"accountId"`
+	Comment   *string  `gorm:"column:comment" json:"comment"`
 	CreatedAt DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	Date      DateTime `gorm:"column:date;uniqueIndex:AccountBalance_accountId_userId_date_key;index:AccountBalance_date_idx;not null" json:"date"`
 	ID        string   `gorm:"column:id;primaryKey;type:char(36)" json:"id"`

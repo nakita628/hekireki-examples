@@ -23,6 +23,8 @@ public partial class Dashboard
 
     public virtual ShareDashboard? Share { get; set; }
 
+    public string Filters { get; set; } = "[]";
+
     public DateTime CreatedAt { get; set; }
 
     public DateTime UpdatedAt { get; set; }

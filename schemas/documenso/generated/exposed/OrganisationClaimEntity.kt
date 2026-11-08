@@ -20,6 +20,8 @@ class OrganisationClaimEntity(
     var memberCount by OrganisationClaimTable.memberCount
     var envelopeItemCount by OrganisationClaimTable.envelopeItemCount
     var recipientCount by OrganisationClaimTable.recipientCount
+    var envelopeContentCount by OrganisationClaimTable.envelopeContentCount
+    var envelopeContentImageCount by OrganisationClaimTable.envelopeContentImageCount
     var flags by OrganisationClaimTable.flags
     var documentRateLimits by OrganisationClaimTable.documentRateLimits
     var documentQuota by OrganisationClaimTable.documentQuota

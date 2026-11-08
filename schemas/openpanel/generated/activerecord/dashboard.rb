@@ -1,4 +1,5 @@
 class Dashboard < ApplicationRecord
+  attribute :filters, default: -> { JSON.parse("[]") }
   alias_attribute :created_at, :createdAt
   alias_attribute :updated_at, :updatedAt
 

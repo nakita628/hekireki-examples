@@ -6,8 +6,8 @@ class Invite < ApplicationRecord
   attribute :teamIds, default: -> { [] }
   alias_attribute :created_at, :createdAt
 
-  enum :role, { owner: "owner", manager: "manager", member: "member", billing: "billing" }, default: :member,
-                                                                                            validate: true
+  enum :role, { owner: "owner", manager: "manager", member: "member", billing: "billing", dashboard_viewer: "dashboard_viewer" },
+       default: :member, validate: true
 
   validates :email, presence: true
   validates :expiresAt, presence: true

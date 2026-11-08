@@ -495,6 +495,8 @@ Table EmailAccount {
   rulesRevision Int [default: 0, not null]
   mailLayout MailLayout [default: 'LIST', not null]
   mailExpandedPreview Boolean [default: false, not null]
+  mailBundleInbox Boolean [note: '''Collapses threads from bundled splits into one row each in the inbox.
+Null until first turned on, which is when default bundles are chosen.''']
   includeInAllAccounts Boolean [default: true, not null]
   meetingBriefingsEnabled Boolean [default: false, not null]
   meetingBriefingsMinutesBefore Int [default: 240, not null]
@@ -523,6 +525,7 @@ Table MailSplit {
   order Int [not null]
   matchAll Boolean [default: true, not null, note: '''Whether every filter must match, or any one of them ("Show mail matching
 all/any of these conditions"). A split with no filters is the plain inbox.''']
+  bundleInInbox Boolean [default: false, not null, note: 'Shown as one collapsed row in the inbox when the account bundles its inbox.']
   emailAccountId String [not null]
 
   indexes {

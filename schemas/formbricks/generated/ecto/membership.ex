@@ -14,7 +14,7 @@ defmodule Formbricks.Membership do
 
   schema "Membership" do
     field(:accepted, :boolean, default: false)
-    field(:role, Ecto.Enum, values: [:owner, :manager, :member, :billing], default: :member)
+    field(:role, Ecto.Enum, values: [:owner, :manager, :member, :billing, :dashboard_viewer], default: :member)
     field(:organization_id, :string, primary_key: true, source: :organizationId)
     field(:user_id, :string, primary_key: true, source: :userId)
     belongs_to(:organization, Formbricks.Organization, foreign_key: :organization_id, define_field: false, type: :string)

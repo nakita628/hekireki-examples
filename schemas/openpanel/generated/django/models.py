@@ -85,6 +85,7 @@ class ChartType(models.TextChoices):
     retention = "retention"
     conversion = "conversion"
     sankey = "sankey"
+    distribution = "distribution"
 
 
 class Metric(models.TextChoices):
@@ -442,6 +443,7 @@ class Dashboard(models.Model):
     name = models.TextField()
     organization = models.ForeignKey("Organization", on_delete=models.CASCADE, related_name="dashboard", db_column="organizationId", db_index=False)
     project = models.ForeignKey("Project", on_delete=models.CASCADE, related_name="dashboards", db_column="projectId", db_index=False)
+    filters = models.JSONField(default=list)
     created_at = UtcDateTimeField(db_column="createdAt", default=timezone.now)
     updated_at = UtcDateTimeField(db_column="updatedAt", auto_now=True)
     objects = AutoNowQuerySet.as_manager()

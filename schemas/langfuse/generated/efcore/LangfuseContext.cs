@@ -215,6 +215,7 @@ public partial class LangfuseContext : DbContext
         npgsql.MapEnum<BlobStorageIntegrationFileType>("BlobStorageIntegrationFileType");
         npgsql.MapEnum<BlobStorageIntegrationType>("BlobStorageIntegrationType");
         npgsql.MapEnum<ExternalMediaStorageIntegrationType>("ExternalMediaStorageIntegrationType");
+        npgsql.MapEnum<StorageIntegrationAuthType>("StorageIntegrationAuthType");
         npgsql.MapEnum<BlobStorageExportMode>("BlobStorageExportMode");
         npgsql.MapEnum<AnalyticsIntegrationExportSource>("AnalyticsIntegrationExportSource");
         npgsql.MapEnum<MediaAssociationOrigin>("MediaAssociationOrigin");
@@ -256,6 +257,7 @@ public partial class LangfuseContext : DbContext
         dataSource.MapEnum<BlobStorageIntegrationFileType>("BlobStorageIntegrationFileType");
         dataSource.MapEnum<BlobStorageIntegrationType>("BlobStorageIntegrationType");
         dataSource.MapEnum<ExternalMediaStorageIntegrationType>("ExternalMediaStorageIntegrationType");
+        dataSource.MapEnum<StorageIntegrationAuthType>("StorageIntegrationAuthType");
         dataSource.MapEnum<BlobStorageExportMode>("BlobStorageExportMode");
         dataSource.MapEnum<AnalyticsIntegrationExportSource>("AnalyticsIntegrationExportSource");
         dataSource.MapEnum<MediaAssociationOrigin>("MediaAssociationOrigin");
@@ -305,6 +307,7 @@ public partial class LangfuseContext : DbContext
         modelBuilder.HasPostgresEnum<BlobStorageIntegrationFileType>(name: "BlobStorageIntegrationFileType");
         modelBuilder.HasPostgresEnum<BlobStorageIntegrationType>(name: "BlobStorageIntegrationType");
         modelBuilder.HasPostgresEnum<ExternalMediaStorageIntegrationType>(name: "ExternalMediaStorageIntegrationType");
+        modelBuilder.HasPostgresEnum<StorageIntegrationAuthType>(name: "StorageIntegrationAuthType");
         modelBuilder.HasPostgresEnum<BlobStorageExportMode>(name: "BlobStorageExportMode");
         modelBuilder.HasPostgresEnum<AnalyticsIntegrationExportSource>(name: "AnalyticsIntegrationExportSource");
         modelBuilder.HasPostgresEnum<MediaAssociationOrigin>(name: "MediaAssociationOrigin");
@@ -771,6 +774,20 @@ public partial class LangfuseContext : DbContext
             entity.Property(e => e.AllowedModels)
                 .HasColumnType("jsonb")
                 .HasColumnName("allowed_models");
+            entity.Property(e => e.CustomModels)
+                .ValueGeneratedNever()
+                .HasDefaultValue("[]")
+                .HasColumnType("jsonb")
+                .HasColumnName("custom_models");
+            entity.Property(e => e.Config)
+                .HasColumnType("jsonb")
+                .HasColumnName("config");
+            entity.Property(e => e.BaseURL).HasColumnName("base_url");
+            entity.Property(e => e.ExtraHeaders).HasColumnName("extra_headers");
+            entity.Property(e => e.ExtraHeaderKeys)
+                .ValueGeneratedNever()
+                .HasDefaultValue(new List<string>())
+                .HasColumnName("extra_header_keys");
             entity.Property(e => e.CreatedAt)
                 .HasValueGenerator<UtcNowGenerator>()
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
@@ -3033,8 +3050,14 @@ public partial class LangfuseContext : DbContext
             entity.Property(e => e.Type).HasColumnName("type");
             entity.Property(e => e.BucketName).HasColumnName("bucket_name");
             entity.Property(e => e.Prefix).HasColumnName("prefix");
+            entity.Property(e => e.AuthType)
+                .ValueGeneratedNever()
+                .HasDefaultValue(StorageIntegrationAuthType.AccessKeys)
+                .HasColumnName("auth_type");
             entity.Property(e => e.AccessKeyId).HasColumnName("access_key_id");
             entity.Property(e => e.SecretAccessKey).HasColumnName("secret_access_key");
+            entity.Property(e => e.RoleArn).HasColumnName("role_arn");
+            entity.Property(e => e.ExternalId).HasColumnName("external_id");
             entity.Property(e => e.Region).HasColumnName("region");
             entity.Property(e => e.Endpoint).HasColumnName("endpoint");
             entity.Property(e => e.ForcePathStyle).HasColumnName("force_path_style");
@@ -3121,8 +3144,14 @@ public partial class LangfuseContext : DbContext
             entity.Property(e => e.Type).HasColumnName("type");
             entity.Property(e => e.BucketName).HasColumnName("bucket_name");
             entity.Property(e => e.Prefix).HasColumnName("prefix");
+            entity.Property(e => e.AuthType)
+                .ValueGeneratedNever()
+                .HasDefaultValue(StorageIntegrationAuthType.AccessKeys)
+                .HasColumnName("auth_type");
             entity.Property(e => e.AccessKeyId).HasColumnName("access_key_id");
             entity.Property(e => e.SecretAccessKey).HasColumnName("secret_access_key");
+            entity.Property(e => e.RoleArn).HasColumnName("role_arn");
+            entity.Property(e => e.ExternalId).HasColumnName("external_id");
             entity.Property(e => e.Region).HasColumnName("region");
             entity.Property(e => e.Endpoint).HasColumnName("endpoint");
             entity.Property(e => e.ForcePathStyle).HasColumnName("force_path_style");

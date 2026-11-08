@@ -12,6 +12,8 @@ class SubscriptionClaim < ApplicationRecord
   validates :memberCount, presence: true
   validates :envelopeItemCount, presence: true
   validates :recipientCount, presence: true
+  validates :envelopeContentCount, presence: true
+  validates :envelopeContentImageCount, presence: true
   validates :flags, exclusion: { in: [ nil ] }
   validates :documentRateLimits, exclusion: { in: [ nil ] }
   validates :emailRateLimits, exclusion: { in: [ nil ] }

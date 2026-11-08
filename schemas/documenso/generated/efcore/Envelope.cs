@@ -43,6 +43,8 @@ public partial class Envelope
 
     public virtual ICollection<Field> Fields { get; set; } = new List<Field>();
 
+    public virtual ICollection<EnvelopeContent> Contents { get; set; } = new List<EnvelopeContent>();
+
     public virtual ICollection<DocumentShareLink> ShareLinks { get; set; } = new List<DocumentShareLink>();
 
     public virtual ICollection<DocumentAuditLog> AuditLogs { get; set; } = new List<DocumentAuditLog>();

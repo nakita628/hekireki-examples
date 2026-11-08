@@ -10,6 +10,8 @@ public partial class AccountBalance
 
     public string AccountId { get; set; } = null!;
 
+    public string? Comment { get; set; }
+
     public DateTime CreatedAt { get; set; }
 
     public DateTime Date { get; set; }

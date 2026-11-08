@@ -215,6 +215,7 @@ export const user = pgTable(
     sendStreakEmails: boolean('sendStreakEmails').notNull().default(true),
   },
   (table) => [
+    index('User_providerId_providerName_idx').on(table.providerId, table.providerName),
     index('User_lastReadNotifications_idx').on(table.lastReadNotifications),
     index('User_inviteId_idx').on(table.inviteId),
     index('User_account_idx').on(table.account),
@@ -859,8 +860,18 @@ export const post = pgTable(
     index('Post_batchId_idx').on(table.batchId),
     index('Post_deletedAt_idx').on(table.deletedAt),
     index('Post_publishDate_idx').on(table.publishDate),
+    index('Post_publishDate_state_deletedAt_parentPostId_integrationId_idx').on(
+      table.publishDate,
+      table.state,
+      table.deletedAt,
+      table.parentPostId,
+      table.integrationId,
+      table.organizationId,
+      table.creationMethod,
+    ),
     index('Post_state_idx').on(table.state),
     index('Post_organizationId_idx').on(table.organizationId),
+    index('Post_organizationId_publishDate_idx').on(table.organizationId, table.publishDate),
     index('Post_parentPostId_idx').on(table.parentPostId),
     index('Post_submittedForOrderId_idx').on(table.submittedForOrderId),
     index('Post_intervalInDays_idx').on(table.intervalInDays),
@@ -935,6 +946,11 @@ export const notifications = pgTable(
   (table) => [
     index('Notifications_createdAt_idx').on(table.createdAt),
     index('Notifications_organizationId_idx').on(table.organizationId),
+    index('Notifications_organizationId_createdAt_deletedAt_idx').on(
+      table.organizationId,
+      table.createdAt,
+      table.deletedAt,
+    ),
     index('Notifications_deletedAt_idx').on(table.deletedAt),
     foreignKey({
       name: 'Notifications_organizationId_fkey',
@@ -1388,6 +1404,7 @@ export const errors = pgTable(
   (table) => [
     index('Errors_organizationId_idx').on(table.organizationId),
     index('Errors_createdAt_idx').on(table.createdAt),
+    index('Errors_createdAt_platform_idx').on(table.createdAt, table.platform),
     foreignKey({
       name: 'Errors_organizationId_fkey',
       columns: [table.organizationId],

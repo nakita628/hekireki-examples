@@ -21,4 +21,6 @@ public partial class EnvelopeItem
     public virtual Envelope Envelope { get; set; } = null!;
 
     public virtual ICollection<Field> Field { get; set; } = new List<Field>();
+
+    public virtual ICollection<EnvelopeContent> Contents { get; set; } = new List<EnvelopeContent>();
 }

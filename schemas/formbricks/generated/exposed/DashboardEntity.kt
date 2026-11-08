@@ -20,6 +20,7 @@ class DashboardEntity(
     var creator by UserEntity optionalReferencedOn DashboardTable.createdBy
     var createdBy by DashboardTable.createdBy
     val widgets by DashboardWidgetEntity referrersOn DashboardWidgetTable.dashboardId
+    var filters by DashboardTable.filters
 
     override fun flush(batch: EntityBatchUpdate?): Boolean {
         if (writeValues.isNotEmpty()) {

@@ -23,7 +23,7 @@ export type SystemRole =
 
 export type GatewayIngestionMode = 'none' | 'usage' | 'full'
 
-export type GatewayProvider = 'openai' | 'anthropic'
+export type GatewayProvider = 'openai' | 'anthropic' | 'bedrock'
 
 export type GatewayConnectionStatus = 'enabled' | 'disabled' | 'error'
 
@@ -78,6 +78,8 @@ export type BlobStorageIntegrationType =
   | 'GOOGLE_CLOUD_STORAGE'
 
 export type ExternalMediaStorageIntegrationType = 'S3' | 'S3_COMPATIBLE'
+
+export type StorageIntegrationAuthType = 'ACCESS_KEYS' | 'ROLE_ARN'
 
 export type BlobStorageExportMode = 'FULL_HISTORY' | 'FROM_TODAY' | 'FROM_CUSTOM_DATE'
 
@@ -258,6 +260,11 @@ export interface GatewayAiConnection {
   created_by_id: string | null
   status: Generated<GatewayConnectionStatus>
   allowed_models: unknown
+  custom_models: Generated<unknown>
+  config: unknown
+  base_url: string | null
+  extra_headers: string | null
+  extra_header_keys: Generated<string[]>
   created_at: Generated<Timestamp>
   updated_at: Generated<Timestamp>
 }
@@ -871,8 +878,11 @@ export interface BlobStorageIntegration {
   type: BlobStorageIntegrationType
   bucket_name: string
   prefix: string
+  auth_type: Generated<StorageIntegrationAuthType>
   access_key_id: string | null
   secret_access_key: string | null
+  role_arn: string | null
+  external_id: string | null
   region: string
   endpoint: string | null
   force_path_style: boolean
@@ -901,8 +911,11 @@ export interface ExternalMediaStorageIntegration {
   type: ExternalMediaStorageIntegrationType
   bucket_name: string
   prefix: string | null
+  auth_type: Generated<StorageIntegrationAuthType>
   access_key_id: string | null
   secret_access_key: string | null
+  role_arn: string | null
+  external_id: string | null
   region: string
   endpoint: string | null
   force_path_style: boolean

@@ -14,6 +14,7 @@ class AccountBalanceEntity(
 
     var account by AccountEntity referencedOn AccountBalanceTable
     var accountId by AccountBalanceTable.accountId
+    var comment by AccountBalanceTable.comment
     var createdAt by AccountBalanceTable.createdAt
     var date by AccountBalanceTable.date
     var updatedAt by AccountBalanceTable.updatedAt

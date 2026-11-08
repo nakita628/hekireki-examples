@@ -352,12 +352,17 @@ class GatewayAiConnection(Base):
     id: Mapped[str] = mapped_column(primary_key=True)
     organization_id: Mapped[str] = mapped_column(ForeignKey("organizations.id", ondelete="CASCADE", onupdate="CASCADE", name="gateway_ai_connections_organization_id_fkey"))
     name: Mapped[str]
-    provider: Mapped[str] = mapped_column(Enum("openai", "anthropic", name="GatewayProvider"))
+    provider: Mapped[str] = mapped_column(Enum("openai", "anthropic", "bedrock", name="GatewayProvider"))
     encrypted_credential: Mapped[str] = mapped_column("encrypted_credentials")
     display_secret: Mapped[str] = mapped_column("display_secret_key")
     created_by_id: Mapped[Optional[str]]
     status: Mapped[str] = mapped_column(Enum("enabled", "disabled", "error", name="GatewayConnectionStatus"), default="enabled", server_default=text("'enabled'"))
     allowed_models: Mapped[Optional[dict[str, Any]]] = mapped_column(JSONB(none_as_null=True))
+    custom_models: Mapped[dict[str, Any]] = mapped_column(JSONB, default=lambda: [], server_default=text("'[]'"))
+    config: Mapped[Optional[dict[str, Any]]] = mapped_column(JSONB(none_as_null=True))
+    base_url: Mapped[Optional[str]]
+    extra_headers: Mapped[Optional[str]]
+    extra_header_keys: Mapped[list[str]] = mapped_column(ARRAY(Text), nullable=True, default=lambda: [], server_default=text("ARRAY[]::text[]"))
     created_at: Mapped[datetime] = mapped_column(default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
     updated_at: Mapped[datetime] = mapped_column(default=utc_now, server_default=text("CURRENT_TIMESTAMP"), onupdate=utc_now)
 
@@ -1402,8 +1407,11 @@ class BlobStorageIntegration(Base):
     type: Mapped[str] = mapped_column(Enum("S3", "S3_COMPATIBLE", "AZURE_BLOB_STORAGE", "GOOGLE_CLOUD_STORAGE", name="BlobStorageIntegrationType"))
     bucket_name: Mapped[str]
     prefix: Mapped[str]
+    auth_type: Mapped[str] = mapped_column(Enum("ACCESS_KEYS", "ROLE_ARN", name="StorageIntegrationAuthType"), default="ACCESS_KEYS", server_default=text("'ACCESS_KEYS'"))
     access_key_id: Mapped[Optional[str]]
     secret_access_key: Mapped[Optional[str]]
+    role_arn: Mapped[Optional[str]]
+    external_id: Mapped[Optional[str]]
     region: Mapped[str]
     endpoint: Mapped[Optional[str]]
     force_path_style: Mapped[bool]
@@ -1435,8 +1443,11 @@ class ExternalMediaStorageIntegration(Base):
     type: Mapped[str] = mapped_column(Enum("S3", "S3_COMPATIBLE", name="ExternalMediaStorageIntegrationType"))
     bucket_name: Mapped[str]
     prefix: Mapped[Optional[str]]
+    auth_type: Mapped[str] = mapped_column(Enum("ACCESS_KEYS", "ROLE_ARN", name="StorageIntegrationAuthType"), default="ACCESS_KEYS", server_default=text("'ACCESS_KEYS'"))
     access_key_id: Mapped[Optional[str]]
     secret_access_key: Mapped[Optional[str]]
+    role_arn: Mapped[Optional[str]]
+    external_id: Mapped[Optional[str]]
     region: Mapped[str]
     endpoint: Mapped[Optional[str]]
     force_path_style: Mapped[bool]

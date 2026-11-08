@@ -9,6 +9,7 @@ class BlobStorageIntegration < ApplicationRecord
 
   enum :type, { s3: "S3", s3_compatible: "S3_COMPATIBLE", azure_blob_storage: "AZURE_BLOB_STORAGE", google_cloud_storage: "GOOGLE_CLOUD_STORAGE" },
        validate: true
+  enum :auth_type, { access_keys: "ACCESS_KEYS", role_arn: "ROLE_ARN" }, default: :access_keys, validate: true
   enum :file_type, { json: "JSON", csv: "CSV", jsonl: "JSONL", parquet: "PARQUET" }, default: :csv, validate: true
   enum :export_mode, { full_history: "FULL_HISTORY", from_today: "FROM_TODAY", from_custom_date: "FROM_CUSTOM_DATE" },
        default: :full_history, validate: true

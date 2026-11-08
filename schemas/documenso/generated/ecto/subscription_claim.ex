@@ -12,6 +12,8 @@ defmodule Documenso.SubscriptionClaim do
           member_count: integer(),
           envelope_item_count: integer(),
           recipient_count: integer(),
+          envelope_content_count: integer(),
+          envelope_content_image_count: integer(),
           flags: map(),
           document_rate_limits: map(),
           document_quota: integer() | nil,
@@ -32,6 +34,8 @@ defmodule Documenso.SubscriptionClaim do
     field(:member_count, :integer, source: :memberCount)
     field(:envelope_item_count, :integer, source: :envelopeItemCount)
     field(:recipient_count, :integer, source: :recipientCount)
+    field(:envelope_content_count, :integer, source: :envelopeContentCount)
+    field(:envelope_content_image_count, :integer, source: :envelopeContentImageCount)
     field(:flags, :map)
     field(:document_rate_limits, :map, source: :documentRateLimits)
     field(:document_quota, :integer, source: :documentQuota)

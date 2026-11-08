@@ -2,6 +2,7 @@ package langfuse.models
 
 import io.github.thibaultmeyer.cuid.CUID
 import org.jetbrains.exposed.v1.core.ReferenceOption
+import org.jetbrains.exposed.v1.core.TextColumnType
 import org.jetbrains.exposed.v1.core.dao.id.IdTable
 import org.jetbrains.exposed.v1.json.jsonb
 import java.time.Instant
@@ -27,6 +28,11 @@ object GatewayAiConnectionTable : IdTable<String>("gateway_ai_connections") {
             GatewayConnectionStatus.ENABLED,
         )
     val allowedModels = jsonb<String>("allowed_models", { it }, { it }).nullable()
+    val customModels = jsonb<String>("custom_models", { it }, { it }).default("[]")
+    val config = jsonb<String>("config", { it }, { it }).nullable()
+    val baseURL = text("base_url").nullable()
+    val extraHeaders = text("extra_headers").nullable()
+    val extraHeaderKeys = array("extra_header_keys", TextColumnType()).nullable().databaseDefault("'{}'") { emptyList() }
     val createdAt = pgTimestamp("created_at", 3).databaseDefault("CURRENT_TIMESTAMP") { Instant.now().truncatedTo(ChronoUnit.MILLIS) }
     val updatedAt = pgTimestamp("updated_at", 3).databaseDefault("CURRENT_TIMESTAMP") { Instant.now().truncatedTo(ChronoUnit.MILLIS) }
     override val primaryKey = PrimaryKey(id, name = "gateway_ai_connections_pkey")

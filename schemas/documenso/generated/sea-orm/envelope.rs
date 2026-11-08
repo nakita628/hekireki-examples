@@ -99,6 +99,8 @@ pub enum Relation {
     Recipients,
     #[sea_orm(has_many = "super::field::Entity")]
     Fields,
+    #[sea_orm(has_many = "super::envelope_content::Entity")]
+    Contents,
     #[sea_orm(has_many = "super::document_share_link::Entity")]
     ShareLinks,
     #[sea_orm(has_many = "super::document_audit_log::Entity")]
@@ -148,6 +150,12 @@ impl Related<super::recipient::Entity> for Entity {
 impl Related<super::field::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Fields.def()
+    }
+}
+
+impl Related<super::envelope_content::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::Contents.def()
     }
 }
 

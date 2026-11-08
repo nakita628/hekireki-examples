@@ -80,6 +80,7 @@ export interface Account {
 
 export interface AccountBalance {
   accountId: string
+  comment: string | null
   createdAt: Generated<Timestamp>
   date: Generated<Timestamp>
   id: string

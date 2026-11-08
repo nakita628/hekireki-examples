@@ -53,6 +53,7 @@ class EmailAccountEntity(
     var rulesRevision by EmailAccountTable.rulesRevision
     var mailLayout by EmailAccountTable.mailLayout
     var mailExpandedPreview by EmailAccountTable.mailExpandedPreview
+    var mailBundleInbox by EmailAccountTable.mailBundleInbox
     var includeInAllAccounts by EmailAccountTable.includeInAllAccounts
     var meetingBriefingsEnabled by EmailAccountTable.meetingBriefingsEnabled
     var meetingBriefingsMinutesBefore by EmailAccountTable.meetingBriefingsMinutesBefore

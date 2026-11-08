@@ -3,6 +3,7 @@ class Dashboard < ApplicationRecord
   self.implicit_order_column = "created_at"
 
   attribute :id, default: -> { Cuid.generate }
+  attribute :filters, default: -> { JSON.parse("[]") }
 
   validates :name, presence: true, uniqueness: { scope: :workspaceId }
 

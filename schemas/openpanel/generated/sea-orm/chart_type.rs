@@ -26,4 +26,6 @@ pub enum ChartType {
     Conversion,
     #[sea_orm(string_value = "sankey")]
     Sankey,
+    #[sea_orm(string_value = "distribution")]
+    Distribution,
 }

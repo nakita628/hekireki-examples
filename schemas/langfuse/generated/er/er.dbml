@@ -25,6 +25,7 @@ Enum GatewayIngestionMode {
 Enum GatewayProvider {
   openai
   anthropic
+  bedrock
 }
 
 Enum GatewayConnectionStatus {
@@ -152,6 +153,11 @@ Enum BlobStorageIntegrationType {
 Enum ExternalMediaStorageIntegrationType {
   S3
   S3_COMPATIBLE
+}
+
+Enum StorageIntegrationAuthType {
+  ACCESS_KEYS
+  ROLE_ARN
 }
 
 Enum BlobStorageExportMode {
@@ -389,6 +395,11 @@ Table gateway_ai_connections {
   created_by_id String
   status GatewayConnectionStatus [default: 'enabled', not null]
   allowed_models Json
+  custom_models Json [default: '[]', not null]
+  config Json
+  base_url String
+  extra_headers String
+  extra_header_keys String[] [not null]
   created_at DateTime [default: `now()`, not null]
   updated_at DateTime [default: `now()`, not null]
 
@@ -1126,8 +1137,11 @@ Table blob_storage_integrations {
   type BlobStorageIntegrationType [not null]
   bucket_name String [not null]
   prefix String [not null]
+  auth_type StorageIntegrationAuthType [default: 'ACCESS_KEYS', not null]
   access_key_id String
   secret_access_key String
+  role_arn String
+  external_id String
   region String [not null]
   endpoint String
   force_path_style Boolean [not null]
@@ -1156,8 +1170,11 @@ Table external_media_storage_integrations {
   type ExternalMediaStorageIntegrationType [not null]
   bucket_name String [not null]
   prefix String
+  auth_type StorageIntegrationAuthType [default: 'ACCESS_KEYS', not null]
   access_key_id String
   secret_access_key String
+  role_arn String
+  external_id String
   region String [not null]
   endpoint String
   force_path_style Boolean [not null]

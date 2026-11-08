@@ -156,6 +156,7 @@ class User(Base):
     send_streak_emails: Mapped[bool] = mapped_column("sendStreakEmails", default=True, server_default=text("true"))
 
     __table_args__ = (
+        Index("User_providerId_providerName_idx", "providerId", "providerName"),
         Index("User_lastReadNotifications_idx", "lastReadNotifications"),
         Index("User_inviteId_idx", "inviteId"),
         Index("User_account_idx", "account"),
@@ -605,8 +606,10 @@ class Post(Base):
         Index("Post_batchId_idx", "batchId"),
         Index("Post_deletedAt_idx", "deletedAt"),
         Index("Post_publishDate_idx", "publishDate"),
+        Index("Post_publishDate_state_deletedAt_parentPostId_integrationId_idx", "publishDate", "state", "deletedAt", "parentPostId", "integrationId", "organizationId", "creationMethod"),
         Index("Post_state_idx", "state"),
         Index("Post_organizationId_idx", "organizationId"),
+        Index("Post_organizationId_publishDate_idx", "organizationId", "publishDate"),
         Index("Post_parentPostId_idx", "parentPostId"),
         Index("Post_submittedForOrderId_idx", "submittedForOrderId"),
         Index("Post_intervalInDays_idx", "intervalInDays"),
@@ -645,6 +648,7 @@ class Notifications(Base):
     __table_args__ = (
         Index("Notifications_createdAt_idx", "createdAt"),
         Index("Notifications_organizationId_idx", "organizationId"),
+        Index("Notifications_organizationId_createdAt_deletedAt_idx", "organizationId", "createdAt", "deletedAt"),
         Index("Notifications_deletedAt_idx", "deletedAt"),
     )
 
@@ -908,6 +912,7 @@ class Errors(Base):
     __table_args__ = (
         Index("Errors_organizationId_idx", "organizationId"),
         Index("Errors_createdAt_idx", "createdAt"),
+        Index("Errors_createdAt_platform_idx", "createdAt", "platform"),
     )
 
     organization: Mapped["Organization"] = relationship(back_populates="errors")

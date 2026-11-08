@@ -85,8 +85,20 @@ object PostTable : IdTable<String>("\"Post\"") {
         index("\"Post_batchId_idx\"", false, batchId)
         index("\"Post_deletedAt_idx\"", false, deletedAt)
         index("\"Post_publishDate_idx\"", false, publishDate)
+        index(
+            "Post_publishDate_state_deletedAt_parentPostId_integrationId_idx",
+            false,
+            publishDate,
+            state,
+            deletedAt,
+            parentPostId,
+            integrationId,
+            organizationId,
+            creationMethod,
+        )
         index("\"Post_state_idx\"", false, state)
         index("\"Post_organizationId_idx\"", false, organizationId)
+        index("\"Post_organizationId_publishDate_idx\"", false, organizationId, publishDate)
         index("\"Post_parentPostId_idx\"", false, parentPostId)
         index("\"Post_submittedForOrderId_idx\"", false, submittedForOrderId)
         index("\"Post_intervalInDays_idx\"", false, intervalInDays)

@@ -753,6 +753,7 @@ public partial class InboxZeroContext : DbContext
                 .ValueGeneratedNever()
                 .HasDefaultValue(false)
                 .HasColumnName("mailExpandedPreview");
+            entity.Property(e => e.MailBundleInbox).HasColumnName("mailBundleInbox");
             entity.Property(e => e.IncludeInAllAccounts)
                 .ValueGeneratedNever()
                 .HasDefaultValue(true)
@@ -848,6 +849,10 @@ public partial class InboxZeroContext : DbContext
                 .ValueGeneratedNever()
                 .HasDefaultValue(true)
                 .HasColumnName("matchAll");
+            entity.Property(e => e.BundleInInbox)
+                .ValueGeneratedNever()
+                .HasDefaultValue(false)
+                .HasColumnName("bundleInInbox");
             entity.Property(e => e.EmailAccountId).HasColumnName("emailAccountId");
 
             entity.HasOne(d => d.EmailAccount).WithMany(p => p.MailSplits)

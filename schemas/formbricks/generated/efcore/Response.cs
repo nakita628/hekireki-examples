@@ -37,6 +37,8 @@ public partial class Response
 
     public ResponseOutcome? Outcome { get; set; }
 
+    public string? NotShown { get; set; }
+
     public virtual ICollection<TagsOnResponses> Tags { get; set; } = new List<TagsOnResponses>();
 
     public virtual ICollection<ResponseQuotaLink> QuotaLinks { get; set; } = new List<ResponseQuotaLink>();

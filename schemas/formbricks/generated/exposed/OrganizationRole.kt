@@ -7,4 +7,5 @@ enum class OrganizationRole(
     MANAGER("manager"),
     MEMBER("member"),
     BILLING("billing"),
+    DASHBOARD_VIEWER("dashboard_viewer"),
 }

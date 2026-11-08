@@ -1,0 +1,375 @@
+Enum NotificationType {
+  LIKE
+  REPLY
+  MENTION
+  MISC
+  SYSTEM
+}
+
+Enum Tags {
+  POPULAR
+  NEWEST
+}
+
+Enum Difficulty {
+  BEGINNER
+  EASY
+  MEDIUM
+  HARD
+  EXTREME
+  EVENT
+}
+
+Enum RoleTypes {
+  USER
+  ADMIN
+  MODERATOR
+  CREATOR
+  SUPPORTER
+  CONTRIBUTOR
+}
+
+Enum UserStatus {
+  BANNED
+  ACTIVE
+}
+
+Enum ReportStatus {
+  PENDING
+  CLEARED
+  DISMISSED
+}
+
+Enum ChallengeStatus {
+  DECLINED
+  BANNED
+  PENDING
+  ACTIVE
+}
+
+Enum VoteType {
+  CHALLENGE
+  COMMENT
+  SUBMISSION
+  SHAREDSOLUTION
+}
+
+Enum ReportType {
+  CHALLENGE
+  USER
+  COMMENT
+  SOLUTION
+}
+
+Enum IssueType {
+  DEROGATORY
+  OTHER
+  UNCLEAR
+  BULLYING
+  SPAM
+  HATESPEECH
+  THREAT
+}
+
+Enum CommentRoot {
+  SOLUTION
+  CHALLENGE
+}
+
+Table Account {
+  id String [pk]
+  userId String [not null]
+  type String [not null]
+  provider String [not null]
+  providerAccountId String [not null]
+  refresh_token String
+  access_token String
+  expires_at Int
+  token_type String
+  scope String
+  id_token String
+  session_state String
+
+  indexes {
+    (provider, providerAccountId) [unique]
+  }
+}
+
+Table Session {
+  id String [pk]
+  sessionToken String [unique, not null]
+  userId String [not null]
+  expires DateTime [not null]
+}
+
+Table Role {
+  id String [pk]
+  role RoleTypes [unique, not null]
+}
+
+Table UserLink {
+  id String [pk]
+  url String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  Note: 'This is a table that contains all the user links they can add to profile'
+}
+
+Table User {
+  id String [pk]
+  name String [not null]
+  email String [unique, not null]
+  emailVerified DateTime
+  image String
+  bio String [default: '', not null, note: 'this is the bio that shows up on the profile page']
+  status UserStatus [default: 'ACTIVE', not null]
+  banReason String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table VerificationToken {
+  identifier String [not null]
+  token String [unique, not null]
+  expires DateTime [not null]
+
+  indexes {
+    (identifier, token) [unique]
+  }
+}
+
+Table Tag {
+  id String [pk]
+  tag Tags [unique, not null]
+}
+
+Table Challenge {
+  id Int [pk, increment]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  difficulty Difficulty [not null]
+  name String [unique, not null]
+  slug String [unique, not null]
+  description String [not null, note: 'this is the description to describe the challenge on description panel']
+  shortDescription String [not null, note: 'this is a short blue thats shown on the explore card']
+  code String [not null, note: 'Starter code for the challenge']
+  tests String [not null, note: 'Test cases that need to be passed in order have the submission be accepted.']
+  status ChallengeStatus [default: 'PENDING', not null]
+  tsconfig Json
+  userId String [not null]
+}
+
+Table Vote {
+  id Int [pk, increment]
+  userId String [not null]
+  rootType VoteType [not null]
+  challengeId Int
+  commentId Int
+  submissionId Int
+  sharedSolutionId Int
+}
+
+Table SharedSolution {
+  id Int [pk, increment]
+  createdAt DateTime [default: `now()`, not null]
+  isPinned Boolean [default: false, not null]
+  title String [not null]
+  description String [not null]
+  userId String
+  challengeId Int
+
+  Note: 'This is a public solution created by a user for a challenge'
+}
+
+Table Submission {
+  id Int [pk, increment]
+  code String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  isSuccessful Boolean [not null]
+  userId String [not null]
+  challengeId Int [not null]
+
+  Note: 'Every attempt a user makes to a challenge is stored here'
+}
+
+Table Bookmark {
+  id Int [pk, increment]
+  userId String [not null]
+  challengeId Int
+  createdAt DateTime [default: `now()`]
+
+  indexes {
+    (userId, challengeId) [unique]
+  }
+}
+
+Table ReportIssue {
+  id Int [pk, increment]
+  reportId Int [not null]
+  type IssueType [not null]
+}
+
+Table Report {
+  id Int [pk, increment]
+  text String [not null]
+  type ReportType [not null]
+  status ReportStatus [not null]
+  reporterId String [not null]
+  userId String
+  challengeId Int
+  commentId Int
+  solutionId Int
+  moderatorId String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table Comment {
+  id Int [pk, increment]
+  text String [not null]
+  visible Boolean [default: true, not null]
+  parentId Int
+  userId String [not null]
+  rootType CommentRoot [default: 'CHALLENGE', not null]
+  rootChallengeId Int
+  rootSolutionId Int
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table ImageUpload {
+  id String [pk, note: 'the id of the db row']
+  userId String [not null, note: 'the user id fk']
+  url String [not null, note: 'the url to the s3 uploaded assets']
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table TrackChallenge {
+  id Int [pk, increment]
+  orderId Int [not null]
+  challengeId Int [not null]
+  trackId Int
+}
+
+Table Track {
+  id Int [pk, increment]
+  name String [unique, not null]
+  slug String [unique, not null]
+  description String [not null]
+  visible Boolean [default: true, not null, note: 'determines if a track can be seen on tracks page']
+  isComingSoon Boolean [default: false, not null, note: 'use this to display coming soon UI']
+}
+
+Table BetaTokens {
+  id Int [pk, increment]
+  token String [unique, not null]
+  userId String
+}
+
+Table Donation {
+  id Int [pk, increment]
+  userId String [not null]
+  amount Int [not null]
+  stripeCheckoutSessionId String [unique, not null]
+  createdAt DateTime [default: `now()`]
+}
+
+Table Notification {
+  id Int [pk, increment]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  isRead Boolean [default: false, not null]
+  type NotificationType [not null]
+  toUserId String [not null]
+  fromUserId String [not null]
+  commentId Int
+  content String [note: 'could be comment text or solution title to avoid having to join to grab this data']
+  blurb String [note: 'can be used to replace the blurb (eg: mention you in a comment)']
+  url String [not null, note: 'use this instead of building the url on the fly (avoids a lot of joins and perf hits to build a string)']
+  challengeId Int
+  sharedSolutionId Int
+}
+
+Table ShortURL {
+  id Int [pk, increment]
+  originalUrl String [not null, note: 'the original full url that we want to shorten e.g. https://www.url.com']
+  shortUrlSlug String [unique, not null, note: 'slug for the short url e.g. url.com/[shortUrlSlug]']
+  createdAt DateTime [default: `now()`, not null]
+  expiresAt DateTime [note: 'the time the short url will expire']
+  clicks Int [default: 0, not null, note: 'the number of times the short url has redirected to the original url']
+  userId String
+}
+
+Ref Account_userId_fk: Account.userId > User.id [delete: cascade]
+
+Ref Session_userId_fk: Session.userId > User.id [delete: cascade]
+
+Ref Challenge_userId_fk: Challenge.userId > User.id
+
+Ref Vote_userId_fk: Vote.userId > User.id
+
+Ref Vote_challengeId_fk: Vote.challengeId > Challenge.id
+
+Ref Vote_commentId_fk: Vote.commentId > Comment.id
+
+Ref Vote_submissionId_fk: Vote.submissionId > Submission.id
+
+Ref Vote_sharedSolutionId_fk: Vote.sharedSolutionId > SharedSolution.id
+
+Ref SharedSolution_userId_fk: SharedSolution.userId > User.id
+
+Ref SharedSolution_challengeId_fk: SharedSolution.challengeId > Challenge.id
+
+Ref Submission_userId_fk: Submission.userId > User.id
+
+Ref Submission_challengeId_fk: Submission.challengeId > Challenge.id
+
+Ref Bookmark_userId_fk: Bookmark.userId > User.id
+
+Ref Bookmark_challengeId_fk: Bookmark.challengeId > Challenge.id
+
+Ref ReportIssue_reportId_fk: ReportIssue.reportId > Report.id
+
+Ref Report_reporterId_fk: Report.reporterId > User.id
+
+Ref Report_userId_fk: Report.userId > User.id
+
+Ref Report_challengeId_fk: Report.challengeId > Challenge.id
+
+Ref Report_commentId_fk: Report.commentId > Comment.id
+
+Ref Report_solutionId_fk: Report.solutionId > SharedSolution.id
+
+Ref Report_moderatorId_fk: Report.moderatorId > User.id
+
+Ref Comment_parentId_fk: Comment.parentId > Comment.id [delete: no action, update: no action]
+
+Ref Comment_userId_fk: Comment.userId > User.id
+
+Ref Comment_rootChallengeId_fk: Comment.rootChallengeId > Challenge.id
+
+Ref Comment_rootSolutionId_fk: Comment.rootSolutionId > SharedSolution.id
+
+Ref ImageUpload_userId_fk: ImageUpload.userId > User.id
+
+Ref TrackChallenge_challengeId_fk: TrackChallenge.challengeId > Challenge.id
+
+Ref TrackChallenge_trackId_fk: TrackChallenge.trackId > Track.id
+
+Ref BetaTokens_userId_fk: BetaTokens.userId > User.id
+
+Ref Donation_userId_fk: Donation.userId > User.id
+
+Ref Notification_toUserId_fk: Notification.toUserId > User.id
+
+Ref Notification_fromUserId_fk: Notification.fromUserId > User.id
+
+Ref Notification_commentId_fk: Notification.commentId > Comment.id
+
+Ref Notification_challengeId_fk: Notification.challengeId > Challenge.id
+
+Ref Notification_sharedSolutionId_fk: Notification.sharedSolutionId > SharedSolution.id
+
+Ref ShortURL_userId_fk: ShortURL.userId > User.id

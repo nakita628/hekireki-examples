@@ -371,6 +371,8 @@ public partial class PostizContext : DbContext
 
             entity.ToTable("User");
 
+            entity.HasIndex(e => new { e.ProviderId, e.ProviderName }, "User_providerId_providerName_idx");
+
             entity.HasIndex(e => e.LastReadNotifications, "User_lastReadNotifications_idx");
 
             entity.HasIndex(e => e.InviteId, "User_inviteId_idx");
@@ -1253,9 +1255,13 @@ public partial class PostizContext : DbContext
 
             entity.HasIndex(e => e.PublishDate, "Post_publishDate_idx");
 
+            entity.HasIndex(e => new { e.PublishDate, e.State, e.DeletedAt, e.ParentPostId, e.IntegrationId, e.OrganizationId, e.CreationMethod }, "Post_publishDate_state_deletedAt_parentPostId_integrationId_idx");
+
             entity.HasIndex(e => e.State, "Post_state_idx");
 
             entity.HasIndex(e => e.OrganizationId, "Post_organizationId_idx");
+
+            entity.HasIndex(e => new { e.OrganizationId, e.PublishDate }, "Post_organizationId_publishDate_idx");
 
             entity.HasIndex(e => e.ParentPostId, "Post_parentPostId_idx");
 
@@ -1372,6 +1378,8 @@ public partial class PostizContext : DbContext
             entity.HasIndex(e => e.CreatedAt, "Notifications_createdAt_idx");
 
             entity.HasIndex(e => e.OrganizationId, "Notifications_organizationId_idx");
+
+            entity.HasIndex(e => new { e.OrganizationId, e.CreatedAt, e.DeletedAt }, "Notifications_organizationId_createdAt_deletedAt_idx");
 
             entity.HasIndex(e => e.DeletedAt, "Notifications_deletedAt_idx");
 
@@ -1876,6 +1884,8 @@ public partial class PostizContext : DbContext
             entity.HasIndex(e => e.OrganizationId, "Errors_organizationId_idx");
 
             entity.HasIndex(e => e.CreatedAt, "Errors_createdAt_idx");
+
+            entity.HasIndex(e => new { e.CreatedAt, e.Platform }, "Errors_createdAt_platform_idx");
 
             entity.Property(e => e.Id)
                 .HasValueGenerator<UuidV4StringGenerator>()

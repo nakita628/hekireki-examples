@@ -99,6 +99,7 @@ class AccountBalance(Base):
     __tablename__ = "AccountBalance"
 
     account_id: Mapped[str] = mapped_column("accountId")
+    comment: Mapped[Optional[str]]
     created_at: Mapped[datetime] = mapped_column("createdAt", default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
     date_: Mapped[datetime] = mapped_column("date", default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
     id: Mapped[str] = mapped_column(primary_key=True, default=lambda: str(uuid_mod.uuid4()))

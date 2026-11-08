@@ -179,6 +179,7 @@ class Account(models.Model):
 
 class AccountBalance(models.Model):
     account_id = models.TextField(db_column="accountId")
+    comment = models.TextField(null=True)
     created_at = UtcDateTimeField(db_column="createdAt", default=timezone.now)
     date = UtcDateTimeField(default=timezone.now)
     id = models.TextField(primary_key=True, default=uuid4_str)

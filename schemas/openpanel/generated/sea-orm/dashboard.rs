@@ -13,6 +13,8 @@ pub struct Model {
     pub organization_id: String,
     #[sea_orm(column_name = "projectId")]
     pub project_id: String,
+    #[sea_orm(default_value = "[]")]
+    pub filters: Json,
     #[sea_orm(column_name = "createdAt")]
     pub created_at: DateTime,
     #[sea_orm(column_name = "updatedAt")]

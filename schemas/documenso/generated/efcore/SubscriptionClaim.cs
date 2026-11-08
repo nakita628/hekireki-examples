@@ -24,6 +24,10 @@ public partial class SubscriptionClaim
 
     public int RecipientCount { get; set; }
 
+    public int EnvelopeContentCount { get; set; }
+
+    public int EnvelopeContentImageCount { get; set; }
+
     public string Flags { get; set; } = null!;
 
     public string DocumentRateLimits { get; set; } = null!;

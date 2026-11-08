@@ -402,6 +402,7 @@ type Response struct {
 	Meta              datatypes.JSON `gorm:"column:meta;default:'{}';not null" json:"meta"`
 	IngestFlags       datatypes.JSON `gorm:"column:ingest_flags" json:"ingest_flags"`
 	Outcome           *string        `gorm:"column:outcome" json:"outcome"`
+	NotShown          datatypes.JSON `gorm:"column:not_shown" json:"not_shown"`
 	ContactAttributes datatypes.JSON `gorm:"column:contactAttributes" json:"contactAttributes"`
 	SingleUseID       *string        `gorm:"column:singleUseId;uniqueIndex:Response_surveyId_singleUseId_key" json:"singleUseId"`
 	Language          *string        `gorm:"column:language" json:"language"`
@@ -655,6 +656,7 @@ type Survey struct {
 	CustomHeadScriptsMode       *string          `gorm:"column:customHeadScriptsMode;default:'add'" json:"customHeadScriptsMode"`
 	CustomCSS                   datatypes.JSON   `gorm:"column:customCss" json:"customCss"`
 	ShowConditions              datatypes.JSON   `gorm:"column:showConditions" json:"showConditions"`
+	StartLogic                  datatypes.JSON   `gorm:"column:startLogic" json:"startLogic"`
 	Workspace                   *Workspace
 	Creator                     *User `gorm:"foreignKey:CreatedBy"`
 	Owner                       *User `gorm:"foreignKey:OwnerID"`
@@ -1910,12 +1912,13 @@ func (*Chart) BeforeUpdate(tx *gorm.DB) error {
 }
 
 type Dashboard struct {
-	ID          string   `gorm:"column:id;primaryKey" json:"id"`
-	CreatedAt   DateTime `gorm:"column:created_at;index:Dashboard_workspaceId_created_at_idx;autoCreateTime:false;not null" json:"created_at"`
-	UpdatedAt   DateTime `gorm:"column:updated_at;autoUpdateTime:false;not null" json:"updated_at"`
-	Name        string   `gorm:"column:name;uniqueIndex:Dashboard_workspaceId_name_key;not null" json:"name"`
-	WorkspaceID string   `gorm:"column:workspaceId;uniqueIndex:Dashboard_workspaceId_name_key;index:Dashboard_workspaceId_created_at_idx;not null" json:"workspaceId"`
-	CreatedBy   *string  `gorm:"column:createdBy" json:"createdBy"`
+	ID          string         `gorm:"column:id;primaryKey" json:"id"`
+	CreatedAt   DateTime       `gorm:"column:created_at;index:Dashboard_workspaceId_created_at_idx;autoCreateTime:false;not null" json:"created_at"`
+	UpdatedAt   DateTime       `gorm:"column:updated_at;autoUpdateTime:false;not null" json:"updated_at"`
+	Name        string         `gorm:"column:name;uniqueIndex:Dashboard_workspaceId_name_key;not null" json:"name"`
+	WorkspaceID string         `gorm:"column:workspaceId;uniqueIndex:Dashboard_workspaceId_name_key;index:Dashboard_workspaceId_created_at_idx;not null" json:"workspaceId"`
+	CreatedBy   *string        `gorm:"column:createdBy" json:"createdBy"`
+	Filters     datatypes.JSON `gorm:"column:filters;default:'[]';not null" json:"filters"`
 	Workspace   *Workspace
 	Creator     *User             `gorm:"foreignKey:CreatedBy"`
 	Widgets     []DashboardWidget `gorm:"foreignKey:DashboardID;constraint:OnDelete:CASCADE"`

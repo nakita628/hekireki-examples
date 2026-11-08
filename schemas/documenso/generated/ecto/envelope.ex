@@ -35,6 +35,7 @@ defmodule Documenso.Envelope do
           envelope_items: [Documenso.EnvelopeItem.t()],
           recipients: [Documenso.Recipient.t()],
           fields: [Documenso.Field.t()],
+          contents: [Documenso.EnvelopeContent.t()],
           share_links: [Documenso.DocumentShareLink.t()],
           audit_logs: [Documenso.DocumentAuditLog.t()],
           envelope_attachments: [Documenso.EnvelopeAttachment.t()]
@@ -73,6 +74,7 @@ defmodule Documenso.Envelope do
     has_many(:envelope_items, Documenso.EnvelopeItem, foreign_key: :envelope_id, references: :id)
     has_many(:recipients, Documenso.Recipient, foreign_key: :envelope_id, references: :id)
     has_many(:fields, Documenso.Field, foreign_key: :envelope_id, references: :id)
+    has_many(:contents, Documenso.EnvelopeContent, foreign_key: :envelope_id, references: :id)
     has_many(:share_links, Documenso.DocumentShareLink, foreign_key: :envelope_id, references: :id)
     has_many(:audit_logs, Documenso.DocumentAuditLog, foreign_key: :envelope_id, references: :id)
     has_many(:envelope_attachments, Documenso.EnvelopeAttachment, foreign_key: :envelope_id, references: :id)

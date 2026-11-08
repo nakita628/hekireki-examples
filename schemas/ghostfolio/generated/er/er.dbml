@@ -115,6 +115,7 @@ Table Account {
 
 Table AccountBalance {
   accountId String [not null]
+  comment String
   createdAt DateTime [default: `now()`, not null]
   date DateTime [default: `now()`, not null]
   id String [pk]

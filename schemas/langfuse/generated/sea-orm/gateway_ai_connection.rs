@@ -22,6 +22,12 @@ pub struct Model {
     pub status: GatewayConnectionStatus,
     #[sea_orm(column_type = "JsonBinary")]
     pub allowed_models: Option<Json>,
+    #[sea_orm(column_type = "JsonBinary", default_value = "[]")]
+    pub custom_models: Json,
+    pub config: Option<Json>,
+    pub base_url: Option<String>,
+    pub extra_headers: Option<String>,
+    pub extra_header_keys: Vec<String>,
     pub created_at: DateTime,
     pub updated_at: DateTime,
 }

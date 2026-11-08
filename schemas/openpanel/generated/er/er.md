@@ -268,6 +268,7 @@ erDiagram
         string name
         string organizationId FK
         string projectId FK
+        json filters
         datetime createdAt
         datetime updatedAt
     }

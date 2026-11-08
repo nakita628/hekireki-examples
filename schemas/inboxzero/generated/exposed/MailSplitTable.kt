@@ -13,6 +13,7 @@ object MailSplitTable : IdTable<String>("\"MailSplit\"") {
     val name = text("name")
     val order = integer("order")
     val matchAll = bool("matchAll").default(true)
+    val bundleInInbox = bool("bundleInInbox").default(false)
     val emailAccountId =
         reference(
             "emailAccountId",

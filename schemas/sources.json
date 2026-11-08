@@ -18,7 +18,7 @@
   "hoppscotch": {
     "repo": "hoppscotch/hoppscotch",
     "path": "packages/hoppscotch-backend/prisma/schema.prisma",
-    "commit": "39d25650bdb4e86464b2cd69174c567b86f57892",
+    "commit": "55908a76a1d0555c9bbb5d74244c14173df95b06",
     "license": "MIT",
     "app": "Hoppscotch",
     "description": "Hoppscotch's backend: users, teams, collections, requests and environments."
@@ -26,7 +26,7 @@
   "langfuse": {
     "repo": "langfuse/langfuse",
     "path": "packages/shared/prisma/schema.prisma",
-    "commit": "728e69371ec7667e24602c2b1d87a8c60cfc6404",
+    "commit": "b9529a9336d5854d5970b7b1c91b8d92a41db5dd",
     "license": "MIT",
     "app": "Langfuse",
     "description": "Langfuse LLM observability: organizations, projects, traces, prompts, datasets and evaluations."
@@ -50,7 +50,7 @@
   "ghostfolio": {
     "repo": "ghostfolio/ghostfolio",
     "path": "prisma/schema.prisma",
-    "commit": "f3840ed29ae634c5f484529718975401ae940608",
+    "commit": "d278362d394a1c49c9cc55e9db4be9a7fd17c7dd",
     "license": "AGPL-3.0",
     "app": "Ghostfolio",
     "description": "Ghostfolio wealth management: users, accounts, orders, symbol profiles and market data."
@@ -58,7 +58,7 @@
   "typebot": {
     "repo": "baptisteArno/typebot.io",
     "path": "packages/prisma/postgresql/schema.prisma",
-    "commit": "fd1dc34e0acdeca99d204fde6e692fed1879d9f5",
+    "commit": "532c83e78cf2ad3c7b86e7db847456609e363213",
     "license": "FSL-1.1-Apache-2.0",
     "app": "Typebot",
     "description": "Typebot chatbot builder: workspaces, typebots, results, answers and credentials."
@@ -82,7 +82,7 @@
   "rallly": {
     "repo": "lukevella/rallly",
     "path": "packages/database/prisma/",
-    "commit": "eee2caa04af3902a871c9292ad33c9eccf6896d4",
+    "commit": "1ec308bd6fa11d6e578b1431fa20b7cb6c3d500c",
     "license": "AGPL-3.0",
     "app": "Rallly",
     "description": "Rallly scheduling polls: users, spaces, polls, options, participants and votes."
@@ -90,7 +90,7 @@
   "documenso": {
     "repo": "documenso/documenso",
     "path": "packages/prisma/schema.prisma",
-    "commit": "91e73d59281254ad0e258adc861a337c85da60d0",
+    "commit": "fdd0337bdd8f6afac64faf97113c65ed2dd0e2a2",
     "license": "AGPL-3.0",
     "app": "Documenso",
     "description": "Documenso document signing: users, teams, documents, recipients, fields and signatures."
@@ -106,7 +106,7 @@
   "postiz": {
     "repo": "gitroomhq/postiz-app",
     "path": "libraries/nestjs-libraries/src/database/prisma/schema.prisma",
-    "commit": "bd8353f09f8dbaec54f15985f26d34b56ac69636",
+    "commit": "59277cf21b109d746875b7ea08fb54c53935799b",
     "license": "AGPL-3.0",
     "app": "Postiz",
     "description": "Postiz social media scheduling: organizations, integrations, posts, comments and media."
@@ -122,7 +122,7 @@
   "formbricks": {
     "repo": "formbricks/formbricks",
     "path": "packages/database/schema/",
-    "commit": "7cddb162bb4615b68561d90a7dbde4c5985213f0",
+    "commit": "b45bafc0df7a0c851f33fd4917df537792999ce6",
     "license": "AGPL-3.0",
     "app": "Formbricks",
     "description": "Formbricks surveys: organizations, environments, surveys, responses and contacts.",
@@ -141,7 +141,7 @@
   "anythingllm": {
     "repo": "Mintplex-Labs/anything-llm",
     "path": "server/prisma/schema.prisma",
-    "commit": "e76048b57c7217f4e04b028c2752e7e1a4a76a03",
+    "commit": "308b27662b2f6fd4947791d61c797945c609fcbc",
     "license": "MIT",
     "app": "AnythingLLM",
     "description": "AnythingLLM local AI workspace: users, workspaces, documents, chats, embeddings and agents, on SQLite."
@@ -149,7 +149,7 @@
   "inboxzero": {
     "repo": "elie222/inbox-zero",
     "path": "apps/web/prisma/schema.prisma",
-    "commit": "423a835622c483ab5594469a2c6eada40a4054af",
+    "commit": "831d26b8e494634292d8ba606bf731924e633dbf",
     "license": "AGPL-3.0-with-additional-terms",
     "app": "InboxZero",
     "description": "Inbox Zero email assistant: users, email accounts, threads, rules, drafts and digests.",
@@ -160,7 +160,7 @@
   "openpanel": {
     "repo": "openpanel-dev/openpanel",
     "path": "packages/db/prisma/schema.prisma",
-    "commit": "130d9c0dd03e7b5d4b1837b9f80e57d42c1b11f8",
+    "commit": "a5a6eb7d62c9579620ec5e3fbfd4ce760f3d8073",
     "license": "AGPL-3.0",
     "app": "OpenPanel",
     "description": "OpenPanel product analytics: organizations, projects, dashboards, reports, clients and integrations."
@@ -172,5 +172,13 @@
     "license": "MIT",
     "app": "Chibisafe",
     "description": "Chibisafe file uploader: users, files, albums, tags, snippets and short links, on SQLite."
+  },
+  "typehero": {
+    "repo": "typehero/typehero",
+    "path": "packages/db/schema.prisma",
+    "commit": "7871629e9a77718312e68a367644ce3fc286ef04",
+    "license": "AGPL-3.0",
+    "app": "TypeHero",
+    "description": "TypeHero TypeScript practice: users, challenges, solutions, comments and tracks."
   }
 }

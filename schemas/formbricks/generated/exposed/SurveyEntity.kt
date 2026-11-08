@@ -80,6 +80,7 @@ class SurveyEntity(
     var customHeadScriptsMode by SurveyTable.customHeadScriptsMode
     var customCss by SurveyTable.customCss
     var showConditions by SurveyTable.showConditions
+    var startLogic by SurveyTable.startLogic
 
     override fun flush(batch: EntityBatchUpdate?): Boolean {
         if (writeValues.isNotEmpty()) {

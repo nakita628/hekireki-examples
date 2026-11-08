@@ -86,6 +86,7 @@ class GatewayIngestionMode(models.TextChoices):
 class GatewayProvider(models.TextChoices):
     OPENAI = "openai"
     ANTHROPIC = "anthropic"
+    BEDROCK = "bedrock"
 
 
 class GatewayConnectionStatus(models.TextChoices):
@@ -213,6 +214,11 @@ class BlobStorageIntegrationType(models.TextChoices):
 class ExternalMediaStorageIntegrationType(models.TextChoices):
     S3 = "S3"
     S3_COMPATIBLE = "S3_COMPATIBLE"
+
+
+class StorageIntegrationAuthType(models.TextChoices):
+    ACCESS_KEYS = "ACCESS_KEYS"
+    ROLE_ARN = "ROLE_ARN"
 
 
 class BlobStorageExportMode(models.TextChoices):
@@ -497,6 +503,11 @@ class GatewayAiConnection(models.Model):
     created_by_id = models.TextField(null=True)
     status = models.TextField(choices=GatewayConnectionStatus.choices, default=GatewayConnectionStatus.ENABLED)
     allowed_models = models.JSONField(null=True)
+    custom_models = models.JSONField(default=list)
+    config = models.JSONField(null=True)
+    base_url = models.TextField(null=True)
+    extra_headers = models.TextField(null=True)
+    extra_header_keys = ArrayField(models.TextField(), default=list)
     created_at = UtcDateTimeField(default=timezone.now)
     updated_at = UtcDateTimeField(auto_now=True)
     objects = AutoNowQuerySet.as_manager()
@@ -1509,8 +1520,11 @@ class BlobStorageIntegration(models.Model):
     type = models.TextField(choices=BlobStorageIntegrationType.choices)
     bucket_name = models.TextField()
     prefix = models.TextField()
+    auth_type = models.TextField(choices=StorageIntegrationAuthType.choices, default=StorageIntegrationAuthType.ACCESS_KEYS)
     access_key_id = models.TextField(null=True)
     secret_access_key = models.TextField(null=True)
+    role_arn = models.TextField(null=True)
+    external_id = models.TextField(null=True)
     region = models.TextField()
     endpoint = models.TextField(null=True)
     force_path_style = models.BooleanField()
@@ -1543,8 +1557,11 @@ class ExternalMediaStorageIntegration(models.Model):
     type = models.TextField(choices=ExternalMediaStorageIntegrationType.choices)
     bucket_name = models.TextField()
     prefix = models.TextField(null=True)
+    auth_type = models.TextField(choices=StorageIntegrationAuthType.choices, default=StorageIntegrationAuthType.ACCESS_KEYS)
     access_key_id = models.TextField(null=True)
     secret_access_key = models.TextField(null=True)
+    role_arn = models.TextField(null=True)
+    external_id = models.TextField(null=True)
     region = models.TextField()
     endpoint = models.TextField(null=True)
     force_path_style = models.BooleanField()

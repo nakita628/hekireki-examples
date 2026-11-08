@@ -8,4 +8,6 @@ pub enum GatewayProvider {
     Openai,
     #[sea_orm(string_value = "anthropic")]
     Anthropic,
+    #[sea_orm(string_value = "bedrock")]
+    Bedrock,
 }

@@ -207,6 +207,7 @@ class OrganizationRole(models.TextChoices):
     manager = "manager"
     member = "member"
     billing = "billing"
+    dashboard_viewer = "dashboard_viewer"
 
 
 class ApiKeyPermission(models.TextChoices):
@@ -629,6 +630,7 @@ class Response(models.Model):
     meta = models.JSONField(default=dict)
     ingest_flags = models.JSONField(null=True)
     outcome = models.TextField(choices=ResponseOutcome.choices, null=True)
+    not_shown = models.JSONField(null=True)
     contact_attributes = models.JSONField(null=True, db_column="contactAttributes")
     single_use_id = models.TextField(null=True, db_column="singleUseId")
     language = models.TextField(null=True)
@@ -786,6 +788,7 @@ class Survey(models.Model):
     custom_head_scripts_mode = models.TextField(choices=SurveyScriptMode.choices, null=True, db_column="customHeadScriptsMode", default=SurveyScriptMode.add)
     custom_css = models.JSONField(null=True, db_column="customCss")
     show_conditions = models.JSONField(null=True, db_column="showConditions")
+    start_logic = models.JSONField(null=True, db_column="startLogic")
     objects = AutoNowQuerySet.as_manager()
 
     class Meta:
@@ -1514,6 +1517,7 @@ class Dashboard(models.Model):
     name = models.TextField()
     workspace = models.ForeignKey("Workspace", on_delete=models.CASCADE, related_name="dashboards", db_column="workspaceId", db_index=False)
     creator = models.ForeignKey("User", on_delete=models.SET_NULL, related_name="dashboards", db_column="createdBy", null=True, db_index=False)
+    filters = models.JSONField(default=list)
     objects = AutoNowQuerySet.as_manager()
 
     class Meta:

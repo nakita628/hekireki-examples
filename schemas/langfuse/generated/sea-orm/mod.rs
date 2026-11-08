@@ -105,6 +105,7 @@ pub mod skill_blob;
 pub mod skill_file;
 pub mod slack_integration;
 pub mod sso_config;
+pub mod storage_integration_auth_type;
 pub mod survey;
 pub mod survey_name;
 pub mod system_role;

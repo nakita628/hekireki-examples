@@ -25,6 +25,7 @@ SCHEMAS = {
     "inboxzero": "postgresql",
     "openpanel": "postgresql",
     "chibisafe": "sqlite",
+    "typehero": "mysql",
 }
 
 # The generators left out of a schema (`skip` in sources.json): the generator refuses it.

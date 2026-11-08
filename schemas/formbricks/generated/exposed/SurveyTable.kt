@@ -99,6 +99,7 @@ object SurveyTable : IdTable<String>("\"Survey\"") {
             .default(SurveyScriptMode.ADD)
     val customCss = jsonb<String>("customCss", { it }, { it }).nullable()
     val showConditions = jsonb<String>("showConditions", { it }, { it }).nullable()
+    val startLogic = jsonb<String>("startLogic", { it }, { it }).nullable()
     override val primaryKey = PrimaryKey(id, name = "\"Survey_pkey\"")
 
     init {

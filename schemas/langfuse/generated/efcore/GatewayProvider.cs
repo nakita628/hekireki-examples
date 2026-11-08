@@ -11,4 +11,7 @@ public enum GatewayProvider
 
     [PgName("anthropic")]
     Anthropic,
+
+    [PgName("bedrock")]
+    Bedrock,
 }

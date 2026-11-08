@@ -1,6 +1,6 @@
 // AnythingLLM: AnythingLLM local AI workspace: users, workspaces, documents, chats, embeddings and agents, on SQLite.
 //
-// Imported from https://github.com/Mintplex-Labs/anything-llm/blob/e76048b57c7217f4e04b028c2752e7e1a4a76a03/server/prisma/schema.prisma
+// Imported from https://github.com/Mintplex-Labs/anything-llm/blob/308b27662b2f6fd4947791d61c797945c609fcbc/server/prisma/schema.prisma
 // (MIT license) by tools/import/import-schema.mjs, which dropped the original
 // generator blocks and the datasource's connection URLs and added the hekireki generators below.
 // The models, enums and `///` comments are the project's own, as they are at that commit.

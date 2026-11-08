@@ -17,4 +17,7 @@ public enum OrganizationRole
 
     [PgName("billing")]
     Billing,
+
+    [PgName("dashboard_viewer")]
+    DashboardViewer,
 }

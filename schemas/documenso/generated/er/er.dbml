@@ -344,6 +344,8 @@ Table SubscriptionClaim {
   memberCount Int [not null]
   envelopeItemCount Int [not null]
   recipientCount Int [not null]
+  envelopeContentCount Int [not null]
+  envelopeContentImageCount Int [not null]
   flags Json [not null, note: '[ClaimFlags] @zod.custom.use(ZClaimFlagsSchema)']
   documentRateLimits Json [not null, note: '[RateLimitArray] @zod.custom.use(ZRateLimitArraySchema)']
   documentQuota Int
@@ -365,6 +367,8 @@ Table OrganisationClaim {
   memberCount Int [not null]
   envelopeItemCount Int [not null]
   recipientCount Int [not null]
+  envelopeContentCount Int [not null]
+  envelopeContentImageCount Int [not null]
   flags Json [not null, note: '[ClaimFlags] @zod.custom.use(ZClaimFlagsSchema)']
   documentRateLimits Json [not null, note: '[RateLimitArray] @zod.custom.use(ZRateLimitArraySchema)']
   documentQuota Int
@@ -586,6 +590,28 @@ Table Field {
   fieldMeta Json [note: '[FieldMeta] @zod.custom.use(ZFieldMetaNotOptionalSchema)']
 
   Note: '@zod.import(["import { ZFieldMetaNotOptionalSchema } from \'@documenso/lib/types/field-meta\';"])'
+}
+
+Table EnvelopeContent {
+  id String [pk]
+  envelopeId String [not null]
+  envelopeItemId String [not null]
+  contentMeta Json [not null, note: '[EnvelopeContentMeta] @zod.custom.use(ZEnvelopeContentMetaSchema)']
+  dataContentId String [note: '''Any number of contents may point at the same data content, e.g. a
+document created from a template shares the template\'s images.''']
+
+  Note: '@zod.import(["import { ZEnvelopeContentMetaSchema } from \'@documenso/lib/types/envelope-content-meta\';"])'
+}
+
+Table DataContent {
+  id String [pk]
+  type DocumentDataType [not null, note: 'How `data` is stored, e.g. an S3 path or inline bytes.']
+  data String [not null]
+  metadata Json [not null, note: '[DataContentMeta] @zod.custom.use(ZDataContentMetaSchema)']
+
+  Note: '''Generic stored data (e.g. an uploaded image) which other models reference.
+The kind of data and its kind specific details live in `metadata`.
+@zod.import(["import { ZDataContentMetaSchema } from \'@documenso/lib/types/data-content-meta\';"])'''
 }
 
 Table Signature {
@@ -1001,6 +1027,12 @@ Ref Field_envelopeItemId_fk: Field.envelopeItemId > EnvelopeItem.id [delete: cas
 Ref Field_envelopeId_fk: Field.envelopeId > Envelope.id [delete: cascade]
 
 Ref Field_recipientId_fk: Field.recipientId > Recipient.id [delete: cascade]
+
+Ref EnvelopeContent_envelopeItemId_fk: EnvelopeContent.envelopeItemId > EnvelopeItem.id [delete: cascade]
+
+Ref EnvelopeContent_envelopeId_fk: EnvelopeContent.envelopeId > Envelope.id [delete: cascade]
+
+Ref EnvelopeContent_dataContentId_fk: EnvelopeContent.dataContentId > DataContent.id [delete: set null]
 
 Ref Signature_recipientId_fk: Signature.recipientId > Recipient.id [delete: cascade]
 

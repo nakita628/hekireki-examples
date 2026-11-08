@@ -8,6 +8,7 @@ use serde::{Deserialize, Serialize};
 pub struct Model {
     #[sea_orm(column_name = "accountId")]
     pub account_id: String,
+    pub comment: Option<String>,
     #[sea_orm(column_name = "createdAt")]
     pub created_at: DateTime,
     pub date: DateTime,

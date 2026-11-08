@@ -158,6 +158,7 @@ export const accountBalance = pgTable(
   'AccountBalance',
   {
     accountId: text('accountId').notNull(),
+    comment: text('comment'),
     createdAt: timestamp('createdAt', { precision: 3 })
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`)

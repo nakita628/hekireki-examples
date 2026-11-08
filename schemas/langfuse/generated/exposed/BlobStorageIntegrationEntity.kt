@@ -16,8 +16,11 @@ class BlobStorageIntegrationEntity(
     var type by BlobStorageIntegrationTable.type
     var bucketName by BlobStorageIntegrationTable.bucketName
     var prefix by BlobStorageIntegrationTable.prefix
+    var authType by BlobStorageIntegrationTable.authType
     var accessKeyId by BlobStorageIntegrationTable.accessKeyId
     var secretAccessKey by BlobStorageIntegrationTable.secretAccessKey
+    var roleArn by BlobStorageIntegrationTable.roleArn
+    var externalId by BlobStorageIntegrationTable.externalId
     var region by BlobStorageIntegrationTable.region
     var endpoint by BlobStorageIntegrationTable.endpoint
     var forcePathStyle by BlobStorageIntegrationTable.forcePathStyle

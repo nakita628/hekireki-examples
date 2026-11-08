@@ -54,6 +54,7 @@ defmodule Formbricks.Survey do
           custom_head_scripts_mode: atom() | nil,
           custom_css: map() | nil,
           show_conditions: map() | nil,
+          start_logic: map() | nil,
           inserted_at: DateTime.t(),
           updated_at: DateTime.t(),
           workspace: Formbricks.Workspace.t() | nil,
@@ -122,6 +123,7 @@ defmodule Formbricks.Survey do
     field(:custom_head_scripts_mode, Ecto.Enum, values: [:add, :replace], default: :add, source: :customHeadScriptsMode)
     field(:custom_css, :map, source: :customCss)
     field(:show_conditions, :map, source: :showConditions)
+    field(:start_logic, :map, source: :startLogic)
     field(:workspace_id, :string, source: :workspaceId)
     field(:created_by, :string, source: :createdBy)
     field(:owner_id, :string, source: :ownerId)

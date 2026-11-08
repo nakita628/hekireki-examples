@@ -29,6 +29,7 @@ pub struct Model {
     pub meta: Json,
     pub ingest_flags: Option<Json>,
     pub outcome: Option<ResponseOutcome>,
+    pub not_shown: Option<Json>,
     #[sea_orm(column_name = "contactAttributes")]
     pub contact_attributes: Option<Json>,
     #[sea_orm(column_name = "singleUseId")]

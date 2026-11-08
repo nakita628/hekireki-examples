@@ -19,6 +19,7 @@ class DashboardEntity(
     var project by ProjectEntity referencedOn DashboardTable.projectId
     val reports by ReportEntity referrersOn ReportTable.dashboardId
     val share by ShareDashboardEntity optionalBackReferencedOn ShareDashboardTable.dashboardId
+    var filters by DashboardTable.filters
     var createdAt by DashboardTable.createdAt
     var updatedAt by DashboardTable.updatedAt
 

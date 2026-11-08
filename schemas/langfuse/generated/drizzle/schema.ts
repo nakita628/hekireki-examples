@@ -53,7 +53,7 @@ export const systemRoleEnum = pgEnum('SystemRole', [
 
 export const gatewayIngestionModeEnum = pgEnum('GatewayIngestionMode', ['none', 'usage', 'full'])
 
-export const gatewayProviderEnum = pgEnum('GatewayProvider', ['openai', 'anthropic'])
+export const gatewayProviderEnum = pgEnum('GatewayProvider', ['openai', 'anthropic', 'bedrock'])
 
 export const gatewayConnectionStatusEnum = pgEnum('GatewayConnectionStatus', [
   'enabled',
@@ -156,6 +156,11 @@ export const externalMediaStorageIntegrationTypeEnum = pgEnum(
   'ExternalMediaStorageIntegrationType',
   ['S3', 'S3_COMPATIBLE'],
 )
+
+export const storageIntegrationAuthTypeEnum = pgEnum('StorageIntegrationAuthType', [
+  'ACCESS_KEYS',
+  'ROLE_ARN',
+])
 
 export const blobStorageExportModeEnum = pgEnum('BlobStorageExportMode', [
   'FULL_HISTORY',
@@ -601,6 +606,11 @@ export const gatewayAiConnections = pgTable(
     createdById: text('created_by_id'),
     status: gatewayConnectionStatusEnum('status').notNull().default('enabled'),
     allowedModels: jsonb('allowed_models'),
+    customModels: jsonb('custom_models').notNull().default([]),
+    config: jsonb('config'),
+    baseURL: text('base_url'),
+    extraHeaders: text('extra_headers'),
+    extraHeaderKeys: text('extra_header_keys').array().default([]),
     createdAt: timestamp('created_at', { precision: 3 })
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`)
@@ -2593,8 +2603,11 @@ export const blobStorageIntegrations = pgTable(
     type: blobStorageIntegrationTypeEnum('type').notNull(),
     bucketName: text('bucket_name').notNull(),
     prefix: text('prefix').notNull(),
+    authType: storageIntegrationAuthTypeEnum('auth_type').notNull().default('ACCESS_KEYS'),
     accessKeyId: text('access_key_id'),
     secretAccessKey: text('secret_access_key'),
+    roleArn: text('role_arn'),
+    externalId: text('external_id'),
     region: text('region').notNull(),
     endpoint: text('endpoint'),
     forcePathStyle: boolean('force_path_style').notNull(),
@@ -2658,8 +2671,11 @@ export const externalMediaStorageIntegrations = pgTable(
     type: externalMediaStorageIntegrationTypeEnum('type').notNull(),
     bucketName: text('bucket_name').notNull(),
     prefix: text('prefix'),
+    authType: storageIntegrationAuthTypeEnum('auth_type').notNull().default('ACCESS_KEYS'),
     accessKeyId: text('access_key_id'),
     secretAccessKey: text('secret_access_key'),
+    roleArn: text('role_arn'),
+    externalId: text('external_id'),
     region: text('region').notNull(),
     endpoint: text('endpoint'),
     forcePathStyle: boolean('force_path_style').notNull(),

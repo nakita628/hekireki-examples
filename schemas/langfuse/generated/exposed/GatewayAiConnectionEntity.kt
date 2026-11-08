@@ -21,6 +21,11 @@ class GatewayAiConnectionEntity(
     var createdById by GatewayAiConnectionTable.createdById
     var status by GatewayAiConnectionTable.status
     var allowedModels by GatewayAiConnectionTable.allowedModels
+    var customModels by GatewayAiConnectionTable.customModels
+    var config by GatewayAiConnectionTable.config
+    var baseURL by GatewayAiConnectionTable.baseURL
+    var extraHeaders by GatewayAiConnectionTable.extraHeaders
+    var extraHeaderKeys by GatewayAiConnectionTable.extraHeaderKeys
     var createdAt by GatewayAiConnectionTable.createdAt
     var updatedAt by GatewayAiConnectionTable.updatedAt
 

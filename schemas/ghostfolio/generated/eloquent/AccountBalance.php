@@ -21,6 +21,7 @@ class AccountBalance extends Model
 
     protected $fillable = [
         'accountId',
+        'comment',
         'date',
         'userId',
         'value',

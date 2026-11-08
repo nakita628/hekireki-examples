@@ -14,4 +14,5 @@ enum class ChartType(
     RETENTION("retention"),
     CONVERSION("conversion"),
     SANKEY("sankey"),
+    DISTRIBUTION("distribution"),
 }

@@ -17,6 +17,7 @@ class MailSplitEntity(
     var name by MailSplitTable.name
     var order by MailSplitTable.order
     var matchAll by MailSplitTable.matchAll
+    var bundleInInbox by MailSplitTable.bundleInInbox
     var emailAccountId by MailSplitTable.emailAccountId
     var emailAccount by EmailAccountEntity referencedOn MailSplitTable.emailAccountId
     val filters by MailSplitFilterEntity referrersOn MailSplitFilterTable.mailSplitId

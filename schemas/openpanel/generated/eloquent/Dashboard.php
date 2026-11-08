@@ -25,6 +25,15 @@ class Dashboard extends Model
         'name',
         'organizationId',
         'projectId',
+        'filters',
+    ];
+
+    protected $attributes = [
+        'filters' => '[]',
+    ];
+
+    protected $casts = [
+        'filters' => 'array',
     ];
 
     public function organization(): BelongsTo

@@ -918,6 +918,9 @@ public partial class FormbricksContext : DbContext
                 .HasColumnType("jsonb")
                 .HasColumnName("ingest_flags");
             entity.Property(e => e.Outcome).HasColumnName("outcome");
+            entity.Property(e => e.NotShown)
+                .HasColumnType("jsonb")
+                .HasColumnName("not_shown");
             entity.Property(e => e.ContactAttributes)
                 .HasColumnType("jsonb")
                 .HasColumnName("contactAttributes");
@@ -1302,6 +1305,9 @@ public partial class FormbricksContext : DbContext
             entity.Property(e => e.ShowConditions)
                 .HasColumnType("jsonb")
                 .HasColumnName("showConditions");
+            entity.Property(e => e.StartLogic)
+                .HasColumnType("jsonb")
+                .HasColumnName("startLogic");
 
             entity.HasOne(d => d.Workspace).WithMany(p => p.Surveys)
                 .HasForeignKey(d => d.WorkspaceId)
@@ -2864,6 +2870,11 @@ public partial class FormbricksContext : DbContext
             entity.Property(e => e.Name).HasColumnName("name");
             entity.Property(e => e.WorkspaceId).HasColumnName("workspaceId");
             entity.Property(e => e.CreatedBy).HasColumnName("createdBy");
+            entity.Property(e => e.Filters)
+                .ValueGeneratedNever()
+                .HasDefaultValue("[]")
+                .HasColumnType("jsonb")
+                .HasColumnName("filters");
 
             entity.HasOne(d => d.Workspace).WithMany(p => p.Dashboards)
                 .HasForeignKey(d => d.WorkspaceId)

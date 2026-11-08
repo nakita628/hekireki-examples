@@ -7,6 +7,7 @@ defmodule Formbricks.Dashboard do
   @type t :: %__MODULE__{
           id: String.t(),
           name: String.t(),
+          filters: map(),
           inserted_at: DateTime.t(),
           updated_at: DateTime.t(),
           workspace: Formbricks.Workspace.t() | nil,
@@ -17,6 +18,7 @@ defmodule Formbricks.Dashboard do
   schema "Dashboard" do
     field(:id, :string, primary_key: true)
     field(:name, :string)
+    field(:filters, :map)
     field(:workspace_id, :string, source: :workspaceId)
     field(:created_by, :string, source: :createdBy)
     belongs_to(:workspace, Formbricks.Workspace, foreign_key: :workspace_id, define_field: false, type: :string)

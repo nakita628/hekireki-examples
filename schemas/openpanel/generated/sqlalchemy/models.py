@@ -425,6 +425,7 @@ class Dashboard(Base):
     name: Mapped[str]
     organization_id: Mapped[str] = mapped_column("organizationId", ForeignKey("organizations.id", ondelete="CASCADE", onupdate="CASCADE", name="dashboards_organizationId_fkey"))
     project_id: Mapped[str] = mapped_column("projectId", ForeignKey("projects.id", ondelete="CASCADE", onupdate="CASCADE", name="dashboards_projectId_fkey"))
+    filters: Mapped[dict[str, Any]] = mapped_column(JSONB, default=lambda: [], server_default=text("'[]'"))
     created_at: Mapped[datetime] = mapped_column("createdAt", default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
     updated_at: Mapped[datetime] = mapped_column("updatedAt", default=utc_now, server_default=text("CURRENT_TIMESTAMP"), onupdate=utc_now)
 
@@ -440,7 +441,7 @@ class Report(Base):
     name: Mapped[str]
     interval: Mapped[str] = mapped_column(Enum("hour", "day", "month", "minute", "week", name="Interval"))
     range: Mapped[str] = mapped_column(default="30d", server_default=text("'30d'"))
-    chart_type: Mapped[str] = mapped_column("chartType", Enum("linear", "bar", "histogram", "pie", "metric", "area", "map", "funnel", "retention", "conversion", "sankey", name="ChartType"))
+    chart_type: Mapped[str] = mapped_column("chartType", Enum("linear", "bar", "histogram", "pie", "metric", "area", "map", "funnel", "retention", "conversion", "sankey", "distribution", name="ChartType"))
     line_type: Mapped[str] = mapped_column("lineType", default="monotone", server_default=text("'monotone'"))
     breakdowns: Mapped[dict[str, Any]] = mapped_column(JSONB)
     events: Mapped[dict[str, Any]] = mapped_column(JSONB)

@@ -26,6 +26,7 @@ class ResponseEntity(
     var meta by ResponseTable.meta
     var ingestFlags by ResponseTable.ingestFlags
     var outcome by ResponseTable.outcome
+    var notShown by ResponseTable.notShown
     val tags by TagsOnResponsesEntity referrersOn TagsOnResponsesTable.responseId
     val quotaLinks by ResponseQuotaLinkEntity referrersOn ResponseQuotaLinkTable.responseId
     var contactAttributes by ResponseTable.contactAttributes

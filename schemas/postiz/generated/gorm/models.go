@@ -151,14 +151,14 @@ type User struct {
 	ID                    string               `gorm:"column:id;primaryKey;type:char(36)" json:"id"`
 	Email                 string               `gorm:"column:email;uniqueIndex:User_email_providerName_key;not null" json:"email"`
 	Password              *string              `gorm:"column:password" json:"password"`
-	ProviderName          string               `gorm:"column:providerName;uniqueIndex:User_email_providerName_key;not null" json:"providerName"`
+	ProviderName          string               `gorm:"column:providerName;uniqueIndex:User_email_providerName_key;index:User_providerId_providerName_idx;not null" json:"providerName"`
 	Name                  *string              `gorm:"column:name" json:"name"`
 	LastName              *string              `gorm:"column:lastName" json:"lastName"`
 	IsSuperAdmin          bool                 `gorm:"column:isSuperAdmin;default:false;not null" json:"isSuperAdmin"`
 	Bio                   *string              `gorm:"column:bio" json:"bio"`
 	Audience              int                  `gorm:"column:audience;default:0;not null" json:"audience"`
 	PictureID             *string              `gorm:"column:pictureId;index:User_pictureId_idx" json:"pictureId"`
-	ProviderID            *string              `gorm:"column:providerId" json:"providerId"`
+	ProviderID            *string              `gorm:"column:providerId;index:User_providerId_providerName_idx" json:"providerId"`
 	Timezone              int                  `gorm:"column:timezone;not null" json:"timezone"`
 	TimezoneName          *string              `gorm:"column:timezoneName" json:"timezoneName"`
 	CreatedAt             DateTime             `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
@@ -904,17 +904,17 @@ func (*Comments) BeforeUpdate(tx *gorm.DB) error {
 
 type Post struct {
 	ID                         string    `gorm:"column:id;primaryKey" json:"id"`
-	State                      string    `gorm:"column:state;index:Post_state_idx;default:'QUEUE';not null" json:"state"`
-	PublishDate                DateTime  `gorm:"column:publishDate;index:Post_publishDate_idx;not null" json:"publishDate"`
-	OrganizationID             string    `gorm:"column:organizationId;index:Post_organizationId_idx;not null" json:"organizationId"`
-	IntegrationID              string    `gorm:"column:integrationId;index:Post_integrationId_idx;not null" json:"integrationId"`
+	State                      string    `gorm:"column:state;index:Post_publishDate_state_deletedAt_parentPostId_integrationId_organizationId_creationMethod_idx;index:Post_state_idx;default:'QUEUE';not null" json:"state"`
+	PublishDate                DateTime  `gorm:"column:publishDate;index:Post_publishDate_idx;index:Post_publishDate_state_deletedAt_parentPostId_integrationId_organizationId_creationMethod_idx;index:Post_organizationId_publishDate_idx;not null" json:"publishDate"`
+	OrganizationID             string    `gorm:"column:organizationId;index:Post_publishDate_state_deletedAt_parentPostId_integrationId_organizationId_creationMethod_idx;index:Post_organizationId_idx;index:Post_organizationId_publishDate_idx;not null" json:"organizationId"`
+	IntegrationID              string    `gorm:"column:integrationId;index:Post_publishDate_state_deletedAt_parentPostId_integrationId_organizationId_creationMethod_idx;index:Post_integrationId_idx;not null" json:"integrationId"`
 	Content                    string    `gorm:"column:content;not null" json:"content"`
 	Delay                      int       `gorm:"column:delay;default:0;not null" json:"delay"`
 	Group                      string    `gorm:"column:group;index:Post_group_idx;not null" json:"group"`
 	BatchID                    *string   `gorm:"column:batchId;index:Post_batchId_idx" json:"batchId"`
 	Title                      *string   `gorm:"column:title" json:"title"`
 	Description                *string   `gorm:"column:description" json:"description"`
-	ParentPostID               *string   `gorm:"column:parentPostId;index:Post_parentPostId_idx" json:"parentPostId"`
+	ParentPostID               *string   `gorm:"column:parentPostId;index:Post_publishDate_state_deletedAt_parentPostId_integrationId_organizationId_creationMethod_idx;index:Post_parentPostId_idx" json:"parentPostId"`
 	ReleaseID                  *string   `gorm:"column:releaseId" json:"releaseId"`
 	ReleaseURL                 *string   `gorm:"column:releaseURL;index:Post_releaseURL_idx" json:"releaseURL"`
 	Settings                   *string   `gorm:"column:settings" json:"settings"`
@@ -922,13 +922,13 @@ type Post struct {
 	SubmittedForOrderID        *string   `gorm:"column:submittedForOrderId;index:Post_submittedForOrderId_idx" json:"submittedForOrderId"`
 	SubmittedForOrganizationID *string   `gorm:"column:submittedForOrganizationId" json:"submittedForOrganizationId"`
 	ApprovedSubmitForOrder     string    `gorm:"column:approvedSubmitForOrder;index:Post_approvedSubmitForOrder_idx;default:'NO';not null" json:"approvedSubmitForOrder"`
-	CreationMethod             string    `gorm:"column:creationMethod;index:Post_creationMethod_idx;default:'UNKNOWN';not null" json:"creationMethod"`
+	CreationMethod             string    `gorm:"column:creationMethod;index:Post_publishDate_state_deletedAt_parentPostId_integrationId_organizationId_creationMethod_idx;index:Post_creationMethod_idx;default:'UNKNOWN';not null" json:"creationMethod"`
 	LastMessageID              *string   `gorm:"column:lastMessageId;index:Post_lastMessageId_idx" json:"lastMessageId"`
 	IntervalInDays             *int      `gorm:"column:intervalInDays;index:Post_intervalInDays_idx" json:"intervalInDays"`
 	Error                      *string   `gorm:"column:error" json:"error"`
 	CreatedAt                  DateTime  `gorm:"column:createdAt;index:Post_createdAt_idx;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt                  DateTime  `gorm:"column:updatedAt;index:Post_updatedAt_idx;autoUpdateTime:false;not null" json:"updatedAt"`
-	DeletedAt                  *DateTime `gorm:"column:deletedAt;index:Post_deletedAt_idx" json:"deletedAt"`
+	DeletedAt                  *DateTime `gorm:"column:deletedAt;index:Post_deletedAt_idx;index:Post_publishDate_state_deletedAt_parentPostId_integrationId_organizationId_creationMethod_idx" json:"deletedAt"`
 	Integration                *Integration
 	LastMessage                *Messages        `gorm:"foreignKey:LastMessageID"`
 	Organization               *Organization    `gorm:"foreignKey:OrganizationID"`
@@ -970,12 +970,12 @@ func (*Post) BeforeUpdate(tx *gorm.DB) error {
 
 type Notifications struct {
 	ID             string    `gorm:"column:id;primaryKey;type:char(36)" json:"id"`
-	OrganizationID string    `gorm:"column:organizationId;index:Notifications_organizationId_idx;not null" json:"organizationId"`
+	OrganizationID string    `gorm:"column:organizationId;index:Notifications_organizationId_idx;index:Notifications_organizationId_createdAt_deletedAt_idx;not null" json:"organizationId"`
 	Content        string    `gorm:"column:content;not null" json:"content"`
 	Link           *string   `gorm:"column:link" json:"link"`
-	CreatedAt      DateTime  `gorm:"column:createdAt;index:Notifications_createdAt_idx;autoCreateTime:false;not null" json:"createdAt"`
+	CreatedAt      DateTime  `gorm:"column:createdAt;index:Notifications_createdAt_idx;index:Notifications_organizationId_createdAt_deletedAt_idx;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt      DateTime  `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	DeletedAt      *DateTime `gorm:"column:deletedAt;index:Notifications_deletedAt_idx" json:"deletedAt"`
+	DeletedAt      *DateTime `gorm:"column:deletedAt;index:Notifications_organizationId_createdAt_deletedAt_idx;index:Notifications_deletedAt_idx" json:"deletedAt"`
 	Organization   *Organization
 }
 
@@ -1437,9 +1437,9 @@ func (*ThirdParty) BeforeUpdate(tx *gorm.DB) error {
 type Errors struct {
 	ID             string   `gorm:"column:id;primaryKey;type:char(36)" json:"id"`
 	Message        string   `gorm:"column:message;not null" json:"message"`
-	Platform       string   `gorm:"column:platform;not null" json:"platform"`
+	Platform       string   `gorm:"column:platform;index:Errors_createdAt_platform_idx;not null" json:"platform"`
 	OrganizationID string   `gorm:"column:organizationId;index:Errors_organizationId_idx;not null" json:"organizationId"`
-	CreatedAt      DateTime `gorm:"column:createdAt;index:Errors_createdAt_idx;autoCreateTime:false;not null" json:"createdAt"`
+	CreatedAt      DateTime `gorm:"column:createdAt;index:Errors_createdAt_idx;index:Errors_createdAt_platform_idx;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt      DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
 	PostID         string   `gorm:"column:postId;not null" json:"postId"`
 	Body           *string  `gorm:"column:body;default:'{}';not null" json:"body"`

@@ -8,6 +8,7 @@ import java.util.UUID
 
 object AccountBalanceTable : IdTable<String>("\"AccountBalance\"") {
     val accountId = text("accountId")
+    val comment = text("comment").nullable()
     val createdAt = pgTimestamp("createdAt", 3).databaseDefault("CURRENT_TIMESTAMP") { Instant.now().truncatedTo(ChronoUnit.MILLIS) }
     val date = pgTimestamp("date", 3).databaseDefault("CURRENT_TIMESTAMP") { Instant.now().truncatedTo(ChronoUnit.MILLIS) }
     override val id = text("id").clientDefault { UUID.randomUUID().toString() }.entityId()

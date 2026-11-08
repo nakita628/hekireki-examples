@@ -23,6 +23,10 @@ pub struct Model {
     pub envelope_item_count: i32,
     #[sea_orm(column_name = "recipientCount")]
     pub recipient_count: i32,
+    #[sea_orm(column_name = "envelopeContentCount")]
+    pub envelope_content_count: i32,
+    #[sea_orm(column_name = "envelopeContentImageCount")]
+    pub envelope_content_image_count: i32,
     pub flags: Json,
     #[sea_orm(column_name = "documentRateLimits")]
     pub document_rate_limits: Json,

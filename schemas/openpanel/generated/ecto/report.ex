@@ -39,7 +39,7 @@ defmodule OpenPanel.Report do
     field(:name, :string)
     field(:interval, Ecto.Enum, values: [:hour, :day, :month, :minute, :week])
     field(:range, :string, default: "30d")
-    field(:chart_type, Ecto.Enum, values: [:linear, :bar, :histogram, :pie, :metric, :area, :map, :funnel, :retention, :conversion, :sankey], source: :chartType)
+    field(:chart_type, Ecto.Enum, values: [:linear, :bar, :histogram, :pie, :metric, :area, :map, :funnel, :retention, :conversion, :sankey, :distribution], source: :chartType)
     field(:line_type, :string, default: "monotone", source: :lineType)
     field(:breakdowns, :map)
     field(:events, :map)

@@ -154,4 +154,6 @@ public partial class Survey
     public virtual ICollection<AttachmentExport> AttachmentExports { get; set; } = new List<AttachmentExport>();
 
     public string? ShowConditions { get; set; }
+
+    public string? StartLogic { get; set; }
 }

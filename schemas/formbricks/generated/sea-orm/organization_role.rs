@@ -12,4 +12,6 @@ pub enum OrganizationRole {
     Member,
     #[sea_orm(string_value = "billing")]
     Billing,
+    #[sea_orm(string_value = "dashboard_viewer")]
+    DashboardViewer,
 }

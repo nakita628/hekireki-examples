@@ -22,7 +22,7 @@ defmodule Formbricks.Invite do
     field(:email, :string)
     field(:name, :string)
     field(:expires_at, Formbricks.PrismaDateTime, source: :expiresAt)
-    field(:role, Ecto.Enum, values: [:owner, :manager, :member, :billing], default: :member)
+    field(:role, Ecto.Enum, values: [:owner, :manager, :member, :billing, :dashboard_viewer], default: :member)
     field(:team_ids, {:array, :string}, source: :teamIds)
     field(:organization_id, :string, source: :organizationId)
     field(:creator_id, :string, source: :creatorId)

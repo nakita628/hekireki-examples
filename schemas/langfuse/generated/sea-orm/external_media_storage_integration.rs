@@ -1,4 +1,5 @@
 use super::external_media_storage_integration_type::ExternalMediaStorageIntegrationType;
+use super::storage_integration_auth_type::StorageIntegrationAuthType;
 use chrono::SubsecRound;
 use sea_orm::entity::prelude::*;
 use sea_orm::Set;
@@ -12,8 +13,12 @@ pub struct Model {
     pub r#type: ExternalMediaStorageIntegrationType,
     pub bucket_name: String,
     pub prefix: Option<String>,
+    #[sea_orm(default_value = "ACCESS_KEYS")]
+    pub auth_type: StorageIntegrationAuthType,
     pub access_key_id: Option<String>,
     pub secret_access_key: Option<String>,
+    pub role_arn: Option<String>,
+    pub external_id: Option<String>,
     pub region: String,
     pub endpoint: Option<String>,
     pub force_path_style: bool,
