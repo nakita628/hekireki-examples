@@ -93,6 +93,10 @@ public partial class EmailAccount
 
     public bool? MailBundleInbox { get; set; }
 
+    public string? MailDefaultSplitId { get; set; }
+
+    public MailSetupState MailSetup { get; set; } = MailSetupState.Pending;
+
     public bool IncludeInAllAccounts { get; set; } = true;
 
     public bool MeetingBriefingsEnabled { get; set; } = false;

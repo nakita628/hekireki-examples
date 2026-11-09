@@ -26,7 +26,7 @@
   "langfuse": {
     "repo": "langfuse/langfuse",
     "path": "packages/shared/prisma/schema.prisma",
-    "commit": "b9529a9336d5854d5970b7b1c91b8d92a41db5dd",
+    "commit": "762fcd7364352daf57b98e18babe0891c5c04962",
     "license": "MIT",
     "app": "Langfuse",
     "description": "Langfuse LLM observability: organizations, projects, traces, prompts, datasets and evaluations."
@@ -50,7 +50,7 @@
   "ghostfolio": {
     "repo": "ghostfolio/ghostfolio",
     "path": "prisma/schema.prisma",
-    "commit": "d278362d394a1c49c9cc55e9db4be9a7fd17c7dd",
+    "commit": "2823510bf4930c974a7681ba8eb45584c190e775",
     "license": "AGPL-3.0",
     "app": "Ghostfolio",
     "description": "Ghostfolio wealth management: users, accounts, orders, symbol profiles and market data."
@@ -82,7 +82,7 @@
   "rallly": {
     "repo": "lukevella/rallly",
     "path": "packages/database/prisma/",
-    "commit": "1ec308bd6fa11d6e578b1431fa20b7cb6c3d500c",
+    "commit": "6d0f71c7e9b5721fca6e07ca41b0a450f986de6c",
     "license": "AGPL-3.0",
     "app": "Rallly",
     "description": "Rallly scheduling polls: users, spaces, polls, options, participants and votes."
@@ -106,7 +106,7 @@
   "postiz": {
     "repo": "gitroomhq/postiz-app",
     "path": "libraries/nestjs-libraries/src/database/prisma/schema.prisma",
-    "commit": "59277cf21b109d746875b7ea08fb54c53935799b",
+    "commit": "4b7b9901abfcd81c88dc3534fb0a9540af8e0bd3",
     "license": "AGPL-3.0",
     "app": "Postiz",
     "description": "Postiz social media scheduling: organizations, integrations, posts, comments and media."
@@ -122,7 +122,7 @@
   "formbricks": {
     "repo": "formbricks/formbricks",
     "path": "packages/database/schema/",
-    "commit": "b45bafc0df7a0c851f33fd4917df537792999ce6",
+    "commit": "94ae9705fc8e6e355d90c743460110ae829c0378",
     "license": "AGPL-3.0",
     "app": "Formbricks",
     "description": "Formbricks surveys: organizations, environments, surveys, responses and contacts.",
@@ -149,7 +149,7 @@
   "inboxzero": {
     "repo": "elie222/inbox-zero",
     "path": "apps/web/prisma/schema.prisma",
-    "commit": "831d26b8e494634292d8ba606bf731924e633dbf",
+    "commit": "787e696aa43d3c69936b4e0f487be26da9f0fd18",
     "license": "AGPL-3.0-with-additional-terms",
     "app": "InboxZero",
     "description": "Inbox Zero email assistant: users, email accounts, threads, rules, drafts and digests.",
@@ -196,5 +196,13 @@
     "license": "AGPL-3.0",
     "app": "Plunk",
     "description": "Plunk email platform: projects, contacts, templates, campaigns, workflows and emails."
+  },
+  "jitsu": {
+    "repo": "jitsucom/jitsu",
+    "path": "webapps/console/prisma/schema.prisma",
+    "commit": "e74ffe2bfcabca86d07aaa8384febe6b225898bc",
+    "license": "MIT",
+    "app": "Jitsu",
+    "description": "Jitsu event collection: workspaces, connections, sources, destinations and syncs."
   }
 }

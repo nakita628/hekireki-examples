@@ -1,0 +1,556 @@
+Enum WorkspaceRole {
+  owner
+  editor
+  analyst
+}
+
+Enum reverse_sync_mode {
+  upsert
+  mirror
+}
+
+Enum reverse_sync_extraction {
+  cursor
+  full
+}
+
+Table EmailLog {
+  id String [pk]
+  time DateTime [default: `now()`, not null]
+  email Json [not null]
+  error String
+  previewUrl String
+  messageId String
+  status String [not null]
+}
+
+Table UserPreferences {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null, note: '@zod.custom(z.coerce.date())']
+  updatedAt DateTime [default: `now()`, not null, note: '@zod.custom(z.coerce.date())']
+  userId String [not null]
+  workspaceId String
+  scope String
+  preferences Json [not null]
+}
+
+Table UserProfile {
+  id String [pk]
+  name String [not null]
+  email String [not null]
+  admin Boolean [default: false]
+  createdAt DateTime [default: `now()`, not null, note: '@zod.custom(z.coerce.date())']
+  updatedAt DateTime [default: `now()`, not null, note: '@zod.custom(z.coerce.date())']
+  loginProvider String [not null]
+  externalUsername String
+  externalId String [not null]
+
+  indexes {
+    (loginProvider, externalId) [unique]
+  }
+}
+
+Table UserPassword {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null, note: '@zod.custom(z.coerce.date())']
+  updatedAt DateTime [default: `now()`, not null, note: '@zod.custom(z.coerce.date())']
+  userId String [unique, not null]
+  hash String [not null]
+  changeAtNextLogin Boolean [default: false, not null]
+}
+
+Table Workspace {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null, note: '@zod.custom(z.coerce.date())']
+  updatedAt DateTime [default: `now()`, not null, note: '@zod.custom(z.coerce.date())']
+  name String [not null]
+  deleted Boolean [default: false, not null]
+  slug String [unique]
+  featuresEnabled String[] [not null]
+}
+
+Table WorkspaceOptions {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null, note: '@zod.custom(z.coerce.date())']
+  updatedAt DateTime [default: `now()`, not null, note: '@zod.custom(z.coerce.date())']
+  workspaceId String [not null]
+  namespace String [not null]
+  value Json [not null]
+}
+
+Table WorkspaceAccess {
+  workspaceId String [not null]
+  createdAt DateTime [default: `now()`, not null, note: '@zod.custom(z.coerce.date())']
+  updatedAt DateTime [default: `now()`, not null, note: '@zod.custom(z.coerce.date())']
+  userId String [not null]
+  role WorkspaceRole [default: 'owner', not null]
+
+  indexes {
+    (userId, workspaceId) [pk]
+  }
+}
+
+Table WorkspaceUserProperties {
+  workspaceId String [not null]
+  userId String [not null]
+  lastUsed DateTime [default: `now()`, not null, note: '@zod.custom(z.coerce.date())']
+
+  indexes {
+    (workspaceId, userId) [pk]
+  }
+}
+
+Table UserApiToken {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null, note: '@zod.custom(z.coerce.date())']
+  updatedAt DateTime [default: `now()`, not null, note: '@zod.custom(z.coerce.date())']
+  lastUsed DateTime [note: '@zod.custom(z.coerce.date())']
+  hint String [not null]
+  hash String [not null]
+  userId String [not null]
+  type String
+  name String
+  expiresAt DateTime [note: '@zod.custom(z.coerce.date())']
+  oauthClientId String
+}
+
+Table OAuthClient {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null, note: '@zod.custom(z.coerce.date())']
+  updatedAt DateTime [default: `now()`, not null, note: '@zod.custom(z.coerce.date())']
+  clientSecretHash String [not null]
+  name String [not null]
+  redirectUris String[] [not null]
+}
+
+Table kv {
+  key String [pk]
+  value Json [not null]
+  expires_at DateTime [note: '@zod.custom(z.coerce.date())']
+}
+
+Table OAuthAccessToken {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null, note: '@zod.custom(z.coerce.date())']
+  lastUsed DateTime [note: '@zod.custom(z.coerce.date())']
+  hash String [not null]
+  expiresAt DateTime [not null, note: '@zod.custom(z.coerce.date())']
+  refreshTokenId String [not null]
+}
+
+Table InvitationToken {
+  id String [pk]
+  workspaceId String [not null]
+  email String [not null]
+  createdAt DateTime [default: `now()`, not null, note: '@zod.custom(z.coerce.date())']
+  updatedAt DateTime [default: `now()`, not null, note: '@zod.custom(z.coerce.date())']
+  token String [not null]
+  usedBy String
+  role WorkspaceRole [default: 'owner', not null]
+}
+
+Table ConfigurationObject {
+  id String [pk]
+  deleted Boolean [default: false]
+  createdAt DateTime [default: `now()`, not null, note: '@zod.custom(z.coerce.date())']
+  updatedAt DateTime [default: `now()`, not null, note: '@zod.custom(z.coerce.date())']
+  type String [not null]
+  workspaceId String [not null]
+  config Json
+}
+
+Table ConfigurationObjectLink {
+  id String [pk]
+  deleted Boolean [default: false]
+  createdAt DateTime [default: `now()`, not null, note: '@zod.custom(z.coerce.date())']
+  updatedAt DateTime [default: `now()`, not null, note: '@zod.custom(z.coerce.date())']
+  type String [default: 'push']
+  data Json
+  workspaceId String [not null]
+  fromId String [not null]
+  toId String [not null]
+}
+
+Table ConnectorPackage {
+  id String [pk]
+  packageId String [not null]
+  packageType String [default: 'airbyte', not null]
+  meta Json
+  logoSvg Bytes
+  createdAt DateTime [default: `now()`, not null, note: '@zod.custom(z.coerce.date())']
+  updatedAt DateTime [default: `now()`, not null, note: '@zod.custom(z.coerce.date())']
+}
+
+Table AuditLog {
+  id String [pk]
+  timestamp DateTime [default: `now()`, not null, note: '@zod.custom(z.coerce.date())']
+  type String [not null]
+  severity String [default: 'info']
+  userId String
+  workspaceId String
+  objectId String
+  changes Json
+  authType String
+  tokenId String
+  ip String
+  requestHeaders Json
+}
+
+Table GlobalProps {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null, note: '@zod.custom(z.coerce.date())']
+  updatedAt DateTime [default: `now()`, not null, note: '@zod.custom(z.coerce.date())']
+  name String [not null]
+  value Json
+}
+
+Table source_spec {
+  package String [not null]
+  version String [not null]
+  specs Json
+  timestamp DateTime [default: `now()`, not null, note: '@zod.custom(z.coerce.date())']
+  error String
+
+  indexes {
+    (package, version) [pk]
+  }
+}
+
+Table source_check {
+  package String [not null]
+  version String [not null]
+  key String [pk]
+  status String [not null]
+  description String
+  timestamp DateTime [default: `now()`, not null, note: '@zod.custom(z.coerce.date())']
+}
+
+Table source_catalog {
+  package String [not null]
+  version String [not null]
+  key String [not null]
+  catalog Json
+  timestamp DateTime [default: `now()`, not null, note: '@zod.custom(z.coerce.date())']
+  status String [not null]
+  description String
+
+  indexes {
+    (package, version, key) [pk]
+  }
+}
+
+Table reverse_sync_control {
+  workspace_id String [not null]
+  sync_id String [not null]
+  run_id String [not null]
+  run_order BigInt [default: 0, not null]
+  detached Boolean [default: false, not null]
+  revision String [not null]
+  target_hash String [not null]
+  phase String [default: 'new', not null]
+  mode reverse_sync_mode [not null]
+  extraction reverse_sync_extraction [not null]
+  artifact_head Bytes
+  base_sequence BigInt [default: 0, not null]
+  next_sequence BigInt [default: 0, not null]
+  checkpoint_sequence BigInt [default: 0, not null]
+  finish_sequence BigInt
+  store Bytes
+  provider_state Bytes
+  finish_result Bytes
+  committed_generation String
+
+  indexes {
+    (workspace_id, sync_id, run_id) [pk]
+    (workspace_id, sync_id, run_order) [unique]
+  }
+}
+
+Table reverse_sync_target_owner {
+  target_hash String [pk]
+  workspace_id String [not null]
+  sync_id String [not null]
+
+  indexes {
+    (workspace_id, sync_id) [unique]
+  }
+}
+
+Table source_state {
+  sync_id String [not null]
+  stream String [not null]
+  state Json [not null]
+  timestamp DateTime [default: `now()`, not null, note: '@zod.custom(z.coerce.date())']
+
+  indexes {
+    (sync_id, stream) [pk]
+  }
+}
+
+Table source_task {
+  sync_id String [not null]
+  task_id String [pk]
+  package String [not null]
+  version String [not null]
+  started_at DateTime [default: `now()`, not null, note: '@zod.custom(z.coerce.date())']
+  updated_at DateTime [default: `now()`, not null, note: '@zod.custom(z.coerce.date())']
+  started_by Json
+  status String [not null]
+  description String
+  metrics Json
+  error String
+}
+
+Table task_log {
+  id String [pk]
+  level String [not null]
+  logger String [not null]
+  message String [not null]
+  sync_id String [not null]
+  task_id String [not null]
+  timestamp DateTime [default: `now()`, not null, note: '@zod.custom(z.coerce.date())']
+}
+
+Table ProfileBuilder {
+  id String [pk]
+  name String [not null]
+  deleted Boolean [default: false]
+  createdAt DateTime [default: `now()`, not null, note: '@zod.custom(z.coerce.date())']
+  updatedAt DateTime [default: `now()`, not null, note: '@zod.custom(z.coerce.date())']
+  workspaceId String [not null]
+  intermediateStorageCredentials Json [not null]
+  destinationId String
+  connectionOptions Json
+  version Int [default: 0, not null]
+}
+
+Table ProfileBuilderFunction {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null, note: '@zod.custom(z.coerce.date())']
+  updatedAt DateTime [default: `now()`, not null, note: '@zod.custom(z.coerce.date())']
+  profileBuilderId String [not null]
+  functionId String [not null]
+}
+
+Table ProfileBuilderState {
+  profileBuilderId String [not null]
+  profileBuilderVersion Int [not null]
+  instanceIndex Int [not null]
+  totalInstances Int [not null]
+  startedAt DateTime [not null]
+  updatedAt DateTime [not null]
+  lastTimestamp DateTime
+  processedUsers Int [not null]
+  totalUsers Int [not null]
+  errorUsers Int [not null]
+  speed Float [not null]
+
+  indexes {
+    (profileBuilderId, profileBuilderVersion, totalInstances, instanceIndex) [pk]
+  }
+}
+
+Table ProfileBuilderState2 {
+  profileBuilderId String [pk]
+  updatedAt DateTime [not null]
+  fullRebuildInfo Json
+  queuesInfo Json
+  metrics Json
+
+  indexes {
+    profileBuilderId [pk]
+  }
+}
+
+Table StatusChange {
+  id BigInt [pk, increment]
+  workspaceId String [not null]
+  actorId String [not null]
+  type String [not null]
+  tableName String [not null]
+  timestamp DateTime [default: `now()`, not null, note: '@zod.custom(z.coerce.date())']
+  status String [not null]
+  startedAt DateTime [not null]
+  counts Int [default: 0, not null]
+  description String
+  queueSize Int [default: 0, not null]
+}
+
+Table NotificationState {
+  workspaceId String [not null]
+  actorId String [not null]
+  type String [not null]
+  tableName String [not null]
+  channelId String [not null]
+  flappingSince DateTime [note: '@zod.custom(z.coerce.date())']
+  lastNotification DateTime [not null, note: '@zod.custom(z.coerce.date())']
+  statusChangeId BigInt [not null]
+  error String
+
+  indexes {
+    (channelId, actorId, type, tableName) [pk]
+  }
+}
+
+Table Notification {
+  id String [pk]
+  workspaceId String [not null]
+  actorId String [not null]
+  type String [not null]
+  tableName String [not null]
+  channelId String [not null]
+  statusChangeId BigInt [not null]
+  timestamp DateTime [default: `now()`, not null, note: '@zod.custom(z.coerce.date())']
+  status String [not null]
+  error String
+}
+
+Table OidcProvider {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null, note: '@zod.custom(z.coerce.date())']
+  updatedAt DateTime [default: `now()`, not null, note: '@zod.custom(z.coerce.date())']
+  name String [not null]
+  issuer String [not null]
+  clientId String [not null]
+  clientSecret String [not null]
+  authorizationEndpoint String
+  tokenEndpoint String
+  userinfoEndpoint String
+  jwksUri String
+  introspectionEndpoint String
+  scopes String[] [not null]
+  audience String
+  prompt String
+  usernameClaim String [default: 'email', not null]
+  emailClaim String [default: 'email', not null]
+  nameClaim String [default: 'name', not null]
+  groupClaim String [default: 'groups', not null]
+  enabled Boolean [default: true, not null]
+  autoDiscovery Boolean [default: true, not null]
+
+  indexes {
+    (issuer, clientId) [unique]
+  }
+}
+
+Table OidcLoginGroup {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null, note: '@zod.custom(z.coerce.date())']
+  updatedAt DateTime [default: `now()`, not null, note: '@zod.custom(z.coerce.date())']
+  workspaceId String [not null]
+  oidcProviderId String [not null]
+  groupValue String
+  allowAllUsers Boolean [default: false, not null]
+
+  indexes {
+    (workspaceId, oidcProviderId) [unique]
+  }
+}
+
+Table reprocessing_jobs {
+  id String [pk]
+  config Json [not null]
+  status String [not null]
+  created_at DateTime [not null]
+  started_at DateTime
+  completed_at DateTime
+  k8s_job_name String
+  total_files Int [default: 0]
+  total_workers Int [default: 0]
+  error String
+}
+
+Table reprocessing_workers {
+  job_id String [not null]
+  worker_index Int [not null]
+  status String [not null]
+  started_at DateTime
+  updated_at DateTime [default: `now()`, not null]
+  completed_at DateTime
+  current_file String
+  current_line BigInt [default: 0]
+  current_ts String
+  assigned_files Int [default: 0]
+  processed_files Int [default: 0]
+  total_lines BigInt [default: 0]
+  success_count BigInt [default: 0]
+  error_count BigInt [default: 0]
+  skipped_count BigInt [default: 0]
+  total_bytes BigInt [default: 0]
+  processed_bytes BigInt [default: 0]
+  error String
+
+  indexes {
+    (job_id, worker_index) [pk]
+  }
+}
+
+Table FunctionsServer {
+  workspaceId String [not null]
+  class String [not null]
+  deploymentId String [not null]
+  connections String[] [not null]
+  emptyConnections String[] [not null]
+  profileBuilders String[] [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime
+
+  indexes {
+    (workspaceId, class) [pk]
+  }
+}
+
+Table RateLimitCounter {
+  bucketKey String [not null]
+  windowStart DateTime [not null]
+  count Int [default: 0, not null]
+  expiresAt DateTime [not null]
+
+  indexes {
+    (bucketKey, windowStart) [pk]
+  }
+}
+
+Ref UserPreferences_userId_fk: UserPreferences.userId > UserProfile.id
+
+Ref UserPreferences_workspaceId_fk: UserPreferences.workspaceId > Workspace.id
+
+Ref UserPassword_userId_fk: UserPassword.userId - UserProfile.id
+
+Ref WorkspaceOptions_workspaceId_fk: WorkspaceOptions.workspaceId > Workspace.id
+
+Ref WorkspaceAccess_workspaceId_fk: WorkspaceAccess.workspaceId > Workspace.id
+
+Ref WorkspaceAccess_userId_fk: WorkspaceAccess.userId > UserProfile.id
+
+Ref WorkspaceUserProperties_workspaceId_fk: WorkspaceUserProperties.workspaceId > Workspace.id
+
+Ref WorkspaceUserProperties_userId_fk: WorkspaceUserProperties.userId > UserProfile.id
+
+Ref UserApiToken_userId_fk: UserApiToken.userId > UserProfile.id
+
+Ref UserApiToken_oauthClientId_fk: UserApiToken.oauthClientId > OAuthClient.id
+
+Ref OAuthAccessToken_refreshTokenId_fk: OAuthAccessToken.refreshTokenId > UserApiToken.id
+
+Ref ConfigurationObject_workspaceId_fk: ConfigurationObject.workspaceId > Workspace.id
+
+Ref ConfigurationObjectLink_workspaceId_fk: ConfigurationObjectLink.workspaceId > Workspace.id
+
+Ref ConfigurationObjectLink_fromId_fk: ConfigurationObjectLink.fromId > ConfigurationObject.id
+
+Ref ConfigurationObjectLink_toId_fk: ConfigurationObjectLink.toId > ConfigurationObject.id
+
+Ref ProfileBuilder_workspaceId_fk: ProfileBuilder.workspaceId > Workspace.id
+
+Ref ProfileBuilder_destinationId_fk: ProfileBuilder.destinationId > ConfigurationObject.id
+
+Ref ProfileBuilderFunction_profileBuilderId_fk: ProfileBuilderFunction.profileBuilderId > ProfileBuilder.id
+
+Ref ProfileBuilderFunction_functionId_fk: ProfileBuilderFunction.functionId > ConfigurationObject.id
+
+Ref OidcLoginGroup_workspaceId_fk: OidcLoginGroup.workspaceId > Workspace.id
+
+Ref OidcLoginGroup_oidcProviderId_fk: OidcLoginGroup.oidcProviderId > OidcProvider.id
+
+Ref reprocessing_workers_job_id_fk: reprocessing_workers.job_id > reprocessing_jobs.id [delete: cascade, update: no action]

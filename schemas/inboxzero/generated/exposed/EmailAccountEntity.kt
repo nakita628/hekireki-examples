@@ -54,6 +54,8 @@ class EmailAccountEntity(
     var mailLayout by EmailAccountTable.mailLayout
     var mailExpandedPreview by EmailAccountTable.mailExpandedPreview
     var mailBundleInbox by EmailAccountTable.mailBundleInbox
+    var mailDefaultSplitId by EmailAccountTable.mailDefaultSplitId
+    var mailSetup by EmailAccountTable.mailSetup
     var includeInAllAccounts by EmailAccountTable.includeInAllAccounts
     var meetingBriefingsEnabled by EmailAccountTable.meetingBriefingsEnabled
     var meetingBriefingsMinutesBefore by EmailAccountTable.meetingBriefingsMinutesBefore

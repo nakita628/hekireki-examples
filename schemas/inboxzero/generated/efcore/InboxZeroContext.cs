@@ -244,6 +244,7 @@ public partial class InboxZeroContext : DbContext
         npgsql.MapEnum<MessagingMessageStatus>("MessagingMessageStatus");
         npgsql.MapEnum<Frequency>("Frequency");
         npgsql.MapEnum<MailLayout>("MailLayout");
+        npgsql.MapEnum<MailSetupState>("MailSetupState");
         npgsql.MapEnum<MailSplitFilterKind>("MailSplitFilterKind");
         npgsql.MapEnum<DraftReplyConfidence>("DraftReplyConfidence");
         npgsql.MapEnum<DraftEmailStatus>("DraftEmailStatus");
@@ -299,6 +300,7 @@ public partial class InboxZeroContext : DbContext
         dataSource.MapEnum<MessagingMessageStatus>("MessagingMessageStatus");
         dataSource.MapEnum<Frequency>("Frequency");
         dataSource.MapEnum<MailLayout>("MailLayout");
+        dataSource.MapEnum<MailSetupState>("MailSetupState");
         dataSource.MapEnum<MailSplitFilterKind>("MailSplitFilterKind");
         dataSource.MapEnum<DraftReplyConfidence>("DraftReplyConfidence");
         dataSource.MapEnum<DraftEmailStatus>("DraftEmailStatus");
@@ -362,6 +364,7 @@ public partial class InboxZeroContext : DbContext
         modelBuilder.HasPostgresEnum<MessagingMessageStatus>(name: "MessagingMessageStatus");
         modelBuilder.HasPostgresEnum<Frequency>(name: "Frequency");
         modelBuilder.HasPostgresEnum<MailLayout>(name: "MailLayout");
+        modelBuilder.HasPostgresEnum<MailSetupState>(name: "MailSetupState");
         modelBuilder.HasPostgresEnum<MailSplitFilterKind>(name: "MailSplitFilterKind");
         modelBuilder.HasPostgresEnum<DraftReplyConfidence>(name: "DraftReplyConfidence");
         modelBuilder.HasPostgresEnum<DraftEmailStatus>(name: "DraftEmailStatus");
@@ -754,6 +757,11 @@ public partial class InboxZeroContext : DbContext
                 .HasDefaultValue(false)
                 .HasColumnName("mailExpandedPreview");
             entity.Property(e => e.MailBundleInbox).HasColumnName("mailBundleInbox");
+            entity.Property(e => e.MailDefaultSplitId).HasColumnName("mailDefaultSplitId");
+            entity.Property(e => e.MailSetup)
+                .ValueGeneratedNever()
+                .HasDefaultValue(MailSetupState.Pending)
+                .HasColumnName("mailSetup");
             entity.Property(e => e.IncludeInAllAccounts)
                 .ValueGeneratedNever()
                 .HasDefaultValue(true)
@@ -853,6 +861,10 @@ public partial class InboxZeroContext : DbContext
                 .ValueGeneratedNever()
                 .HasDefaultValue(false)
                 .HasColumnName("bundleInInbox");
+            entity.Property(e => e.HideFromAll)
+                .ValueGeneratedNever()
+                .HasDefaultValue(false)
+                .HasColumnName("hideFromAll");
             entity.Property(e => e.EmailAccountId).HasColumnName("emailAccountId");
 
             entity.HasOne(d => d.EmailAccount).WithMany(p => p.MailSplits)

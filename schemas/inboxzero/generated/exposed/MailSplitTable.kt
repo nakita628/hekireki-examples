@@ -14,6 +14,7 @@ object MailSplitTable : IdTable<String>("\"MailSplit\"") {
     val order = integer("order")
     val matchAll = bool("matchAll").default(true)
     val bundleInInbox = bool("bundleInInbox").default(false)
+    val hideFromAll = bool("hideFromAll").default(false)
     val emailAccountId =
         reference(
             "emailAccountId",

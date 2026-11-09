@@ -36,6 +36,7 @@ class EmailAccount < ApplicationRecord
   enum :draftReplyConfidence, { all_emails: "ALL_EMAILS", standard: "STANDARD", high_confidence: "HIGH_CONFIDENCE" },
        default: :all_emails, validate: true
   enum :mailLayout, { list: "LIST", split: "SPLIT" }, default: :list, prefix: true, validate: true
+  enum :mailSetup, { pending: "PENDING", suggested: "SUGGESTED", done: "DONE" }, default: :pending, validate: true
   enum :meetingRecorderJoinRule, { all: "ALL", external_only: "EXTERNAL_ONLY", host_only: "HOST_ONLY", off: "OFF" },
        default: :all, prefix: true, validate: true
 

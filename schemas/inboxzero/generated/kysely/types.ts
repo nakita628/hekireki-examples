@@ -83,6 +83,8 @@ export type Frequency = 'NEVER' | 'DAILY' | 'WEEKLY'
 
 export type MailLayout = 'LIST' | 'SPLIT'
 
+export type MailSetupState = 'PENDING' | 'SUGGESTED' | 'DONE'
+
 export type MailSplitFilterKind =
   | 'UNREAD'
   | 'STARRED'
@@ -336,6 +338,8 @@ export interface EmailAccount {
   mailLayout: Generated<MailLayout>
   mailExpandedPreview: Generated<boolean>
   mailBundleInbox: boolean | null
+  mailDefaultSplitId: string | null
+  mailSetup: Generated<MailSetupState>
   includeInAllAccounts: Generated<boolean>
   meetingBriefingsEnabled: Generated<boolean>
   meetingBriefingsMinutesBefore: Generated<number>
@@ -364,6 +368,7 @@ export interface MailSplit {
   order: number
   matchAll: Generated<boolean>
   bundleInInbox: Generated<boolean>
+  hideFromAll: Generated<boolean>
   emailAccountId: string
 }
 

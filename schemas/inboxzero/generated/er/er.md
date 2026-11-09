@@ -248,6 +248,8 @@ erDiagram
         maillayout mailLayout
         boolean mailExpandedPreview
         boolean mailBundleInbox "Collapses threads from bundled splits into one row each in the inbox. Null until first turned on, which is when default bundles are chosen."
+        string mailDefaultSplitId
+        mailsetupstate mailSetup
         boolean includeInAllAccounts
         boolean meetingBriefingsEnabled
         int meetingBriefingsMinutesBefore
@@ -275,6 +277,7 @@ erDiagram
         int order
         boolean matchAll "Whether every filter must match, or any one of them (#quot;Show mail matching all/any of these conditions#quot;). A split with no filters is the plain inbox."
         boolean bundleInInbox "Shown as one collapsed row in the inbox when the account bundles its inbox."
+        boolean hideFromAll
         string emailAccountId FK, UK
     }
     MailSplitFilter {

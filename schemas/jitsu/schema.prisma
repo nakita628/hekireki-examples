@@ -1,0 +1,739 @@
+// Jitsu: Jitsu event collection: workspaces, connections, sources, destinations and syncs.
+//
+// Imported from https://github.com/jitsucom/jitsu/blob/e74ffe2bfcabca86d07aaa8384febe6b225898bc/webapps/console/prisma/schema.prisma
+// (MIT license) by tools/import/import-schema.mjs, which dropped the original
+// generator blocks and the datasource's connection URLs and added the hekireki generators below.
+// The models, enums and `///` comments are the project's own, as they are at that commit.
+
+datasource db {
+  provider = "postgresql"
+}
+
+// hekireki: every ORM generator, and the ER diagram as Mermaid, DBML and SVG. Every output is
+// under generated/, which the Bazel target //schemas/jitsu:generate writes and
+// //schemas/jitsu:generate.test holds the committed copy to.
+
+generator Hekireki-Drizzle {
+  provider = "hekireki-drizzle"
+  output   = "generated/drizzle/schema.ts"
+}
+
+generator Hekireki-Kysely {
+  provider = "hekireki-kysely"
+  output   = "generated/kysely/types.ts"
+}
+
+generator Hekireki-SQLAlchemy {
+  provider = "hekireki-sqlalchemy"
+  output   = "generated/sqlalchemy"
+}
+
+generator Hekireki-Django {
+  provider = "hekireki-django"
+  output   = "generated/django"
+}
+
+generator Hekireki-GORM {
+  provider = "hekireki-gorm"
+  output   = "generated/gorm"
+  package  = "model"
+}
+
+generator Hekireki-SeaORM {
+  provider = "hekireki-sea-orm"
+  output   = "generated/sea-orm"
+}
+
+generator Hekireki-Ecto {
+  provider = "hekireki-ecto"
+  output   = "generated/ecto"
+  app      = "Jitsu"
+}
+
+generator Hekireki-ActiveRecord {
+  provider = "hekireki-activerecord"
+  output   = "generated/activerecord"
+}
+
+generator Hekireki-EFCore {
+  provider  = "hekireki-efcore"
+  output    = "generated/efcore"
+  namespace = "Jitsu.Models"
+  context   = "JitsuContext"
+}
+
+generator Hekireki-Eloquent {
+  provider  = "hekireki-eloquent"
+  output    = "generated/eloquent"
+  namespace = "App\\Models"
+}
+
+generator Hekireki-Exposed {
+  provider = "hekireki-exposed"
+  output   = "generated/exposed"
+  package  = "jitsu.models"
+}
+
+generator Hekireki-ER {
+  provider = "hekireki-er"
+  outputs  = ["generated/er/er.md", "generated/er/er.dbml", "generated/er/er.svg"]
+}
+
+model EmailLog {
+  id         String   @id @default(cuid())
+  time       DateTime @default(now())
+  email      Json
+  error      String?
+  previewUrl String?
+  messageId  String?
+  status     String
+}
+
+model UserPreferences {
+  id        String      @id @default(cuid())
+  createdAt DateTime    @default(now()) /// @zod.custom(z.coerce.date())
+  updatedAt DateTime    @default(now()) @updatedAt /// @zod.custom(z.coerce.date())
+  userId    String
+  user      UserProfile @relation(fields: [userId], references: [id])
+
+  //If preferences relates to workspace,
+  workspaceId String?
+  workspace   Workspace? @relation(fields: [workspaceId], references: [id])
+  //empty or 'server-only'. Server-only means that preferences can't be changed from JS. NOT USED so far
+  scope       String?
+  preferences Json
+}
+
+model UserProfile {
+  id                      String                    @id @default(cuid())
+  name                    String
+  email                   String
+  admin                   Boolean?                  @default(false)
+  createdAt               DateTime                  @default(now()) /// @zod.custom(z.coerce.date())
+  updatedAt               DateTime                  @default(now()) @updatedAt /// @zod.custom(z.coerce.date())
+  loginProvider           String
+  externalUsername        String?
+  externalId              String
+  tokens                  UserApiToken[]
+  workspaceAccess         WorkspaceAccess[]
+  userPreferences         UserPreferences[]
+  workspaceUserProperties WorkspaceUserProperties[]
+  password                UserPassword?
+
+  @@unique([loginProvider, externalId])
+  @@index(externalId)
+}
+
+model UserPassword {
+  id                String      @id @default(cuid())
+  createdAt         DateTime    @default(now()) /// @zod.custom(z.coerce.date())
+  updatedAt         DateTime    @default(now()) @updatedAt /// @zod.custom(z.coerce.date())
+  userId            String      @unique
+  user              UserProfile @relation(fields: [userId], references: [id])
+  hash              String
+  changeAtNextLogin Boolean     @default(false)
+}
+
+model Workspace {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) /// @zod.custom(z.coerce.date())
+  updatedAt DateTime @default(now()) @updatedAt /// @zod.custom(z.coerce.date())
+  name      String
+  deleted   Boolean  @default(false)
+
+  slug                    String?
+  workspaceAccess         WorkspaceAccess[]
+  workspaceOptions        WorkspaceOptions[]
+  configurationObject     ConfigurationObject[]
+  configurationObjectLink ConfigurationObjectLink[]
+  preferences             UserPreferences[]
+  workspaceUserProperties WorkspaceUserProperties[]
+  featuresEnabled         String[]                  @default([])
+  profileBuilders         ProfileBuilder[]
+  oidcLoginGroups         OidcLoginGroup[]
+
+  @@unique(slug)
+  @@index(slug)
+  @@index(updatedAt(sort: Desc))
+}
+
+//additional properties for workspace
+model WorkspaceOptions {
+  id          String    @id @default(cuid())
+  createdAt   DateTime  @default(now()) /// @zod.custom(z.coerce.date())
+  updatedAt   DateTime  @default(now()) @updatedAt /// @zod.custom(z.coerce.date())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  namespace   String
+  value       Json
+
+  @@index([workspaceId, namespace])
+}
+
+enum WorkspaceRole {
+  owner
+  editor
+  analyst
+}
+
+model WorkspaceAccess {
+  workspaceId String
+  createdAt   DateTime      @default(now()) /// @zod.custom(z.coerce.date())
+  updatedAt   DateTime      @default(now()) @updatedAt /// @zod.custom(z.coerce.date())
+  userId      String
+  workspace   Workspace     @relation(fields: [workspaceId], references: [id])
+  user        UserProfile   @relation(fields: [userId], references: [id])
+  role        WorkspaceRole @default(owner)
+
+  @@id([userId, workspaceId])
+}
+
+model WorkspaceUserProperties {
+  workspaceId String
+  workspace   Workspace   @relation(fields: [workspaceId], references: [id])
+  userId      String
+  user        UserProfile @relation(fields: [userId], references: [id])
+  lastUsed    DateTime    @default(now()) /// @zod.custom(z.coerce.date())
+
+  @@id([workspaceId, userId])
+}
+
+model UserApiToken {
+  id        String      @id @default(cuid())
+  createdAt DateTime    @default(now()) /// @zod.custom(z.coerce.date())
+  updatedAt DateTime    @default(now()) @updatedAt /// @zod.custom(z.coerce.date())
+  lastUsed  DateTime? /// @zod.custom(z.coerce.date())
+  hint      String
+  hash      String
+  userId    String
+  user      UserProfile @relation(fields: [userId], references: [id])
+  type      String?
+  name      String?
+  expiresAt DateTime? /// @zod.custom(z.coerce.date())
+
+  // For MCP-issued tokens: oauthClientId is set and this row IS the refresh
+  // token. MCP-ness is inferred from oauthClientId IS NOT NULL (we don't set
+  // type="mcp"). For non-MCP keys (UI/CLI/api) oauthClientId is null.
+  oauthClientId String?
+  oauthClient   OAuthClient?       @relation(fields: [oauthClientId], references: [id])
+  accessTokens  OAuthAccessToken[]
+}
+
+model OAuthClient {
+  id               String   @id @default(cuid()) // == OAuth client_id
+  createdAt        DateTime @default(now()) /// @zod.custom(z.coerce.date())
+  updatedAt        DateTime @default(now()) @updatedAt /// @zod.custom(z.coerce.date())
+  clientSecretHash String // hashed via juava.createHash
+  name             String // from DCR client_name; shown on /user
+  redirectUris     String[] // whitelisted at DCR time
+
+  // Schema is 1:N (a client could in principle hold many refresh tokens).
+  // We enforce 1:1 in code:
+  //   1. At /oauth/token (authorize success): delete any existing
+  //      UserApiToken rows for this client (cascading to their access
+  //      tokens) before creating the new one.
+  //   2. At DELETE /api/user/keys: when a token with oauthClientId is
+  //      deleted, also delete the OAuthClient row and its access tokens
+  //      in the same transaction.
+  // To migrate to 1:N later: drop step (1) and replace step (2) with a
+  // separate "revoke connection" action. No schema change required.
+  tokens UserApiToken[]
+}
+
+// Generic key-value store used by the MCP server (and any future feature
+// that wants ephemeral or atomic key/value semantics). Single flat
+// namespace; callers separate concerns via key prefix conventions
+// (`oauth:code:...`, `mcp:event:...`). See lib/server/kv/.
+model KvStoreEntry {
+  key       String    @id
+  value     Json
+  expiresAt DateTime? @map("expires_at") /// @zod.custom(z.coerce.date())
+
+  @@index([expiresAt])
+  // Prefix scans (`segment1:segment2:*`) need text_pattern_ops to use the
+  // index — the default text ops only help equality and ordering. With this
+  // ops class, `WHERE key LIKE 'prefix%'` becomes an index range scan.
+  @@index([key(ops: raw("text_pattern_ops"))], map: "kv_key_pattern_idx")
+  @@map("kv")
+}
+
+model OAuthAccessToken {
+  id             String       @id @default(cuid()) // bearer keyId
+  createdAt      DateTime     @default(now()) /// @zod.custom(z.coerce.date())
+  lastUsed       DateTime? /// @zod.custom(z.coerce.date())
+  hash           String // juava.createHash(plaintext); no hint (never shown)
+  expiresAt      DateTime /// @zod.custom(z.coerce.date())
+  refreshTokenId String // user is inferred via refreshToken.userId
+  refreshToken   UserApiToken @relation(fields: [refreshTokenId], references: [id])
+
+  @@index([expiresAt])
+  @@index([refreshTokenId])
+}
+
+model InvitationToken {
+  id          String @id @default(cuid())
+  workspaceId String
+
+  email     String
+  createdAt DateTime      @default(now()) /// @zod.custom(z.coerce.date())
+  updatedAt DateTime      @default(now()) @updatedAt /// @zod.custom(z.coerce.date())
+  token     String
+  usedBy    String?
+  role      WorkspaceRole @default(owner)
+}
+
+model ConfigurationObject {
+  id          String    @id @default(cuid())
+  deleted     Boolean?  @default(false)
+  createdAt   DateTime  @default(now()) /// @zod.custom(z.coerce.date())
+  updatedAt   DateTime  @default(now()) @updatedAt /// @zod.custom(z.coerce.date())
+  type        String
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  config      Json?
+
+  fromLinks              ConfigurationObjectLink[] @relation("from")
+  toLinks                ConfigurationObjectLink[] @relation("to")
+  ProfileBuilder         ProfileBuilder[]
+  ProfileBuilderFunction ProfileBuilderFunction[]
+
+  @@index(updatedAt(sort: Desc))
+}
+
+model ConfigurationObjectLink {
+  id        String   @id @default(cuid())
+  deleted   Boolean? @default(false)
+  createdAt DateTime @default(now()) /// @zod.custom(z.coerce.date())
+  updatedAt DateTime @default(now()) @updatedAt /// @zod.custom(z.coerce.date())
+  type      String?  @default("push")
+  data      Json?
+
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+
+  fromId String
+  from   ConfigurationObject @relation(fields: [fromId], references: [id], name: "to")
+
+  toId String
+  to   ConfigurationObject @relation(fields: [toId], references: [id], name: "from")
+
+  @@index(updatedAt(sort: Desc))
+  @@index(workspaceId)
+}
+
+model ConnectorPackage {
+  id          String   @id @default(cuid())
+  packageId   String
+  packageType String   @default("airbyte")
+  meta        Json?
+  logoSvg     Bytes?
+  createdAt   DateTime @default(now()) /// @zod.custom(z.coerce.date())
+  updatedAt   DateTime @default(now()) @updatedAt /// @zod.custom(z.coerce.date())
+}
+
+model AuditLog {
+  id             String   @id @default(cuid())
+  timestamp      DateTime @default(now()) /// @zod.custom(z.coerce.date())
+  type           String
+  severity       String?  @default("info")
+  userId         String?
+  workspaceId    String?
+  objectId       String?
+  changes        Json?
+  authType       String?
+  tokenId        String?
+  ip             String?
+  requestHeaders Json?
+
+  @@index(timestamp)
+  @@index(type)
+  @@index([workspaceId, timestamp])
+}
+
+model GlobalProps {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) /// @zod.custom(z.coerce.date())
+  updatedAt DateTime @default(now()) @updatedAt /// @zod.custom(z.coerce.date())
+  name      String
+  value     Json?
+}
+
+model source_spec {
+  package   String
+  version   String
+  specs     Json?
+  timestamp DateTime @default(now()) @db.Timestamptz(3) /// @zod.custom(z.coerce.date())
+  error     String?
+
+  @@id([package, version])
+}
+
+model source_check {
+  package     String
+  version     String
+  key         String   @id
+  status      String
+  description String?
+  timestamp   DateTime @default(now()) @db.Timestamptz(3) /// @zod.custom(z.coerce.date())
+}
+
+model source_catalog {
+  package     String
+  version     String
+  key         String
+  catalog     Json?
+  timestamp   DateTime @default(now()) @db.Timestamptz(3) /// @zod.custom(z.coerce.date())
+  status      String
+  description String?
+
+  @@id([package, version, key])
+}
+
+// Reverse ETL tables share the config database schema and its update workflow.
+// Prisma defines their schema/types; the Node runner uses pg for atomic transactions.
+// Worker coordination belongs to Kubernetes leases and syncctl, not these tables.
+enum reverse_sync_mode {
+  upsert
+  mirror
+}
+
+enum reverse_sync_extraction {
+  cursor
+  full
+}
+
+// One durable lifecycle record per logical run: immutable config/target
+// binding, phase, in-progress provider state, sequence boundaries and the durable artifact head.
+// Status refresh workers reuse the original source_task and append to its logs.
+// source_state holds committed checkpoints; this row also tracks unfinished work.
+model reverse_sync_control {
+  workspace_id         String
+  sync_id              String
+  run_id               String
+  // Monotonic per-sync admission order, including runs still processing remotely.
+  run_order            BigInt                  @default(0)
+  // Initial extraction/uploads are durably submitted; newer runs may now start.
+  detached             Boolean                 @default(false)
+  revision             String
+  target_hash          String
+  phase                String                  @default("new")
+  mode                 reverse_sync_mode
+  extraction           reverse_sync_extraction
+  // Immutable object-storage manifest reference. New runs always insert a pointer;
+  // null identifies legacy per-row state requiring an explicit operator reset.
+  artifact_head        Bytes?
+  base_sequence        BigInt                  @default(0)
+  next_sequence        BigInt                  @default(0)
+  checkpoint_sequence  BigInt                  @default(0)
+  finish_sequence      BigInt?
+  store                Bytes?
+  provider_state       Bytes?
+  finish_result        Bytes?
+  committed_generation String?
+
+  @@id([workspace_id, sync_id, run_id])
+  @@index([sync_id])
+  @@unique([workspace_id, sync_id, run_order])
+}
+
+// Persistent exclusive claim of a destination audience by a mirror sync. Prevents
+// other mirror/upsert syncs from managing that same target across runs/workspaces.
+// This is audience ownership, not a worker lease; it survives completion/failure.
+model reverse_sync_target_owner {
+  target_hash  String @id
+  workspace_id String
+  sync_id      String
+
+  @@unique([workspace_id, sync_id])
+}
+
+// Shared committed checkpoint storage for connector syncs and Reverse ETL.
+// Reverse ETL uses the _REVERSE_ETL_ stream for scoped cursor/sequence, provider
+// store and generation state; detailed unfinished delivery stays in its journal.
+model source_state {
+  sync_id   String
+  stream    String
+  state     Json
+  timestamp DateTime @default(now()) @db.Timestamptz(3) /// @zod.custom(z.coerce.date())
+
+  @@id([sync_id, stream])
+}
+
+// Shared execution-attempt status and heartbeat for syncctl-managed syncs.
+// Reverse ETL uses one task ID per logical run, including status-refresh workers.
+// PENDING means submitted/processing; COMPLETE means accepted, not matched audience size.
+model source_task {
+  sync_id     String
+  task_id     String   @id
+  package     String
+  version     String
+  started_at  DateTime @default(now()) @db.Timestamptz(3) /// @zod.custom(z.coerce.date())
+  updated_at  DateTime @default(now()) @db.Timestamptz(3) /// @zod.custom(z.coerce.date())
+  started_by  Json?
+  status      String
+  description String?
+  metrics     Json?
+  error       String?
+
+  @@index(sync_id)
+  @@index(started_at)
+  // Backs syncctl's CleanupTaskLogs retention sweep
+  // (bulker/sync-sidecar/db/db.go). Lets the per-sync window function be
+  // index-only — without this the hourly DELETE scans the whole table.
+  @@index([sync_id, started_at(sort: Desc)])
+}
+
+// Diagnostic messages attached to a sync/task execution attempt. Reverse ETL writes
+// core-owned lifecycle messages here; delivery receipts and recovery evidence live
+// in durable object-storage batches/receipts instead of being inferred from logs.
+model task_log {
+  id        String   @id @default(uuid()) @db.Uuid
+  level     String
+  logger    String
+  message   String
+  sync_id   String
+  task_id   String
+  timestamp DateTime @default(now()) @db.Timestamptz(3) /// @zod.custom(z.coerce.date())
+
+  @@index(sync_id)
+  @@index(task_id)
+  @@index(timestamp)
+}
+
+model ProfileBuilder {
+  id                             String                   @id @default(cuid())
+  name                           String
+  deleted                        Boolean?                 @default(false)
+  createdAt                      DateTime                 @default(now()) /// @zod.custom(z.coerce.date())
+  updatedAt                      DateTime                 @default(now()) @updatedAt /// @zod.custom(z.coerce.date())
+  workspaceId                    String
+  workspace                      Workspace                @relation(fields: [workspaceId], references: [id])
+  intermediateStorageCredentials Json
+  destinationId                  String?
+  destination                    ConfigurationObject?     @relation(fields: [destinationId], references: [id])
+  connectionOptions              Json?
+  functions                      ProfileBuilderFunction[]
+  version                        Int                      @default(0)
+}
+
+model ProfileBuilderFunction {
+  id               String              @id @default(cuid())
+  createdAt        DateTime            @default(now()) /// @zod.custom(z.coerce.date())
+  updatedAt        DateTime            @default(now()) @updatedAt /// @zod.custom(z.coerce.date())
+  profileBuilderId String
+  profileBuilder   ProfileBuilder      @relation(fields: [profileBuilderId], references: [id])
+  functionId       String
+  function         ConfigurationObject @relation(fields: [functionId], references: [id])
+}
+
+model ProfileBuilderState {
+  profileBuilderId      String
+  profileBuilderVersion Int
+  instanceIndex         Int
+  totalInstances        Int
+  startedAt             DateTime
+  updatedAt             DateTime
+  lastTimestamp         DateTime?
+  processedUsers        Int
+  totalUsers            Int
+  errorUsers            Int
+  speed                 Float
+
+  @@id([profileBuilderId, profileBuilderVersion, totalInstances, instanceIndex])
+}
+
+model ProfileBuilderState2 {
+  profileBuilderId String
+  updatedAt        DateTime
+  fullRebuildInfo  Json?
+  queuesInfo       Json?
+  metrics          Json?
+
+  @@id([profileBuilderId])
+}
+
+model StatusChange {
+  id          BigInt   @id @default(autoincrement()) @db.BigInt
+  workspaceId String
+  actorId     String
+  type        String
+  tableName   String
+  timestamp   DateTime @default(now()) @db.Timestamptz(3) /// @zod.custom(z.coerce.date())
+  status      String
+  startedAt   DateTime
+  counts      Int      @default(0)
+  description String?
+  queueSize   Int      @default(0)
+
+  @@index([actorId, type, tableName])
+  @@index(timestamp)
+  @@index(startedAt)
+}
+
+model NotificationState {
+  workspaceId      String
+  actorId          String
+  type             String
+  tableName        String
+  channelId        String
+  flappingSince    DateTime? @db.Timestamptz(3) /// @zod.custom(z.coerce.date())
+  lastNotification DateTime  @db.Timestamptz(3) /// @zod.custom(z.coerce.date())
+  statusChangeId   BigInt
+  error            String?
+
+  @@id([channelId, actorId, type, tableName])
+}
+
+model Notification {
+  id             String   @id @default(uuid()) @db.Uuid
+  workspaceId    String
+  actorId        String
+  type           String
+  tableName      String
+  channelId      String
+  statusChangeId BigInt
+  timestamp      DateTime @default(now()) @db.Timestamptz(3) /// @zod.custom(z.coerce.date())
+  status         String
+  error          String?
+
+  @@index([actorId, type, tableName])
+  @@index(timestamp)
+}
+
+// OIDC Provider configuration for custom authentication
+model OidcProvider {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) /// @zod.custom(z.coerce.date())
+  updatedAt DateTime @default(now()) @updatedAt /// @zod.custom(z.coerce.date())
+
+  // Display name for the provider
+  name String
+
+  // OIDC configuration
+  issuer       String // OIDC issuer URL (e.g., https://auth.company.com)
+  clientId     String
+  clientSecret String // Should be encrypted in production
+
+  // OIDC endpoints - if autoDiscovery is true, these will be fetched from /.well-known/openid-configuration
+  authorizationEndpoint String? // maps to authorization_endpoint
+  tokenEndpoint         String? // maps to token_endpoint
+  userinfoEndpoint      String? // maps to userinfo_endpoint
+  jwksUri               String? // maps to jwks_uri
+  introspectionEndpoint String? // maps to introspection_endpoint
+
+  // OAuth scopes to request
+  scopes String[] @default(["openid", "profile", "email", "offline_access"])
+
+  // OAuth/OIDC parameters
+  audience String? // The audience parameter for the authorization request (defaults to clientId)
+  prompt   String? // The prompt parameter for the authorization request (e.g., "login", "consent")
+
+  // Claims mapping - which OIDC claims to use for user properties
+  usernameClaim String @default("email") // Claim to use as username
+  emailClaim    String @default("email") // Claim to use for email
+  nameClaim     String @default("name") // Claim to use for display name
+  groupClaim    String @default("groups") // Which claim contains user's groups
+
+  enabled       Boolean @default(true)
+  autoDiscovery Boolean @default(true) // Whether to use OIDC discovery endpoint
+
+  oidcLoginGroups OidcLoginGroup[]
+
+  @@unique([issuer, clientId])
+}
+
+// Links OIDC providers to workspaces with access control rules
+model OidcLoginGroup {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) /// @zod.custom(z.coerce.date())
+  updatedAt DateTime @default(now()) @updatedAt /// @zod.custom(z.coerce.date())
+
+  workspaceId    String
+  workspace      Workspace    @relation(fields: [workspaceId], references: [id])
+  oidcProviderId String
+  oidcProvider   OidcProvider @relation(fields: [oidcProviderId], references: [id])
+
+  // Group-based access control
+  groupValue String? // Required group value (e.g., "engineering", "admins")
+
+  // If true, all authenticated users from this OIDC provider can access the workspace
+  // If false, only users with matching groupValue in their groupClaim can access
+  allowAllUsers Boolean @default(false)
+
+  @@unique([workspaceId, oidcProviderId])
+  @@index(workspaceId)
+  @@index(oidcProviderId)
+}
+
+model reprocessing_jobs {
+  id                   String                 @id @default(cuid()) @db.VarChar(64)
+  config               Json
+  status               String                 @db.VarChar(32)
+  created_at           DateTime               @db.Timestamptz(6)
+  started_at           DateTime?              @db.Timestamptz(6)
+  completed_at         DateTime?              @db.Timestamptz(6)
+  k8s_job_name         String?                @db.VarChar(255)
+  total_files          Int?                   @default(0)
+  total_workers        Int?                   @default(0)
+  error                String?
+  reprocessing_workers reprocessing_workers[]
+
+  @@index([created_at(sort: Desc)])
+}
+
+model reprocessing_workers {
+  job_id          String            @db.VarChar(64)
+  worker_index    Int
+  status          String            @db.VarChar(32)
+  started_at      DateTime?         @db.Timestamptz(6)
+  updated_at      DateTime          @default(now()) @db.Timestamptz(6)
+  completed_at    DateTime?         @db.Timestamptz(6)
+  current_file    String?
+  current_line    BigInt?           @default(0)
+  current_ts      String?
+  assigned_files  Int?              @default(0)
+  processed_files Int?              @default(0)
+  total_lines     BigInt?           @default(0)
+  success_count   BigInt?           @default(0)
+  error_count     BigInt?           @default(0)
+  skipped_count   BigInt?           @default(0)
+  total_bytes     BigInt?           @default(0)
+  processed_bytes BigInt?           @default(0)
+  error           String?
+  job             reprocessing_jobs @relation(fields: [job_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([job_id, worker_index])
+  @@index([job_id])
+  @@index([job_id, status], map: "reprocessing_workers_status_idx")
+}
+
+model FunctionsServer {
+  workspaceId      String
+  class            String // 'free' | 'dedicated' | 'premium'
+  deploymentId     String
+  connections      String[]
+  emptyConnections String[]
+  profileBuilders  String[]
+  createdAt        DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt        DateTime? @db.Timestamptz(3)
+
+  @@id([workspaceId, class])
+}
+
+//model OauthSecrets {
+//  id        String   @id @default(cuid())
+//  createdAt DateTime @default(now()) /// @zod.custom(z.coerce.date())
+//  updatedAt DateTime @default(now()) @updatedAt /// @zod.custom(z.coerce.date())
+//  nangoIntegrationId String
+//  secrets      Json?
+//}
+
+model RateLimitCounter {
+  bucketKey   String
+  windowStart DateTime @db.Timestamptz(3)
+  count       Int      @default(0)
+  expiresAt   DateTime @db.Timestamptz(3)
+
+  @@id([bucketKey, windowStart])
+  @@index([expiresAt])
+}

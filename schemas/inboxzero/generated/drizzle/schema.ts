@@ -126,6 +126,8 @@ export const frequencyEnum = pgEnum('Frequency', ['NEVER', 'DAILY', 'WEEKLY'])
 
 export const mailLayoutEnum = pgEnum('MailLayout', ['LIST', 'SPLIT'])
 
+export const mailSetupStateEnum = pgEnum('MailSetupState', ['PENDING', 'SUGGESTED', 'DONE'])
+
 export const mailSplitFilterKindEnum = pgEnum('MailSplitFilterKind', [
   'UNREAD',
   'STARRED',
@@ -539,6 +541,8 @@ export const emailAccount = pgTable(
     mailLayout: mailLayoutEnum('mailLayout').notNull().default('LIST'),
     mailExpandedPreview: boolean('mailExpandedPreview').notNull().default(false),
     mailBundleInbox: boolean('mailBundleInbox'),
+    mailDefaultSplitId: text('mailDefaultSplitId'),
+    mailSetup: mailSetupStateEnum('mailSetup').notNull().default('PENDING'),
     includeInAllAccounts: boolean('includeInAllAccounts').notNull().default(true),
     meetingBriefingsEnabled: boolean('meetingBriefingsEnabled').notNull().default(false),
     meetingBriefingsMinutesBefore: integer('meetingBriefingsMinutesBefore').notNull().default(240),
@@ -606,6 +610,7 @@ export const mailSplit = pgTable(
     order: integer('order').notNull(),
     matchAll: boolean('matchAll').notNull().default(true),
     bundleInInbox: boolean('bundleInInbox').notNull().default(false),
+    hideFromAll: boolean('hideFromAll').notNull().default(false),
     emailAccountId: text('emailAccountId').notNull(),
   },
   (table) => [

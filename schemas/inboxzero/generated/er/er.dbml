@@ -117,6 +117,12 @@ Enum MailLayout {
   SPLIT
 }
 
+Enum MailSetupState {
+  PENDING
+  SUGGESTED
+  DONE
+}
+
 Enum MailSplitFilterKind {
   UNREAD
   STARRED
@@ -497,6 +503,8 @@ Table EmailAccount {
   mailExpandedPreview Boolean [default: false, not null]
   mailBundleInbox Boolean [note: '''Collapses threads from bundled splits into one row each in the inbox.
 Null until first turned on, which is when default bundles are chosen.''']
+  mailDefaultSplitId String
+  mailSetup MailSetupState [default: 'PENDING', not null]
   includeInAllAccounts Boolean [default: true, not null]
   meetingBriefingsEnabled Boolean [default: false, not null]
   meetingBriefingsMinutesBefore Int [default: 240, not null]
@@ -526,6 +534,7 @@ Table MailSplit {
   matchAll Boolean [default: true, not null, note: '''Whether every filter must match, or any one of them ("Show mail matching
 all/any of these conditions"). A split with no filters is the plain inbox.''']
   bundleInInbox Boolean [default: false, not null, note: 'Shown as one collapsed row in the inbox when the account bundles its inbox.']
+  hideFromAll Boolean [default: false, not null]
   emailAccountId String [not null]
 
   indexes {

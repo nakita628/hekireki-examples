@@ -18,6 +18,8 @@ pub struct Model {
     pub match_all: bool,
     #[sea_orm(column_name = "bundleInInbox", default_value = false)]
     pub bundle_in_inbox: bool,
+    #[sea_orm(column_name = "hideFromAll", default_value = false)]
+    pub hide_from_all: bool,
     #[sea_orm(column_name = "emailAccountId")]
     pub email_account_id: String,
 }

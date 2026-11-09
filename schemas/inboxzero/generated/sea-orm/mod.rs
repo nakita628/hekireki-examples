@@ -72,6 +72,7 @@ pub mod label;
 pub mod logical_operator;
 pub mod loops_email_source;
 pub mod mail_layout;
+pub mod mail_setup_state;
 pub mod mail_split;
 pub mod mail_split_filter;
 pub mod mail_split_filter_kind;

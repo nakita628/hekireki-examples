@@ -2,6 +2,7 @@ use super::cold_email_setting::ColdEmailSetting;
 use super::draft_reply_confidence::DraftReplyConfidence;
 use super::frequency::Frequency;
 use super::mail_layout::MailLayout;
+use super::mail_setup_state::MailSetupState;
 use super::meeting_join_rule::MeetingJoinRule;
 use chrono::SubsecRound;
 use sea_orm::entity::prelude::*;
@@ -91,6 +92,10 @@ pub struct Model {
     pub mail_expanded_preview: bool,
     #[sea_orm(column_name = "mailBundleInbox")]
     pub mail_bundle_inbox: Option<bool>,
+    #[sea_orm(column_name = "mailDefaultSplitId")]
+    pub mail_default_split_id: Option<String>,
+    #[sea_orm(column_name = "mailSetup", default_value = "PENDING")]
+    pub mail_setup: MailSetupState,
     #[sea_orm(column_name = "includeInAllAccounts", default_value = true)]
     pub include_in_all_accounts: bool,
     #[sea_orm(column_name = "meetingBriefingsEnabled", default_value = false)]

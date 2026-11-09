@@ -21,6 +21,8 @@ public partial class MailSplit
 
     public bool BundleInInbox { get; set; } = false;
 
+    public bool HideFromAll { get; set; } = false;
+
     public string EmailAccountId { get; set; } = null!;
 
     public virtual EmailAccount EmailAccount { get; set; } = null!;

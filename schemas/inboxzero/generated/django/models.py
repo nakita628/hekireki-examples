@@ -161,6 +161,12 @@ class MailLayout(models.TextChoices):
     SPLIT = "SPLIT"
 
 
+class MailSetupState(models.TextChoices):
+    PENDING = "PENDING"
+    SUGGESTED = "SUGGESTED"
+    DONE = "DONE"
+
+
 class MailSplitFilterKind(models.TextChoices):
     UNREAD = "UNREAD"
     STARRED = "STARRED"
@@ -558,6 +564,8 @@ class EmailAccount(models.Model):
     mail_layout = models.TextField(choices=MailLayout.choices, db_column="mailLayout", default=MailLayout.LIST)
     mail_expanded_preview = models.BooleanField(db_column="mailExpandedPreview", default=False)
     mail_bundle_inbox = models.BooleanField(null=True, db_column="mailBundleInbox")
+    mail_default_split_id = models.TextField(null=True, db_column="mailDefaultSplitId")
+    mail_setup = models.TextField(choices=MailSetupState.choices, db_column="mailSetup", default=MailSetupState.PENDING)
     include_in_all_accounts = models.BooleanField(db_column="includeInAllAccounts", default=True)
     meeting_briefings_enabled = models.BooleanField(db_column="meetingBriefingsEnabled", default=False)
     meeting_briefings_minutes_before = models.IntegerField(db_column="meetingBriefingsMinutesBefore", default=240)
@@ -597,6 +605,7 @@ class MailSplit(models.Model):
     order = models.IntegerField()
     match_all = models.BooleanField(db_column="matchAll", default=True)
     bundle_in_inbox = models.BooleanField(db_column="bundleInInbox", default=False)
+    hide_from_all = models.BooleanField(db_column="hideFromAll", default=False)
     email_account = models.ForeignKey("EmailAccount", on_delete=models.CASCADE, related_name="mail_splits", db_column="emailAccountId", db_index=False)
     objects = AutoNowQuerySet.as_manager()
 

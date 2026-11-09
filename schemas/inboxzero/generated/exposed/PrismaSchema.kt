@@ -21,6 +21,7 @@ object PrismaSchema {
             "CREATE TYPE \"MessagingMessageStatus\" AS ENUM ('SENT', 'DRAFT_SENT', 'DRAFT_EDITED', 'DISMISSED', 'EXPIRED', 'FAILED')",
             "CREATE TYPE \"Frequency\" AS ENUM ('NEVER', 'DAILY', 'WEEKLY')",
             "CREATE TYPE \"MailLayout\" AS ENUM ('LIST', 'SPLIT')",
+            "CREATE TYPE \"MailSetupState\" AS ENUM ('PENDING', 'SUGGESTED', 'DONE')",
             "CREATE TYPE \"MailSplitFilterKind\" AS ENUM ('UNREAD', 'STARRED', 'LABEL', 'CATEGORY', 'FROM', 'OLDER_THAN')",
             "CREATE TYPE \"DraftReplyConfidence\" AS ENUM ('ALL_EMAILS', 'STANDARD', 'HIGH_CONFIDENCE')",
             "CREATE TYPE \"DraftEmailStatus\" AS ENUM ('PENDING', 'LIKELY_SENT', 'REPLIED_WITHOUT_DRAFT', 'CLEANED_UP_UNUSED', 'MISSING_FROM_PROVIDER', 'USER_EDITED', 'CLEANUP_SKIPPED')",

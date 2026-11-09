@@ -1,6 +1,6 @@
 // InboxZero: Inbox Zero email assistant: users, email accounts, threads, rules, drafts and digests.
 //
-// Imported from https://github.com/elie222/inbox-zero/blob/831d26b8e494634292d8ba606bf731924e633dbf/apps/web/prisma/schema.prisma
+// Imported from https://github.com/elie222/inbox-zero/blob/787e696aa43d3c69936b4e0f487be26da9f0fd18/apps/web/prisma/schema.prisma
 // (AGPL-3.0-with-additional-terms license) by tools/import/import-schema.mjs, which dropped the original
 // generator blocks and the datasource's connection URLs and added the hekireki generators below.
 // The models, enums and `///` comments are the project's own, as they are at that commit.
@@ -267,6 +267,8 @@ model EmailAccount {
   /// Collapses threads from bundled splits into one row each in the inbox.
   /// Null until first turned on, which is when default bundles are chosen.
   mailBundleInbox     Boolean?
+  mailDefaultSplitId  String?
+  mailSetup           MailSetupState @default(PENDING)
 
   includeInAllAccounts Boolean @default(true)
 
@@ -364,6 +366,7 @@ model MailSplit {
   matchAll  Boolean  @default(true)
   /// Shown as one collapsed row in the inbox when the account bundles its inbox.
   bundleInInbox Boolean @default(false)
+  hideFromAll   Boolean @default(false)
 
   emailAccountId String
   emailAccount   EmailAccount      @relation(fields: [emailAccountId], references: [id], onDelete: Cascade)
@@ -2298,6 +2301,12 @@ enum Frequency {
 enum MailLayout {
   LIST
   SPLIT
+}
+
+enum MailSetupState {
+  PENDING
+  SUGGESTED
+  DONE
 }
 
 enum MailSplitFilterKind {
