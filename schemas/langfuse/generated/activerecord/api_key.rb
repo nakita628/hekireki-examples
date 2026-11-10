@@ -4,7 +4,7 @@ class ApiKey < ApplicationRecord
   attribute :id, default: -> { Cuid.generate }
   attribute :is_in_app_agent_key, default: false
 
-  enum :scope, { organization: "ORGANIZATION", project: "PROJECT" }, default: :project, validate: true
+  enum :scope, { organization: "ORGANIZATION", project: "PROJECT", user: "USER" }, default: :project, validate: true
 
   validates :public_key, presence: true, uniqueness: true
   validates :hashed_secret_key, presence: true, uniqueness: true

@@ -11,4 +11,7 @@ public enum ApiKeyScope
 
     [PgName("PROJECT")]
     Project,
+
+    [PgName("USER")]
+    User,
 }

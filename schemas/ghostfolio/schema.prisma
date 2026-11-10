@@ -1,6 +1,6 @@
 // Ghostfolio: Ghostfolio wealth management: users, accounts, orders, symbol profiles and market data.
 //
-// Imported from https://github.com/ghostfolio/ghostfolio/blob/2823510bf4930c974a7681ba8eb45584c190e775/prisma/schema.prisma
+// Imported from https://github.com/ghostfolio/ghostfolio/blob/7bf71c641a44852e00954f09747955267853a416/prisma/schema.prisma
 // (AGPL-3.0 license) by tools/import/import-schema.mjs, which dropped the original
 // generator blocks and the datasource's connection URLs and added the hekireki generators below.
 // The models, enums and `///` comments are the project's own, as they are at that commit.

@@ -7,7 +7,7 @@ object PrismaSchema {
     val schemas: List<Schema> = emptyList()
     val enumTypes: List<String> =
         listOf(
-            "CREATE TYPE \"ApiKeyScope\" AS ENUM ('ORGANIZATION', 'PROJECT')",
+            "CREATE TYPE \"ApiKeyScope\" AS ENUM ('ORGANIZATION', 'PROJECT', 'USER')",
             "CREATE TYPE \"SystemRole\" AS ENUM ('OWNER', 'ADMIN', 'MEMBER', 'VIEWER', 'NONE', 'LEGACY_PROJECT_API_KEY', 'LEGACY_ORGANIZATION_API_KEY', 'SCORES_INGEST', 'INGEST', 'AI_GATEWAY')",
             "CREATE TYPE \"GatewayIngestionMode\" AS ENUM ('none', 'usage', 'full')",
             "CREATE TYPE \"GatewayProvider\" AS ENUM ('openai', 'anthropic', 'bedrock')",

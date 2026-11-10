@@ -36,7 +36,7 @@ const utcNow = (() => {
   }
 })()
 
-export const apiKeyScopeEnum = pgEnum('ApiKeyScope', ['ORGANIZATION', 'PROJECT'])
+export const apiKeyScopeEnum = pgEnum('ApiKeyScope', ['ORGANIZATION', 'PROJECT', 'USER'])
 
 export const systemRoleEnum = pgEnum('SystemRole', [
   'OWNER',

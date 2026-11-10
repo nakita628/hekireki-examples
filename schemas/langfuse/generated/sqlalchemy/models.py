@@ -277,7 +277,7 @@ class ApiKey(Base):
     is_in_app_agent_key: Mapped[bool] = mapped_column(default=False, server_default=text("false"))
     project_id: Mapped[Optional[str]] = mapped_column(ForeignKey("projects.id", ondelete="CASCADE", onupdate="CASCADE", name="api_keys_project_id_fkey"))
     org_id: Mapped[Optional[str]] = mapped_column("organization_id", ForeignKey("organizations.id", ondelete="CASCADE", onupdate="CASCADE", name="api_keys_organization_id_fkey"))
-    scope: Mapped[str] = mapped_column(Enum("ORGANIZATION", "PROJECT", name="ApiKeyScope"), default="PROJECT", server_default=text("'PROJECT'"))
+    scope: Mapped[str] = mapped_column(Enum("ORGANIZATION", "PROJECT", "USER", name="ApiKeyScope"), default="PROJECT", server_default=text("'PROJECT'"))
     created_by_user_id: Mapped[Optional[str]] = mapped_column(ForeignKey("users.id", ondelete="SET NULL", onupdate="CASCADE", name="api_keys_created_by_user_id_fkey"))
     user_id: Mapped[Optional[str]] = mapped_column(ForeignKey("users.id", ondelete="CASCADE", onupdate="CASCADE", name="api_keys_user_id_fkey"))
     created_by_api_key_id: Mapped[Optional[str]] = mapped_column(ForeignKey("api_keys.id", ondelete="SET NULL", onupdate="CASCADE", name="api_keys_created_by_api_key_id_fkey"))

@@ -5,4 +5,5 @@ enum class ApiKeyScope(
 ) {
     ORGANIZATION("ORGANIZATION"),
     PROJECT("PROJECT"),
+    USER("USER"),
 }

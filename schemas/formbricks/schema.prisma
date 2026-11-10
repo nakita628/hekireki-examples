@@ -1,6 +1,6 @@
 // Formbricks: Formbricks surveys: organizations, environments, surveys, responses and contacts.
 //
-// Imported from https://github.com/formbricks/formbricks/tree/94ae9705fc8e6e355d90c743460110ae829c0378/packages/database/schema/
+// Imported from https://github.com/formbricks/formbricks/tree/2f76787a887de9f46db1254134ccc93a1acd57be/packages/database/schema/
 // (AGPL-3.0 license) by tools/import/import-schema.mjs, which dropped the original
 // generator blocks and the datasource's connection URLs and added the hekireki generators below.
 // The project keeps its schema in 4 files (prismaSchemaFolder), joined here in name order.

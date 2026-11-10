@@ -62,6 +62,7 @@ def blob_storage_integration_export_field_groups_default() -> list[str]:
 class ApiKeyScope(models.TextChoices):
     ORGANIZATION = "ORGANIZATION"
     PROJECT = "PROJECT"
+    USER = "USER"
 
 
 class SystemRole(models.TextChoices):

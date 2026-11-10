@@ -26,7 +26,7 @@
   "langfuse": {
     "repo": "langfuse/langfuse",
     "path": "packages/shared/prisma/schema.prisma",
-    "commit": "762fcd7364352daf57b98e18babe0891c5c04962",
+    "commit": "a479bb6eb76fa284b27cdbb45cd304d83cd98b82",
     "license": "MIT",
     "app": "Langfuse",
     "description": "Langfuse LLM observability: organizations, projects, traces, prompts, datasets and evaluations."
@@ -50,7 +50,7 @@
   "ghostfolio": {
     "repo": "ghostfolio/ghostfolio",
     "path": "prisma/schema.prisma",
-    "commit": "2823510bf4930c974a7681ba8eb45584c190e775",
+    "commit": "7bf71c641a44852e00954f09747955267853a416",
     "license": "AGPL-3.0",
     "app": "Ghostfolio",
     "description": "Ghostfolio wealth management: users, accounts, orders, symbol profiles and market data."
@@ -82,7 +82,7 @@
   "rallly": {
     "repo": "lukevella/rallly",
     "path": "packages/database/prisma/",
-    "commit": "6d0f71c7e9b5721fca6e07ca41b0a450f986de6c",
+    "commit": "094054fa36f89dff6f7ab9d328ef4e6119cf51b3",
     "license": "AGPL-3.0",
     "app": "Rallly",
     "description": "Rallly scheduling polls: users, spaces, polls, options, participants and votes."
@@ -98,7 +98,7 @@
   "teable": {
     "repo": "teableio/teable",
     "path": "packages/db-main-prisma/prisma/postgres/schema.prisma",
-    "commit": "f8be01fadb86790d3d3a878bedd10cf949f9a8f8",
+    "commit": "10a97939829d8b3ea99d618a38bf760e0787a3fa",
     "license": "MIT",
     "app": "Teable",
     "description": "Teable no-code database: spaces, bases, tables, fields, views and records."
@@ -106,7 +106,7 @@
   "postiz": {
     "repo": "gitroomhq/postiz-app",
     "path": "libraries/nestjs-libraries/src/database/prisma/schema.prisma",
-    "commit": "4b7b9901abfcd81c88dc3534fb0a9540af8e0bd3",
+    "commit": "e0991b2f74eb22a6b0e1c686abd948896fac8717",
     "license": "AGPL-3.0",
     "app": "Postiz",
     "description": "Postiz social media scheduling: organizations, integrations, posts, comments and media."
@@ -122,7 +122,7 @@
   "formbricks": {
     "repo": "formbricks/formbricks",
     "path": "packages/database/schema/",
-    "commit": "94ae9705fc8e6e355d90c743460110ae829c0378",
+    "commit": "2f76787a887de9f46db1254134ccc93a1acd57be",
     "license": "AGPL-3.0",
     "app": "Formbricks",
     "description": "Formbricks surveys: organizations, environments, surveys, responses and contacts.",
@@ -141,7 +141,7 @@
   "anythingllm": {
     "repo": "Mintplex-Labs/anything-llm",
     "path": "server/prisma/schema.prisma",
-    "commit": "308b27662b2f6fd4947791d61c797945c609fcbc",
+    "commit": "ace9dad3348b4d8a237b09978517ced2bd18e198",
     "license": "MIT",
     "app": "AnythingLLM",
     "description": "AnythingLLM local AI workspace: users, workspaces, documents, chats, embeddings and agents, on SQLite."
@@ -149,7 +149,7 @@
   "inboxzero": {
     "repo": "elie222/inbox-zero",
     "path": "apps/web/prisma/schema.prisma",
-    "commit": "787e696aa43d3c69936b4e0f487be26da9f0fd18",
+    "commit": "e040fb7eb8778dc85112ad4cd087f88dac5b8640",
     "license": "AGPL-3.0-with-additional-terms",
     "app": "InboxZero",
     "description": "Inbox Zero email assistant: users, email accounts, threads, rules, drafts and digests.",
@@ -192,7 +192,7 @@
   "plunk": {
     "repo": "useplunk/plunk",
     "path": "packages/db/prisma/schema.prisma",
-    "commit": "2bda149c13f81c3c291e216dcb10d4161bb9bd35",
+    "commit": "37e5f818e8087fc5947ecdc399b7f59efed0b342",
     "license": "AGPL-3.0",
     "app": "Plunk",
     "description": "Plunk email platform: projects, contacts, templates, campaigns, workflows and emails."
@@ -204,5 +204,13 @@
     "license": "MIT",
     "app": "Jitsu",
     "description": "Jitsu event collection: workspaces, connections, sources, destinations and syncs."
+  },
+  "opensaas": {
+    "repo": "wasp-lang/open-saas",
+    "path": "template/app/schema.prisma",
+    "commit": "5f5dd77403b97952f6b3c3ff2131d1e9eea03f1f",
+    "license": "MIT",
+    "app": "OpenSaas",
+    "description": "Wasp Open SaaS starter: users, subscriptions, tasks, files, analytics and contact messages."
   }
 }

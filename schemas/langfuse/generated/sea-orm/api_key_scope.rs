@@ -8,4 +8,6 @@ pub enum ApiKeyScope {
     Organization,
     #[sea_orm(string_value = "PROJECT")]
     Project,
+    #[sea_orm(string_value = "USER")]
+    User,
 }

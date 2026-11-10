@@ -1,6 +1,7 @@
 Enum ApiKeyScope {
   ORGANIZATION
   PROJECT
+  USER
 }
 
 Enum SystemRole {

@@ -7,7 +7,7 @@ export type Generated<T> =
 
 export type Timestamp = ColumnType<Date, Date | string, Date | string>
 
-export type ApiKeyScope = 'ORGANIZATION' | 'PROJECT'
+export type ApiKeyScope = 'ORGANIZATION' | 'PROJECT' | 'USER'
 
 export type SystemRole =
   | 'OWNER'

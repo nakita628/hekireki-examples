@@ -1,0 +1,95 @@
+Table User {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  email String [unique]
+  username String [unique]
+  isAdmin Boolean [default: false, not null]
+  paymentProcessorUserId String [unique]
+  subscriptionStatus String
+  subscriptionPlan String
+  datePaid DateTime
+  credits Int [default: 3, not null]
+}
+
+Table ProcessedWebhookEvent {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  paymentProcessorEventId String [unique, not null]
+  eventType String [not null]
+}
+
+Table GptResponse {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  userId String [not null]
+  content String [not null]
+}
+
+Table Task {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  userId String [not null]
+  description String [not null]
+  time String [default: '1', not null]
+  isDone Boolean [default: false, not null]
+}
+
+Table File {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  userId String [not null]
+  name String [not null]
+  type String [not null]
+  s3Key String [not null]
+}
+
+Table DailyStats {
+  id Int [pk, increment]
+  date DateTime [default: `now()`, unique, not null]
+  totalViews Int [default: 0, not null]
+  prevDayViewsChangePercent String [default: '0', not null]
+  userCount Int [default: 0, not null]
+  paidUserCount Int [default: 0, not null]
+  userDelta Int [default: 0, not null]
+  paidUserDelta Int [default: 0, not null]
+  totalRevenue Float [default: 0, not null]
+  totalProfit Float [default: 0, not null]
+}
+
+Table PageViewSource {
+  name String [not null]
+  date DateTime [default: `now()`, not null]
+  dailyStatsId Int
+  visitors Int [not null]
+
+  indexes {
+    (date, name) [pk]
+  }
+}
+
+Table Logs {
+  id Int [pk, increment]
+  createdAt DateTime [default: `now()`, not null]
+  message String [not null]
+  level String [not null]
+}
+
+Table ContactFormMessage {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  userId String [not null]
+  content String [not null]
+  isRead Boolean [default: false, not null]
+  repliedAt DateTime
+}
+
+Ref GptResponse_userId_fk: GptResponse.userId > User.id
+
+Ref Task_userId_fk: Task.userId > User.id
+
+Ref File_userId_fk: File.userId > User.id
+
+Ref PageViewSource_dailyStatsId_fk: PageViewSource.dailyStatsId > DailyStats.id
+
+Ref ContactFormMessage_userId_fk: ContactFormMessage.userId > User.id

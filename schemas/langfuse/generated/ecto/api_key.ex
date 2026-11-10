@@ -36,7 +36,7 @@ defmodule Langfuse.ApiKey do
     field(:last_used_at, Langfuse.PrismaDateTime)
     field(:expires_at, Langfuse.PrismaDateTime)
     field(:is_in_app_agent_key, :boolean, default: false)
-    field(:scope, Ecto.Enum, values: [:ORGANIZATION, :PROJECT], default: :PROJECT)
+    field(:scope, Ecto.Enum, values: [:ORGANIZATION, :PROJECT, :USER], default: :PROJECT)
     field(:org_id, :string, source: :organization_id)
     belongs_to(:project, Langfuse.Project, foreign_key: :project_id, type: :string)
     belongs_to(:organization, Langfuse.Organization, foreign_key: :org_id, define_field: false, type: :string)

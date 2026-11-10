@@ -29,6 +29,7 @@ SCHEMAS = {
     "workoutcool": "postgresql",
     "plunk": "postgresql",
     "jitsu": "postgresql",
+    "opensaas": "postgresql",
 }
 
 # The generators left out of a schema (`skip` in sources.json): the generator refuses it.
