@@ -28,6 +28,8 @@ public partial class LinkwardenContext : DbContext
 
     public virtual DbSet<VerificationToken> VerificationTokens { get; set; }
 
+    public virtual DbSet<EmailVerificationCode> EmailVerificationCodes { get; set; }
+
     public virtual DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
 
     public virtual DbSet<Collection> Collections { get; set; }
@@ -223,10 +225,26 @@ public partial class LinkwardenContext : DbContext
                 .ValueGeneratedNever()
                 .HasDefaultValue(false)
                 .HasColumnName("acceptPromotionalEmails");
+            entity.Property(e => e.ShareUsageAnalytics)
+                .ValueGeneratedNever()
+                .HasDefaultValue(true)
+                .HasColumnName("shareUsageAnalytics");
             entity.Property(e => e.TrialEndEmailSent)
                 .ValueGeneratedNever()
                 .HasDefaultValue(false)
                 .HasColumnName("trialEndEmailSent");
+            entity.Property(e => e.SessionVersion)
+                .ValueGeneratedNever()
+                .HasDefaultValue(0)
+                .HasColumnName("sessionVersion");
+            entity.Property(e => e.PasswordRetries)
+                .ValueGeneratedNever()
+                .HasDefaultValue(0)
+                .HasColumnName("passwordRetries");
+            entity.Property(e => e.PasswordRetryAt)
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("passwordRetryAt");
             entity.Property(e => e.CreatedAt)
                 .HasValueGenerator<UtcNowGenerator>()
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
@@ -256,6 +274,36 @@ public partial class LinkwardenContext : DbContext
 
             entity.Property(e => e.Identifier).HasColumnName("identifier");
             entity.Property(e => e.Token).HasColumnName("token");
+            entity.Property(e => e.Expires)
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("expires");
+            entity.Property(e => e.CreatedAt)
+                .HasValueGenerator<UtcNowGenerator>()
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("createdAt");
+            entity.Property(e => e.UpdatedAt)
+                .HasValueGenerator<UtcNowGenerator>()
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("updatedAt");
+        });
+
+        modelBuilder.Entity<EmailVerificationCode>(entity =>
+        {
+            entity.HasKey(e => e.Identifier).HasName("EmailVerificationCode_identifier_key");
+
+            entity.ToTable("EmailVerificationCode");
+
+            entity.Property(e => e.Identifier).HasColumnName("identifier");
+            entity.Property(e => e.Code).HasColumnName("code");
+            entity.Property(e => e.Attempts)
+                .ValueGeneratedNever()
+                .HasDefaultValue(0)
+                .HasColumnName("attempts");
             entity.Property(e => e.Expires)
                 .HasConversion<UtcClockConverter>()
                 .HasColumnType("timestamp(3) without time zone")
@@ -403,6 +451,8 @@ public partial class LinkwardenContext : DbContext
 
             entity.HasIndex(e => e.CollectionId, "Link_collectionId_idx");
 
+            entity.HasIndex(e => new { e.CollectionId, e.CollectionOrder, e.Id }, "Link_collectionId_collectionOrder_id_idx");
+
             entity.Property(e => e.Id)
                 .UseSerialColumn()
                 .HasColumnName("id");
@@ -420,6 +470,7 @@ public partial class LinkwardenContext : DbContext
                 .HasColumnName("description");
             entity.Property(e => e.CreatedById).HasColumnName("createdById");
             entity.Property(e => e.CollectionId).HasColumnName("collectionId");
+            entity.Property(e => e.CollectionOrder).HasColumnName("collectionOrder");
             entity.Property(e => e.Icon).HasColumnName("icon");
             entity.Property(e => e.IconWeight).HasColumnName("iconWeight");
             entity.Property(e => e.Color).HasColumnName("color");
@@ -829,6 +880,15 @@ public partial class LinkwardenContext : DbContext
         }
 
         foreach (var entry in ChangeTracker.Entries<VerificationToken>())
+        {
+            if ((entry.State == EntityState.Added && entry.Entity.UpdatedAt == default)
+                || (entry.State == EntityState.Modified && !entry.Property(e => e.UpdatedAt).IsModified))
+            {
+                entry.Entity.UpdatedAt = now;
+            }
+        }
+
+        foreach (var entry in ChangeTracker.Entries<EmailVerificationCode>())
         {
             if ((entry.State == EntityState.Added && entry.Entity.UpdatedAt == default)
                 || (entry.State == EntityState.Modified && !entry.Property(e => e.UpdatedAt).IsModified))

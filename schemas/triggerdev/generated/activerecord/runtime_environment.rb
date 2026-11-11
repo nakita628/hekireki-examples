@@ -15,7 +15,7 @@ class RuntimeEnvironment < ApplicationRecord
 
   enum :type, { production: "PRODUCTION", staging: "STAGING", development: "DEVELOPMENT", preview: "PREVIEW" },
        default: :development, validate: true
-  enum :pauseSource, { billing_limit: "BILLING_LIMIT" }, validate: { allow_nil: true }
+  enum :pauseSource, { billing_limit: "BILLING_LIMIT", admin_ban: "ADMIN_BAN" }, validate: { allow_nil: true }
 
   validates :slug, presence: true,
                    uniqueness: { scope: [ :projectId, :orgMemberId ], conditions: -> { where.not(orgMemberId: nil) } }
@@ -30,6 +30,8 @@ class RuntimeEnvironment < ApplicationRecord
   belongs_to :org_member, foreign_key: "orgMemberId", optional: true, inverse_of: :environments
   belongs_to :current_session, class_name: "RuntimeEnvironmentSession", foreign_key: "currentSessionId", optional: true,
                                inverse_of: :current_environments
+  has_one :trusted_deploy_grant, class_name: "TrustedDeployEnvironment", foreign_key: "runtimeEnvironmentId",
+                                 inverse_of: :runtime_environment, dependent: :destroy
   has_many :child_environments, class_name: "RuntimeEnvironment", foreign_key: "parentEnvironmentId",
                                 inverse_of: :parent_environment, dependent: :destroy
   has_many :background_workers, foreign_key: "runtimeEnvironmentId", inverse_of: :runtime_environment,

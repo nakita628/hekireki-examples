@@ -67,4 +67,6 @@ public partial class Alert
     public int OccurrencesSinceRaise { get; set; } = 0;
 
     public long OccurrencesTotal { get; set; } = 0L;
+
+    public string? GroupId { get; set; }
 }

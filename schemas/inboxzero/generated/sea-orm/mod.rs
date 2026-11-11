@@ -21,6 +21,7 @@ pub mod category;
 pub mod category_filter_type;
 pub mod category_to_rule;
 pub mod chat;
+pub mod chat_action_total;
 pub mod chat_compaction;
 pub mod chat_memory;
 pub mod chat_message;

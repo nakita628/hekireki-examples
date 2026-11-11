@@ -185,18 +185,22 @@ func (*AuthorizationCode) BeforeUpdate(tx *gorm.DB) error {
 }
 
 type PersonalAccessToken struct {
-	ID                 string         `gorm:"column:id;primaryKey" json:"id"`
-	Name               string         `gorm:"column:name;not null" json:"name"`
-	EncryptedToken     datatypes.JSON `gorm:"column:encryptedToken;not null" json:"encryptedToken"`
-	ObfuscatedToken    string         `gorm:"column:obfuscatedToken;not null" json:"obfuscatedToken"`
-	HashedToken        string         `gorm:"column:hashedToken;uniqueIndex;not null" json:"hashedToken"`
-	UserID             string         `gorm:"column:userId;index:PersonalAccessToken_userId_idx;not null" json:"userId"`
-	RevokedAt          *DateTime      `gorm:"column:revokedAt" json:"revokedAt"`
-	LastAccessedAt     *DateTime      `gorm:"column:lastAccessedAt" json:"lastAccessedAt"`
-	CreatedAt          DateTime       `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
-	UpdatedAt          DateTime       `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	User               *User
-	AuthorizationCodes []AuthorizationCode `gorm:"foreignKey:PersonalAccessTokenID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	ID                   string         `gorm:"column:id;primaryKey" json:"id"`
+	Name                 string         `gorm:"column:name;not null" json:"name"`
+	EncryptedToken       datatypes.JSON `gorm:"column:encryptedToken;not null" json:"encryptedToken"`
+	ObfuscatedToken      string         `gorm:"column:obfuscatedToken;not null" json:"obfuscatedToken"`
+	HashedToken          string         `gorm:"column:hashedToken;uniqueIndex;not null" json:"hashedToken"`
+	UserID               string         `gorm:"column:userId;index:PersonalAccessToken_userId_idx;not null" json:"userId"`
+	RevokedAt            *DateTime      `gorm:"column:revokedAt" json:"revokedAt"`
+	LastAccessedAt       *DateTime      `gorm:"column:lastAccessedAt" json:"lastAccessedAt"`
+	ExpiresAt            *DateTime      `gorm:"column:expiresAt" json:"expiresAt"`
+	IdleTimeoutSeconds   *int           `gorm:"column:idleTimeoutSeconds" json:"idleTimeoutSeconds"`
+	ExpiryReminderSentAt *DateTime      `gorm:"column:expiryReminderSentAt" json:"expiryReminderSentAt"`
+	ExpiredNoticeSentAt  *DateTime      `gorm:"column:expiredNoticeSentAt" json:"expiredNoticeSentAt"`
+	CreatedAt            DateTime       `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
+	UpdatedAt            DateTime       `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
+	User                 *User
+	AuthorizationCodes   []AuthorizationCode `gorm:"foreignKey:PersonalAccessTokenID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 }
 
 func (PersonalAccessToken) TableName() string {
@@ -484,6 +488,7 @@ type RuntimeEnvironment struct {
 	TaskIdentifiers                     []TaskIdentifier            `gorm:"foreignKey:RuntimeEnvironmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 	APIKeys                             []APIKey                    `gorm:"foreignKey:RuntimeEnvironmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 	RevokedAPIKeys                      []RevokedAPIKey             `gorm:"foreignKey:RuntimeEnvironmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	TrustedDeployGrant                  *TrustedDeployEnvironment   `gorm:"foreignKey:RuntimeEnvironmentID;constraint:OnDelete:CASCADE"`
 }
 
 func (RuntimeEnvironment) TableName() string {
@@ -517,11 +522,14 @@ type APIKey struct {
 	Name                 string    `gorm:"column:name;not null" json:"name"`
 	KeyHash              string    `gorm:"column:key_hash;uniqueIndex;not null" json:"key_hash"`
 	LastFour             string    `gorm:"column:last_four;not null" json:"last_four"`
+	Description          *string   `gorm:"column:description" json:"description"`
 	RuntimeEnvironmentID string    `gorm:"column:runtime_environment_id;index:api_keys_runtime_environment_id_revoked_at_created_at_idx;not null" json:"runtime_environment_id"`
 	CreatedByUserID      *string   `gorm:"column:created_by_user_id" json:"created_by_user_id"`
 	PresetID             *string   `gorm:"column:preset_id" json:"preset_id"`
 	Scopes               []string  `gorm:"column:scopes;serializer:json;not null" json:"scopes"`
+	AllowedIPRanges      []string  `gorm:"column:allowed_ip_ranges;serializer:json;not null" json:"allowed_ip_ranges"`
 	LastUsedAt           *DateTime `gorm:"column:last_used_at" json:"last_used_at"`
+	LastUsedIP           *string   `gorm:"column:last_used_ip" json:"last_used_ip"`
 	RevokedAt            *DateTime `gorm:"column:revoked_at;index:api_keys_runtime_environment_id_revoked_at_created_at_idx" json:"revoked_at"`
 	ExpiresAt            *DateTime `gorm:"column:expires_at" json:"expires_at"`
 	UpdatedAt            DateTime  `gorm:"column:updated_at;autoUpdateTime:false;not null" json:"updated_at"`
@@ -633,6 +641,7 @@ type Project struct {
 	ErrorGroupStates               []ErrorGroupState                `gorm:"foreignKey:ProjectID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 	TaskIdentifiers                []TaskIdentifier                 `gorm:"foreignKey:ProjectID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 	ConnectedGithubRepository      *ConnectedGithubRepository       `gorm:"foreignKey:ProjectID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	TrustedDeployRepository        *TrustedDeployRepository         `gorm:"foreignKey:ProjectID;constraint:OnDelete:CASCADE"`
 }
 
 func (Project) TableName() string {
@@ -1165,6 +1174,7 @@ type Alert struct {
 	LastOccurrenceAt           *DateTime      `gorm:"column:lastOccurrenceAt;type:timestamptz(6)" json:"lastOccurrenceAt"`
 	OccurrencesSinceRaise      int            `gorm:"column:occurrencesSinceRaise;default:0;not null" json:"occurrencesSinceRaise"`
 	OccurrencesTotal           int64          `gorm:"column:occurrencesTotal;default:0;not null" json:"occurrencesTotal"`
+	GroupID                    *string        `gorm:"column:groupId;index:Alert_groupId_idx" json:"groupId"`
 }
 
 func (Alert) TableName() string {
@@ -1912,11 +1922,13 @@ func (*WorkerInstanceGroup) BeforeUpdate(tx *gorm.DB) error {
 }
 
 type WorkerGroupToken struct {
-	ID          string               `gorm:"column:id;primaryKey" json:"id"`
-	TokenHash   string               `gorm:"column:tokenHash;uniqueIndex;not null" json:"tokenHash"`
-	CreatedAt   DateTime             `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
-	UpdatedAt   DateTime             `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
-	WorkerGroup *WorkerInstanceGroup `gorm:"foreignKey:TokenID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	ID                      string               `gorm:"column:id;primaryKey" json:"id"`
+	TokenHash               string               `gorm:"column:tokenHash;uniqueIndex;not null" json:"tokenHash"`
+	PreviousTokenHash       *string              `gorm:"column:previousTokenHash;uniqueIndex" json:"previousTokenHash"`
+	PreviousTokenValidUntil *DateTime            `gorm:"column:previousTokenValidUntil" json:"previousTokenValidUntil"`
+	CreatedAt               DateTime             `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
+	UpdatedAt               DateTime             `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
+	WorkerGroup             *WorkerInstanceGroup `gorm:"foreignKey:TokenID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 }
 
 func (WorkerGroupToken) TableName() string {
@@ -3238,6 +3250,86 @@ func (m *GithubRepository) BeforeCreate(tx *gorm.DB) error {
 }
 
 func (*GithubRepository) BeforeUpdate(tx *gorm.DB) error {
+	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
+	if !tx.Statement.Changed("UpdatedAt") {
+		tx.Statement.SetColumn("UpdatedAt", DateTime{Time: now})
+	}
+	return nil
+}
+
+type TrustedDeployRepository struct {
+	ID                string   `gorm:"column:id;primaryKey" json:"id"`
+	ProjectID         string   `gorm:"column:projectId;uniqueIndex;not null" json:"projectId"`
+	Issuer            *string  `gorm:"column:issuer;default:'https://token.actions.githubusercontent.com';not null" json:"issuer"`
+	RepositoryOwner   string   `gorm:"column:repositoryOwner;not null" json:"repositoryOwner"`
+	RepositoryName    string   `gorm:"column:repositoryName;not null" json:"repositoryName"`
+	RepositoryID      *string  `gorm:"column:repositoryId" json:"repositoryId"`
+	RepositoryOwnerID *string  `gorm:"column:repositoryOwnerId" json:"repositoryOwnerId"`
+	CreatedAt         DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
+	UpdatedAt         DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
+	Project           *Project
+	Environments      []TrustedDeployEnvironment `gorm:"foreignKey:TrustedDeployRepositoryID;constraint:OnDelete:CASCADE"`
+}
+
+func (TrustedDeployRepository) TableName() string {
+	return "TrustedDeployRepository"
+}
+
+func (m *TrustedDeployRepository) BeforeCreate(tx *gorm.DB) error {
+	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
+	if m.ID == "" {
+		m.ID = cuid.New()
+	}
+	if m.CreatedAt.IsZero() {
+		m.CreatedAt = DateTime{Time: now}
+	}
+	if m.UpdatedAt.IsZero() {
+		m.UpdatedAt = DateTime{Time: now}
+	}
+	return nil
+}
+
+func (*TrustedDeployRepository) BeforeUpdate(tx *gorm.DB) error {
+	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
+	if !tx.Statement.Changed("UpdatedAt") {
+		tx.Statement.SetColumn("UpdatedAt", DateTime{Time: now})
+	}
+	return nil
+}
+
+type TrustedDeployEnvironment struct {
+	ID                        string         `gorm:"column:id;primaryKey" json:"id"`
+	TrustedDeployRepositoryID string         `gorm:"column:trustedDeployRepositoryId;index:TrustedDeployEnvironment_trustedDeployRepositoryId_idx;not null" json:"trustedDeployRepositoryId"`
+	RuntimeEnvironmentID      string         `gorm:"column:runtimeEnvironmentId;uniqueIndex;not null" json:"runtimeEnvironmentId"`
+	Enabled                   bool           `gorm:"column:enabled;default:false;not null" json:"enabled"`
+	Scope                     string         `gorm:"column:scope;not null" json:"scope"`
+	ScopeValue                *string        `gorm:"column:scopeValue" json:"scopeValue"`
+	AdditionalClaims          datatypes.JSON `gorm:"column:additionalClaims;default:'{}';not null" json:"additionalClaims"`
+	CreatedAt                 DateTime       `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
+	UpdatedAt                 DateTime       `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
+	TrustedDeployRepository   *TrustedDeployRepository
+	RuntimeEnvironment        *RuntimeEnvironment
+}
+
+func (TrustedDeployEnvironment) TableName() string {
+	return "TrustedDeployEnvironment"
+}
+
+func (m *TrustedDeployEnvironment) BeforeCreate(tx *gorm.DB) error {
+	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
+	if m.ID == "" {
+		m.ID = cuid.New()
+	}
+	if m.CreatedAt.IsZero() {
+		m.CreatedAt = DateTime{Time: now}
+	}
+	if m.UpdatedAt.IsZero() {
+		m.UpdatedAt = DateTime{Time: now}
+	}
+	return nil
+}
+
+func (*TrustedDeployEnvironment) BeforeUpdate(tx *gorm.DB) error {
 	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
 	if !tx.Statement.Changed("UpdatedAt") {
 		tx.Statement.SetColumn("UpdatedAt", DateTime{Time: now})

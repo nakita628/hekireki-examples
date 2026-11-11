@@ -18,6 +18,7 @@ class Project < ApplicationRecord
   belongs_to :default_worker_group, class_name: "WorkerInstanceGroup", foreign_key: "defaultWorkerGroupId",
                                     optional: true, inverse_of: :default_for_projects
   has_one :connected_github_repository, foreign_key: "projectId", inverse_of: :project, dependent: :destroy
+  has_one :trusted_deploy_repository, foreign_key: "projectId", inverse_of: :project, dependent: :destroy
   has_many :worker_groups, class_name: "WorkerInstanceGroup", foreign_key: "projectId", inverse_of: :project,
                            dependent: :destroy
   has_many :workers, class_name: "WorkerInstance", foreign_key: "projectId", inverse_of: :project, dependent: :destroy

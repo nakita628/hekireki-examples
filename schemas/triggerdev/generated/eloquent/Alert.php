@@ -48,6 +48,7 @@ class Alert extends Model
         'lastOccurrenceAt',
         'occurrencesSinceRaise',
         'occurrencesTotal',
+        'groupId',
     ];
 
     protected $attributes = [

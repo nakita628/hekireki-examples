@@ -39,4 +39,5 @@ class AlertEntity(
     var lastOccurrenceAt by AlertTable.lastOccurrenceAt
     var occurrencesSinceRaise by AlertTable.occurrencesSinceRaise
     var occurrencesTotal by AlertTable.occurrencesTotal
+    var groupId by AlertTable.groupId
 }

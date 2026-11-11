@@ -102,7 +102,11 @@ class User(Base):
     referred_by: Mapped[Optional[str]] = mapped_column("referredBy")
     last_picked_at: Mapped[Optional[datetime]] = mapped_column("lastPickedAt")
     accept_promotional_emails: Mapped[bool] = mapped_column("acceptPromotionalEmails", default=False, server_default=text("false"))
+    share_usage_analytics: Mapped[bool] = mapped_column("shareUsageAnalytics", default=True, server_default=text("true"))
     trial_end_email_sent: Mapped[bool] = mapped_column("trialEndEmailSent", default=False, server_default=text("false"))
+    session_version: Mapped[int] = mapped_column("sessionVersion", default=0, server_default=text("0"))
+    password_retries: Mapped[int] = mapped_column("passwordRetries", default=0, server_default=text("0"))
+    password_retry_at: Mapped[Optional[datetime]] = mapped_column("passwordRetryAt")
     created_at: Mapped[datetime] = mapped_column("createdAt", default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
     updated_at: Mapped[datetime] = mapped_column("updatedAt", default=utc_now, server_default=text("CURRENT_TIMESTAMP"), onupdate=utc_now)
 
@@ -140,6 +144,22 @@ class VerificationToken(Base):
     )
 
     __mapper_args__ = {"primary_key": [token]}
+
+class EmailVerificationCode(Base):
+    __tablename__ = "EmailVerificationCode"
+
+    identifier: Mapped[str] = mapped_column()
+    code: Mapped[str]
+    attempts: Mapped[int] = mapped_column(default=0, server_default=text("0"))
+    expires: Mapped[datetime]
+    created_at: Mapped[datetime] = mapped_column("createdAt", default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
+    updated_at: Mapped[datetime] = mapped_column("updatedAt", default=utc_now, server_default=text("CURRENT_TIMESTAMP"), onupdate=utc_now)
+
+    __table_args__ = (
+        Index("EmailVerificationCode_identifier_key", "identifier", unique=True),
+    )
+
+    __mapper_args__ = {"primary_key": [identifier]}
 
 class PasswordResetToken(Base):
     __tablename__ = "PasswordResetToken"
@@ -212,6 +232,7 @@ class Link(Base):
     description: Mapped[str] = mapped_column(default="", server_default=text("''"))
     created_by_id: Mapped[Optional[int]] = mapped_column("createdById", ForeignKey("User.id", ondelete="CASCADE", onupdate="CASCADE", name="Link_createdById_fkey"))
     collection_id: Mapped[int] = mapped_column("collectionId", ForeignKey("Collection.id", ondelete="CASCADE", onupdate="CASCADE", name="Link_collectionId_fkey"))
+    collection_order: Mapped[float] = mapped_column("collectionOrder")
     icon: Mapped[Optional[str]]
     icon_weight: Mapped[Optional[str]] = mapped_column("iconWeight")
     color: Mapped[Optional[str]]
@@ -233,6 +254,7 @@ class Link(Base):
 
     __table_args__ = (
         Index("Link_collectionId_idx", "collectionId"),
+        Index("Link_collectionId_collectionOrder_id_idx", "collectionId", "collectionOrder", "id"),
     )
 
     created_by: Mapped[Optional["User"]] = relationship(back_populates="created_links")

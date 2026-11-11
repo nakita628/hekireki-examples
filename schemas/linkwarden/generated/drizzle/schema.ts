@@ -1,6 +1,7 @@
 import {
   type PgTableExtraConfigValue,
   boolean,
+  doublePrecision,
   foreignKey,
   index,
   integer,
@@ -128,7 +129,11 @@ export const user = pgTable(
     referredBy: text('referredBy'),
     lastPickedAt: timestamp('lastPickedAt', { precision: 3 }),
     acceptPromotionalEmails: boolean('acceptPromotionalEmails').notNull().default(false),
+    shareUsageAnalytics: boolean('shareUsageAnalytics').notNull().default(true),
     trialEndEmailSent: boolean('trialEndEmailSent').notNull().default(false),
+    sessionVersion: integer('sessionVersion').notNull().default(0),
+    passwordRetries: integer('passwordRetries').notNull().default(0),
+    passwordRetryAt: timestamp('passwordRetryAt', { precision: 3 }),
     createdAt: timestamp('createdAt', { precision: 3 })
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`)
@@ -173,6 +178,26 @@ export const verificationToken = pgTable(
     uniqueIndex('VerificationToken_token_key').on(table.token),
     uniqueIndex('VerificationToken_identifier_token_key').on(table.identifier, table.token),
   ],
+)
+
+export const emailVerificationCode = pgTable(
+  'EmailVerificationCode',
+  {
+    identifier: text('identifier').notNull(),
+    code: text('code').notNull(),
+    attempts: integer('attempts').notNull().default(0),
+    expires: timestamp('expires', { precision: 3 }).notNull(),
+    createdAt: timestamp('createdAt', { precision: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`)
+      .$defaultFn(utcNow),
+    updatedAt: timestamp('updatedAt', { precision: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`)
+      .$defaultFn(utcNow)
+      .$onUpdate(utcNow),
+  },
+  (table) => [uniqueIndex('EmailVerificationCode_identifier_key').on(table.identifier)],
 )
 
 export const passwordResetToken = pgTable(
@@ -290,6 +315,7 @@ export const link = pgTable(
     description: text('description').notNull().default(''),
     createdById: integer('createdById'),
     collectionId: integer('collectionId').notNull(),
+    collectionOrder: doublePrecision('collectionOrder').notNull(),
     icon: text('icon'),
     iconWeight: text('iconWeight'),
     color: text('color'),
@@ -318,6 +344,11 @@ export const link = pgTable(
   },
   (table) => [
     index('Link_collectionId_idx').on(table.collectionId),
+    index('Link_collectionId_collectionOrder_id_idx').on(
+      table.collectionId,
+      table.collectionOrder,
+      table.id,
+    ),
     foreignKey({
       name: 'Link_createdById_fkey',
       columns: [table.createdById],
@@ -596,6 +627,7 @@ export const relations = defineRelations(
     account,
     user,
     verificationToken,
+    emailVerificationCode,
     passwordResetToken,
     collection,
     usersAndCollections,

@@ -10,4 +10,10 @@ pub enum GatewayProvider {
     Anthropic,
     #[sea_orm(string_value = "bedrock")]
     Bedrock,
+    #[sea_orm(string_value = "openrouter")]
+    Openrouter,
+    #[sea_orm(string_value = "xai")]
+    Xai,
+    #[sea_orm(string_value = "vercel")]
+    Vercel,
 }

@@ -10,4 +10,6 @@ use serde::{Deserialize, Serialize};
 pub enum EnvironmentPauseSource {
     #[sea_orm(string_value = "BILLING_LIMIT")]
     BillingLimit,
+    #[sea_orm(string_value = "ADMIN_BAN")]
+    AdminBan,
 }

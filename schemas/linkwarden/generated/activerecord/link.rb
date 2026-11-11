@@ -10,6 +10,8 @@ class Link < ApplicationRecord
   alias_attribute :created_at, :createdAt
   alias_attribute :updated_at, :updatedAt
 
+  validates :collectionOrder, presence: true
+
   belongs_to :created_by, class_name: "User", foreign_key: "createdById", optional: true, inverse_of: :created_links
   belongs_to :collection, foreign_key: "collectionId", inverse_of: :links
   has_many :highlight, foreign_key: "linkId", inverse_of: :link, dependent: :destroy

@@ -54,8 +54,8 @@ object AnnotationQueueItemTable : IdTable<String>("annotation_queue_items") {
     override val primaryKey = PrimaryKey(id, name = "annotation_queue_items_pkey")
 
     init {
-        index("annotation_queue_items_id_project_id_idx", false, id, projectId)
         index("annotation_queue_items_project_id_queue_id_status_idx", false, projectId, queueId, status)
+        index("annotation_queue_items_project_id_queue_id_created_at_id_idx", false, projectId, queueId, createdAt, id)
         index("annotation_queue_items_object_id_object_type_project_id_que_idx", false, objectId, objectType, projectId, queueId)
         index("annotation_queue_items_annotator_user_id_idx", false, annotatorUserId)
         index("annotation_queue_items_created_at_idx", false, createdAt)

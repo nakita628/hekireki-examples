@@ -932,8 +932,8 @@ func (*AnnotationQueue) BeforeUpdate(tx *gorm.DB) error {
 }
 
 type AnnotationQueueItem struct {
-	ID              string           `gorm:"column:id;primaryKey;index:annotation_queue_items_id_project_id_idx" json:"id"`
-	QueueID         string           `gorm:"column:queue_id;index:annotation_queue_items_project_id_queue_id_status_idx;index:annotation_queue_items_object_id_object_type_project_id_queue_id_idx;not null" json:"queue_id"`
+	ID              string           `gorm:"column:id;primaryKey;index:annotation_queue_items_project_id_queue_id_created_at_id_idx" json:"id"`
+	QueueID         string           `gorm:"column:queue_id;index:annotation_queue_items_project_id_queue_id_status_idx;index:annotation_queue_items_project_id_queue_id_created_at_id_idx;index:annotation_queue_items_object_id_object_type_project_id_queue_id_idx;not null" json:"queue_id"`
 	ObjectID        string           `gorm:"column:object_id;index:annotation_queue_items_object_id_object_type_project_id_queue_id_idx;not null" json:"object_id"`
 	ObjectType      string           `gorm:"column:object_type;index:annotation_queue_items_object_id_object_type_project_id_queue_id_idx;not null" json:"object_type"`
 	Status          string           `gorm:"column:status;index:annotation_queue_items_project_id_queue_id_status_idx;default:'PENDING';not null" json:"status"`
@@ -941,8 +941,8 @@ type AnnotationQueueItem struct {
 	LockedByUserID  *string          `gorm:"column:locked_by_user_id" json:"locked_by_user_id"`
 	AnnotatorUserID *string          `gorm:"column:annotator_user_id;index:annotation_queue_items_annotator_user_id_idx" json:"annotator_user_id"`
 	CompletedAt     *DateTime        `gorm:"column:completed_at" json:"completed_at"`
-	ProjectID       string           `gorm:"column:project_id;index:annotation_queue_items_id_project_id_idx;index:annotation_queue_items_project_id_queue_id_status_idx;index:annotation_queue_items_object_id_object_type_project_id_queue_id_idx;not null" json:"project_id"`
-	CreatedAt       DateTime         `gorm:"column:created_at;index:annotation_queue_items_created_at_idx;autoCreateTime:false;not null" json:"created_at"`
+	ProjectID       string           `gorm:"column:project_id;index:annotation_queue_items_project_id_queue_id_status_idx;index:annotation_queue_items_project_id_queue_id_created_at_id_idx;index:annotation_queue_items_object_id_object_type_project_id_queue_id_idx;not null" json:"project_id"`
+	CreatedAt       DateTime         `gorm:"column:created_at;index:annotation_queue_items_project_id_queue_id_created_at_id_idx;index:annotation_queue_items_created_at_idx;autoCreateTime:false;not null" json:"created_at"`
 	UpdatedAt       DateTime         `gorm:"column:updated_at;autoUpdateTime:false;not null" json:"updated_at"`
 	Queue           *AnnotationQueue `gorm:"foreignKey:QueueID"`
 	LockedByUser    *User            `gorm:"foreignKey:LockedByUserID"`

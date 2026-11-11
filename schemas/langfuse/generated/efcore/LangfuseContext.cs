@@ -1408,9 +1408,9 @@ public partial class LangfuseContext : DbContext
 
             entity.ToTable("annotation_queue_items");
 
-            entity.HasIndex(e => new { e.Id, e.ProjectId }, "annotation_queue_items_id_project_id_idx");
-
             entity.HasIndex(e => new { e.ProjectId, e.QueueId, e.Status }, "annotation_queue_items_project_id_queue_id_status_idx");
+
+            entity.HasIndex(e => new { e.ProjectId, e.QueueId, e.CreatedAt, e.Id }, "annotation_queue_items_project_id_queue_id_created_at_id_idx");
 
             entity.HasIndex(e => new { e.ObjectId, e.ObjectType, e.ProjectId, e.QueueId }, "annotation_queue_items_object_id_object_type_project_id_que_idx");
 

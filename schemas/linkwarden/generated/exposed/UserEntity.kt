@@ -54,7 +54,11 @@ class UserEntity(
     val dashboardSections by DashboardSectionEntity referrersOn DashboardSectionTable.userId
     var lastPickedAt by UserTable.lastPickedAt
     var acceptPromotionalEmails by UserTable.acceptPromotionalEmails
+    var shareUsageAnalytics by UserTable.shareUsageAnalytics
     var trialEndEmailSent by UserTable.trialEndEmailSent
+    var sessionVersion by UserTable.sessionVersion
+    var passwordRetries by UserTable.passwordRetries
+    var passwordRetryAt by UserTable.passwordRetryAt
     var createdAt by UserTable.createdAt
     var updatedAt by UserTable.updatedAt
 

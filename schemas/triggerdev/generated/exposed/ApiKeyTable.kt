@@ -12,6 +12,7 @@ object ApiKeyTable : IdTable<String>("api_keys") {
     val name = text("name")
     val keyHash = text("key_hash").uniqueIndex("api_keys_key_hash_key")
     val lastFour = text("last_four")
+    val description = text("description").nullable()
     val runtimeEnvironmentId =
         reference(
             "runtime_environment_id",
@@ -30,7 +31,9 @@ object ApiKeyTable : IdTable<String>("api_keys") {
         )
     val presetId = text("preset_id").nullable()
     val scopes = array("scopes", TextColumnType()).nullable()
+    val allowedIpRanges = array("allowed_ip_ranges", TextColumnType()).nullable().databaseDefault("'{}'") { emptyList() }
     val lastUsedAt = pgTimestamp("last_used_at", 3).nullable()
+    val lastUsedIp = text("last_used_ip").nullable()
     val revokedAt = pgTimestamp("revoked_at", 3).nullable()
     val expiresAt = pgTimestamp("expires_at", 3).nullable()
     val updatedAt = pgTimestamp("updated_at", 3).clientDefault { Instant.now().truncatedTo(ChronoUnit.MILLIS) }

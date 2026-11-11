@@ -177,6 +177,8 @@ pub enum Relation {
     ApiKeys,
     #[sea_orm(has_many = "super::revoked_api_key::Entity")]
     RevokedApiKeys,
+    #[sea_orm(has_one = "super::trusted_deploy_environment::Entity")]
+    TrustedDeployGrant,
 }
 
 impl Related<super::runtime_environment::Entity> for Entity {
@@ -356,6 +358,12 @@ impl Related<super::api_key::Entity> for Entity {
 impl Related<super::revoked_api_key::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::RevokedApiKeys.def()
+    }
+}
+
+impl Related<super::trusted_deploy_environment::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::TrustedDeployGrant.def()
     }
 }
 

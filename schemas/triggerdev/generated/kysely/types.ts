@@ -15,7 +15,7 @@ export type OrgMemberRole = 'ADMIN' | 'MEMBER'
 
 export type RuntimeEnvironmentType = 'PRODUCTION' | 'STAGING' | 'DEVELOPMENT' | 'PREVIEW'
 
-export type EnvironmentPauseSource = 'BILLING_LIMIT'
+export type EnvironmentPauseSource = 'BILLING_LIMIT' | 'ADMIN_BAN'
 
 export type ProjectVersion = 'V2' | 'V3'
 
@@ -163,6 +163,8 @@ export type BulkActionItemStatus = 'PENDING' | 'COMPLETED' | 'FAILED'
 
 export type GithubRepositorySelection = 'ALL' | 'SELECTED'
 
+export type TrustedDeployScope = 'ANY' | 'BRANCH' | 'TAG' | 'ENVIRONMENT'
+
 export type ImpersonationAuditLogAction = 'START' | 'STOP'
 
 export type SupportAccessMode = 'ALLOW' | 'REQUIRES_REQUEST'
@@ -247,6 +249,10 @@ export interface PersonalAccessToken {
   userId: string
   revokedAt: Timestamp | null
   lastAccessedAt: Timestamp | null
+  expiresAt: Timestamp | null
+  idleTimeoutSeconds: number | null
+  expiryReminderSentAt: Timestamp | null
+  expiredNoticeSentAt: Timestamp | null
   createdAt: Generated<Timestamp>
   updatedAt: Timestamp
 }
@@ -357,11 +363,14 @@ export interface ApiKey {
   name: string
   key_hash: string
   last_four: string
+  description: string | null
   runtime_environment_id: string
   created_by_user_id: string | null
   preset_id: string | null
   scopes: string[]
+  allowed_ip_ranges: Generated<string[]>
   last_used_at: Timestamp | null
+  last_used_ip: string | null
   revoked_at: Timestamp | null
   expires_at: Timestamp | null
   updated_at: Timestamp
@@ -609,6 +618,7 @@ export interface Alert {
   lastOccurrenceAt: Timestamp | null
   occurrencesSinceRaise: Generated<number>
   occurrencesTotal: Generated<bigint>
+  groupId: string | null
 }
 
 export interface AlertEvent {
@@ -934,6 +944,8 @@ export interface WorkerInstanceGroup {
 export interface WorkerGroupToken {
   id: string
   tokenHash: string
+  previousTokenHash: string | null
+  previousTokenValidUntil: Timestamp | null
   createdAt: Generated<Timestamp>
   updatedAt: Timestamp
 }
@@ -1466,6 +1478,30 @@ export interface GithubRepository {
   updatedAt: Timestamp
 }
 
+export interface TrustedDeployRepository {
+  id: string
+  projectId: string
+  issuer: Generated<string>
+  repositoryOwner: string
+  repositoryName: string
+  repositoryId: string | null
+  repositoryOwnerId: string | null
+  createdAt: Generated<Timestamp>
+  updatedAt: Timestamp
+}
+
+export interface TrustedDeployEnvironment {
+  id: string
+  trustedDeployRepositoryId: string
+  runtimeEnvironmentId: string
+  enabled: Generated<boolean>
+  scope: TrustedDeployScope
+  scopeValue: string | null
+  additionalClaims: Generated<unknown>
+  createdAt: Generated<Timestamp>
+  updatedAt: Timestamp
+}
+
 export interface ConnectedGithubRepository {
   id: string
   projectId: string
@@ -1751,6 +1787,8 @@ export interface DB {
   TaskEventPartitioned: TaskEventPartitioned
   GithubAppInstallation: GithubAppInstallation
   GithubRepository: GithubRepository
+  TrustedDeployRepository: TrustedDeployRepository
+  TrustedDeployEnvironment: TrustedDeployEnvironment
   ConnectedGithubRepository: ConnectedGithubRepository
   ImpersonationAuditLog: ImpersonationAuditLog
   SupportAccessRequest: SupportAccessRequest

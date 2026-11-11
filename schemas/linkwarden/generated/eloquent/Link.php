@@ -22,6 +22,7 @@ class Link extends Model
         'description',
         'createdById',
         'collectionId',
+        'collectionOrder',
         'icon',
         'iconWeight',
         'color',
@@ -51,6 +52,7 @@ class Link extends Model
     protected $casts = [
         'createdById' => 'integer',
         'collectionId' => 'integer',
+        'collectionOrder' => 'float',
         'clientSide' => 'boolean',
         'aiTagged' => 'boolean',
         'indexVersion' => 'integer',

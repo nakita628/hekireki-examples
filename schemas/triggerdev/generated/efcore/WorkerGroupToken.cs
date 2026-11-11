@@ -10,6 +10,10 @@ public partial class WorkerGroupToken
 
     public string TokenHash { get; set; } = null!;
 
+    public string? PreviousTokenHash { get; set; }
+
+    public DateTime? PreviousTokenValidUntil { get; set; }
+
     public DateTime CreatedAt { get; set; }
 
     public DateTime UpdatedAt { get; set; }

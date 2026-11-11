@@ -3,6 +3,7 @@ class ApiKey < ApplicationRecord
 
   attribute :id, default: -> { Cuid.generate }
   attribute :scopes, default: -> { [] }
+  attribute :allowed_ip_ranges, default: -> { [] }
 
   validates :name, presence: true
   validates :key_hash, presence: true, uniqueness: true

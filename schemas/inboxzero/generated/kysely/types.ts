@@ -92,6 +92,7 @@ export type MailSplitFilterKind =
   | 'CATEGORY'
   | 'FROM'
   | 'OLDER_THAN'
+  | 'TO'
 
 export type DraftReplyConfidence = 'ALL_EMAILS' | 'STANDARD' | 'HIGH_CONFIDENCE'
 
@@ -1118,6 +1119,15 @@ export interface ChatCompaction {
   chatId: string
 }
 
+export interface ChatActionTotal {
+  id: string
+  createdAt: Generated<Timestamp>
+  updatedAt: Timestamp
+  action: string
+  count: Generated<number>
+  chatId: string
+}
+
 export interface ChatMemory {
   id: string
   createdAt: Generated<Timestamp>
@@ -1840,6 +1850,7 @@ export interface DB {
   Chat: Chat
   ChatMessage: ChatMessage
   ChatCompaction: ChatCompaction
+  ChatActionTotal: ChatActionTotal
   ChatMemory: ChatMemory
   CalendarConnection: CalendarConnection
   Calendar: Calendar

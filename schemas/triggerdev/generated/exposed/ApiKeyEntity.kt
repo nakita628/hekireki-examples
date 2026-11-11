@@ -15,13 +15,16 @@ class ApiKeyEntity(
     var name by ApiKeyTable.name
     var keyHash by ApiKeyTable.keyHash
     var lastFour by ApiKeyTable.lastFour
+    var description by ApiKeyTable.description
     var runtimeEnvironment by RuntimeEnvironmentEntity referencedOn ApiKeyTable.runtimeEnvironmentId
     var runtimeEnvironmentId by ApiKeyTable.runtimeEnvironmentId
     var createdBy by UserEntity optionalReferencedOn ApiKeyTable.createdByUserId
     var createdByUserId by ApiKeyTable.createdByUserId
     var presetId by ApiKeyTable.presetId
     var scopes by ApiKeyTable.scopes
+    var allowedIpRanges by ApiKeyTable.allowedIpRanges
     var lastUsedAt by ApiKeyTable.lastUsedAt
+    var lastUsedIp by ApiKeyTable.lastUsedIp
     var revokedAt by ApiKeyTable.revokedAt
     var expiresAt by ApiKeyTable.expiresAt
     var updatedAt by ApiKeyTable.updatedAt

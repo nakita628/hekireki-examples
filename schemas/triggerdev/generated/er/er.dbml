@@ -24,6 +24,7 @@ Enum RuntimeEnvironmentType {
 
 Enum EnvironmentPauseSource {
   BILLING_LIMIT
+  ADMIN_BAN
 }
 
 Enum ProjectVersion {
@@ -295,6 +296,13 @@ Enum GithubRepositorySelection {
   SELECTED
 }
 
+Enum TrustedDeployScope {
+  ANY
+  BRANCH
+  TAG
+  ENVIRONMENT
+}
+
 Enum ImpersonationAuditLogAction {
   START
   STOP
@@ -422,6 +430,11 @@ Table PersonalAccessToken {
   userId String [not null]
   revokedAt DateTime
   lastAccessedAt DateTime
+  expiresAt DateTime [note: 'After this the token no longer authenticates. Null means it never expires.']
+  idleTimeoutSeconds Int [note: '''Set on CLI login tokens: they stop authenticating this many seconds after their last use
+(or creation, if never used). Null means no idle limit.''']
+  expiryReminderSentAt DateTime [note: 'When the "about to expire" email was sent. Set before sending, so it\'s sent at most once.']
+  expiredNoticeSentAt DateTime [note: 'When the "has expired" email was sent. Set before sending, so it\'s sent at most once.']
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
 }
@@ -560,11 +573,14 @@ Table api_keys {
   name String [not null]
   key_hash String [unique, not null]
   last_four String [not null]
+  description String [note: 'Optional one-line note the creator adds to say what the key is for.']
   runtime_environment_id String [not null]
   created_by_user_id String
   preset_id String
   scopes String[] [not null]
+  allowed_ip_ranges String[] [not null, note: 'CIDR ranges this key may be used from. Empty means any IP.']
   last_used_at DateTime
+  last_used_ip String
   revoked_at DateTime
   expires_at DateTime
   updated_at DateTime [not null]
@@ -848,6 +864,7 @@ Table Alert {
   lastOccurrenceAt DateTime
   occurrencesSinceRaise Int [default: 0, not null]
   occurrencesTotal BigInt [default: 0, not null]
+  groupId String
 }
 
 Table AlertEvent {
@@ -1272,6 +1289,8 @@ and be pushed directly to the worker queue when concurrency is available.''']
 Table WorkerGroupToken {
   id String [pk]
   tokenHash String [unique, not null]
+  previousTokenHash String [unique]
+  previousTokenValidUntil DateTime
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
 }
@@ -1897,6 +1916,30 @@ Table GithubRepository {
   }
 }
 
+Table TrustedDeployRepository {
+  id String [pk]
+  projectId String [unique, not null]
+  issuer String [default: 'https://token.actions.githubusercontent.com', not null]
+  repositoryOwner String [not null]
+  repositoryName String [not null]
+  repositoryId String
+  repositoryOwnerId String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table TrustedDeployEnvironment {
+  id String [pk]
+  trustedDeployRepositoryId String [not null]
+  runtimeEnvironmentId String [unique, not null]
+  enabled Boolean [default: false, not null]
+  scope TrustedDeployScope [not null]
+  scopeValue String
+  additionalClaims Json [default: '{}', not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
 Table ConnectedGithubRepository {
   id String [pk]
   projectId String [unique, not null]
@@ -2406,6 +2449,12 @@ Ref BulkActionItem_destinationRunId_fk: BulkActionItem.destinationRunId > TaskRu
 Ref GithubAppInstallation_organizationId_fk: GithubAppInstallation.organizationId > Organization.id
 
 Ref GithubRepository_installationId_fk: GithubRepository.installationId > GithubAppInstallation.id [delete: cascade, update: cascade]
+
+Ref TrustedDeployRepository_projectId_fk: TrustedDeployRepository.projectId - Project.id [delete: cascade]
+
+Ref TrustedDeployEnvironment_trustedDeployRepositoryId_fk: TrustedDeployEnvironment.trustedDeployRepositoryId > TrustedDeployRepository.id [delete: cascade]
+
+Ref TrustedDeployEnvironment_runtimeEnvironmentId_fk: TrustedDeployEnvironment.runtimeEnvironmentId - RuntimeEnvironment.id [delete: cascade]
 
 Ref ConnectedGithubRepository_projectId_fk: ConnectedGithubRepository.projectId - Project.id [delete: cascade, update: cascade]
 

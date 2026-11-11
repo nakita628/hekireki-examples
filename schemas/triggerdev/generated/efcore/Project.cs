@@ -87,6 +87,8 @@ public partial class Project
 
     public virtual ConnectedGithubRepository? ConnectedGithubRepository { get; set; }
 
+    public virtual TrustedDeployRepository? TrustedDeployRepository { get; set; }
+
     public virtual ICollection<OrganizationProjectIntegration> OrganizationProjectIntegration { get; set; } = new List<OrganizationProjectIntegration>();
 
     public virtual ICollection<CustomerQuery> CustomerQueries { get; set; } = new List<CustomerQuery>();

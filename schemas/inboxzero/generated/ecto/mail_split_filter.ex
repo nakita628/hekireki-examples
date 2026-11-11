@@ -13,7 +13,7 @@ defmodule InboxZero.MailSplitFilter do
 
   schema "MailSplitFilter" do
     field(:id, :string, primary_key: true)
-    field(:kind, Ecto.Enum, values: [:UNREAD, :STARRED, :LABEL, :CATEGORY, :FROM, :OLDER_THAN])
+    field(:kind, Ecto.Enum, values: [:UNREAD, :STARRED, :LABEL, :CATEGORY, :FROM, :OLDER_THAN, :TO])
     field(:value, :string)
     field(:order, :integer)
     field(:mail_split_id, :string, source: :mailSplitId)

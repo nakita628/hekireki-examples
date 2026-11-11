@@ -26,6 +26,7 @@ object LinkTable : IdTable<Int>("\"Link\"") {
             onUpdate = ReferenceOption.CASCADE,
             fkName = "\"Link_collectionId_fkey\"",
         )
+    val collectionOrder = double("collectionOrder")
     val icon = text("icon").nullable()
     val iconWeight = text("iconWeight").nullable()
     val color = text("color").nullable()
@@ -48,5 +49,6 @@ object LinkTable : IdTable<Int>("\"Link\"") {
 
     init {
         index("\"Link_collectionId_idx\"", false, collectionId)
+        index("\"Link_collectionId_collectionOrder_id_idx\"", false, collectionId, collectionOrder, id)
     }
 }

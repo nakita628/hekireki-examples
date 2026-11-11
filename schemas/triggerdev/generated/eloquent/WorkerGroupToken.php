@@ -21,6 +21,12 @@ class WorkerGroupToken extends Model
     protected $fillable = [
         'id',
         'tokenHash',
+        'previousTokenHash',
+        'previousTokenValidUntil',
+    ];
+
+    protected $casts = [
+        'previousTokenValidUntil' => 'datetime',
     ];
 
     public function workerGroup(): HasOne

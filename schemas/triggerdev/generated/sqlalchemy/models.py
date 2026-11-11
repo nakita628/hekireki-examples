@@ -191,6 +191,10 @@ class PersonalAccessToken(Base):
     user_id: Mapped[str] = mapped_column("userId", ForeignKey("User.id", ondelete="RESTRICT", onupdate="CASCADE", name="PersonalAccessToken_userId_fkey"))
     revoked_at: Mapped[Optional[datetime]] = mapped_column("revokedAt")
     last_accessed_at: Mapped[Optional[datetime]] = mapped_column("lastAccessedAt")
+    expires_at: Mapped[Optional[datetime]] = mapped_column("expiresAt")
+    idle_timeout_seconds: Mapped[Optional[int]] = mapped_column("idleTimeoutSeconds")
+    expiry_reminder_sent_at: Mapped[Optional[datetime]] = mapped_column("expiryReminderSentAt")
+    expired_notice_sent_at: Mapped[Optional[datetime]] = mapped_column("expiredNoticeSentAt")
     created_at: Mapped[datetime] = mapped_column("createdAt", default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
     updated_at: Mapped[datetime] = mapped_column("updatedAt", default=utc_now, onupdate=utc_now)
 
@@ -341,7 +345,7 @@ class RuntimeEnvironment(Base):
     maximum_concurrency_limit: Mapped[int] = mapped_column("maximumConcurrencyLimit", default=5, server_default=text("5"))
     concurrency_limit_burst_factor: Mapped[DecimalType] = mapped_column("concurrencyLimitBurstFactor", Numeric(precision=4, scale=2), default=DecimalType("2"), server_default=text("2"))
     paused: Mapped[bool] = mapped_column(default=False, server_default=text("false"))
-    pause_source: Mapped[Optional[str]] = mapped_column("pauseSource", Enum("BILLING_LIMIT", name="EnvironmentPauseSource"))
+    pause_source: Mapped[Optional[str]] = mapped_column("pauseSource", Enum("BILLING_LIMIT", "ADMIN_BAN", name="EnvironmentPauseSource"))
     auto_enable_internal_sources: Mapped[bool] = mapped_column("autoEnableInternalSources", default=True, server_default=text("true"))
     organization_id: Mapped[str] = mapped_column("organizationId", ForeignKey("Organization.id", ondelete="CASCADE", onupdate="CASCADE", name="RuntimeEnvironment_organizationId_fkey"))
     project_id: Mapped[str] = mapped_column("projectId", ForeignKey("Project.id", ondelete="CASCADE", onupdate="CASCADE", name="RuntimeEnvironment_projectId_fkey"))
@@ -394,6 +398,7 @@ class RuntimeEnvironment(Base):
     task_identifiers: Mapped[list["TaskIdentifier"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="runtime_environment")
     api_keys: Mapped[list["ApiKey"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="runtime_environment")
     revoked_api_keys: Mapped[list["RevokedApiKey"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="runtime_environment")
+    trusted_deploy_grant: Mapped[Optional["TrustedDeployEnvironment"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="runtime_environment")
 
 class ApiKey(Base):
     __tablename__ = "api_keys"
@@ -402,11 +407,14 @@ class ApiKey(Base):
     name: Mapped[str]
     key_hash: Mapped[str]
     last_four: Mapped[str]
+    description: Mapped[Optional[str]]
     runtime_environment_id: Mapped[str] = mapped_column(ForeignKey("RuntimeEnvironment.id", ondelete="CASCADE", onupdate="CASCADE", name="api_keys_runtime_environment_id_fkey"))
     created_by_user_id: Mapped[Optional[str]] = mapped_column(ForeignKey("User.id", ondelete="SET NULL", onupdate="CASCADE", name="api_keys_created_by_user_id_fkey"))
     preset_id: Mapped[Optional[str]]
     scopes: Mapped[list[str]] = mapped_column(ARRAY(Text), nullable=True)
+    allowed_ip_ranges: Mapped[list[str]] = mapped_column(ARRAY(Text), nullable=True, default=lambda: [], server_default=text("ARRAY[]::text[]"))
     last_used_at: Mapped[Optional[datetime]]
+    last_used_ip: Mapped[Optional[str]]
     revoked_at: Mapped[Optional[datetime]]
     expires_at: Mapped[Optional[datetime]]
     updated_at: Mapped[datetime] = mapped_column(default=utc_now, onupdate=utc_now)
@@ -497,6 +505,7 @@ class Project(Base):
     error_group_states: Mapped[list["ErrorGroupState"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="project")
     task_identifiers: Mapped[list["TaskIdentifier"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="project")
     connected_github_repository: Mapped[Optional["ConnectedGithubRepository"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="project")
+    trusted_deploy_repository: Mapped[Optional["TrustedDeployRepository"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="project")
 
 class SecretReference(Base):
     __tablename__ = "SecretReference"
@@ -825,12 +834,14 @@ class Alert(Base):
     last_occurrence_at: Mapped[Optional[datetime]] = mapped_column("lastOccurrenceAt", UtcDateTimeTz(precision=6))
     occurrences_since_raise: Mapped[int] = mapped_column("occurrencesSinceRaise", default=0, server_default=text("0"))
     occurrences_total: Mapped[int] = mapped_column("occurrencesTotal", BigInteger, default=0, server_default=text("0"))
+    group_id: Mapped[Optional[str]] = mapped_column("groupId")
 
     __table_args__ = (
         Index("Alert_environmentId_lifecycle_idx", "environmentId", "lifecycle"),
         Index("Alert_lifecycle_evaluationLeaseUntil_idx", "lifecycle", "evaluationLeaseUntil"),
         Index("Alert_projectId_idx", "projectId"),
         Index("Alert_organizationId_idx", "organizationId"),
+        Index("Alert_groupId_idx", "groupId"),
     )
 
 class AlertEvent(Base):
@@ -1333,11 +1344,14 @@ class WorkerGroupToken(Base):
 
     id: Mapped[str] = mapped_column(primary_key=True)
     token_hash: Mapped[str] = mapped_column("tokenHash")
+    previous_token_hash: Mapped[Optional[str]] = mapped_column("previousTokenHash")
+    previous_token_valid_until: Mapped[Optional[datetime]] = mapped_column("previousTokenValidUntil")
     created_at: Mapped[datetime] = mapped_column("createdAt", default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
     updated_at: Mapped[datetime] = mapped_column("updatedAt", default=utc_now, onupdate=utc_now)
 
     __table_args__ = (
         Index("WorkerGroupToken_tokenHash_key", "tokenHash", unique=True),
+        Index("WorkerGroupToken_previousTokenHash_key", "previousTokenHash", unique=True),
     )
 
     worker_group: Mapped[Optional["WorkerInstanceGroup"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="token")
@@ -2176,6 +2190,47 @@ class GithubRepository(Base):
 
     installation: Mapped["GithubAppInstallation"] = relationship(back_populates="repositories")
     connected_github_repository: Mapped[list["ConnectedGithubRepository"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="repository")
+
+class TrustedDeployRepository(Base):
+    __tablename__ = "TrustedDeployRepository"
+
+    id: Mapped[str] = mapped_column(primary_key=True)
+    project_id: Mapped[str] = mapped_column("projectId", ForeignKey("Project.id", ondelete="CASCADE", onupdate="CASCADE", name="TrustedDeployRepository_projectId_fkey"))
+    issuer: Mapped[str] = mapped_column(default="https://token.actions.githubusercontent.com", server_default=text("'https://token.actions.githubusercontent.com'"))
+    repository_owner: Mapped[str] = mapped_column("repositoryOwner")
+    repository_name: Mapped[str] = mapped_column("repositoryName")
+    repository_id: Mapped[Optional[str]] = mapped_column("repositoryId")
+    repository_owner_id: Mapped[Optional[str]] = mapped_column("repositoryOwnerId")
+    created_at: Mapped[datetime] = mapped_column("createdAt", default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
+    updated_at: Mapped[datetime] = mapped_column("updatedAt", default=utc_now, onupdate=utc_now)
+
+    __table_args__ = (
+        Index("TrustedDeployRepository_projectId_key", "projectId", unique=True),
+    )
+
+    project: Mapped["Project"] = relationship(back_populates="trusted_deploy_repository")
+    environments: Mapped[list["TrustedDeployEnvironment"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="trusted_deploy_repository")
+
+class TrustedDeployEnvironment(Base):
+    __tablename__ = "TrustedDeployEnvironment"
+
+    id: Mapped[str] = mapped_column(primary_key=True)
+    trusted_deploy_repository_id: Mapped[str] = mapped_column("trustedDeployRepositoryId", ForeignKey("TrustedDeployRepository.id", ondelete="CASCADE", onupdate="CASCADE", name="TrustedDeployEnvironment_trustedDeployRepositoryId_fkey"))
+    runtime_environment_id: Mapped[str] = mapped_column("runtimeEnvironmentId", ForeignKey("RuntimeEnvironment.id", ondelete="CASCADE", onupdate="CASCADE", name="TrustedDeployEnvironment_runtimeEnvironmentId_fkey"))
+    enabled: Mapped[bool] = mapped_column(default=False, server_default=text("false"))
+    scope: Mapped[str] = mapped_column(Enum("ANY", "BRANCH", "TAG", "ENVIRONMENT", name="TrustedDeployScope"))
+    scope_value: Mapped[Optional[str]] = mapped_column("scopeValue")
+    additional_claims: Mapped[dict[str, Any]] = mapped_column("additionalClaims", JSONB, default=lambda: {}, server_default=text("'{}'"))
+    created_at: Mapped[datetime] = mapped_column("createdAt", default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
+    updated_at: Mapped[datetime] = mapped_column("updatedAt", default=utc_now, onupdate=utc_now)
+
+    __table_args__ = (
+        Index("TrustedDeployEnvironment_runtimeEnvironmentId_key", "runtimeEnvironmentId", unique=True),
+        Index("TrustedDeployEnvironment_trustedDeployRepositoryId_idx", "trustedDeployRepositoryId"),
+    )
+
+    trusted_deploy_repository: Mapped["TrustedDeployRepository"] = relationship(back_populates="environments")
+    runtime_environment: Mapped["RuntimeEnvironment"] = relationship(back_populates="trusted_deploy_grant")
 
 class ConnectedGithubRepository(Base):
     __tablename__ = "ConnectedGithubRepository"

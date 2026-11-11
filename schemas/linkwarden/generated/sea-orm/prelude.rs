@@ -3,6 +3,7 @@ pub use super::account::Entity as Account;
 pub use super::app_migration::Entity as AppMigration;
 pub use super::collection::Entity as Collection;
 pub use super::dashboard_section::Entity as DashboardSection;
+pub use super::email_verification_code::Entity as EmailVerificationCode;
 pub use super::highlight::Entity as Highlight;
 pub use super::link::Entity as Link;
 pub use super::password_reset_token::Entity as PasswordResetToken;

@@ -13,6 +13,8 @@ class WorkerGroupTokenEntity(
     companion object : EntityClass<String, WorkerGroupTokenEntity>(WorkerGroupTokenTable)
 
     var tokenHash by WorkerGroupTokenTable.tokenHash
+    var previousTokenHash by WorkerGroupTokenTable.previousTokenHash
+    var previousTokenValidUntil by WorkerGroupTokenTable.previousTokenValidUntil
     var createdAt by WorkerGroupTokenTable.createdAt
     var updatedAt by WorkerGroupTokenTable.updatedAt
     val workerGroup by WorkerInstanceGroupEntity optionalBackReferencedOn WorkerInstanceGroupTable.tokenId

@@ -42,6 +42,8 @@ pub enum Relation {
     Compactions,
     #[sea_orm(has_many = "super::chat_memory::Entity")]
     Memories,
+    #[sea_orm(has_many = "super::chat_action_total::Entity")]
+    ActionTotals,
 }
 
 impl Related<super::email_account::Entity> for Entity {
@@ -65,6 +67,12 @@ impl Related<super::chat_compaction::Entity> for Entity {
 impl Related<super::chat_memory::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Memories.def()
+    }
+}
+
+impl Related<super::chat_action_total::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::ActionTotals.def()
     }
 }
 

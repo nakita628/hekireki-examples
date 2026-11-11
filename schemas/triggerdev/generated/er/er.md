@@ -130,6 +130,9 @@ erDiagram
     TaskRun |o--o{ BulkActionItem : "(id) - (destinationRunId)"
     Organization ||--o{ GithubAppInstallation : "(id) - (organizationId)"
     GithubAppInstallation ||--o{ GithubRepository : "(id) - (installationId)"
+    Project ||--o| TrustedDeployRepository : "(id) - (projectId)"
+    TrustedDeployRepository ||--o{ TrustedDeployEnvironment : "(id) - (trustedDeployRepositoryId)"
+    RuntimeEnvironment ||--o| TrustedDeployEnvironment : "(id) - (runtimeEnvironmentId)"
     Project ||--o| ConnectedGithubRepository : "(id) - (projectId)"
     GithubRepository ||--o{ ConnectedGithubRepository : "(id) - (repositoryId)"
     User ||--o{ ImpersonationAuditLog : "(id) - (adminId)"
@@ -226,6 +229,10 @@ erDiagram
         string userId FK
         datetime revokedAt
         datetime lastAccessedAt
+        datetime expiresAt "After this the token no longer authenticates. Null means it never expires."
+        int idleTimeoutSeconds "Set on CLI login tokens: they stop authenticating this many seconds after their last use (or creation, if never used). Null means no idle limit."
+        datetime expiryReminderSentAt "When the #quot;about to expire#quot; email was sent. Set before sending, so it's sent at most once."
+        datetime expiredNoticeSentAt "When the #quot;has expired#quot; email was sent. Set before sending, so it's sent at most once."
         datetime createdAt
         datetime updatedAt
     }
@@ -330,11 +337,14 @@ erDiagram
         string name
         string keyHash UK
         string lastFour
+        string description "Optional one-line note the creator adds to say what the key is for."
         string runtimeEnvironmentId FK
         string createdByUserId FK
         string presetId
         string[] scopes
+        string[] allowedIpRanges "CIDR ranges this key may be used from. Empty means any IP."
         datetime lastUsedAt
+        string lastUsedIp
         datetime revokedAt
         datetime expiresAt
         datetime updatedAt
@@ -568,6 +578,7 @@ erDiagram
         datetime lastOccurrenceAt
         int occurrencesSinceRaise
         bigint occurrencesTotal
+        string groupId
     }
     AlertEvent {
         string id PK
@@ -876,6 +887,8 @@ erDiagram
     WorkerGroupToken {
         string id PK
         string tokenHash UK
+        string previousTokenHash UK
+        datetime previousTokenValidUntil
         datetime createdAt
         datetime updatedAt
     }
@@ -1374,6 +1387,28 @@ erDiagram
         boolean private
         string defaultBranch
         string installationId FK, UK
+        datetime createdAt
+        datetime updatedAt
+    }
+    TrustedDeployRepository {
+        string id PK
+        string projectId FK, UK
+        string issuer
+        string repositoryOwner
+        string repositoryName
+        string repositoryId
+        string repositoryOwnerId
+        datetime createdAt
+        datetime updatedAt
+    }
+    TrustedDeployEnvironment {
+        string id PK
+        string trustedDeployRepositoryId FK
+        string runtimeEnvironmentId FK, UK
+        boolean enabled
+        trusteddeployscope scope
+        string scopeValue
+        json additionalClaims
         datetime createdAt
         datetime updatedAt
     }

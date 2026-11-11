@@ -9,4 +9,5 @@ enum class MailSplitFilterKind(
     CATEGORY("CATEGORY"),
     FROM("FROM"),
     OLDER_THAN("OLDER_THAN"),
+    TO("TO"),
 }

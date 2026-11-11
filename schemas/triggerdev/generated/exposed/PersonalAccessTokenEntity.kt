@@ -20,6 +20,10 @@ class PersonalAccessTokenEntity(
     var userId by PersonalAccessTokenTable.userId
     var revokedAt by PersonalAccessTokenTable.revokedAt
     var lastAccessedAt by PersonalAccessTokenTable.lastAccessedAt
+    var expiresAt by PersonalAccessTokenTable.expiresAt
+    var idleTimeoutSeconds by PersonalAccessTokenTable.idleTimeoutSeconds
+    var expiryReminderSentAt by PersonalAccessTokenTable.expiryReminderSentAt
+    var expiredNoticeSentAt by PersonalAccessTokenTable.expiredNoticeSentAt
     var createdAt by PersonalAccessTokenTable.createdAt
     var updatedAt by PersonalAccessTokenTable.updatedAt
     val authorizationCodes by AuthorizationCodeEntity optionalReferrersOn AuthorizationCodeTable.personalAccessTokenId

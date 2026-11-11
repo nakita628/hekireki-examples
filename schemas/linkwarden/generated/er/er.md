@@ -65,13 +65,25 @@ erDiagram
         string referredBy
         datetime lastPickedAt
         boolean acceptPromotionalEmails
+        boolean shareUsageAnalytics
         boolean trialEndEmailSent
+        int sessionVersion
+        int passwordRetries
+        datetime passwordRetryAt
         datetime createdAt
         datetime updatedAt
     }
     VerificationToken {
         string identifier UK
         string token UK
+        datetime expires
+        datetime createdAt
+        datetime updatedAt
+    }
+    EmailVerificationCode {
+        string identifier UK
+        string code
+        int attempts
         datetime expires
         datetime createdAt
         datetime updatedAt
@@ -113,6 +125,7 @@ erDiagram
         string description
         int createdById FK
         int collectionId FK
+        float collectionOrder
         string icon
         string iconWeight
         string color

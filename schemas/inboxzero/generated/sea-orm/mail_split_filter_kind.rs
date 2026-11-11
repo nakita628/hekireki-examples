@@ -20,4 +20,6 @@ pub enum MailSplitFilterKind {
     From,
     #[sea_orm(string_value = "OLDER_THAN")]
     OlderThan,
+    #[sea_orm(string_value = "TO")]
+    To,
 }

@@ -130,6 +130,7 @@ Enum MailSplitFilterKind {
   CATEGORY
   FROM
   OLDER_THAN
+  TO
 }
 
 Enum DraftReplyConfidence {
@@ -1416,6 +1417,19 @@ Table ChatCompaction {
   chatId String [not null]
 }
 
+Table ChatActionTotal {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  action String [not null]
+  count Int [default: 0, not null]
+  chatId String [not null]
+
+  indexes {
+    (chatId, action) [unique]
+  }
+}
+
 Table ChatMemory {
   id String [pk]
   createdAt DateTime [default: `now()`, not null]
@@ -2317,6 +2331,8 @@ Ref Chat_emailAccountId_fk: Chat.emailAccountId > EmailAccount.id [delete: casca
 Ref ChatMessage_chatId_fk: ChatMessage.chatId > Chat.id [delete: cascade]
 
 Ref ChatCompaction_chatId_fk: ChatCompaction.chatId > Chat.id [delete: cascade]
+
+Ref ChatActionTotal_chatId_fk: ChatActionTotal.chatId > Chat.id [delete: cascade]
 
 Ref ChatMemory_chatId_fk: ChatMemory.chatId > Chat.id [delete: set null]
 

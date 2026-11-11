@@ -14,4 +14,13 @@ public enum GatewayProvider
 
     [PgName("bedrock")]
     Bedrock,
+
+    [PgName("openrouter")]
+    Openrouter,
+
+    [PgName("xai")]
+    Xai,
+
+    [PgName("vercel")]
+    Vercel,
 }

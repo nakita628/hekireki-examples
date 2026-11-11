@@ -66,7 +66,11 @@ export interface User {
   referredBy: string | null
   lastPickedAt: Timestamp | null
   acceptPromotionalEmails: Generated<boolean>
+  shareUsageAnalytics: Generated<boolean>
   trialEndEmailSent: Generated<boolean>
+  sessionVersion: Generated<number>
+  passwordRetries: Generated<number>
+  passwordRetryAt: Timestamp | null
   createdAt: Generated<Timestamp>
   updatedAt: Generated<Timestamp>
 }
@@ -74,6 +78,15 @@ export interface User {
 export interface VerificationToken {
   identifier: string
   token: string
+  expires: Timestamp
+  createdAt: Generated<Timestamp>
+  updatedAt: Generated<Timestamp>
+}
+
+export interface EmailVerificationCode {
+  identifier: string
+  code: string
+  attempts: Generated<number>
   expires: Timestamp
   createdAt: Generated<Timestamp>
   updatedAt: Generated<Timestamp>
@@ -119,6 +132,7 @@ export interface Link {
   description: Generated<string>
   createdById: number | null
   collectionId: number
+  collectionOrder: number
   icon: string | null
   iconWeight: string | null
   color: string | null
@@ -240,6 +254,7 @@ export interface DB {
   Account: Account
   User: User
   VerificationToken: VerificationToken
+  EmailVerificationCode: EmailVerificationCode
   PasswordResetToken: PasswordResetToken
   Collection: Collection
   UsersAndCollections: UsersAndCollections

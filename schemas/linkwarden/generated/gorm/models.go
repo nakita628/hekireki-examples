@@ -74,7 +74,11 @@ type User struct {
 	ReferredBy              *string               `gorm:"column:referredBy" json:"referredBy"`
 	LastPickedAt            *DateTime             `gorm:"column:lastPickedAt" json:"lastPickedAt"`
 	AcceptPromotionalEmails bool                  `gorm:"column:acceptPromotionalEmails;default:false;not null" json:"acceptPromotionalEmails"`
+	ShareUsageAnalytics     *bool                 `gorm:"column:shareUsageAnalytics;default:true;not null" json:"shareUsageAnalytics"`
 	TrialEndEmailSent       bool                  `gorm:"column:trialEndEmailSent;default:false;not null" json:"trialEndEmailSent"`
+	SessionVersion          int                   `gorm:"column:sessionVersion;default:0;not null" json:"sessionVersion"`
+	PasswordRetries         int                   `gorm:"column:passwordRetries;default:0;not null" json:"passwordRetries"`
+	PasswordRetryAt         *DateTime             `gorm:"column:passwordRetryAt" json:"passwordRetryAt"`
 	CreatedAt               DateTime              `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
 	UpdatedAt               DateTime              `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
 	ParentSubscription      *Subscription         `gorm:"foreignKey:ParentSubscriptionID"`
@@ -141,6 +145,38 @@ func (m *VerificationToken) BeforeCreate(tx *gorm.DB) error {
 }
 
 func (*VerificationToken) BeforeUpdate(tx *gorm.DB) error {
+	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
+	if !tx.Statement.Changed("UpdatedAt") {
+		tx.Statement.SetColumn("UpdatedAt", DateTime{Time: now})
+	}
+	return nil
+}
+
+type EmailVerificationCode struct {
+	Identifier string   `gorm:"column:identifier;primaryKey;uniqueIndex" json:"identifier"`
+	Code       string   `gorm:"column:code;not null" json:"code"`
+	Attempts   int      `gorm:"column:attempts;default:0;not null" json:"attempts"`
+	Expires    DateTime `gorm:"column:expires;not null" json:"expires"`
+	CreatedAt  DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
+	UpdatedAt  DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
+}
+
+func (EmailVerificationCode) TableName() string {
+	return "EmailVerificationCode"
+}
+
+func (m *EmailVerificationCode) BeforeCreate(tx *gorm.DB) error {
+	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
+	if m.CreatedAt.IsZero() {
+		m.CreatedAt = DateTime{Time: now}
+	}
+	if m.UpdatedAt.IsZero() {
+		m.UpdatedAt = DateTime{Time: now}
+	}
+	return nil
+}
+
+func (*EmailVerificationCode) BeforeUpdate(tx *gorm.DB) error {
 	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
 	if !tx.Statement.Changed("UpdatedAt") {
 		tx.Statement.SetColumn("UpdatedAt", DateTime{Time: now})
@@ -261,12 +297,13 @@ func (*UsersAndCollections) BeforeUpdate(tx *gorm.DB) error {
 }
 
 type Link struct {
-	ID              int       `gorm:"column:id;primaryKey;autoIncrement" json:"id"`
+	ID              int       `gorm:"column:id;primaryKey;autoIncrement;index:Link_collectionId_collectionOrder_id_idx" json:"id"`
 	Name            string    `gorm:"column:name;default:'';not null" json:"name"`
 	Type            *string   `gorm:"column:type;default:'url';not null" json:"type"`
 	Description     string    `gorm:"column:description;default:'';not null" json:"description"`
 	CreatedByID     *int      `gorm:"column:createdById" json:"createdById"`
-	CollectionID    int       `gorm:"column:collectionId;index:Link_collectionId_idx;not null" json:"collectionId"`
+	CollectionID    int       `gorm:"column:collectionId;index:Link_collectionId_idx;index:Link_collectionId_collectionOrder_id_idx;not null" json:"collectionId"`
+	CollectionOrder float64   `gorm:"column:collectionOrder;index:Link_collectionId_collectionOrder_id_idx;not null" json:"collectionOrder"`
 	Icon            *string   `gorm:"column:icon" json:"icon"`
 	IconWeight      *string   `gorm:"column:iconWeight" json:"iconWeight"`
 	Color           *string   `gorm:"column:color" json:"color"`

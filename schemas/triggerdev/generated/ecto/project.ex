@@ -23,6 +23,7 @@ defmodule Trigger.Project do
           organization: Trigger.Organization.t() | nil,
           default_worker_group: Trigger.WorkerInstanceGroup.t() | nil,
           connected_github_repository: Trigger.ConnectedGithubRepository.t() | nil,
+          trusted_deploy_repository: Trigger.TrustedDeployRepository.t() | nil,
           worker_groups: [Trigger.WorkerInstanceGroup.t()],
           workers: [Trigger.WorkerInstance.t()],
           environments: [Trigger.RuntimeEnvironment.t()],
@@ -76,6 +77,7 @@ defmodule Trigger.Project do
     belongs_to(:organization, Trigger.Organization, foreign_key: :organization_id, define_field: false, type: :string)
     belongs_to(:default_worker_group, Trigger.WorkerInstanceGroup, foreign_key: :default_worker_group_id, define_field: false, type: :string)
     has_one(:connected_github_repository, Trigger.ConnectedGithubRepository, foreign_key: :project_id, references: :id)
+    has_one(:trusted_deploy_repository, Trigger.TrustedDeployRepository, foreign_key: :project_id, references: :id)
     has_many(:worker_groups, Trigger.WorkerInstanceGroup, foreign_key: :project_id, references: :id)
     has_many(:workers, Trigger.WorkerInstance, foreign_key: :project_id, references: :id)
     has_many(:environments, Trigger.RuntimeEnvironment, foreign_key: :project_id, references: :id)

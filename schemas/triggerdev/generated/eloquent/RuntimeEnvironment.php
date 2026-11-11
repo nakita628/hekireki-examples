@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class RuntimeEnvironment extends Model
 {
@@ -99,6 +100,11 @@ class RuntimeEnvironment extends Model
     public function currentSession(): BelongsTo
     {
         return $this->belongsTo(RuntimeEnvironmentSession::class, 'currentSessionId');
+    }
+
+    public function trustedDeployGrant(): HasOne
+    {
+        return $this->hasOne(TrustedDeployEnvironment::class, 'runtimeEnvironmentId');
     }
 
     public function childEnvironments(): HasMany

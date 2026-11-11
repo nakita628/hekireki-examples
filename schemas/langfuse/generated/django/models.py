@@ -88,6 +88,9 @@ class GatewayProvider(models.TextChoices):
     OPENAI = "openai"
     ANTHROPIC = "anthropic"
     BEDROCK = "bedrock"
+    OPENROUTER = "openrouter"
+    XAI = "xai"
+    VERCEL = "vercel"
 
 
 class GatewayConnectionStatus(models.TextChoices):
@@ -807,8 +810,8 @@ class AnnotationQueueItem(models.Model):
     class Meta:
         db_table = "annotation_queue_items"
         indexes = [
-            models.Index(fields=["id", "project"]),
             models.Index(fields=["project", "queue", "status"]),
+            models.Index(fields=["project", "queue", "created_at", "id"]),
             models.Index(fields=["object_id", "object_type", "project", "queue"]),
             models.Index(fields=["annotator_user"]),
             models.Index(fields=["created_at"]),

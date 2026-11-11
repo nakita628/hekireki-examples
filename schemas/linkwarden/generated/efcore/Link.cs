@@ -27,6 +27,8 @@ public partial class Link
 
     public int CollectionId { get; set; }
 
+    public double CollectionOrder { get; set; }
+
     public virtual ICollection<Tag> Tags { get; set; } = new List<Tag>();
 
     public string? Icon { get; set; }

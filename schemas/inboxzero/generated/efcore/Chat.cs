@@ -31,6 +31,8 @@ public partial class Chat
 
     public virtual ICollection<ChatMemory> Memories { get; set; } = new List<ChatMemory>();
 
+    public virtual ICollection<ChatActionTotal> ActionTotals { get; set; } = new List<ChatActionTotal>();
+
     public string EmailAccountId { get; set; } = null!;
 
     public virtual EmailAccount EmailAccount { get; set; } = null!;

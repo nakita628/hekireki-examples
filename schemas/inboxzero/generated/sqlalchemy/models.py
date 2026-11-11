@@ -305,7 +305,7 @@ class MailSplitFilter(Base):
     __tablename__ = "MailSplitFilter"
 
     id: Mapped[str] = mapped_column(primary_key=True)
-    kind: Mapped[str] = mapped_column(Enum("UNREAD", "STARRED", "LABEL", "CATEGORY", "FROM", "OLDER_THAN", name="MailSplitFilterKind"))
+    kind: Mapped[str] = mapped_column(Enum("UNREAD", "STARRED", "LABEL", "CATEGORY", "FROM", "OLDER_THAN", "TO", name="MailSplitFilterKind"))
     value: Mapped[Optional[str]]
     order: Mapped[int]
     mail_split_id: Mapped[str] = mapped_column("mailSplitId", ForeignKey("MailSplit.id", ondelete="CASCADE", onupdate="CASCADE", name="MailSplitFilter_mailSplitId_fkey"))
@@ -1514,6 +1514,7 @@ class Chat(Base):
     messages: Mapped[list["ChatMessage"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="chat")
     compactions: Mapped[list["ChatCompaction"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="chat")
     memories: Mapped[list["ChatMemory"]] = relationship(back_populates="chat")
+    action_totals: Mapped[list["ChatActionTotal"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="chat")
 
 class ChatMessage(Base):
     __tablename__ = "ChatMessage"
@@ -1547,6 +1548,22 @@ class ChatCompaction(Base):
     )
 
     chat: Mapped["Chat"] = relationship(back_populates="compactions")
+
+class ChatActionTotal(Base):
+    __tablename__ = "ChatActionTotal"
+
+    id: Mapped[str] = mapped_column(primary_key=True)
+    created_at: Mapped[datetime] = mapped_column("createdAt", default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
+    updated_at: Mapped[datetime] = mapped_column("updatedAt", default=utc_now, onupdate=utc_now)
+    action: Mapped[str]
+    count: Mapped[int] = mapped_column(default=0, server_default=text("0"))
+    chat_id: Mapped[str] = mapped_column("chatId", ForeignKey("Chat.id", ondelete="CASCADE", onupdate="CASCADE", name="ChatActionTotal_chatId_fkey"))
+
+    __table_args__ = (
+        Index("ChatActionTotal_chatId_action_key", "chatId", "action", unique=True),
+    )
+
+    chat: Mapped["Chat"] = relationship(back_populates="action_totals")
 
 class ChatMemory(Base):
     __tablename__ = "ChatMemory"

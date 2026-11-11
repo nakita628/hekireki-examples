@@ -3,7 +3,7 @@ use sea_orm::entity::prelude::*;
 use sea_orm::Set;
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize)]
 #[sea_orm(table_name = "Link")]
 pub struct Model {
     #[sea_orm(primary_key)]
@@ -18,6 +18,8 @@ pub struct Model {
     pub created_by_id: Option<i32>,
     #[sea_orm(column_name = "collectionId")]
     pub collection_id: i32,
+    #[sea_orm(column_name = "collectionOrder")]
+    pub collection_order: f64,
     pub icon: Option<String>,
     #[sea_orm(column_name = "iconWeight")]
     pub icon_weight: Option<String>,

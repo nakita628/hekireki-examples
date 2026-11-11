@@ -23,4 +23,7 @@ public enum MailSplitFilterKind
 
     [PgName("OLDER_THAN")]
     OlderThan,
+
+    [PgName("TO")]
+    To,
 }

@@ -19,6 +19,7 @@ object PrismaSchema {
             AccountTable,
             UserTable,
             VerificationTokenTable,
+            EmailVerificationCodeTable,
             PasswordResetTokenTable,
             CollectionTable,
             UsersAndCollectionsTable,

@@ -1,0 +1,1906 @@
+Enum JobStatus {
+  ACTIVE
+  INACTIVE
+}
+
+Enum AccountingDeliveryState {
+  pending
+  applied
+  parked
+}
+
+Table LiteLLM_BudgetTable {
+  budget_id String [pk]
+  max_budget Float
+  soft_budget Float
+  max_parallel_requests Int
+  tpm_limit BigInt
+  rpm_limit BigInt
+  tpd_limit BigInt
+  model_max_budget Json
+  model_tpm_limit Json
+  model_rpm_limit Json
+  budget_duration String
+  budget_reset_at DateTime
+  allowed_models String[] [not null]
+  temp_budget_increase Float
+  temp_budget_expiry DateTime
+  created_at DateTime [default: `now()`, not null]
+  created_by String [not null]
+  updated_at DateTime [default: `now()`, not null]
+  updated_by String [not null]
+}
+
+Table LiteLLM_CredentialsTable {
+  credential_id String [pk]
+  credential_name String [unique, not null]
+  display_name String
+  credential_values Json [not null]
+  credential_info Json
+  created_at DateTime [default: `now()`, not null]
+  created_by String [not null]
+  updated_at DateTime [default: `now()`, not null]
+  updated_by String [not null]
+}
+
+Table LiteLLM_ProxyModelTable {
+  model_id String [pk]
+  model_name String [not null]
+  litellm_params Json [not null]
+  model_info Json
+  blocked Boolean [default: false, not null]
+  created_at DateTime [default: `now()`, not null]
+  created_by String [not null]
+  updated_at DateTime [default: `now()`, not null]
+  updated_by String [not null]
+}
+
+Table LiteLLM_AgentsTable {
+  agent_id String [pk]
+  agent_name String [unique, not null]
+  litellm_params Json
+  agent_card_params Json [not null]
+  static_headers Json [default: '{}']
+  extra_headers String[] [not null]
+  kill_switch Json
+  agent_access_groups String[] [not null]
+  access_group_ids String[] [not null]
+  object_permission_id String
+  spend Float [default: 0, not null]
+  identity_managed Boolean [default: false, not null]
+  enabled Boolean [default: true, not null]
+  execution_mode String [default: 'autonomous', not null]
+  tpm_limit Int
+  rpm_limit Int
+  session_tpm_limit Int
+  session_rpm_limit Int
+  created_at DateTime [default: `now()`, not null]
+  created_by String [not null]
+  updated_at DateTime [default: `now()`, not null]
+  updated_by String [not null]
+}
+
+Table LiteLLM_AgentIdentity {
+  agent_id String [pk]
+  active Boolean [default: true, not null]
+  provider String [not null]
+  issuer String [not null]
+  tenant_id String [not null]
+  client_id String [not null]
+  service_principal_id String
+  required_roles String[] [not null]
+  required_scopes String[] [not null]
+  revision String [not null]
+  last_authenticated_at DateTime
+
+  indexes {
+    (provider, tenant_id, client_id) [unique]
+    (issuer, service_principal_id) [unique]
+  }
+}
+
+Table LiteLLM_RetiredAgentIdentity {
+  binding_id String [pk]
+  agent_id String
+  provider String [not null]
+  issuer String [not null]
+  tenant_id String [not null]
+  client_id String [not null]
+
+  indexes {
+    (provider, tenant_id, client_id) [unique]
+  }
+}
+
+Table LiteLLM_RetiredAgent {
+  original_agent_id String [pk]
+  retired_at DateTime [default: `now()`, not null]
+}
+
+Table LiteLLM_VerifiedSubject {
+  subject_id String [pk]
+  issuer String [not null]
+  tenant_id String [not null]
+  oid String [not null]
+  kind String [default: 'human', not null]
+  user_id String
+  verified_via String [default: 'sso_interactive', not null]
+  verified_at DateTime [default: `now()`, not null]
+
+  indexes {
+    (issuer, tenant_id, oid) [unique]
+  }
+}
+
+Table LiteLLM_OrganizationTable {
+  organization_id String [pk]
+  organization_alias String [not null]
+  budget_id String [not null]
+  metadata Json [default: '{}', not null]
+  models String[] [not null]
+  spend Float [default: 0, not null]
+  model_spend Json [default: '{}', not null]
+  object_permission_id String
+  created_at DateTime [default: `now()`, not null]
+  created_by String [not null]
+  updated_at DateTime [default: `now()`, not null]
+  updated_by String [not null]
+}
+
+Table LiteLLM_ModelTable {
+  id Int [pk, increment]
+  aliases Json
+  created_at DateTime [default: `now()`, not null]
+  created_by String [not null]
+  updated_at DateTime [default: `now()`, not null]
+  updated_by String [not null]
+}
+
+Table LiteLLM_TeamTable {
+  team_id String [pk]
+  team_alias String
+  organization_id String
+  object_permission_id String
+  admins String[] [not null]
+  members String[] [not null]
+  members_with_roles Json [default: '{}', not null]
+  metadata Json [default: '{}', not null]
+  max_budget Float
+  soft_budget Float
+  spend Float [default: 0, not null]
+  models String[] [not null]
+  max_parallel_requests Int
+  tpm_limit BigInt
+  rpm_limit BigInt
+  tpd_limit BigInt
+  budget_duration String
+  budget_reset_at DateTime
+  blocked Boolean [default: false, not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+  model_spend Json [default: '{}', not null]
+  model_max_budget Json [default: '{}', not null]
+  router_settings Json [default: '{}']
+  team_member_permissions String[] [not null]
+  access_group_ids String[] [not null]
+  policies String[] [not null]
+  default_team_member_models String[] [not null]
+  budget_limits Json
+  model_id Int [unique]
+  allow_team_guardrail_config Boolean [default: false, not null]
+}
+
+Table LiteLLM_ProjectTable {
+  project_id String [pk]
+  project_alias String
+  description String
+  team_id String
+  budget_id String
+  metadata Json [default: '{}', not null]
+  models String[] [not null]
+  spend Float [default: 0, not null]
+  model_spend Json [default: '{}', not null]
+  model_rpm_limit Json [default: '{}', not null]
+  model_tpm_limit Json [default: '{}', not null]
+  blocked Boolean [default: false, not null]
+  object_permission_id String
+  created_at DateTime [default: `now()`, not null]
+  created_by String [not null]
+  updated_at DateTime [default: `now()`, not null]
+  updated_by String [not null]
+}
+
+Table LiteLLM_DeletedTeamTable {
+  id String [pk]
+  team_id String [not null]
+  team_alias String
+  organization_id String
+  object_permission_id String
+  admins String[] [not null]
+  members String[] [not null]
+  members_with_roles Json [default: '{}', not null]
+  metadata Json [default: '{}', not null]
+  max_budget Float
+  soft_budget Float
+  spend Float [default: 0, not null]
+  models String[] [not null]
+  max_parallel_requests Int
+  tpm_limit BigInt
+  rpm_limit BigInt
+  tpd_limit BigInt
+  budget_duration String
+  budget_reset_at DateTime
+  blocked Boolean [default: false, not null]
+  model_spend Json [default: '{}', not null]
+  model_max_budget Json [default: '{}', not null]
+  router_settings Json [default: '{}']
+  team_member_permissions String[] [not null]
+  access_group_ids String[] [not null]
+  policies String[] [not null]
+  model_id Int
+  allow_team_guardrail_config Boolean [default: false, not null]
+  created_at DateTime
+  updated_at DateTime
+  deleted_at DateTime [default: `now()`, not null]
+  deleted_by String
+  deleted_by_api_key String
+  litellm_changed_by String
+}
+
+Table LiteLLM_UserTable {
+  user_id String [pk]
+  user_alias String
+  team_id String
+  sso_user_id String [unique]
+  organization_id String
+  object_permission_id String
+  password String
+  password_reset_required Boolean
+  last_breach_check_at DateTime
+  teams String[] [not null]
+  user_role String
+  max_budget Float
+  spend Float [default: 0, not null]
+  user_email String
+  models String[] [not null]
+  metadata Json [default: '{}', not null]
+  max_parallel_requests Int
+  tpm_limit BigInt
+  rpm_limit BigInt
+  budget_duration String
+  budget_reset_at DateTime
+  allowed_cache_controls String[] [not null]
+  policies String[] [not null]
+  model_spend Json [default: '{}', not null]
+  model_max_budget Json [default: '{}', not null]
+  created_at DateTime [default: `now()`]
+  updated_at DateTime [default: `now()`]
+}
+
+Table LiteLLM_ObjectPermissionTable {
+  object_permission_id String [pk]
+  mcp_servers String[] [not null]
+  mcp_access_groups String[] [not null]
+  mcp_tool_permissions Json
+  vector_stores String[] [not null]
+  agents String[] [not null]
+  agent_access_groups String[] [not null]
+  models String[] [not null]
+  blocked_tools String[] [not null]
+  mcp_toolsets String[] [not null]
+  search_tools String[] [not null]
+  mcp_tool_search_enabled Boolean
+  skills String[] [not null]
+}
+
+Table LiteLLM_MCPServerTable {
+  server_id String [pk]
+  server_name String
+  alias String
+  description String
+  instructions String
+  url String
+  spec_path String
+  transport String [default: 'sse', not null]
+  auth_type String
+  credentials Json [default: '{}']
+  created_at DateTime [default: `now()`]
+  created_by String
+  updated_at DateTime [default: `now()`]
+  updated_by String
+  mcp_info Json [default: '{}']
+  mcp_access_groups String[] [not null]
+  allowed_tools String[] [not null]
+  tool_name_to_display_name Json [default: '{}']
+  tool_name_to_description Json [default: '{}']
+  pinned_tools Json [default: '{}']
+  extra_headers String[] [not null]
+  static_headers Json [default: '{}']
+  env_vars Json [default: '[]']
+  status String [default: 'unknown']
+  last_health_check DateTime
+  health_check_error String
+  command String
+  args String[] [not null]
+  env Json [default: '{}']
+  issuer String
+  authorization_url String
+  token_url String
+  registration_url String
+  oauth2_flow String
+  token_exchange_endpoint String
+  audience String
+  subject_token_type String
+  token_exchange_profile String
+  allow_all_keys Boolean [default: false, not null]
+  available_on_public_internet Boolean [default: true, not null]
+  delegate_auth_to_upstream Boolean [default: false, not null]
+  oauth_passthrough Boolean [default: false, not null]
+  dcr_bridge Boolean
+  per_server_oauth_discovery Boolean [default: false, not null]
+  is_byok Boolean [default: false, not null]
+  byok_description String[] [not null]
+  byok_api_key_help_url String
+  source_url String
+  timeout Float
+  max_concurrent_requests Int
+  rpm Int
+  approval_status String [default: 'active']
+  submitted_by String
+  submitted_at DateTime
+  reviewed_at DateTime
+  review_notes String
+}
+
+Table LiteLLM_MCPToolsetTable {
+  toolset_id String [pk]
+  toolset_name String [unique, not null]
+  description String
+  tools Json [default: '[]', not null]
+  created_at DateTime [default: `now()`, not null]
+  created_by String
+  updated_at DateTime [default: `now()`, not null]
+  updated_by String
+}
+
+Table LiteLLM_MCPUserCredentials {
+  id String [pk]
+  user_id String [not null]
+  server_id String [not null]
+  credential_b64 String [not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+
+  indexes {
+    (user_id, server_id) [unique]
+  }
+}
+
+Table LiteLLM_UserProviderCredentials {
+  id String [pk]
+  user_id String [not null]
+  credential_name String [not null]
+  provider String [not null]
+  credential_b64 String [not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+
+  indexes {
+    (user_id, credential_name) [unique]
+  }
+}
+
+Table LiteLLM_MCPUserEnvVars {
+  id String [pk]
+  user_id String [not null]
+  server_id String [not null]
+  values_b64 String [not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+
+  indexes {
+    (user_id, server_id) [unique]
+  }
+}
+
+Table LiteLLM_MCPServerOAuthClient {
+  server_id String [pk]
+  credentials Json
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+}
+
+Table LiteLLM_SSOIdentityAssertion {
+  user_id String [pk]
+  assertion_b64 String [not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+}
+
+Table LiteLLM_VerificationToken {
+  token String [pk]
+  key_name String
+  key_alias String
+  soft_budget_cooldown Boolean [default: false, not null]
+  spend Float [default: 0, not null]
+  total_spend Float [default: 0, not null]
+  expires DateTime
+  models String[] [not null]
+  aliases Json [default: '{}', not null]
+  config Json [default: '{}', not null]
+  router_settings Json [default: '{}']
+  user_id String
+  team_id String
+  agent_id String
+  project_id String
+  permissions Json [default: '{}', not null]
+  max_parallel_requests Int
+  metadata Json [default: '{}', not null]
+  blocked Boolean
+  tpm_limit BigInt
+  rpm_limit BigInt
+  tpd_limit BigInt
+  max_budget Float
+  budget_duration String
+  budget_reset_at DateTime
+  allowed_cache_controls String[] [not null]
+  allowed_routes String[] [not null]
+  key_type String
+  policies String[] [not null]
+  access_group_ids String[] [not null]
+  model_spend Json [default: '{}', not null]
+  model_max_budget Json [default: '{}', not null]
+  budget_fallbacks Json [default: '{}', not null]
+  budget_id String
+  organization_id String
+  object_permission_id String
+  created_at DateTime [default: `now()`]
+  created_by String
+  updated_at DateTime [default: `now()`]
+  updated_by String
+  settings_updated_at DateTime
+  last_active DateTime
+  rotation_count Int [default: 0]
+  auto_rotate Boolean [default: false]
+  rotation_interval String
+  last_rotation_at DateTime
+  key_rotation_at DateTime
+  budget_limits Json
+}
+
+Table LiteLLM_JWTKeyMapping {
+  id String [pk]
+  jwt_issuer String [default: '', not null]
+  jwt_claim_name String [not null]
+  jwt_claim_value String [not null]
+  token String [not null]
+  description String
+  is_active Boolean [default: true, not null]
+  created_at DateTime [default: `now()`, not null]
+  created_by String
+  updated_at DateTime [default: `now()`, not null]
+  updated_by String
+
+  indexes {
+    (jwt_issuer, jwt_claim_name, jwt_claim_value) [unique]
+  }
+}
+
+Table LiteLLM_DeprecatedVerificationToken {
+  id String [pk]
+  token String [unique, not null]
+  active_token_id String [not null]
+  revoke_at DateTime [not null]
+  created_at DateTime [default: `now()`, not null]
+}
+
+Table LiteLLM_DeletedVerificationToken {
+  id String [pk]
+  token String [not null]
+  key_name String
+  key_alias String
+  soft_budget_cooldown Boolean [default: false, not null]
+  spend Float [default: 0, not null]
+  total_spend Float [default: 0, not null]
+  expires DateTime
+  models String[] [not null]
+  aliases Json [default: '{}', not null]
+  config Json [default: '{}', not null]
+  user_id String
+  team_id String
+  agent_id String
+  project_id String
+  permissions Json [default: '{}', not null]
+  max_parallel_requests Int
+  metadata Json [default: '{}', not null]
+  blocked Boolean
+  tpm_limit BigInt
+  rpm_limit BigInt
+  tpd_limit BigInt
+  max_budget Float
+  budget_duration String
+  budget_reset_at DateTime
+  allowed_cache_controls String[] [not null]
+  allowed_routes String[] [not null]
+  key_type String
+  policies String[] [not null]
+  access_group_ids String[] [not null]
+  model_spend Json [default: '{}', not null]
+  model_max_budget Json [default: '{}', not null]
+  budget_fallbacks Json [default: '{}', not null]
+  router_settings Json [default: '{}']
+  budget_id String
+  organization_id String
+  object_permission_id String
+  created_at DateTime
+  created_by String
+  updated_at DateTime
+  updated_by String
+  settings_updated_at DateTime
+  last_active DateTime
+  rotation_count Int [default: 0]
+  auto_rotate Boolean [default: false]
+  rotation_interval String
+  last_rotation_at DateTime
+  key_rotation_at DateTime
+  deleted_at DateTime [default: `now()`, not null]
+  deleted_by String
+  deleted_by_api_key String
+  litellm_changed_by String
+}
+
+Table LiteLLM_EndUserTable {
+  user_id String [pk]
+  alias String
+  spend Float [default: 0, not null]
+  allowed_model_region String
+  default_model String
+  models String[] [not null]
+  budget_id String
+  object_permission_id String
+  blocked Boolean [default: false, not null]
+}
+
+Table LiteLLM_ModelAccessGroupBudgetTable {
+  access_group_name String [pk]
+  spend Float [default: 0, not null]
+  budget_id String
+  created_at DateTime [default: `now()`, not null]
+  created_by String
+  updated_at DateTime [default: `now()`, not null]
+  updated_by String
+}
+
+Table LiteLLM_TagTable {
+  tag_name String [pk]
+  description String
+  models String[] [not null]
+  model_info Json
+  spend Float [default: 0, not null]
+  budget_id String
+  created_at DateTime [default: `now()`, not null]
+  created_by String
+  updated_at DateTime [default: `now()`, not null]
+}
+
+Table LiteLLM_Config {
+  param_name String [pk]
+  param_value Json
+  last_run_at DateTime
+  reload_revision BigInt [default: 0, not null]
+}
+
+Table LiteLLM_SpendLogs {
+  request_id String [pk]
+  call_type String [not null]
+  api_key String [default: '', not null]
+  spend Float [default: 0, not null]
+  total_tokens Int [default: 0, not null]
+  prompt_tokens Int [default: 0, not null]
+  completion_tokens Int [default: 0, not null]
+  startTime DateTime [not null]
+  endTime DateTime [not null]
+  request_duration_ms Int
+  completionStartTime DateTime
+  model String [default: '', not null]
+  model_id String [default: '']
+  model_group String [default: '']
+  custom_llm_provider String [default: '']
+  api_base String [default: '']
+  user String [default: '']
+  metadata Json [default: '{}']
+  cache_hit String [default: '']
+  cache_key String [default: '']
+  request_tags Json [default: '[]']
+  team_id String
+  organization_id String
+  end_user String
+  requester_ip_address String
+  messages Json [default: '{}']
+  response Json [default: '{}']
+  session_id String
+  status String
+  mcp_namespaced_tool_name String
+  billing_agent_id String
+  agent_id String
+  proxy_server_request Json [default: '{}']
+  litellm_call_id String
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+}
+
+Table LiteLLM_BudgetWindowSpend {
+  entity_type String [not null]
+  entity_id String [not null]
+  window_duration String [not null]
+  window_start DateTime [not null]
+  spend Float [default: 0, not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+
+  indexes {
+    (entity_type, entity_id, window_duration) [pk]
+  }
+}
+
+Table LiteLLM_ErrorLogs {
+  request_id String [pk]
+  startTime DateTime [not null]
+  endTime DateTime [not null]
+  api_base String [default: '', not null]
+  model_group String [default: '', not null]
+  litellm_model_name String [default: '', not null]
+  model_id String [default: '', not null]
+  request_kwargs Json [default: '{}', not null]
+  exception_type String [default: '', not null]
+  exception_string String [default: '', not null]
+  status_code String [default: '', not null]
+}
+
+Table LiteLLM_UserNotifications {
+  request_id String [pk]
+  user_id String [not null]
+  models String[] [not null]
+  justification String [not null]
+  status String [not null]
+}
+
+Table LiteLLM_TeamMembership {
+  user_id String [not null]
+  team_id String [not null]
+  spend Float [default: 0, not null]
+  total_spend Float [default: 0, not null]
+  budget_id String
+
+  indexes {
+    (user_id, team_id) [pk]
+  }
+}
+
+Table LiteLLM_OrganizationMembership {
+  user_id String [not null]
+  organization_id String [not null]
+  user_role String
+  spend Float [default: 0]
+  budget_id String
+  created_at DateTime [default: `now()`]
+  updated_at DateTime [default: `now()`]
+
+  indexes {
+    (user_id, organization_id) [pk]
+    (user_id, organization_id) [unique]
+  }
+}
+
+Table LiteLLM_InvitationLink {
+  id String [pk]
+  user_id String [not null]
+  is_accepted Boolean [default: false, not null]
+  accepted_at DateTime
+  expires_at DateTime [not null]
+  created_at DateTime [not null]
+  created_by String [not null]
+  updated_at DateTime [not null]
+  updated_by String [not null]
+}
+
+Table LiteLLM_AuditLog {
+  id String [pk]
+  updated_at DateTime [default: `now()`, not null]
+  changed_by String [default: '', not null]
+  changed_by_api_key String [default: '', not null]
+  action String [not null]
+  table_name String [not null]
+  object_id String [not null]
+  before_value Json
+  updated_values Json
+}
+
+Table LiteLLM_DailyUserSpend {
+  id String [pk]
+  user_id String
+  date String [not null]
+  api_key String [not null]
+  model String
+  model_group String
+  custom_llm_provider String
+  mcp_namespaced_tool_name String
+  endpoint String
+  prompt_tokens BigInt [default: 0, not null]
+  completion_tokens BigInt [default: 0, not null]
+  cache_read_input_tokens BigInt [default: 0, not null]
+  cache_creation_input_tokens BigInt [default: 0, not null]
+  compression_saved_tokens BigInt [default: 0, not null]
+  compression_savings_spend Float [default: 0, not null]
+  prompt_caching_savings_spend Float [default: 0, not null]
+  gateway_injected_caching_savings_spend Float [default: 0, not null]
+  autorouter_savings_spend Float [default: 0, not null]
+  guardrail_spend Float [default: 0, not null]
+  spend Float [default: 0, not null]
+  api_requests BigInt [default: 0, not null]
+  successful_requests BigInt [default: 0, not null]
+  failed_requests BigInt [default: 0, not null]
+  total_response_time_ms BigInt [default: 0, not null]
+  timed_requests BigInt [default: 0, not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+
+  indexes {
+    (user_id, date, api_key, model, custom_llm_provider, mcp_namespaced_tool_name, endpoint) [unique]
+  }
+}
+
+Table LiteLLM_DailyGlobalSpend {
+  id String [pk]
+  date String [not null]
+  model String
+  model_group String
+  custom_llm_provider String
+  mcp_namespaced_tool_name String
+  endpoint String
+  prompt_tokens BigInt [default: 0, not null]
+  completion_tokens BigInt [default: 0, not null]
+  cache_read_input_tokens BigInt [default: 0, not null]
+  cache_creation_input_tokens BigInt [default: 0, not null]
+  compression_saved_tokens BigInt [default: 0, not null]
+  compression_savings_spend Float [default: 0, not null]
+  prompt_caching_savings_spend Float [default: 0, not null]
+  gateway_injected_caching_savings_spend Float [default: 0, not null]
+  autorouter_savings_spend Float [default: 0, not null]
+  guardrail_spend Float [default: 0, not null]
+  spend Float [default: 0, not null]
+  api_requests BigInt [default: 0, not null]
+  successful_requests BigInt [default: 0, not null]
+  failed_requests BigInt [default: 0, not null]
+  total_response_time_ms BigInt [default: 0, not null]
+  timed_requests BigInt [default: 0, not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+
+  indexes {
+    (date, model, model_group, custom_llm_provider, mcp_namespaced_tool_name, endpoint) [unique]
+  }
+}
+
+Table LiteLLM_DailyOrganizationSpend {
+  id String [pk]
+  organization_id String
+  date String [not null]
+  api_key String [not null]
+  model String
+  model_group String
+  custom_llm_provider String
+  mcp_namespaced_tool_name String
+  endpoint String
+  prompt_tokens BigInt [default: 0, not null]
+  completion_tokens BigInt [default: 0, not null]
+  cache_read_input_tokens BigInt [default: 0, not null]
+  cache_creation_input_tokens BigInt [default: 0, not null]
+  compression_saved_tokens BigInt [default: 0, not null]
+  compression_savings_spend Float [default: 0, not null]
+  prompt_caching_savings_spend Float [default: 0, not null]
+  gateway_injected_caching_savings_spend Float [default: 0, not null]
+  autorouter_savings_spend Float [default: 0, not null]
+  guardrail_spend Float [default: 0, not null]
+  spend Float [default: 0, not null]
+  api_requests BigInt [default: 0, not null]
+  successful_requests BigInt [default: 0, not null]
+  failed_requests BigInt [default: 0, not null]
+  total_response_time_ms BigInt [default: 0, not null]
+  timed_requests BigInt [default: 0, not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+
+  indexes {
+    (organization_id, date, api_key, model, custom_llm_provider, mcp_namespaced_tool_name, endpoint) [unique]
+  }
+}
+
+Table LiteLLM_DailyEndUserSpend {
+  id String [pk]
+  end_user_id String
+  date String [not null]
+  api_key String [not null]
+  model String
+  model_group String
+  custom_llm_provider String
+  mcp_namespaced_tool_name String
+  endpoint String
+  prompt_tokens BigInt [default: 0, not null]
+  completion_tokens BigInt [default: 0, not null]
+  cache_read_input_tokens BigInt [default: 0, not null]
+  cache_creation_input_tokens BigInt [default: 0, not null]
+  compression_saved_tokens BigInt [default: 0, not null]
+  compression_savings_spend Float [default: 0, not null]
+  prompt_caching_savings_spend Float [default: 0, not null]
+  gateway_injected_caching_savings_spend Float [default: 0, not null]
+  autorouter_savings_spend Float [default: 0, not null]
+  guardrail_spend Float [default: 0, not null]
+  spend Float [default: 0, not null]
+  api_requests BigInt [default: 0, not null]
+  successful_requests BigInt [default: 0, not null]
+  failed_requests BigInt [default: 0, not null]
+  total_response_time_ms BigInt [default: 0, not null]
+  timed_requests BigInt [default: 0, not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+
+  indexes {
+    (end_user_id, date, api_key, model, custom_llm_provider, mcp_namespaced_tool_name, endpoint) [unique]
+  }
+}
+
+Table LiteLLM_DailyAgentSpend {
+  id String [pk]
+  agent_id String
+  date String [not null]
+  api_key String [not null]
+  model String
+  model_group String
+  custom_llm_provider String
+  mcp_namespaced_tool_name String
+  endpoint String
+  prompt_tokens BigInt [default: 0, not null]
+  completion_tokens BigInt [default: 0, not null]
+  cache_read_input_tokens BigInt [default: 0, not null]
+  cache_creation_input_tokens BigInt [default: 0, not null]
+  compression_saved_tokens BigInt [default: 0, not null]
+  compression_savings_spend Float [default: 0, not null]
+  prompt_caching_savings_spend Float [default: 0, not null]
+  gateway_injected_caching_savings_spend Float [default: 0, not null]
+  autorouter_savings_spend Float [default: 0, not null]
+  guardrail_spend Float [default: 0, not null]
+  spend Float [default: 0, not null]
+  api_requests BigInt [default: 0, not null]
+  successful_requests BigInt [default: 0, not null]
+  failed_requests BigInt [default: 0, not null]
+  total_response_time_ms BigInt [default: 0, not null]
+  timed_requests BigInt [default: 0, not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+
+  indexes {
+    (agent_id, date, api_key, model, custom_llm_provider, mcp_namespaced_tool_name, endpoint) [unique]
+  }
+}
+
+Table LiteLLM_DailyTeamSpend {
+  id String [pk]
+  team_id String
+  date String [not null]
+  api_key String [not null]
+  model String
+  model_group String
+  custom_llm_provider String
+  mcp_namespaced_tool_name String
+  endpoint String
+  prompt_tokens BigInt [default: 0, not null]
+  completion_tokens BigInt [default: 0, not null]
+  cache_read_input_tokens BigInt [default: 0, not null]
+  cache_creation_input_tokens BigInt [default: 0, not null]
+  compression_saved_tokens BigInt [default: 0, not null]
+  compression_savings_spend Float [default: 0, not null]
+  prompt_caching_savings_spend Float [default: 0, not null]
+  gateway_injected_caching_savings_spend Float [default: 0, not null]
+  autorouter_savings_spend Float [default: 0, not null]
+  guardrail_spend Float [default: 0, not null]
+  spend Float [default: 0, not null]
+  api_requests BigInt [default: 0, not null]
+  successful_requests BigInt [default: 0, not null]
+  failed_requests BigInt [default: 0, not null]
+  total_response_time_ms BigInt [default: 0, not null]
+  timed_requests BigInt [default: 0, not null]
+  ptu_flat_cost Float [default: 0, not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+
+  indexes {
+    (team_id, date, api_key, model, custom_llm_provider, mcp_namespaced_tool_name, endpoint) [unique]
+  }
+}
+
+Table LiteLLM_DailyTagSpend {
+  id String [pk]
+  request_id String
+  tag String
+  date String [not null]
+  api_key String [not null]
+  model String
+  model_group String
+  custom_llm_provider String
+  mcp_namespaced_tool_name String
+  endpoint String
+  prompt_tokens BigInt [default: 0, not null]
+  completion_tokens BigInt [default: 0, not null]
+  cache_read_input_tokens BigInt [default: 0, not null]
+  cache_creation_input_tokens BigInt [default: 0, not null]
+  compression_saved_tokens BigInt [default: 0, not null]
+  compression_savings_spend Float [default: 0, not null]
+  prompt_caching_savings_spend Float [default: 0, not null]
+  gateway_injected_caching_savings_spend Float [default: 0, not null]
+  autorouter_savings_spend Float [default: 0, not null]
+  guardrail_spend Float [default: 0, not null]
+  spend Float [default: 0, not null]
+  api_requests BigInt [default: 0, not null]
+  successful_requests BigInt [default: 0, not null]
+  failed_requests BigInt [default: 0, not null]
+  total_response_time_ms BigInt [default: 0, not null]
+  timed_requests BigInt [default: 0, not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+
+  indexes {
+    (tag, date, api_key, model, custom_llm_provider, mcp_namespaced_tool_name, endpoint) [unique]
+  }
+}
+
+Table LiteLLM_ProxyWorkerHeartbeat {
+  worker_id String [pk]
+  hostname String [not null]
+  started_at DateTime [default: `now()`, not null]
+  last_heartbeat_at DateTime [default: `now()`, not null]
+}
+
+Table LiteLLM_CronJob {
+  cronjob_id String [pk]
+  pod_id String [not null]
+  status JobStatus [default: 'INACTIVE', not null]
+  last_updated DateTime [default: `now()`, not null]
+  ttl DateTime [not null]
+}
+
+Table LiteLLM_ManagedFileTable {
+  id String [pk]
+  unified_file_id String [unique, not null]
+  file_object Json
+  model_mappings Json [not null]
+  flat_model_file_ids String[] [not null]
+  storage_backend String
+  storage_url String
+  created_at DateTime [default: `now()`, not null]
+  created_by String
+  team_id String
+  updated_at DateTime [not null]
+  updated_by String
+}
+
+Table LiteLLM_ManagedObjectTable {
+  id String [pk]
+  unified_object_id String [unique, not null]
+  model_object_id String [unique, not null]
+  file_object Json [not null]
+  file_purpose String [not null]
+  status String
+  batch_processed Boolean [default: false, not null]
+  created_at DateTime [default: `now()`, not null]
+  created_by String
+  team_id String
+  org_id String
+  api_key String
+  request_tags Json [default: '[]']
+  end_user_id String
+  updated_at DateTime [not null]
+  updated_by String
+}
+
+Table LiteLLM_ManagedFileContentTable {
+  id String [pk]
+  content Bytes [not null]
+  created_at DateTime [default: `now()`, not null]
+}
+
+Table LiteLLM_ManagedVectorStoreTable {
+  id String [pk]
+  unified_resource_id String [unique, not null]
+  resource_object Json
+  model_mappings Json [not null]
+  flat_model_resource_ids String[] [not null]
+  storage_backend String
+  storage_url String
+  created_at DateTime [default: `now()`, not null]
+  created_by String
+  team_id String
+  updated_at DateTime [not null]
+  updated_by String
+}
+
+Table LiteLLM_ManagedVectorStoresTable {
+  vector_store_id String [pk]
+  custom_llm_provider String [not null]
+  vector_store_name String
+  vector_store_description String
+  vector_store_metadata Json
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  litellm_credential_name String
+  litellm_params Json
+  team_id String
+  user_id String
+}
+
+Table LiteLLM_GuardrailsTable {
+  guardrail_id String [pk]
+  guardrail_name String [unique, not null]
+  litellm_params Json [not null]
+  guardrail_info Json
+  team_id String
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  status String [default: 'active', not null]
+  submitted_at DateTime
+  reviewed_at DateTime
+}
+
+Table LiteLLM_DailyGuardrailMetrics {
+  guardrail_id String [not null]
+  date String [not null]
+  requests_evaluated BigInt [default: 0, not null]
+  passed_count BigInt [default: 0, not null]
+  blocked_count BigInt [default: 0, not null]
+  flagged_count BigInt [default: 0, not null]
+  avg_score Float
+  avg_latency_ms Float
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+
+  indexes {
+    (guardrail_id, date) [pk]
+  }
+}
+
+Table LiteLLM_DailyGuardrailUsageUnits {
+  guardrail_id String [not null]
+  date String [not null]
+  team_id String [not null]
+  api_key String [not null]
+  usage_unit String [not null]
+  units BigInt [default: 0, not null]
+  cost Float
+  untracked_units BigInt [default: 0, not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+
+  indexes {
+    (guardrail_id, date, team_id, api_key, usage_unit) [pk]
+  }
+}
+
+Table LiteLLM_DailyPolicyMetrics {
+  policy_id String [not null]
+  date String [not null]
+  requests_evaluated BigInt [default: 0, not null]
+  passed_count BigInt [default: 0, not null]
+  blocked_count BigInt [default: 0, not null]
+  flagged_count BigInt [default: 0, not null]
+  avg_score Float
+  avg_latency_ms Float
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+
+  indexes {
+    (policy_id, date) [pk]
+  }
+}
+
+Table LiteLLM_SpendLogGuardrailIndex {
+  request_id String [not null]
+  guardrail_id String [not null]
+  policy_id String
+  start_time DateTime [not null]
+
+  indexes {
+    (request_id, guardrail_id) [pk]
+  }
+}
+
+Table LiteLLM_SpendLogToolIndex {
+  request_id String [not null]
+  tool_name String [not null]
+  start_time DateTime [not null]
+
+  indexes {
+    (request_id, tool_name) [pk]
+  }
+}
+
+Table LiteLLM_DailyToolSpend {
+  date String [not null]
+  tool_name String [not null]
+  spend Float [default: 0, not null]
+  total_tokens BigInt [default: 0, not null]
+  request_count BigInt [default: 0, not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+
+  indexes {
+    (date, tool_name) [pk]
+  }
+}
+
+Table LiteLLM_DailyModelUsage {
+  date String [not null]
+  model_group String [not null]
+  model String [not null]
+  custom_llm_provider String [not null]
+  task_type String [not null]
+  spend Float [default: 0, not null]
+  prompt_tokens BigInt [default: 0, not null]
+  completion_tokens BigInt [default: 0, not null]
+  request_count BigInt [default: 0, not null]
+  successful_requests BigInt [default: 0, not null]
+  failed_requests BigInt [default: 0, not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+
+  indexes {
+    (date, model_group, model, custom_llm_provider, task_type) [pk]
+  }
+}
+
+Table LiteLLM_DailyGatewayRequests {
+  date String [not null]
+  category String [not null]
+  route String [not null]
+  successful_requests BigInt [default: 0, not null]
+  failed_requests BigInt [default: 0, not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+
+  indexes {
+    (date, category, route) [pk]
+  }
+}
+
+Table LiteLLM_DailyGatewayFailedRequests {
+  date String [not null]
+  category String [not null]
+  route String [not null]
+  status_code Int [not null]
+  failed_requests BigInt [default: 0, not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+
+  indexes {
+    (date, category, route, status_code) [pk]
+  }
+}
+
+Table LiteLLM_DailyRequestErrors {
+  date String [not null]
+  api_key String [not null]
+  team_id String [default: '', not null]
+  user_id String [default: '', not null]
+  model_group String [default: '', not null]
+  status_code Int [not null]
+  failed_requests BigInt [default: 0, not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+
+  indexes {
+    (date, api_key, team_id, user_id, model_group, status_code) [pk]
+  }
+}
+
+Table LiteLLM_PromptTable {
+  id String [pk]
+  prompt_id String [not null]
+  version Int [default: 1, not null]
+  environment String [default: 'development', not null]
+  created_by String
+  litellm_params Json [not null]
+  prompt_info Json
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+
+  indexes {
+    (prompt_id, version, environment) [unique]
+  }
+}
+
+Table LiteLLM_HealthCheckTable {
+  health_check_id String [pk]
+  model_name String [not null]
+  model_id String
+  status String [not null]
+  healthy_count Int [default: 0, not null]
+  unhealthy_count Int [default: 0, not null]
+  error_message String
+  response_time_ms Float
+  details Json
+  checked_by String
+  checked_at DateTime [default: `now()`, not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+}
+
+Table LiteLLM_SearchToolsTable {
+  search_tool_id String [pk]
+  search_tool_name String [unique, not null]
+  litellm_params Json [not null]
+  search_tool_info Json
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+}
+
+Table LiteLLM_SSOConfig {
+  id String [pk, default: 'sso_config']
+  sso_settings Json [not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+}
+
+Table LiteLLM_ManagedVectorStoreIndexTable {
+  id String [pk]
+  index_name String [unique, not null]
+  litellm_params Json [not null]
+  index_info Json
+  created_at DateTime [default: `now()`, not null]
+  created_by String
+  updated_at DateTime [not null]
+  updated_by String
+}
+
+Table LiteLLM_CacheConfig {
+  id String [pk, default: 'cache_config']
+  cache_settings Json [not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+}
+
+Table LiteLLM_UISettings {
+  id String [pk, default: 'ui_settings']
+  ui_settings Json [not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+}
+
+Table LiteLLM_ConfigOverrides {
+  config_type String [pk]
+  config_value Json [not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+}
+
+Table LiteLLM_SkillsTable {
+  skill_id String [pk]
+  display_title String
+  description String
+  instructions String
+  source String [default: 'custom', not null]
+  latest_version String
+  file_content Bytes
+  file_name String
+  file_type String
+  metadata Json [default: '{}']
+  created_at DateTime [default: `now()`, not null]
+  created_by String
+  updated_at DateTime [default: `now()`, not null]
+  updated_by String
+}
+
+Table LiteLLM_PolicyTable {
+  policy_id String [pk]
+  policy_name String [not null]
+  version_number Int [default: 1, not null]
+  version_status String [default: 'production', not null]
+  parent_version_id String
+  is_latest Boolean [default: true, not null]
+  published_at DateTime
+  production_at DateTime
+  inherit String
+  description String
+  guardrails_add String[] [not null]
+  guardrails_remove String[] [not null]
+  condition Json [default: '{}']
+  pipeline Json
+  created_at DateTime [default: `now()`, not null]
+  created_by String
+  updated_at DateTime [default: `now()`, not null]
+  updated_by String
+
+  indexes {
+    (policy_name, version_number) [unique]
+  }
+}
+
+Table LiteLLM_PolicyAttachmentTable {
+  attachment_id String [pk]
+  policy_name String [not null]
+  scope String
+  teams String[] [not null]
+  keys String[] [not null]
+  models String[] [not null]
+  tags String[] [not null]
+  priority Int
+  is_default Boolean [default: false, not null]
+  created_at DateTime [default: `now()`, not null]
+  created_by String
+  updated_at DateTime [default: `now()`, not null]
+  updated_by String
+}
+
+Table LiteLLM_ToolTable {
+  tool_id String [pk]
+  tool_name String [unique, not null]
+  origin String
+  input_policy String [default: 'untrusted', not null]
+  output_policy String [default: 'untrusted', not null]
+  call_count Int [default: 0, not null]
+  assignments Json [default: '{}']
+  key_hash String
+  team_id String
+  key_alias String
+  user_agent String
+  last_used_at DateTime
+  created_at DateTime [default: `now()`, not null]
+  created_by String
+  updated_at DateTime [default: `now()`, not null]
+  updated_by String
+}
+
+Table LiteLLM_AccessGroupTable {
+  access_group_id String [pk]
+  access_group_name String [unique, not null]
+  description String
+  access_model_names String[] [not null]
+  access_mcp_server_ids String[] [not null]
+  mcp_tool_permissions Json
+  access_agent_ids String[] [not null]
+  access_skill_names String[] [not null]
+  assigned_team_ids String[] [not null]
+  assigned_key_ids String[] [not null]
+  created_at DateTime [default: `now()`, not null]
+  created_by String
+  updated_at DateTime [default: `now()`, not null]
+  updated_by String
+}
+
+Table LiteLLM_ClaudeCodePluginTable {
+  id String [pk]
+  name String [unique, not null]
+  version String
+  description String
+  manifest_json String
+  files_json String [default: '{}']
+  enabled Boolean [default: true, not null]
+  created_at DateTime [default: `now()`]
+  updated_at DateTime [default: `now()`]
+  created_by String
+  anonymous_download_count BigInt [default: 0, not null]
+}
+
+Table LiteLLM_ClaudeCodePluginVersion {
+  id String [pk]
+  plugin_id String [not null]
+  version String
+  description String
+  manifest_json String
+  published_at DateTime
+  published_by String
+  archive_available Boolean [default: false, not null]
+  content Bytes
+
+  indexes {
+    (plugin_id, version) [unique]
+  }
+}
+
+Table LiteLLM_SkillSubmission {
+  id String [pk]
+  plugin_name String [not null]
+  operation String [not null]
+  status String [default: 'pending_review', not null]
+  proposal_json String [not null]
+  archive_content Bytes
+  submitted_by String [not null]
+  created_at DateTime [default: `now()`, not null]
+  base_plugin_id String
+  base_updated_at DateTime
+  reviewed_by String
+  reviewed_at DateTime
+  rejection_reason String
+  scan_json String
+}
+
+Table LiteLLM_ClaudeCodePluginDownload {
+  id BigInt [pk, increment]
+  plugin_id String [not null]
+  downloaded_at DateTime [default: `now()`, not null]
+  version String
+  digest String [not null]
+  authenticated Boolean [not null]
+  user_id String
+  user_email String
+  key_alias String
+  team_id String
+  team_alias String
+}
+
+Table LiteLLM_ClaudeCodePluginUpload {
+  plugin_name String [pk]
+  content Bytes [not null]
+}
+
+Table LiteLLM_MemoryTable {
+  memory_id String [pk]
+  key String [unique, not null]
+  value String [not null]
+  metadata Json
+  user_id String
+  team_id String
+  created_at DateTime [default: `now()`, not null]
+  created_by String
+  updated_at DateTime [default: `now()`, not null]
+  updated_by String
+}
+
+Table LiteLLM_AdaptiveRouterState {
+  router_name String [not null]
+  request_type String [not null]
+  model_name String [not null]
+  alpha Float [not null]
+  beta Float [not null]
+  total_samples Int [default: 0, not null]
+  last_updated_at DateTime [default: `now()`, not null]
+
+  indexes {
+    (router_name, request_type, model_name) [pk]
+  }
+}
+
+Table LiteLLM_AdaptiveRouterSession {
+  session_id String [not null]
+  router_name String [not null]
+  model_name String [not null]
+  classified_type String [not null]
+  misalignment_count Int [default: 0, not null]
+  stagnation_count Int [default: 0, not null]
+  disengagement_count Int [default: 0, not null]
+  satisfaction_count Int [default: 0, not null]
+  failure_count Int [default: 0, not null]
+  loop_count Int [default: 0, not null]
+  exhaustion_count Int [default: 0, not null]
+  last_user_content String
+  last_assistant_content String
+  tool_call_history Json [default: '[]', not null]
+  pending_tool_calls Json [default: '{}', not null]
+  turn_count Int [default: 0, not null]
+  last_processed_turn Int [default: -1, not null]
+  clean_credit_awarded Boolean [default: false, not null]
+  terminal_status Int
+  last_activity_at DateTime [default: `now()`, not null]
+
+  indexes {
+    (session_id, router_name, model_name) [pk]
+  }
+}
+
+Table LiteLLM_AutoRouterBaselineComparison {
+  scope String [pk]
+  api_key String [not null]
+  session_id String [not null]
+  router_name String [not null]
+  initial_equivalent Boolean [not null]
+  revision BigInt [default: 0, not null]
+  published_revision BigInt [default: 0, not null]
+  history String
+  attempted_at DateTime
+  retired Boolean [default: false, not null]
+  updated_at DateTime [default: `now()`, not null]
+}
+
+Table LiteLLM_AutoRouterBaselineObservation {
+  request_id String [pk]
+  scope String [not null]
+  started_at Float [not null]
+  revision BigInt [not null]
+  data String [not null]
+  publication String
+  conflicted Boolean [default: false, not null]
+}
+
+Table LiteLLM_AutoRouterSession {
+  api_key String [not null]
+  session_id String [not null]
+  router_name String [not null]
+  router_type String [not null]
+  first_turn_at DateTime [not null]
+  last_turn_at DateTime [not null]
+  last_model String [not null]
+  models Json [default: '{}', not null]
+  turns Int [default: 0, not null]
+  unordered_turns Int [default: 0, not null]
+  covered_turns Int [default: 0, not null]
+  cache_hits Int [default: 0, not null]
+  same_model_turns Int [default: 0, not null]
+  same_model_hits Int [default: 0, not null]
+  first_visit_turns Int [default: 0, not null]
+  first_visit_hits Int [default: 0, not null]
+  return_turns Int [default: 0, not null]
+  return_hits Int [default: 0, not null]
+  return_expired_misses Int [default: 0, not null]
+  return_within_ttl_misses Int [default: 0, not null]
+  ttl_5m_turns Int [default: 0, not null]
+  ttl_1h_turns Int [default: 0, not null]
+  total_tokens BigInt [default: 0, not null]
+  spend Float [default: 0, not null]
+  saved_spend Float [default: 0, not null]
+  savings_estimated_turns Int [default: 0, not null]
+  savings_estimated_actual_spend Float [default: 0, not null]
+  savings_estimated_saved_spend Float [default: 0, not null]
+  savings_estimated_baseline_models Json [default: '{}', not null]
+  classifier_cost Float [default: 0, not null]
+  classifier_cost_recorded_turns Int [default: 0, not null]
+  tier_turns Json [default: '{}', not null]
+  baseline_models Json [default: '{}', not null]
+
+  indexes {
+    (api_key, session_id, router_name) [pk]
+  }
+}
+
+Table LiteLLM_AutoRouterUserSession {
+  user_id String [not null]
+  api_key String [not null]
+  session_id String [not null]
+  router_name String [not null]
+  router_type String [not null]
+  first_turn_at DateTime [not null]
+  last_turn_at DateTime [not null]
+  last_model String [not null]
+  models Json [default: '{}', not null]
+  turns Int [default: 0, not null]
+  unordered_turns Int [default: 0, not null]
+  covered_turns Int [default: 0, not null]
+  cache_hits Int [default: 0, not null]
+  same_model_turns Int [default: 0, not null]
+  same_model_hits Int [default: 0, not null]
+  first_visit_turns Int [default: 0, not null]
+  first_visit_hits Int [default: 0, not null]
+  return_turns Int [default: 0, not null]
+  return_hits Int [default: 0, not null]
+  return_expired_misses Int [default: 0, not null]
+  return_within_ttl_misses Int [default: 0, not null]
+  ttl_5m_turns Int [default: 0, not null]
+  ttl_1h_turns Int [default: 0, not null]
+  total_tokens BigInt [default: 0, not null]
+  spend Float [default: 0, not null]
+  saved_spend Float [default: 0, not null]
+  savings_estimated_turns Int [default: 0, not null]
+  savings_estimated_actual_spend Float [default: 0, not null]
+  savings_estimated_saved_spend Float [default: 0, not null]
+  savings_estimated_baseline_models Json [default: '{}', not null]
+  classifier_cost Float [default: 0, not null]
+  classifier_cost_recorded_turns Int [default: 0, not null]
+  tier_turns Json [default: '{}', not null]
+  baseline_models Json [default: '{}', not null]
+
+  indexes {
+    (user_id, api_key, session_id, router_name) [pk]
+  }
+}
+
+Table LiteLLM_AutoRouterDailySpend {
+  date String [not null]
+  api_key String [not null]
+  user_id String [not null]
+  router_name String [not null]
+  router_type String [not null]
+  turns Int [default: 0, not null]
+  total_tokens BigInt [default: 0, not null]
+  token_recorded_turns Int [default: 0, not null]
+  spend Float [default: 0, not null]
+  saved_spend Float [default: 0, not null]
+  savings_estimated_turns Int [default: 0, not null]
+  savings_estimated_actual_spend Float [default: 0, not null]
+  savings_estimated_saved_spend Float [default: 0, not null]
+  classifier_cost Float [default: 0, not null]
+  classifier_cost_recorded_turns Int [default: 0, not null]
+
+  indexes {
+    (date, api_key, user_id, router_name, router_type) [pk]
+  }
+}
+
+Table LiteLLM_ShadowEvalJob {
+  id String [pk]
+  group_id String [not null]
+  target_type String [default: 'key', not null]
+  target_id String [not null]
+  router_name String [not null]
+  router_names String[] [not null]
+  models String[] [not null]
+  direction String [default: 'forward', not null]
+  baseline_model String
+  judge_model String [not null]
+  shadow_percentage Float [not null]
+  max_turns Int [not null]
+  max_budget Float
+  created_at DateTime [default: `now()`, not null]
+  created_by String
+  ends_at DateTime [not null]
+  stopped_at DateTime
+  stopped_by String
+}
+
+Table LiteLLM_ShadowEvalAttempt {
+  id String [pk]
+  job_id String [not null]
+  request_id String [not null]
+  outcome String [not null]
+  router_name String
+  tier String
+  real_model String
+  shadow_model String
+  confidence Float
+  judge_cost Float [default: 0, not null]
+  shadow_cost Float [default: 0, not null]
+  real_cost Float
+  real_classifier_cost Float [default: 0, not null]
+  shadow_classifier_cost Float [default: 0, not null]
+  real_cache_hit Boolean [default: false, not null]
+  error String
+  created_at DateTime [default: `now()`, not null]
+}
+
+Table LiteLLM_ShadowEvalFunnel {
+  job_id String [pk]
+  not_sampled Int [default: 0, not null]
+  unjudgeable Int [default: 0, not null]
+  shed Int [default: 0, not null]
+  withheld Int [default: 0, not null]
+}
+
+Table LiteLLM_WorkflowRun {
+  run_id String [pk]
+  session_id String [unique, not null]
+  workflow_type String [not null]
+  status String [default: 'pending', not null]
+  created_by String
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  input Json
+  output Json
+  metadata Json
+}
+
+Table LiteLLM_WorkflowEvent {
+  event_id String [pk]
+  run_id String [not null]
+  event_type String [not null]
+  step_name String [not null]
+  sequence_number Int [not null]
+  data Json
+  created_at DateTime [default: `now()`, not null]
+
+  indexes {
+    (run_id, sequence_number) [unique]
+  }
+}
+
+Table LiteLLM_WorkflowMessage {
+  message_id String [pk]
+  run_id String [not null]
+  role String [not null]
+  content String [not null]
+  sequence_number Int [not null]
+  session_id String
+  created_at DateTime [default: `now()`, not null]
+
+  indexes {
+    (run_id, sequence_number) [unique]
+  }
+}
+
+Table LiteLLM_BackgroundInteractionSettlement {
+  interaction_id String [pk]
+  custom_llm_provider String [not null]
+  create_context Json [not null]
+  created_at DateTime [default: `now()`, not null]
+  claimed_at DateTime
+  claimed_by String
+  settled_at DateTime
+  outcome String
+}
+
+Table LiteLLM_BackgroundResponseSettlement {
+  response_id String [pk]
+  settled_at DateTime [default: `now()`, not null]
+}
+
+Table LiteLLM_Lens {
+  id String [pk]
+  version Int [default: 0, not null]
+  data Json [not null]
+  due_at DateTime
+}
+
+Table LiteLLM_LensRun {
+  id String [pk]
+  lens_id String [not null]
+  created_at DateTime [not null]
+  data Json [not null]
+}
+
+Table LiteLLM_LensReview {
+  lens_id String [not null]
+  criteria_key String [not null]
+  execution_id String [not null]
+  data Json [not null]
+
+  indexes {
+    (lens_id, criteria_key, execution_id) [pk]
+  }
+}
+
+Table LiteLLM_LensWorker {
+  id String [pk]
+  token_hash String [unique, not null]
+  data Json [not null]
+}
+
+Table LiteLLM_LensIngestionKey {
+  id String [pk]
+  data Json [not null]
+}
+
+Table LiteLLM_LensDataset {
+  id String [not null]
+  revision Int [not null]
+  created_at DateTime [not null]
+  data Json [not null]
+
+  indexes {
+    (id, revision) [pk]
+  }
+}
+
+Table LiteLLM_LensSignalConfig {
+  id String [pk]
+  data Json [not null]
+}
+
+Table LiteLLM_LensTraceSignal {
+  trace_id String [not null]
+  trace_ref String [default: '', not null]
+  config_key String [not null]
+  span_count Int [not null]
+  claimed_until DateTime
+  classified_at DateTime
+  data Json [not null]
+
+  indexes {
+    (trace_id, trace_ref) [pk]
+  }
+}
+
+Table LiteLLM_TelemetryReport {
+  id String [pk]
+  window_start Float [not null]
+  window_end Float [not null]
+  report Json [not null]
+  created_at DateTime [default: `now()`, not null]
+}
+
+Table LiteLLM_SpendLogDelivery {
+  delivery_id String [pk]
+  request_id String [not null]
+  state AccountingDeliveryState [default: 'pending', not null]
+  accounting_payload Json [not null]
+  is_batch Boolean [not null]
+  attempts Int [default: 0, not null]
+  next_attempt_at DateTime [default: `now()`, not null]
+  applied_at DateTime
+  last_error String
+  created_at DateTime [default: `now()`, not null]
+}
+
+Table LiteLLM_SubscriptionAccountTable {
+  subscription_account_id String [pk]
+  custom_llm_provider String [not null]
+  account_id String [not null]
+  label String
+  monthly_fee Float [not null]
+  currency String [not null]
+  billing_period_start String [not null]
+  created_at DateTime [default: `now()`, not null]
+  created_by String [not null]
+  updated_at DateTime [default: `now()`, not null]
+  updated_by String [not null]
+
+  indexes {
+    (custom_llm_provider, account_id) [unique]
+  }
+}
+
+Ref LiteLLM_AgentsTable_object_permission_id_fk: LiteLLM_AgentsTable.object_permission_id > LiteLLM_ObjectPermissionTable.object_permission_id
+
+Ref LiteLLM_AgentIdentity_agent_id_fk: LiteLLM_AgentIdentity.agent_id - LiteLLM_AgentsTable.agent_id [delete: cascade]
+
+Ref LiteLLM_RetiredAgentIdentity_agent_id_fk: LiteLLM_RetiredAgentIdentity.agent_id > LiteLLM_AgentsTable.agent_id [delete: set null]
+
+Ref LiteLLM_VerifiedSubject_user_id_fk: LiteLLM_VerifiedSubject.user_id > LiteLLM_UserTable.user_id [delete: cascade]
+
+Ref LiteLLM_OrganizationTable_budget_id_fk: LiteLLM_OrganizationTable.budget_id > LiteLLM_BudgetTable.budget_id
+
+Ref LiteLLM_OrganizationTable_object_permission_id_fk: LiteLLM_OrganizationTable.object_permission_id > LiteLLM_ObjectPermissionTable.object_permission_id
+
+Ref LiteLLM_TeamTable_organization_id_fk: LiteLLM_TeamTable.organization_id > LiteLLM_OrganizationTable.organization_id
+
+Ref LiteLLM_TeamTable_model_id_fk: LiteLLM_TeamTable.model_id - LiteLLM_ModelTable.id
+
+Ref LiteLLM_TeamTable_object_permission_id_fk: LiteLLM_TeamTable.object_permission_id > LiteLLM_ObjectPermissionTable.object_permission_id
+
+Ref LiteLLM_ProjectTable_team_id_fk: LiteLLM_ProjectTable.team_id > LiteLLM_TeamTable.team_id
+
+Ref LiteLLM_ProjectTable_budget_id_fk: LiteLLM_ProjectTable.budget_id > LiteLLM_BudgetTable.budget_id
+
+Ref LiteLLM_ProjectTable_object_permission_id_fk: LiteLLM_ProjectTable.object_permission_id > LiteLLM_ObjectPermissionTable.object_permission_id
+
+Ref LiteLLM_UserTable_organization_id_fk: LiteLLM_UserTable.organization_id > LiteLLM_OrganizationTable.organization_id
+
+Ref LiteLLM_UserTable_object_permission_id_fk: LiteLLM_UserTable.object_permission_id > LiteLLM_ObjectPermissionTable.object_permission_id
+
+Ref LiteLLM_VerificationToken_budget_id_fk: LiteLLM_VerificationToken.budget_id > LiteLLM_BudgetTable.budget_id
+
+Ref LiteLLM_VerificationToken_organization_id_fk: LiteLLM_VerificationToken.organization_id > LiteLLM_OrganizationTable.organization_id
+
+Ref LiteLLM_VerificationToken_project_id_fk: LiteLLM_VerificationToken.project_id > LiteLLM_ProjectTable.project_id
+
+Ref LiteLLM_VerificationToken_object_permission_id_fk: LiteLLM_VerificationToken.object_permission_id > LiteLLM_ObjectPermissionTable.object_permission_id
+
+Ref LiteLLM_JWTKeyMapping_token_fk: LiteLLM_JWTKeyMapping.token > LiteLLM_VerificationToken.token [delete: cascade]
+
+Ref LiteLLM_EndUserTable_budget_id_fk: LiteLLM_EndUserTable.budget_id > LiteLLM_BudgetTable.budget_id
+
+Ref LiteLLM_EndUserTable_object_permission_id_fk: LiteLLM_EndUserTable.object_permission_id > LiteLLM_ObjectPermissionTable.object_permission_id
+
+Ref LiteLLM_ModelAccessGroupBudgetTable_budget_id_fk: LiteLLM_ModelAccessGroupBudgetTable.budget_id > LiteLLM_BudgetTable.budget_id
+
+Ref LiteLLM_TagTable_budget_id_fk: LiteLLM_TagTable.budget_id > LiteLLM_BudgetTable.budget_id
+
+Ref LiteLLM_TeamMembership_budget_id_fk: LiteLLM_TeamMembership.budget_id > LiteLLM_BudgetTable.budget_id
+
+Ref LiteLLM_OrganizationMembership_user_id_fk: LiteLLM_OrganizationMembership.user_id > LiteLLM_UserTable.user_id
+
+Ref LiteLLM_OrganizationMembership_organization_id_fk: LiteLLM_OrganizationMembership.organization_id > LiteLLM_OrganizationTable.organization_id
+
+Ref LiteLLM_OrganizationMembership_budget_id_fk: LiteLLM_OrganizationMembership.budget_id > LiteLLM_BudgetTable.budget_id
+
+Ref LiteLLM_InvitationLink_user_id_fk: LiteLLM_InvitationLink.user_id > LiteLLM_UserTable.user_id
+
+Ref LiteLLM_InvitationLink_created_by_fk: LiteLLM_InvitationLink.created_by > LiteLLM_UserTable.user_id
+
+Ref LiteLLM_InvitationLink_updated_by_fk: LiteLLM_InvitationLink.updated_by > LiteLLM_UserTable.user_id
+
+Ref LiteLLM_ClaudeCodePluginVersion_plugin_id_fk: LiteLLM_ClaudeCodePluginVersion.plugin_id > LiteLLM_ClaudeCodePluginTable.id [delete: cascade, update: cascade]
+
+Ref LiteLLM_ClaudeCodePluginDownload_plugin_id_fk: LiteLLM_ClaudeCodePluginDownload.plugin_id > LiteLLM_ClaudeCodePluginTable.id [delete: cascade, update: cascade]
+
+Ref LiteLLM_ClaudeCodePluginUpload_plugin_name_fk: LiteLLM_ClaudeCodePluginUpload.plugin_name - LiteLLM_ClaudeCodePluginTable.name [delete: cascade, update: cascade]
+
+Ref LiteLLM_WorkflowEvent_run_id_fk: LiteLLM_WorkflowEvent.run_id > LiteLLM_WorkflowRun.run_id
+
+Ref LiteLLM_WorkflowMessage_run_id_fk: LiteLLM_WorkflowMessage.run_id > LiteLLM_WorkflowRun.run_id
+
+Ref LiteLLM_LensReview_lens_id_fk: LiteLLM_LensReview.lens_id > LiteLLM_Lens.id [delete: cascade]

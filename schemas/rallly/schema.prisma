@@ -1,6 +1,6 @@
 // Rallly: Rallly scheduling polls: users, spaces, polls, options, participants and votes.
 //
-// Imported from https://github.com/lukevella/rallly/tree/094054fa36f89dff6f7ab9d328ef4e6119cf51b3/packages/database/prisma/
+// Imported from https://github.com/lukevella/rallly/tree/e435a14826f59fa84f3bbe9a3cf40ff540a3a3ad/packages/database/prisma/
 // (AGPL-3.0 license) by tools/import/import-schema.mjs, which dropped the original
 // generator blocks and the datasource's connection URLs and added the hekireki generators below.
 // The project keeps its schema in 14 files (prismaSchemaFolder), joined here in name order.

@@ -90,7 +90,11 @@ Table User {
   referredBy String
   lastPickedAt DateTime
   acceptPromotionalEmails Boolean [default: false, not null]
+  shareUsageAnalytics Boolean [default: true, not null]
   trialEndEmailSent Boolean [default: false, not null]
+  sessionVersion Int [default: 0, not null]
+  passwordRetries Int [default: 0, not null]
+  passwordRetryAt DateTime
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [default: `now()`, not null]
 }
@@ -105,6 +109,15 @@ Table VerificationToken {
   indexes {
     (identifier, token) [unique]
   }
+}
+
+Table EmailVerificationCode {
+  identifier String [unique, not null]
+  code String [not null]
+  attempts Int [default: 0, not null]
+  expires DateTime [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [default: `now()`, not null]
 }
 
 Table PasswordResetToken {
@@ -151,6 +164,7 @@ Table Link {
   description String [default: '', not null]
   createdById Int
   collectionId Int [not null]
+  collectionOrder Float [not null]
   icon String
   iconWeight String
   color String

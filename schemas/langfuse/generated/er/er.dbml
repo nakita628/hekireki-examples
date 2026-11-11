@@ -27,6 +27,9 @@ Enum GatewayProvider {
   openai
   anthropic
   bedrock
+  openrouter
+  xai
+  vercel
 }
 
 Enum GatewayConnectionStatus {

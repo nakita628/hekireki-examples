@@ -53,7 +53,14 @@ export const systemRoleEnum = pgEnum('SystemRole', [
 
 export const gatewayIngestionModeEnum = pgEnum('GatewayIngestionMode', ['none', 'usage', 'full'])
 
-export const gatewayProviderEnum = pgEnum('GatewayProvider', ['openai', 'anthropic', 'bedrock'])
+export const gatewayProviderEnum = pgEnum('GatewayProvider', [
+  'openai',
+  'anthropic',
+  'bedrock',
+  'openrouter',
+  'xai',
+  'vercel',
+])
 
 export const gatewayConnectionStatusEnum = pgEnum('GatewayConnectionStatus', [
   'enabled',
@@ -1198,11 +1205,16 @@ export const annotationQueueItems = pgTable(
       .$onUpdate(utcNow),
   },
   (table) => [
-    index('annotation_queue_items_id_project_id_idx').on(table.id, table.projectId),
     index('annotation_queue_items_project_id_queue_id_status_idx').on(
       table.projectId,
       table.queueId,
       table.status,
+    ),
+    index('annotation_queue_items_project_id_queue_id_created_at_id_idx').on(
+      table.projectId,
+      table.queueId,
+      table.createdAt,
+      table.id,
     ),
     index('annotation_queue_items_object_id_object_type_project_id_que_idx').on(
       table.objectId,

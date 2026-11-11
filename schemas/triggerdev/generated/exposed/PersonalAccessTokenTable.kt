@@ -23,6 +23,10 @@ object PersonalAccessTokenTable : IdTable<String>("\"PersonalAccessToken\"") {
         )
     val revokedAt = pgTimestamp("revokedAt", 3).nullable()
     val lastAccessedAt = pgTimestamp("lastAccessedAt", 3).nullable()
+    val expiresAt = pgTimestamp("expiresAt", 3).nullable()
+    val idleTimeoutSeconds = integer("idleTimeoutSeconds").nullable()
+    val expiryReminderSentAt = pgTimestamp("expiryReminderSentAt", 3).nullable()
+    val expiredNoticeSentAt = pgTimestamp("expiredNoticeSentAt", 3).nullable()
     val createdAt = pgTimestamp("createdAt", 3).databaseDefault("CURRENT_TIMESTAMP") { Instant.now().truncatedTo(ChronoUnit.MILLIS) }
     val updatedAt = pgTimestamp("updatedAt", 3).clientDefault { Instant.now().truncatedTo(ChronoUnit.MILLIS) }
     override val primaryKey = PrimaryKey(id, name = "\"PersonalAccessToken_pkey\"")

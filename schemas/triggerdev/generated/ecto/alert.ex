@@ -35,6 +35,7 @@ defmodule Trigger.Alert do
           last_occurrence_at: DateTime.t() | nil,
           occurrences_since_raise: integer(),
           occurrences_total: integer(),
+          group_id: String.t() | nil,
           inserted_at: DateTime.t()
         }
 
@@ -69,6 +70,7 @@ defmodule Trigger.Alert do
     field(:last_occurrence_at, Trigger.PrismaDateTime, source: :lastOccurrenceAt)
     field(:occurrences_since_raise, :integer, default: 0, source: :occurrencesSinceRaise)
     field(:occurrences_total, :integer, default: 0, source: :occurrencesTotal)
+    field(:group_id, :string, source: :groupId)
     timestamps(inserted_at_source: :createdAt, updated_at: false)
   end
 end

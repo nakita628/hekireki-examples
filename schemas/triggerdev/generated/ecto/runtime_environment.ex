@@ -35,6 +35,7 @@ defmodule Trigger.RuntimeEnvironment do
           project: Trigger.Project.t() | nil,
           org_member: Trigger.OrgMember.t() | nil,
           current_session: Trigger.RuntimeEnvironmentSession.t() | nil,
+          trusted_deploy_grant: Trigger.TrustedDeployEnvironment.t() | nil,
           child_environments: [Trigger.RuntimeEnvironment.t()],
           background_workers: [Trigger.BackgroundWorker.t()],
           background_worker_tasks: [Trigger.BackgroundWorkerTask.t()],
@@ -84,7 +85,7 @@ defmodule Trigger.RuntimeEnvironment do
     field(:maximum_concurrency_limit, :integer, default: 5, source: :maximumConcurrencyLimit)
     field(:concurrency_limit_burst_factor, :decimal, default: Decimal.new("2"), source: :concurrencyLimitBurstFactor)
     field(:paused, :boolean, default: false)
-    field(:pause_source, Ecto.Enum, values: [:BILLING_LIMIT], source: :pauseSource)
+    field(:pause_source, Ecto.Enum, values: [:BILLING_LIMIT, :ADMIN_BAN], source: :pauseSource)
     field(:auto_enable_internal_sources, :boolean, default: true, source: :autoEnableInternalSources)
     field(:built_in_environment_variable_overrides, :map, source: :builtInEnvironmentVariableOverrides)
     field(:tunnel_id, :string, source: :tunnelId)
@@ -98,6 +99,7 @@ defmodule Trigger.RuntimeEnvironment do
     belongs_to(:project, Trigger.Project, foreign_key: :project_id, define_field: false, type: :string)
     belongs_to(:org_member, Trigger.OrgMember, foreign_key: :org_member_id, define_field: false, type: :string)
     belongs_to(:current_session, Trigger.RuntimeEnvironmentSession, foreign_key: :current_session_id, define_field: false, type: :string)
+    has_one(:trusted_deploy_grant, Trigger.TrustedDeployEnvironment, foreign_key: :runtime_environment_id, references: :id)
     has_many(:child_environments, Trigger.RuntimeEnvironment, foreign_key: :parent_environment_id, references: :id)
     has_many(:background_workers, Trigger.BackgroundWorker, foreign_key: :runtime_environment_id, references: :id)
     has_many(:background_worker_tasks, Trigger.BackgroundWorkerTask, foreign_key: :runtime_environment_id, references: :id)

@@ -130,4 +130,6 @@ public partial class RuntimeEnvironment
     public virtual ICollection<ApiKey> ApiKeys { get; set; } = new List<ApiKey>();
 
     public virtual ICollection<RevokedApiKey> RevokedApiKeys { get; set; } = new List<RevokedApiKey>();
+
+    public virtual TrustedDeployEnvironment? TrustedDeployGrant { get; set; }
 }

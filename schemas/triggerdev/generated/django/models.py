@@ -73,6 +73,7 @@ class RuntimeEnvironmentType(models.TextChoices):
 
 class EnvironmentPauseSource(models.TextChoices):
     BILLING_LIMIT = "BILLING_LIMIT"
+    ADMIN_BAN = "ADMIN_BAN"
 
 
 class ProjectVersion(models.TextChoices):
@@ -344,6 +345,13 @@ class GithubRepositorySelection(models.TextChoices):
     SELECTED = "SELECTED"
 
 
+class TrustedDeployScope(models.TextChoices):
+    ANY = "ANY"
+    BRANCH = "BRANCH"
+    TAG = "TAG"
+    ENVIRONMENT = "ENVIRONMENT"
+
+
 class ImpersonationAuditLogAction(models.TextChoices):
     START = "START"
     STOP = "STOP"
@@ -477,6 +485,10 @@ class PersonalAccessToken(models.Model):
     user = models.ForeignKey("User", on_delete=models.RESTRICT, related_name="personal_access_tokens", db_column="userId", db_index=False)
     revoked_at = UtcDateTimeField(null=True, db_column="revokedAt")
     last_accessed_at = UtcDateTimeField(null=True, db_column="lastAccessedAt")
+    expires_at = UtcDateTimeField(null=True, db_column="expiresAt")
+    idle_timeout_seconds = models.IntegerField(null=True, db_column="idleTimeoutSeconds")
+    expiry_reminder_sent_at = UtcDateTimeField(null=True, db_column="expiryReminderSentAt")
+    expired_notice_sent_at = UtcDateTimeField(null=True, db_column="expiredNoticeSentAt")
     created_at = UtcDateTimeField(db_column="createdAt", default=timezone.now)
     updated_at = UtcDateTimeField(db_column="updatedAt", auto_now=True)
     objects = AutoNowQuerySet.as_manager()
@@ -635,11 +647,14 @@ class ApiKey(models.Model):
     name = models.TextField()
     key_hash = models.TextField(unique=True)
     last_four = models.TextField()
+    description = models.TextField(null=True)
     runtime_environment = models.ForeignKey("RuntimeEnvironment", on_delete=models.CASCADE, related_name="api_keys", db_index=False)
     created_by = models.ForeignKey("User", on_delete=models.SET_NULL, related_name="created_api_keys", db_column="created_by_user_id", null=True, db_index=False)
     preset_id = models.TextField(null=True)
     scopes = ArrayField(models.TextField())
+    allowed_ip_ranges = ArrayField(models.TextField(), default=list)
     last_used_at = UtcDateTimeField(null=True)
+    last_used_ip = models.TextField(null=True)
     revoked_at = UtcDateTimeField(null=True)
     expires_at = UtcDateTimeField(null=True)
     updated_at = UtcDateTimeField(auto_now=True)
@@ -996,6 +1011,7 @@ class Alert(models.Model):
     last_occurrence_at = models.DateTimeField(null=True, db_column="lastOccurrenceAt")
     occurrences_since_raise = models.IntegerField(db_column="occurrencesSinceRaise", default=0)
     occurrences_total = models.BigIntegerField(db_column="occurrencesTotal", default=0)
+    group_id = models.TextField(null=True, db_column="groupId")
 
     class Meta:
         db_table = "Alert"
@@ -1004,6 +1020,7 @@ class Alert(models.Model):
             models.Index(fields=["lifecycle", "evaluation_lease_until"]),
             models.Index(fields=["project_id"]),
             models.Index(fields=["organization_id"]),
+            models.Index(fields=["group_id"]),
         ]
 
 
@@ -1466,6 +1483,8 @@ class WorkerInstanceGroup(models.Model):
 class WorkerGroupToken(models.Model):
     id = models.TextField(primary_key=True, default=None)
     token_hash = models.TextField(unique=True, db_column="tokenHash")
+    previous_token_hash = models.TextField(null=True, unique=True, db_column="previousTokenHash")
+    previous_token_valid_until = UtcDateTimeField(null=True, db_column="previousTokenValidUntil")
     created_at = UtcDateTimeField(db_column="createdAt", default=timezone.now)
     updated_at = UtcDateTimeField(db_column="updatedAt", auto_now=True)
     objects = AutoNowQuerySet.as_manager()
@@ -2246,6 +2265,41 @@ class GithubRepository(models.Model):
         ]
         indexes = [
             models.Index(fields=["installation"]),
+        ]
+
+
+class TrustedDeployRepository(models.Model):
+    id = models.TextField(primary_key=True, default=None)
+    project = models.OneToOneField("Project", on_delete=models.CASCADE, related_name="trusted_deploy_repository", db_column="projectId")
+    issuer = models.TextField(default="https://token.actions.githubusercontent.com")
+    repository_owner = models.TextField(db_column="repositoryOwner")
+    repository_name = models.TextField(db_column="repositoryName")
+    repository_id = models.TextField(null=True, db_column="repositoryId")
+    repository_owner_id = models.TextField(null=True, db_column="repositoryOwnerId")
+    created_at = UtcDateTimeField(db_column="createdAt", default=timezone.now)
+    updated_at = UtcDateTimeField(db_column="updatedAt", auto_now=True)
+    objects = AutoNowQuerySet.as_manager()
+
+    class Meta:
+        db_table = "TrustedDeployRepository"
+
+
+class TrustedDeployEnvironment(models.Model):
+    id = models.TextField(primary_key=True, default=None)
+    trusted_deploy_repository = models.ForeignKey("TrustedDeployRepository", on_delete=models.CASCADE, related_name="environments", db_column="trustedDeployRepositoryId", db_index=False)
+    runtime_environment = models.OneToOneField("RuntimeEnvironment", on_delete=models.CASCADE, related_name="trusted_deploy_grant", db_column="runtimeEnvironmentId")
+    enabled = models.BooleanField(default=False)
+    scope = models.TextField(choices=TrustedDeployScope.choices)
+    scope_value = models.TextField(null=True, db_column="scopeValue")
+    additional_claims = models.JSONField(db_column="additionalClaims", default=dict)
+    created_at = UtcDateTimeField(db_column="createdAt", default=timezone.now)
+    updated_at = UtcDateTimeField(db_column="updatedAt", auto_now=True)
+    objects = AutoNowQuerySet.as_manager()
+
+    class Meta:
+        db_table = "TrustedDeployEnvironment"
+        indexes = [
+            models.Index(fields=["trusted_deploy_repository"]),
         ]
 
 

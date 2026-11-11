@@ -7,6 +7,7 @@ class WorkerGroupToken < ApplicationRecord
   alias_attribute :updated_at, :updatedAt
 
   validates :tokenHash, presence: true, uniqueness: true
+  validates :previousTokenHash, uniqueness: { allow_nil: true }
 
   has_one :worker_group, class_name: "WorkerInstanceGroup", foreign_key: "tokenId", inverse_of: :token,
                          dependent: :destroy

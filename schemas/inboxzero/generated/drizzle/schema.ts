@@ -135,6 +135,7 @@ export const mailSplitFilterKindEnum = pgEnum('MailSplitFilterKind', [
   'CATEGORY',
   'FROM',
   'OLDER_THAN',
+  'TO',
 ])
 
 export const draftReplyConfidenceEnum = pgEnum('DraftReplyConfidence', [
@@ -2623,6 +2624,33 @@ export const chatCompaction = pgTable(
   ],
 )
 
+export const chatActionTotal = pgTable(
+  'ChatActionTotal',
+  {
+    id: text('id')
+      .primaryKey()
+      .$defaultFn(() => cuid()),
+    createdAt: timestamp('createdAt', { precision: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`)
+      .$defaultFn(utcNow),
+    updatedAt: timestamp('updatedAt', { precision: 3 }).notNull().$onUpdate(utcNow),
+    action: text('action').notNull(),
+    count: integer('count').notNull().default(0),
+    chatId: text('chatId').notNull(),
+  },
+  (table) => [
+    uniqueIndex('ChatActionTotal_chatId_action_key').on(table.chatId, table.action),
+    foreignKey({
+      name: 'ChatActionTotal_chatId_fkey',
+      columns: [table.chatId],
+      foreignColumns: [chat.id],
+    })
+      .onDelete('cascade')
+      .onUpdate('cascade'),
+  ],
+)
+
 export const chatMemory = pgTable(
   'ChatMemory',
   {
@@ -4371,6 +4399,7 @@ export const relations = defineRelations(
     chat,
     chatMessage,
     chatCompaction,
+    chatActionTotal,
     chatMemory,
     calendarConnection,
     calendar,
@@ -4930,6 +4959,7 @@ export const relations = defineRelations(
       messages: r.many.chatMessage(),
       compactions: r.many.chatCompaction(),
       memories: r.many.chatMemory(),
+      actionTotals: r.many.chatActionTotal(),
       emailAccount: r.one.emailAccount({
         from: r.chat.emailAccountId,
         to: r.emailAccount.id,
@@ -4941,6 +4971,9 @@ export const relations = defineRelations(
     },
     chatCompaction: {
       chat: r.one.chat({ from: r.chatCompaction.chatId, to: r.chat.id, optional: false }),
+    },
+    chatActionTotal: {
+      chat: r.one.chat({ from: r.chatActionTotal.chatId, to: r.chat.id, optional: false }),
     },
     chatMemory: {
       chat: r.one.chat({ from: r.chatMemory.chatId, to: r.chat.id }),

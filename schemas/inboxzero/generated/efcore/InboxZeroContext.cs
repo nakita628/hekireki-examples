@@ -136,6 +136,8 @@ public partial class InboxZeroContext : DbContext
 
     public virtual DbSet<ChatCompaction> ChatCompactions { get; set; }
 
+    public virtual DbSet<ChatActionTotal> ChatActionTotals { get; set; }
+
     public virtual DbSet<ChatMemory> ChatMemories { get; set; }
 
     public virtual DbSet<CalendarConnection> CalendarConnections { get; set; }
@@ -3300,6 +3302,40 @@ public partial class InboxZeroContext : DbContext
                 .HasConstraintName("ChatCompaction_chatId_fkey");
         });
 
+        modelBuilder.Entity<ChatActionTotal>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("ChatActionTotal_pkey");
+
+            entity.ToTable("ChatActionTotal");
+
+            entity.HasIndex(e => new { e.ChatId, e.Action }, "ChatActionTotal_chatId_action_key").IsUnique();
+
+            entity.Property(e => e.Id)
+                .HasValueGenerator<CuidGenerator>()
+                .HasColumnName("id");
+            entity.Property(e => e.CreatedAt)
+                .HasValueGenerator<UtcNowGenerator>()
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("createdAt");
+            entity.Property(e => e.UpdatedAt)
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("updatedAt");
+            entity.Property(e => e.Action).HasColumnName("action");
+            entity.Property(e => e.Count)
+                .ValueGeneratedNever()
+                .HasDefaultValue(0)
+                .HasColumnName("count");
+            entity.Property(e => e.ChatId).HasColumnName("chatId");
+
+            entity.HasOne(d => d.Chat).WithMany(p => p.ActionTotals)
+                .HasForeignKey(d => d.ChatId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("ChatActionTotal_chatId_fkey");
+        });
+
         modelBuilder.Entity<ChatMemory>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("ChatMemory_pkey");
@@ -5778,6 +5814,15 @@ public partial class InboxZeroContext : DbContext
         }
 
         foreach (var entry in ChangeTracker.Entries<ChatMessage>())
+        {
+            if ((entry.State == EntityState.Added && entry.Entity.UpdatedAt == default)
+                || (entry.State == EntityState.Modified && !entry.Property(e => e.UpdatedAt).IsModified))
+            {
+                entry.Entity.UpdatedAt = now;
+            }
+        }
+
+        foreach (var entry in ChangeTracker.Entries<ChatActionTotal>())
         {
             if ((entry.State == EntityState.Added && entry.Entity.UpdatedAt == default)
                 || (entry.State == EntityState.Modified && !entry.Property(e => e.UpdatedAt).IsModified))

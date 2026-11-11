@@ -78,6 +78,7 @@ erDiagram
     EmailAccount ||--o{ Chat : "(id) - (emailAccountId)"
     Chat ||--o{ ChatMessage : "(id) - (chatId)"
     Chat ||--o{ ChatCompaction : "(id) - (chatId)"
+    Chat ||--o{ ChatActionTotal : "(id) - (chatId)"
     Chat |o--o{ ChatMemory : "(id) - (chatId)"
     EmailAccount ||--o{ ChatMemory : "(id) - (emailAccountId)"
     EmailAccount ||--o{ CalendarConnection : "(id) - (emailAccountId)"
@@ -973,6 +974,14 @@ erDiagram
         int messageCount
         datetime compactedBeforeCreatedAt
         string chatId FK
+    }
+    ChatActionTotal {
+        string id PK
+        datetime createdAt
+        datetime updatedAt
+        string action UK
+        int count
+        string chatId FK, UK
     }
     ChatMemory {
         string id PK

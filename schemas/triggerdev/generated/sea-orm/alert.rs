@@ -76,6 +76,8 @@ pub struct Model {
     pub occurrences_since_raise: i32,
     #[sea_orm(column_name = "occurrencesTotal", default_value = "0")]
     pub occurrences_total: i64,
+    #[sea_orm(column_name = "groupId")]
+    pub group_id: Option<String>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

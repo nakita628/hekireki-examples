@@ -136,7 +136,11 @@ class User(models.Model):
     referred_by = models.TextField(null=True, db_column="referredBy")
     last_picked_at = UtcDateTimeField(null=True, db_column="lastPickedAt")
     accept_promotional_emails = models.BooleanField(db_column="acceptPromotionalEmails", default=False)
+    share_usage_analytics = models.BooleanField(db_column="shareUsageAnalytics", default=True)
     trial_end_email_sent = models.BooleanField(db_column="trialEndEmailSent", default=False)
+    session_version = models.IntegerField(db_column="sessionVersion", default=0)
+    password_retries = models.IntegerField(db_column="passwordRetries", default=0)
+    password_retry_at = UtcDateTimeField(null=True, db_column="passwordRetryAt")
     created_at = UtcDateTimeField(db_column="createdAt", default=timezone.now)
     updated_at = UtcDateTimeField(db_column="updatedAt", auto_now=True)
     objects = AutoNowQuerySet.as_manager()
@@ -158,6 +162,19 @@ class VerificationToken(models.Model):
         constraints = [
             models.UniqueConstraint(fields=["identifier", "token"], name="VerificationToken_identifier_token_key"),
         ]
+
+
+class EmailVerificationCode(models.Model):
+    identifier = models.TextField(primary_key=True, default=None)
+    code = models.TextField()
+    attempts = models.IntegerField(default=0)
+    expires = UtcDateTimeField()
+    created_at = UtcDateTimeField(db_column="createdAt", default=timezone.now)
+    updated_at = UtcDateTimeField(db_column="updatedAt", auto_now=True)
+    objects = AutoNowQuerySet.as_manager()
+
+    class Meta:
+        db_table = "EmailVerificationCode"
 
 
 class PasswordResetToken(models.Model):
@@ -220,6 +237,7 @@ class Link(models.Model):
     pinned_by: "models.ManyToManyField[User, PinnedLinks]" = models.ManyToManyField("User", through="PinnedLinks", related_name="pinned_links")
     created_by = models.ForeignKey("User", on_delete=models.CASCADE, related_name="created_links", db_column="createdById", null=True, db_index=False)
     collection = models.ForeignKey("Collection", on_delete=models.CASCADE, related_name="links", db_column="collectionId", db_index=False)
+    collection_order = models.FloatField(db_column="collectionOrder")
     tags: "models.ManyToManyField[Tag, LinkToTag]" = models.ManyToManyField("Tag", through="LinkToTag", related_name="links")
     icon = models.TextField(null=True)
     icon_weight = models.TextField(null=True, db_column="iconWeight")
@@ -245,6 +263,7 @@ class Link(models.Model):
         db_table = "Link"
         indexes = [
             models.Index(fields=["collection"]),
+            models.Index(fields=["collection", "collection_order", "id"]),
         ]
 
 

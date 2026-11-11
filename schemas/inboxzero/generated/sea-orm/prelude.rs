@@ -13,6 +13,7 @@ pub use super::calendar::Entity as Calendar;
 pub use super::calendar_connection::Entity as CalendarConnection;
 pub use super::category::Entity as Category;
 pub use super::chat::Entity as Chat;
+pub use super::chat_action_total::Entity as ChatActionTotal;
 pub use super::chat_compaction::Entity as ChatCompaction;
 pub use super::chat_memory::Entity as ChatMemory;
 pub use super::chat_message::Entity as ChatMessage;

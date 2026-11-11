@@ -49,7 +49,11 @@ object UserTable : IdTable<Int>("\"User\"") {
     val referredBy = text("referredBy").nullable()
     val lastPickedAt = pgTimestamp("lastPickedAt", 3).nullable()
     val acceptPromotionalEmails = bool("acceptPromotionalEmails").default(false)
+    val shareUsageAnalytics = bool("shareUsageAnalytics").default(true)
     val trialEndEmailSent = bool("trialEndEmailSent").default(false)
+    val sessionVersion = integer("sessionVersion").default(0)
+    val passwordRetries = integer("passwordRetries").default(0)
+    val passwordRetryAt = pgTimestamp("passwordRetryAt", 3).nullable()
     val createdAt = pgTimestamp("createdAt", 3).databaseDefault("CURRENT_TIMESTAMP") { Instant.now().truncatedTo(ChronoUnit.MILLIS) }
     val updatedAt = pgTimestamp("updatedAt", 3).databaseDefault("CURRENT_TIMESTAMP") { Instant.now().truncatedTo(ChronoUnit.MILLIS) }
     override val primaryKey = PrimaryKey(id, name = "\"User_pkey\"")

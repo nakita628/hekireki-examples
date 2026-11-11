@@ -1,6 +1,6 @@
 // InboxZero: Inbox Zero email assistant: users, email accounts, threads, rules, drafts and digests.
 //
-// Imported from https://github.com/elie222/inbox-zero/blob/e040fb7eb8778dc85112ad4cd087f88dac5b8640/apps/web/prisma/schema.prisma
+// Imported from https://github.com/elie222/inbox-zero/blob/019bdb7c35a3be95cc07bc640211b09f11d2402c/apps/web/prisma/schema.prisma
 // (AGPL-3.0-with-additional-terms license) by tools/import/import-schema.mjs, which dropped the original
 // generator blocks and the datasource's connection URLs and added the hekireki generators below.
 // The models, enums and `///` comments are the project's own, as they are at that commit.
@@ -1547,6 +1547,7 @@ model Chat {
   messages       ChatMessage[]
   compactions    ChatCompaction[]
   memories       ChatMemory[]
+  actionTotals   ChatActionTotal[]
   emailAccountId String
   emailAccount   EmailAccount     @relation(fields: [emailAccountId], references: [id], onDelete: Cascade)
 
@@ -1582,6 +1583,22 @@ model ChatCompaction {
   chat   Chat   @relation(fields: [chatId], references: [id], onDelete: Cascade)
 
   @@index([chatId])
+}
+
+// Running count of inbox actions the assistant took in a chat, so totals stay
+// exact after earlier tool results are compacted or trimmed away.
+model ChatActionTotal {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  action String
+  count  Int    @default(0)
+
+  chatId String
+  chat   Chat   @relation(fields: [chatId], references: [id], onDelete: Cascade)
+
+  @@unique([chatId, action])
 }
 
 model ChatMemory {
@@ -2316,6 +2333,8 @@ enum MailSplitFilterKind {
   CATEGORY
   FROM
   OLDER_THAN
+  /// Mail addressed to an address or @domain, in To or Cc.
+  TO
 }
 
 enum DraftReplyConfidence {

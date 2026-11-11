@@ -22,6 +22,14 @@ pub struct Model {
     pub revoked_at: Option<DateTime>,
     #[sea_orm(column_name = "lastAccessedAt")]
     pub last_accessed_at: Option<DateTime>,
+    #[sea_orm(column_name = "expiresAt")]
+    pub expires_at: Option<DateTime>,
+    #[sea_orm(column_name = "idleTimeoutSeconds")]
+    pub idle_timeout_seconds: Option<i32>,
+    #[sea_orm(column_name = "expiryReminderSentAt")]
+    pub expiry_reminder_sent_at: Option<DateTime>,
+    #[sea_orm(column_name = "expiredNoticeSentAt")]
+    pub expired_notice_sent_at: Option<DateTime>,
     #[sea_orm(column_name = "createdAt")]
     pub created_at: DateTime,
     #[sea_orm(column_name = "updatedAt")]

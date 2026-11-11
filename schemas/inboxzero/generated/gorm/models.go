@@ -2314,9 +2314,10 @@ type Chat struct {
 	ActiveStreamStartedAt *DateTime `gorm:"column:activeStreamStartedAt" json:"activeStreamStartedAt"`
 	EmailAccountID        string    `gorm:"column:emailAccountId;index:Chat_emailAccountId_idx;not null" json:"emailAccountId"`
 	EmailAccount          *EmailAccount
-	Messages              []ChatMessage    `gorm:"foreignKey:ChatID;constraint:OnDelete:CASCADE"`
-	Compactions           []ChatCompaction `gorm:"foreignKey:ChatID;constraint:OnDelete:CASCADE"`
-	Memories              []ChatMemory     `gorm:"foreignKey:ChatID;constraint:OnDelete:SET NULL"`
+	Messages              []ChatMessage     `gorm:"foreignKey:ChatID;constraint:OnDelete:CASCADE"`
+	Compactions           []ChatCompaction  `gorm:"foreignKey:ChatID;constraint:OnDelete:CASCADE"`
+	Memories              []ChatMemory      `gorm:"foreignKey:ChatID;constraint:OnDelete:SET NULL"`
+	ActionTotals          []ChatActionTotal `gorm:"foreignKey:ChatID;constraint:OnDelete:CASCADE"`
 }
 
 func (Chat) TableName() string {
@@ -2403,6 +2404,42 @@ func (m *ChatCompaction) BeforeCreate(tx *gorm.DB) error {
 	}
 	if m.CreatedAt.IsZero() {
 		m.CreatedAt = DateTime{Time: now}
+	}
+	return nil
+}
+
+type ChatActionTotal struct {
+	ID        string   `gorm:"column:id;primaryKey" json:"id"`
+	CreatedAt DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
+	UpdatedAt DateTime `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
+	Action    string   `gorm:"column:action;uniqueIndex:ChatActionTotal_chatId_action_key;not null" json:"action"`
+	Count     int      `gorm:"column:count;default:0;not null" json:"count"`
+	ChatID    string   `gorm:"column:chatId;uniqueIndex:ChatActionTotal_chatId_action_key;not null" json:"chatId"`
+	Chat      *Chat
+}
+
+func (ChatActionTotal) TableName() string {
+	return "ChatActionTotal"
+}
+
+func (m *ChatActionTotal) BeforeCreate(tx *gorm.DB) error {
+	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
+	if m.ID == "" {
+		m.ID = cuid.New()
+	}
+	if m.CreatedAt.IsZero() {
+		m.CreatedAt = DateTime{Time: now}
+	}
+	if m.UpdatedAt.IsZero() {
+		m.UpdatedAt = DateTime{Time: now}
+	}
+	return nil
+}
+
+func (*ChatActionTotal) BeforeUpdate(tx *gorm.DB) error {
+	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
+	if !tx.Statement.Changed("UpdatedAt") {
+		tx.Statement.SetColumn("UpdatedAt", DateTime{Time: now})
 	}
 	return nil
 }

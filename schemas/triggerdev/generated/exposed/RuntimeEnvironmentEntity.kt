@@ -73,6 +73,7 @@ class RuntimeEnvironmentEntity(
     val taskIdentifiers by TaskIdentifierEntity referrersOn TaskIdentifierTable.runtimeEnvironmentId
     val apiKeys by ApiKeyEntity referrersOn ApiKeyTable.runtimeEnvironmentId
     val revokedApiKeys by RevokedApiKeyEntity referrersOn RevokedApiKeyTable.runtimeEnvironmentId
+    val trustedDeployGrant by TrustedDeployEnvironmentEntity optionalBackReferencedOn TrustedDeployEnvironmentTable.runtimeEnvironmentId
 
     override fun flush(batch: EntityBatchUpdate?): Boolean {
         if (writeValues.isNotEmpty()) {

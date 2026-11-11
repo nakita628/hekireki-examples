@@ -26,7 +26,7 @@
   "langfuse": {
     "repo": "langfuse/langfuse",
     "path": "packages/shared/prisma/schema.prisma",
-    "commit": "a479bb6eb76fa284b27cdbb45cd304d83cd98b82",
+    "commit": "47a70342f1736561dfa157a654d011aac29db79d",
     "license": "MIT",
     "app": "Langfuse",
     "description": "Langfuse LLM observability: organizations, projects, traces, prompts, datasets and evaluations."
@@ -34,7 +34,7 @@
   "calcom": {
     "repo": "calcom/cal.com",
     "path": "packages/prisma/schema.prisma",
-    "commit": "2eb48eccd8aca8a0c0ffabf28cf92e298b33ecee",
+    "commit": "3030d88a1fd9a9b9acc986aac37879a6ba51cb8a",
     "license": "MIT",
     "app": "Calcom",
     "description": "Cal.com scheduling: users, teams, event types, bookings, availability and integrations."
@@ -50,7 +50,7 @@
   "ghostfolio": {
     "repo": "ghostfolio/ghostfolio",
     "path": "prisma/schema.prisma",
-    "commit": "7bf71c641a44852e00954f09747955267853a416",
+    "commit": "aea75a89a3ea840d1c32ec11ad3595bcca99c93e",
     "license": "AGPL-3.0",
     "app": "Ghostfolio",
     "description": "Ghostfolio wealth management: users, accounts, orders, symbol profiles and market data."
@@ -66,7 +66,7 @@
   "linkwarden": {
     "repo": "linkwarden/linkwarden",
     "path": "packages/prisma/schema.prisma",
-    "commit": "eff7c6b735f6b20a4766745dc86c6bdc52bd9840",
+    "commit": "24adcc146ba356632859a1e8adb4bffae2874d11",
     "license": "AGPL-3.0",
     "app": "Linkwarden",
     "description": "Linkwarden bookmark manager: users, collections, links, tags and subscriptions."
@@ -82,7 +82,7 @@
   "rallly": {
     "repo": "lukevella/rallly",
     "path": "packages/database/prisma/",
-    "commit": "094054fa36f89dff6f7ab9d328ef4e6119cf51b3",
+    "commit": "e435a14826f59fa84f3bbe9a3cf40ff540a3a3ad",
     "license": "AGPL-3.0",
     "app": "Rallly",
     "description": "Rallly scheduling polls: users, spaces, polls, options, participants and votes."
@@ -106,7 +106,7 @@
   "postiz": {
     "repo": "gitroomhq/postiz-app",
     "path": "libraries/nestjs-libraries/src/database/prisma/schema.prisma",
-    "commit": "e0991b2f74eb22a6b0e1c686abd948896fac8717",
+    "commit": "85a0246b600733d851ed0927020bd5735db860c8",
     "license": "AGPL-3.0",
     "app": "Postiz",
     "description": "Postiz social media scheduling: organizations, integrations, posts, comments and media."
@@ -122,7 +122,7 @@
   "formbricks": {
     "repo": "formbricks/formbricks",
     "path": "packages/database/schema/",
-    "commit": "2f76787a887de9f46db1254134ccc93a1acd57be",
+    "commit": "7f4619c3d3604831b5ccd5f65b67fb048fef02e2",
     "license": "AGPL-3.0",
     "app": "Formbricks",
     "description": "Formbricks surveys: organizations, environments, surveys, responses and contacts.",
@@ -133,7 +133,7 @@
   "triggerdev": {
     "repo": "triggerdotdev/trigger.dev",
     "path": "internal-packages/database/prisma/schema.prisma",
-    "commit": "41ad1995b30573a9b55cfaab80c3293b7c35c1f8",
+    "commit": "bdcbc61ab2871f7cc81f29ec36e42c8676ff6aa9",
     "license": "Apache-2.0",
     "app": "Trigger",
     "description": "Trigger.dev background jobs: organizations, projects, tasks, runs, queues and deployments."
@@ -141,7 +141,7 @@
   "anythingllm": {
     "repo": "Mintplex-Labs/anything-llm",
     "path": "server/prisma/schema.prisma",
-    "commit": "ace9dad3348b4d8a237b09978517ced2bd18e198",
+    "commit": "728586d76c843ed25cb7a27c7403f4b79bd960c8",
     "license": "MIT",
     "app": "AnythingLLM",
     "description": "AnythingLLM local AI workspace: users, workspaces, documents, chats, embeddings and agents, on SQLite."
@@ -149,7 +149,7 @@
   "inboxzero": {
     "repo": "elie222/inbox-zero",
     "path": "apps/web/prisma/schema.prisma",
-    "commit": "e040fb7eb8778dc85112ad4cd087f88dac5b8640",
+    "commit": "019bdb7c35a3be95cc07bc640211b09f11d2402c",
     "license": "AGPL-3.0-with-additional-terms",
     "app": "InboxZero",
     "description": "Inbox Zero email assistant: users, email accounts, threads, rules, drafts and digests.",
@@ -212,5 +212,13 @@
     "license": "MIT",
     "app": "OpenSaas",
     "description": "Wasp Open SaaS starter: users, subscriptions, tasks, files, analytics and contact messages."
+  },
+  "litellm": {
+    "repo": "BerriAI/litellm",
+    "path": "schema.prisma",
+    "commit": "ebd5a15b22ba012d2f5a5ee654afc93cd51add5e",
+    "license": "MIT",
+    "app": "LiteLLM",
+    "description": "LiteLLM AI gateway: virtual keys, teams, budgets, spend logs and model deployments."
   }
 }

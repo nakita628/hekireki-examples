@@ -17,7 +17,10 @@ class User < ApplicationRecord
   attribute :archiveAsReadable, default: true
   attribute :archiveAsWaybackMachine, default: false
   attribute :acceptPromotionalEmails, default: false
+  attribute :shareUsageAnalytics, default: true
   attribute :trialEndEmailSent, default: false
+  attribute :sessionVersion, default: 0
+  attribute :passwordRetries, default: 0
   alias_attribute :created_at, :createdAt
   alias_attribute :updated_at, :updatedAt
 

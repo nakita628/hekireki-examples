@@ -35,7 +35,11 @@ defmodule Linkwarden.User do
           referred_by: String.t() | nil,
           last_picked_at: DateTime.t() | nil,
           accept_promotional_emails: boolean(),
+          share_usage_analytics: boolean(),
           trial_end_email_sent: boolean(),
+          session_version: integer(),
+          password_retries: integer(),
+          password_retry_at: DateTime.t() | nil,
           inserted_at: DateTime.t(),
           updated_at: DateTime.t(),
           parent_subscription: Linkwarden.Subscription.t() | nil,
@@ -82,7 +86,11 @@ defmodule Linkwarden.User do
     field(:referred_by, :string, source: :referredBy)
     field(:last_picked_at, Linkwarden.PrismaDateTime, source: :lastPickedAt)
     field(:accept_promotional_emails, :boolean, default: false, source: :acceptPromotionalEmails)
+    field(:share_usage_analytics, :boolean, default: true, source: :shareUsageAnalytics)
     field(:trial_end_email_sent, :boolean, default: false, source: :trialEndEmailSent)
+    field(:session_version, :integer, default: 0, source: :sessionVersion)
+    field(:password_retries, :integer, default: 0, source: :passwordRetries)
+    field(:password_retry_at, Linkwarden.PrismaDateTime, source: :passwordRetryAt)
     field(:parent_subscription_id, :id, source: :parentSubscriptionId)
     belongs_to(:parent_subscription, Linkwarden.Subscription, foreign_key: :parent_subscription_id, define_field: false)
     has_one(:subscriptions, Linkwarden.Subscription, foreign_key: :user_id)

@@ -49,7 +49,11 @@ class User extends Model
         'referredBy',
         'lastPickedAt',
         'acceptPromotionalEmails',
+        'shareUsageAnalytics',
         'trialEndEmailSent',
+        'sessionVersion',
+        'passwordRetries',
+        'passwordRetryAt',
     ];
 
     protected $attributes = [
@@ -69,7 +73,10 @@ class User extends Model
         'archiveAsReadable' => true,
         'archiveAsWaybackMachine' => false,
         'acceptPromotionalEmails' => false,
+        'shareUsageAnalytics' => true,
         'trialEndEmailSent' => false,
+        'sessionVersion' => 0,
+        'passwordRetries' => 0,
     ];
 
     protected $casts = [
@@ -87,7 +94,11 @@ class User extends Model
         'archiveAsWaybackMachine' => 'boolean',
         'lastPickedAt' => 'datetime',
         'acceptPromotionalEmails' => 'boolean',
+        'shareUsageAnalytics' => 'boolean',
         'trialEndEmailSent' => 'boolean',
+        'sessionVersion' => 'integer',
+        'passwordRetries' => 'integer',
+        'passwordRetryAt' => 'datetime',
     ];
 
     public function save(array $options = [])

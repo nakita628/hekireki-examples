@@ -11,6 +11,11 @@ pub struct Model {
     #[sea_orm(unique)]
     #[sea_orm(column_name = "tokenHash")]
     pub token_hash: String,
+    #[sea_orm(unique)]
+    #[sea_orm(column_name = "previousTokenHash")]
+    pub previous_token_hash: Option<String>,
+    #[sea_orm(column_name = "previousTokenValidUntil")]
+    pub previous_token_valid_until: Option<DateTime>,
     #[sea_orm(column_name = "createdAt")]
     pub created_at: DateTime,
     #[sea_orm(column_name = "updatedAt")]

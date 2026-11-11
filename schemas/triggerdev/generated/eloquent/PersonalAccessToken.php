@@ -28,12 +28,20 @@ class PersonalAccessToken extends Model
         'userId',
         'revokedAt',
         'lastAccessedAt',
+        'expiresAt',
+        'idleTimeoutSeconds',
+        'expiryReminderSentAt',
+        'expiredNoticeSentAt',
     ];
 
     protected $casts = [
         'encryptedToken' => 'array',
         'revokedAt' => 'datetime',
         'lastAccessedAt' => 'datetime',
+        'expiresAt' => 'datetime',
+        'idleTimeoutSeconds' => 'integer',
+        'expiryReminderSentAt' => 'datetime',
+        'expiredNoticeSentAt' => 'datetime',
     ];
 
     public function user(): BelongsTo

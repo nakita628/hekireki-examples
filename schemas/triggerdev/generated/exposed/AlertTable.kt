@@ -37,6 +37,7 @@ object AlertTable : IdTable<String>("\"Alert\"") {
     val lastOccurrenceAt = pgTimestamptz("lastOccurrenceAt", 6).nullable()
     val occurrencesSinceRaise = integer("occurrencesSinceRaise").default(0)
     val occurrencesTotal = long("occurrencesTotal").default(0L)
+    val groupId = text("groupId").nullable()
     override val primaryKey = PrimaryKey(id, name = "\"Alert_pkey\"")
 
     init {
@@ -44,5 +45,6 @@ object AlertTable : IdTable<String>("\"Alert\"") {
         index("\"Alert_lifecycle_evaluationLeaseUntil_idx\"", false, lifecycle, evaluationLeaseUntil)
         index("\"Alert_projectId_idx\"", false, projectId)
         index("\"Alert_organizationId_idx\"", false, organizationId)
+        index("\"Alert_groupId_idx\"", false, groupId)
     }
 }

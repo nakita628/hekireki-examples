@@ -6,4 +6,7 @@ enum class GatewayProvider(
     OPENAI("openai"),
     ANTHROPIC("anthropic"),
     BEDROCK("bedrock"),
+    OPENROUTER("openrouter"),
+    XAI("xai"),
+    VERCEL("vercel"),
 }

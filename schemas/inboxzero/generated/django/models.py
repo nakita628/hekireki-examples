@@ -174,6 +174,7 @@ class MailSplitFilterKind(models.TextChoices):
     CATEGORY = "CATEGORY"
     FROM = "FROM"
     OLDER_THAN = "OLDER_THAN"
+    TO = "TO"
 
 
 class DraftReplyConfidence(models.TextChoices):
@@ -1818,6 +1819,22 @@ class ChatCompaction(models.Model):
         db_table = "ChatCompaction"
         indexes = [
             models.Index(fields=["chat"]),
+        ]
+
+
+class ChatActionTotal(models.Model):
+    id = models.TextField(primary_key=True, default=None)
+    created_at = UtcDateTimeField(db_column="createdAt", default=timezone.now)
+    updated_at = UtcDateTimeField(db_column="updatedAt", auto_now=True)
+    action = models.TextField()
+    count = models.IntegerField(default=0)
+    chat = models.ForeignKey("Chat", on_delete=models.CASCADE, related_name="action_totals", db_column="chatId", db_index=False)
+    objects = AutoNowQuerySet.as_manager()
+
+    class Meta:
+        db_table = "ChatActionTotal"
+        constraints = [
+            models.UniqueConstraint(fields=["chat", "action"], name="ChatActionTotal_chatId_action_key"),
         ]
 
 

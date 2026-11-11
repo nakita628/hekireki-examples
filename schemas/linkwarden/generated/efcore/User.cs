@@ -93,7 +93,15 @@ public partial class User
 
     public bool AcceptPromotionalEmails { get; set; } = false;
 
+    public bool ShareUsageAnalytics { get; set; } = true;
+
     public bool TrialEndEmailSent { get; set; } = false;
+
+    public int SessionVersion { get; set; } = 0;
+
+    public int PasswordRetries { get; set; } = 0;
+
+    public DateTime? PasswordRetryAt { get; set; }
 
     public DateTime CreatedAt { get; set; }
 

@@ -7,4 +7,7 @@ enum GatewayProvider: string
     case OPENAI = 'openai';
     case ANTHROPIC = 'anthropic';
     case BEDROCK = 'bedrock';
+    case OPENROUTER = 'openrouter';
+    case XAI = 'xai';
+    case VERCEL = 'vercel';
 }

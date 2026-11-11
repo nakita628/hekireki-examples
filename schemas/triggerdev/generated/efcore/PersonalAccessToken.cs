@@ -25,6 +25,14 @@ public partial class PersonalAccessToken
 
     public DateTime? LastAccessedAt { get; set; }
 
+    public DateTime? ExpiresAt { get; set; }
+
+    public int? IdleTimeoutSeconds { get; set; }
+
+    public DateTime? ExpiryReminderSentAt { get; set; }
+
+    public DateTime? ExpiredNoticeSentAt { get; set; }
+
     public DateTime CreatedAt { get; set; }
 
     public DateTime UpdatedAt { get; set; }

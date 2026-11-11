@@ -67,6 +67,11 @@ class Project extends Model
         return $this->hasOne(ConnectedGithubRepository::class, 'projectId');
     }
 
+    public function trustedDeployRepository(): HasOne
+    {
+        return $this->hasOne(TrustedDeployRepository::class, 'projectId');
+    }
+
     public function workerGroups(): HasMany
     {
         return $this->hasMany(WorkerInstanceGroup::class, 'projectId');

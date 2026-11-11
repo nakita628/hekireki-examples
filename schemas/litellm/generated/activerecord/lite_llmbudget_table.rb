@@ -1,0 +1,28 @@
+class LiteLLMBudgetTable < ApplicationRecord
+  self.table_name = "LiteLLM_BudgetTable"
+  self.primary_key = "budget_id"
+  self.implicit_order_column = "created_at"
+
+  attribute :budget_id, default: -> { SecureRandom.uuid }
+  attribute :allowed_models, default: -> { [] }
+
+  validates :created_by, presence: true
+  validates :updated_by, presence: true
+
+  has_many :organization, class_name: "LiteLLMOrganizationTable", foreign_key: "budget_id",
+                          inverse_of: :litellm_budget_table, dependent: :nullify
+  has_many :projects, class_name: "LiteLLMProjectTable", foreign_key: "budget_id", inverse_of: :litellm_budget_table,
+                      dependent: :nullify
+  has_many :keys, class_name: "LiteLLMVerificationToken", foreign_key: "budget_id", inverse_of: :litellm_budget_table,
+                  dependent: :nullify
+  has_many :end_users, class_name: "LiteLLMEndUserTable", foreign_key: "budget_id", inverse_of: :litellm_budget_table,
+                       dependent: :nullify
+  has_many :tags, class_name: "LiteLLMTagTable", foreign_key: "budget_id", inverse_of: :litellm_budget_table,
+                  dependent: :nullify
+  has_many :model_access_groups, class_name: "LiteLLMModelAccessGroupBudgetTable", foreign_key: "budget_id",
+                                 inverse_of: :litellm_budget_table, dependent: :nullify
+  has_many :team_membership, class_name: "LiteLLMTeamMembership", foreign_key: "budget_id",
+                             inverse_of: :litellm_budget_table, dependent: :nullify
+  has_many :organization_membership, class_name: "LiteLLMOrganizationMembership", foreign_key: "budget_id",
+                                     inverse_of: :litellm_budget_table, dependent: :nullify
+end

@@ -6,6 +6,7 @@ pub mod app_migration_status;
 pub mod collection;
 pub mod dashboard_section;
 pub mod dashboard_section_type;
+pub mod email_verification_code;
 pub mod highlight;
 pub mod link;
 pub mod link_to_tag;

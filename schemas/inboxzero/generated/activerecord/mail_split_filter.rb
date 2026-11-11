@@ -3,7 +3,7 @@ class MailSplitFilter < ApplicationRecord
 
   attribute :id, default: -> { Cuid.generate }
 
-  enum :kind, { unread: "UNREAD", starred: "STARRED", label: "LABEL", category: "CATEGORY", from: "FROM", older_than: "OLDER_THAN" },
+  enum :kind, { unread: "UNREAD", starred: "STARRED", label: "LABEL", category: "CATEGORY", from: "FROM", older_than: "OLDER_THAN", to: "TO" },
        prefix: true, validate: true
 
   validates :order, presence: true, uniqueness: { scope: :mailSplitId }

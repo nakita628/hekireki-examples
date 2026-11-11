@@ -69,8 +69,16 @@ pub struct Model {
     pub last_picked_at: Option<DateTime>,
     #[sea_orm(column_name = "acceptPromotionalEmails", default_value = false)]
     pub accept_promotional_emails: bool,
+    #[sea_orm(column_name = "shareUsageAnalytics", default_value = true)]
+    pub share_usage_analytics: bool,
     #[sea_orm(column_name = "trialEndEmailSent", default_value = false)]
     pub trial_end_email_sent: bool,
+    #[sea_orm(column_name = "sessionVersion", default_value = 0)]
+    pub session_version: i32,
+    #[sea_orm(column_name = "passwordRetries", default_value = 0)]
+    pub password_retries: i32,
+    #[sea_orm(column_name = "passwordRetryAt")]
+    pub password_retry_at: Option<DateTime>,
     #[sea_orm(column_name = "createdAt")]
     pub created_at: DateTime,
     #[sea_orm(column_name = "updatedAt")]

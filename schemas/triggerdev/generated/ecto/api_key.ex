@@ -9,9 +9,12 @@ defmodule Trigger.ApiKey do
           name: String.t(),
           key_hash: String.t(),
           last_four: String.t(),
+          description: String.t() | nil,
           preset_id: String.t() | nil,
           scopes: [String.t()],
+          allowed_ip_ranges: [String.t()],
           last_used_at: DateTime.t() | nil,
+          last_used_ip: String.t() | nil,
           revoked_at: DateTime.t() | nil,
           expires_at: DateTime.t() | nil,
           inserted_at: DateTime.t(),
@@ -25,9 +28,12 @@ defmodule Trigger.ApiKey do
     field(:name, :string)
     field(:key_hash, :string)
     field(:last_four, :string)
+    field(:description, :string)
     field(:preset_id, :string)
     field(:scopes, {:array, :string})
+    field(:allowed_ip_ranges, {:array, :string})
     field(:last_used_at, Trigger.PrismaDateTime)
+    field(:last_used_ip, :string)
     field(:revoked_at, Trigger.PrismaDateTime)
     field(:expires_at, Trigger.PrismaDateTime)
     belongs_to(:runtime_environment, Trigger.RuntimeEnvironment, foreign_key: :runtime_environment_id, type: :string)

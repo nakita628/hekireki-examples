@@ -21,6 +21,7 @@ class LinkEntity(
     var createdById by LinkTable.createdById
     var collection by CollectionEntity referencedOn LinkTable.collectionId
     var collectionId by LinkTable.collectionId
+    var collectionOrder by LinkTable.collectionOrder
     var tags by TagEntity via LinkToTagTable
     var icon by LinkTable.icon
     var iconWeight by LinkTable.iconWeight

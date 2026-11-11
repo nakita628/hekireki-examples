@@ -9,6 +9,7 @@ defmodule Linkwarden.Link do
           name: String.t(),
           type: String.t(),
           description: String.t(),
+          collection_order: float(),
           icon: String.t() | nil,
           icon_weight: String.t() | nil,
           color: String.t() | nil,
@@ -38,6 +39,7 @@ defmodule Linkwarden.Link do
     field(:name, :string, default: "")
     field(:type, :string, default: "url")
     field(:description, :string, default: "")
+    field(:collection_order, :float, source: :collectionOrder)
     field(:icon, :string)
     field(:icon_weight, :string, source: :iconWeight)
     field(:color, :string)

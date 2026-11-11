@@ -130,6 +130,8 @@ pub enum Relation {
     TaskIdentifiers,
     #[sea_orm(has_one = "super::connected_github_repository::Entity")]
     ConnectedGithubRepository,
+    #[sea_orm(has_one = "super::trusted_deploy_repository::Entity")]
+    TrustedDeployRepository,
 }
 
 impl Related<super::organization::Entity> for Entity {
@@ -333,6 +335,12 @@ impl Related<super::task_identifier::Entity> for Entity {
 impl Related<super::connected_github_repository::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::ConnectedGithubRepository.def()
+    }
+}
+
+impl Related<super::trusted_deploy_repository::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::TrustedDeployRepository.def()
     }
 }
 

@@ -57,7 +57,10 @@ export const runtimeEnvironmentTypeEnum = pgEnum('RuntimeEnvironmentType', [
   'PREVIEW',
 ])
 
-export const environmentPauseSourceEnum = pgEnum('EnvironmentPauseSource', ['BILLING_LIMIT'])
+export const environmentPauseSourceEnum = pgEnum('EnvironmentPauseSource', [
+  'BILLING_LIMIT',
+  'ADMIN_BAN',
+])
 
 export const projectVersionEnum = pgEnum('ProjectVersion', ['V2', 'V3'])
 
@@ -277,6 +280,13 @@ export const githubRepositorySelectionEnum = pgEnum('GithubRepositorySelection',
   'SELECTED',
 ])
 
+export const trustedDeployScopeEnum = pgEnum('TrustedDeployScope', [
+  'ANY',
+  'BRANCH',
+  'TAG',
+  'ENVIRONMENT',
+])
+
 export const impersonationAuditLogActionEnum = pgEnum('ImpersonationAuditLogAction', [
   'START',
   'STOP',
@@ -459,6 +469,10 @@ export const personalAccessToken = pgTable(
     userId: text('userId').notNull(),
     revokedAt: timestamp('revokedAt', { precision: 3 }),
     lastAccessedAt: timestamp('lastAccessedAt', { precision: 3 }),
+    expiresAt: timestamp('expiresAt', { precision: 3 }),
+    idleTimeoutSeconds: integer('idleTimeoutSeconds'),
+    expiryReminderSentAt: timestamp('expiryReminderSentAt', { precision: 3 }),
+    expiredNoticeSentAt: timestamp('expiredNoticeSentAt', { precision: 3 }),
     createdAt: timestamp('createdAt', { precision: 3 })
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`)
@@ -738,11 +752,14 @@ export const apiKeys = pgTable(
     name: text('name').notNull(),
     keyHash: text('key_hash').notNull(),
     lastFour: text('last_four').notNull(),
+    description: text('description'),
     runtimeEnvironmentId: text('runtime_environment_id').notNull(),
     createdByUserId: text('created_by_user_id'),
     presetId: text('preset_id'),
     scopes: text('scopes').array(),
+    allowedIpRanges: text('allowed_ip_ranges').array().default([]),
     lastUsedAt: timestamp('last_used_at', { precision: 3 }),
+    lastUsedIp: text('last_used_ip'),
     revokedAt: timestamp('revoked_at', { precision: 3 }),
     expiresAt: timestamp('expires_at', { precision: 3 }),
     updatedAt: timestamp('updated_at', { precision: 3 }).notNull().$onUpdate(utcNow),
@@ -1344,6 +1361,7 @@ export const alert = pgTable(
     occurrencesTotal: bigint('occurrencesTotal', { mode: 'bigint' })
       .notNull()
       .default(sql`0`),
+    groupId: text('groupId'),
   },
   (table) => [
     index('Alert_environmentId_lifecycle_idx').on(table.environmentId, table.lifecycle),
@@ -1353,6 +1371,7 @@ export const alert = pgTable(
     ),
     index('Alert_projectId_idx').on(table.projectId),
     index('Alert_organizationId_idx').on(table.organizationId),
+    index('Alert_groupId_idx').on(table.groupId),
   ],
 )
 
@@ -2174,13 +2193,18 @@ export const workerGroupToken = pgTable(
       .primaryKey()
       .$defaultFn(() => cuid()),
     tokenHash: text('tokenHash').notNull(),
+    previousTokenHash: text('previousTokenHash'),
+    previousTokenValidUntil: timestamp('previousTokenValidUntil', { precision: 3 }),
     createdAt: timestamp('createdAt', { precision: 3 })
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`)
       .$defaultFn(utcNow),
     updatedAt: timestamp('updatedAt', { precision: 3 }).notNull().$onUpdate(utcNow),
   },
-  (table) => [uniqueIndex('WorkerGroupToken_tokenHash_key').on(table.tokenHash)],
+  (table) => [
+    uniqueIndex('WorkerGroupToken_tokenHash_key').on(table.tokenHash),
+    uniqueIndex('WorkerGroupToken_previousTokenHash_key').on(table.previousTokenHash),
+  ],
 )
 
 export const taskRunTag = pgTable(
@@ -3585,6 +3609,76 @@ export const githubRepository = pgTable(
   ],
 )
 
+export const trustedDeployRepository = pgTable(
+  'TrustedDeployRepository',
+  {
+    id: text('id')
+      .primaryKey()
+      .$defaultFn(() => cuid()),
+    projectId: text('projectId').notNull(),
+    issuer: text('issuer').notNull().default('https://token.actions.githubusercontent.com'),
+    repositoryOwner: text('repositoryOwner').notNull(),
+    repositoryName: text('repositoryName').notNull(),
+    repositoryId: text('repositoryId'),
+    repositoryOwnerId: text('repositoryOwnerId'),
+    createdAt: timestamp('createdAt', { precision: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`)
+      .$defaultFn(utcNow),
+    updatedAt: timestamp('updatedAt', { precision: 3 }).notNull().$onUpdate(utcNow),
+  },
+  (table) => [
+    uniqueIndex('TrustedDeployRepository_projectId_key').on(table.projectId),
+    foreignKey({
+      name: 'TrustedDeployRepository_projectId_fkey',
+      columns: [table.projectId],
+      foreignColumns: [project.id],
+    })
+      .onDelete('cascade')
+      .onUpdate('cascade'),
+  ],
+)
+
+export const trustedDeployEnvironment = pgTable(
+  'TrustedDeployEnvironment',
+  {
+    id: text('id')
+      .primaryKey()
+      .$defaultFn(() => cuid()),
+    trustedDeployRepositoryId: text('trustedDeployRepositoryId').notNull(),
+    runtimeEnvironmentId: text('runtimeEnvironmentId').notNull(),
+    enabled: boolean('enabled').notNull().default(false),
+    scope: trustedDeployScopeEnum('scope').notNull(),
+    scopeValue: text('scopeValue'),
+    additionalClaims: jsonb('additionalClaims').notNull().default({}),
+    createdAt: timestamp('createdAt', { precision: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`)
+      .$defaultFn(utcNow),
+    updatedAt: timestamp('updatedAt', { precision: 3 }).notNull().$onUpdate(utcNow),
+  },
+  (table) => [
+    uniqueIndex('TrustedDeployEnvironment_runtimeEnvironmentId_key').on(table.runtimeEnvironmentId),
+    index('TrustedDeployEnvironment_trustedDeployRepositoryId_idx').on(
+      table.trustedDeployRepositoryId,
+    ),
+    foreignKey({
+      name: 'TrustedDeployEnvironment_trustedDeployRepositoryId_fkey',
+      columns: [table.trustedDeployRepositoryId],
+      foreignColumns: [trustedDeployRepository.id],
+    })
+      .onDelete('cascade')
+      .onUpdate('cascade'),
+    foreignKey({
+      name: 'TrustedDeployEnvironment_runtimeEnvironmentId_fkey',
+      columns: [table.runtimeEnvironmentId],
+      foreignColumns: [runtimeEnvironment.id],
+    })
+      .onDelete('cascade')
+      .onUpdate('cascade'),
+  ],
+)
+
 export const connectedGithubRepository = pgTable(
   'ConnectedGithubRepository',
   {
@@ -4358,6 +4452,8 @@ export const relations = defineRelations(
     taskEventPartitioned,
     githubAppInstallation,
     githubRepository,
+    trustedDeployRepository,
+    trustedDeployEnvironment,
     connectedGithubRepository,
     impersonationAuditLog,
     supportAccessRequest,
@@ -4511,6 +4607,10 @@ export const relations = defineRelations(
       taskIdentifiers: r.many.taskIdentifier(),
       apiKeys: r.many.apiKeys(),
       revokedApiKeys: r.many.revokedApiKey(),
+      trustedDeployGrant: r.one.trustedDeployEnvironment({
+        from: r.runtimeEnvironment.id,
+        to: r.trustedDeployEnvironment.runtimeEnvironmentId,
+      }),
     },
     apiKeys: {
       runtimeEnvironment: r.one.runtimeEnvironment({
@@ -4563,6 +4663,10 @@ export const relations = defineRelations(
       connectedGithubRepository: r.one.connectedGithubRepository({
         from: r.project.id,
         to: r.connectedGithubRepository.projectId,
+      }),
+      trustedDeployRepository: r.one.trustedDeployRepository({
+        from: r.project.id,
+        to: r.trustedDeployRepository.projectId,
       }),
       organizationProjectIntegration: r.many.organizationProjectIntegration(),
       customerQueries: r.many.customerQuery(),
@@ -5229,6 +5333,26 @@ export const relations = defineRelations(
         optional: false,
       }),
       ConnectedGithubRepository: r.many.connectedGithubRepository(),
+    },
+    trustedDeployRepository: {
+      project: r.one.project({
+        from: r.trustedDeployRepository.projectId,
+        to: r.project.id,
+        optional: false,
+      }),
+      environments: r.many.trustedDeployEnvironment(),
+    },
+    trustedDeployEnvironment: {
+      trustedDeployRepository: r.one.trustedDeployRepository({
+        from: r.trustedDeployEnvironment.trustedDeployRepositoryId,
+        to: r.trustedDeployRepository.id,
+        optional: false,
+      }),
+      runtimeEnvironment: r.one.runtimeEnvironment({
+        from: r.trustedDeployEnvironment.runtimeEnvironmentId,
+        to: r.runtimeEnvironment.id,
+        optional: false,
+      }),
     },
     connectedGithubRepository: {
       project: r.one.project({

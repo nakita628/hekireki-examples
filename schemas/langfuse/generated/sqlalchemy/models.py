@@ -352,7 +352,7 @@ class GatewayAiConnection(Base):
     id: Mapped[str] = mapped_column(primary_key=True)
     organization_id: Mapped[str] = mapped_column(ForeignKey("organizations.id", ondelete="CASCADE", onupdate="CASCADE", name="gateway_ai_connections_organization_id_fkey"))
     name: Mapped[str]
-    provider: Mapped[str] = mapped_column(Enum("openai", "anthropic", "bedrock", name="GatewayProvider"))
+    provider: Mapped[str] = mapped_column(Enum("openai", "anthropic", "bedrock", "openrouter", "xai", "vercel", name="GatewayProvider"))
     encrypted_credential: Mapped[str] = mapped_column("encrypted_credentials")
     display_secret: Mapped[str] = mapped_column("display_secret_key")
     created_by_id: Mapped[Optional[str]]
@@ -674,8 +674,8 @@ class AnnotationQueueItem(Base):
     updated_at: Mapped[datetime] = mapped_column(default=utc_now, server_default=text("CURRENT_TIMESTAMP"), onupdate=utc_now)
 
     __table_args__ = (
-        Index("annotation_queue_items_id_project_id_idx", "id", "project_id"),
         Index("annotation_queue_items_project_id_queue_id_status_idx", "project_id", "queue_id", "status"),
+        Index("annotation_queue_items_project_id_queue_id_created_at_id_idx", "project_id", "queue_id", "created_at", "id"),
         Index("annotation_queue_items_object_id_object_type_project_id_que_idx", "object_id", "object_type", "project_id", "queue_id"),
         Index("annotation_queue_items_annotator_user_id_idx", "annotator_user_id"),
         Index("annotation_queue_items_created_at_idx", "created_at"),

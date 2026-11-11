@@ -166,6 +166,10 @@ public partial class TriggerContext : DbContext
 
     public virtual DbSet<GithubRepository> GithubRepositories { get; set; }
 
+    public virtual DbSet<TrustedDeployRepository> TrustedDeployRepositories { get; set; }
+
+    public virtual DbSet<TrustedDeployEnvironment> TrustedDeployEnvironments { get; set; }
+
     public virtual DbSet<ConnectedGithubRepository> ConnectedGithubRepositories { get; set; }
 
     public virtual DbSet<ImpersonationAuditLog> ImpersonationAuditLogs { get; set; }
@@ -241,6 +245,7 @@ public partial class TriggerContext : DbContext
         npgsql.MapEnum<BulkActionNotificationType>("BulkActionNotificationType");
         npgsql.MapEnum<BulkActionItemStatus>("BulkActionItemStatus");
         npgsql.MapEnum<GithubRepositorySelection>("GithubRepositorySelection");
+        npgsql.MapEnum<TrustedDeployScope>("TrustedDeployScope");
         npgsql.MapEnum<ImpersonationAuditLogAction>("ImpersonationAuditLogAction");
         npgsql.MapEnum<SupportAccessMode>("SupportAccessMode");
         npgsql.MapEnum<SupportAccessRequestStatus>("SupportAccessRequestStatus");
@@ -299,6 +304,7 @@ public partial class TriggerContext : DbContext
         dataSource.MapEnum<BulkActionNotificationType>("BulkActionNotificationType");
         dataSource.MapEnum<BulkActionItemStatus>("BulkActionItemStatus");
         dataSource.MapEnum<GithubRepositorySelection>("GithubRepositorySelection");
+        dataSource.MapEnum<TrustedDeployScope>("TrustedDeployScope");
         dataSource.MapEnum<ImpersonationAuditLogAction>("ImpersonationAuditLogAction");
         dataSource.MapEnum<SupportAccessMode>("SupportAccessMode");
         dataSource.MapEnum<SupportAccessRequestStatus>("SupportAccessRequestStatus");
@@ -365,6 +371,7 @@ public partial class TriggerContext : DbContext
         modelBuilder.HasPostgresEnum<BulkActionNotificationType>(name: "BulkActionNotificationType");
         modelBuilder.HasPostgresEnum<BulkActionItemStatus>(name: "BulkActionItemStatus");
         modelBuilder.HasPostgresEnum<GithubRepositorySelection>(name: "GithubRepositorySelection");
+        modelBuilder.HasPostgresEnum<TrustedDeployScope>(name: "TrustedDeployScope");
         modelBuilder.HasPostgresEnum<ImpersonationAuditLogAction>(name: "ImpersonationAuditLogAction");
         modelBuilder.HasPostgresEnum<SupportAccessMode>(name: "SupportAccessMode");
         modelBuilder.HasPostgresEnum<SupportAccessRequestStatus>(name: "SupportAccessRequestStatus");
@@ -585,6 +592,19 @@ public partial class TriggerContext : DbContext
                 .HasConversion<UtcClockConverter>()
                 .HasColumnType("timestamp(3) without time zone")
                 .HasColumnName("lastAccessedAt");
+            entity.Property(e => e.ExpiresAt)
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("expiresAt");
+            entity.Property(e => e.IdleTimeoutSeconds).HasColumnName("idleTimeoutSeconds");
+            entity.Property(e => e.ExpiryReminderSentAt)
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("expiryReminderSentAt");
+            entity.Property(e => e.ExpiredNoticeSentAt)
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("expiredNoticeSentAt");
             entity.Property(e => e.CreatedAt)
                 .HasValueGenerator<UtcNowGenerator>()
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
@@ -982,14 +1002,20 @@ public partial class TriggerContext : DbContext
             entity.Property(e => e.Name).HasColumnName("name");
             entity.Property(e => e.KeyHash).HasColumnName("key_hash");
             entity.Property(e => e.LastFour).HasColumnName("last_four");
+            entity.Property(e => e.Description).HasColumnName("description");
             entity.Property(e => e.RuntimeEnvironmentId).HasColumnName("runtime_environment_id");
             entity.Property(e => e.CreatedByUserId).HasColumnName("created_by_user_id");
             entity.Property(e => e.PresetId).HasColumnName("preset_id");
             entity.Property(e => e.Scopes).HasColumnName("scopes");
+            entity.Property(e => e.AllowedIpRanges)
+                .ValueGeneratedNever()
+                .HasDefaultValue(new List<string>())
+                .HasColumnName("allowed_ip_ranges");
             entity.Property(e => e.LastUsedAt)
                 .HasConversion<UtcClockConverter>()
                 .HasColumnType("timestamp(3) without time zone")
                 .HasColumnName("last_used_at");
+            entity.Property(e => e.LastUsedIp).HasColumnName("last_used_ip");
             entity.Property(e => e.RevokedAt)
                 .HasConversion<UtcClockConverter>()
                 .HasColumnType("timestamp(3) without time zone")
@@ -1758,6 +1784,8 @@ public partial class TriggerContext : DbContext
 
             entity.HasIndex(e => e.OrganizationId, "Alert_organizationId_idx");
 
+            entity.HasIndex(e => e.GroupId, "Alert_groupId_idx");
+
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.OrganizationId).HasColumnName("organizationId");
             entity.Property(e => e.ProjectId).HasColumnName("projectId");
@@ -1851,6 +1879,7 @@ public partial class TriggerContext : DbContext
                 .ValueGeneratedNever()
                 .HasDefaultValue(0L)
                 .HasColumnName("occurrencesTotal");
+            entity.Property(e => e.GroupId).HasColumnName("groupId");
         });
 
         modelBuilder.Entity<AlertEvent>(entity =>
@@ -2914,10 +2943,17 @@ public partial class TriggerContext : DbContext
 
             entity.HasIndex(e => e.TokenHash, "WorkerGroupToken_tokenHash_key").IsUnique();
 
+            entity.HasIndex(e => e.PreviousTokenHash, "WorkerGroupToken_previousTokenHash_key").IsUnique();
+
             entity.Property(e => e.Id)
                 .HasValueGenerator<CuidGenerator>()
                 .HasColumnName("id");
             entity.Property(e => e.TokenHash).HasColumnName("tokenHash");
+            entity.Property(e => e.PreviousTokenHash).HasColumnName("previousTokenHash");
+            entity.Property(e => e.PreviousTokenValidUntil)
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("previousTokenValidUntil");
             entity.Property(e => e.CreatedAt)
                 .HasValueGenerator<UtcNowGenerator>()
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
@@ -4680,6 +4716,91 @@ public partial class TriggerContext : DbContext
                 .HasConstraintName("GithubRepository_installationId_fkey");
         });
 
+        modelBuilder.Entity<TrustedDeployRepository>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("TrustedDeployRepository_pkey");
+
+            entity.ToTable("TrustedDeployRepository");
+
+            entity.HasIndex(e => e.ProjectId, "TrustedDeployRepository_projectId_key").IsUnique();
+
+            entity.Property(e => e.Id)
+                .HasValueGenerator<CuidGenerator>()
+                .HasColumnName("id");
+            entity.Property(e => e.ProjectId).HasColumnName("projectId");
+            entity.Property(e => e.Issuer)
+                .ValueGeneratedNever()
+                .HasDefaultValue("https://token.actions.githubusercontent.com")
+                .HasColumnName("issuer");
+            entity.Property(e => e.RepositoryOwner).HasColumnName("repositoryOwner");
+            entity.Property(e => e.RepositoryName).HasColumnName("repositoryName");
+            entity.Property(e => e.RepositoryId).HasColumnName("repositoryId");
+            entity.Property(e => e.RepositoryOwnerId).HasColumnName("repositoryOwnerId");
+            entity.Property(e => e.CreatedAt)
+                .HasValueGenerator<UtcNowGenerator>()
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("createdAt");
+            entity.Property(e => e.UpdatedAt)
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("updatedAt");
+
+            entity.HasOne(d => d.Project).WithOne(p => p.TrustedDeployRepository)
+                .HasForeignKey<TrustedDeployRepository>(d => d.ProjectId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("TrustedDeployRepository_projectId_fkey");
+        });
+
+        modelBuilder.Entity<TrustedDeployEnvironment>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("TrustedDeployEnvironment_pkey");
+
+            entity.ToTable("TrustedDeployEnvironment");
+
+            entity.HasIndex(e => e.RuntimeEnvironmentId, "TrustedDeployEnvironment_runtimeEnvironmentId_key").IsUnique();
+
+            entity.HasIndex(e => e.TrustedDeployRepositoryId, "TrustedDeployEnvironment_trustedDeployRepositoryId_idx");
+
+            entity.Property(e => e.Id)
+                .HasValueGenerator<CuidGenerator>()
+                .HasColumnName("id");
+            entity.Property(e => e.TrustedDeployRepositoryId).HasColumnName("trustedDeployRepositoryId");
+            entity.Property(e => e.RuntimeEnvironmentId).HasColumnName("runtimeEnvironmentId");
+            entity.Property(e => e.Enabled)
+                .ValueGeneratedNever()
+                .HasDefaultValue(false)
+                .HasColumnName("enabled");
+            entity.Property(e => e.Scope).HasColumnName("scope");
+            entity.Property(e => e.ScopeValue).HasColumnName("scopeValue");
+            entity.Property(e => e.AdditionalClaims)
+                .ValueGeneratedNever()
+                .HasDefaultValue("{}")
+                .HasColumnType("jsonb")
+                .HasColumnName("additionalClaims");
+            entity.Property(e => e.CreatedAt)
+                .HasValueGenerator<UtcNowGenerator>()
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("createdAt");
+            entity.Property(e => e.UpdatedAt)
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("updatedAt");
+
+            entity.HasOne(d => d.TrustedDeployRepository).WithMany(p => p.Environments)
+                .HasForeignKey(d => d.TrustedDeployRepositoryId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("TrustedDeployEnvironment_trustedDeployRepositoryId_fkey");
+
+            entity.HasOne(d => d.RuntimeEnvironment).WithOne(p => p.TrustedDeployGrant)
+                .HasForeignKey<TrustedDeployEnvironment>(d => d.RuntimeEnvironmentId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("TrustedDeployEnvironment_runtimeEnvironmentId_fkey");
+        });
+
         modelBuilder.Entity<ConnectedGithubRepository>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("ConnectedGithubRepository_pkey");
@@ -5881,6 +6002,24 @@ public partial class TriggerContext : DbContext
         }
 
         foreach (var entry in ChangeTracker.Entries<GithubRepository>())
+        {
+            if ((entry.State == EntityState.Added && entry.Entity.UpdatedAt == default)
+                || (entry.State == EntityState.Modified && !entry.Property(e => e.UpdatedAt).IsModified))
+            {
+                entry.Entity.UpdatedAt = now;
+            }
+        }
+
+        foreach (var entry in ChangeTracker.Entries<TrustedDeployRepository>())
+        {
+            if ((entry.State == EntityState.Added && entry.Entity.UpdatedAt == default)
+                || (entry.State == EntityState.Modified && !entry.Property(e => e.UpdatedAt).IsModified))
+            {
+                entry.Entity.UpdatedAt = now;
+            }
+        }
+
+        foreach (var entry in ChangeTracker.Entries<TrustedDeployEnvironment>())
         {
             if ((entry.State == EntityState.Added && entry.Entity.UpdatedAt == default)
                 || (entry.State == EntityState.Modified && !entry.Property(e => e.UpdatedAt).IsModified))

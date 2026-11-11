@@ -74,6 +74,8 @@ pub use super::task_run_template::Entity as TaskRunTemplate;
 pub use super::task_run_waitpoint::Entity as TaskRunWaitpoint;
 pub use super::task_schedule::Entity as TaskSchedule;
 pub use super::task_schedule_instance::Entity as TaskScheduleInstance;
+pub use super::trusted_deploy_environment::Entity as TrustedDeployEnvironment;
+pub use super::trusted_deploy_repository::Entity as TrustedDeployRepository;
 pub use super::user::Entity as User;
 pub use super::waitpoint::Entity as Waitpoint;
 pub use super::waitpoint_tag::Entity as WaitpointTag;

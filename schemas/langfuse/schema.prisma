@@ -1,6 +1,6 @@
 // Langfuse: Langfuse LLM observability: organizations, projects, traces, prompts, datasets and evaluations.
 //
-// Imported from https://github.com/langfuse/langfuse/blob/a479bb6eb76fa284b27cdbb45cd304d83cd98b82/packages/shared/prisma/schema.prisma
+// Imported from https://github.com/langfuse/langfuse/blob/47a70342f1736561dfa157a654d011aac29db79d/packages/shared/prisma/schema.prisma
 // (MIT license) by tools/import/import-schema.mjs, which dropped the original
 // generator blocks and the datasource's connection URLs and added the hekireki generators below.
 // The models, enums and `///` comments are the project's own, as they are at that commit.
@@ -404,9 +404,12 @@ enum GatewayIngestionMode {
 }
 
 enum GatewayProvider {
-  OPENAI    @map("openai")
-  ANTHROPIC @map("anthropic")
-  BEDROCK   @map("bedrock")
+  OPENAI     @map("openai")
+  ANTHROPIC  @map("anthropic")
+  BEDROCK    @map("bedrock")
+  OPENROUTER @map("openrouter")
+  XAI        @map("xai")
+  VERCEL     @map("vercel")
 }
 
 enum GatewayConnectionStatus {
@@ -754,8 +757,8 @@ model AnnotationQueueItem {
   createdAt       DateTime                  @default(now()) @map("created_at")
   updatedAt       DateTime                  @default(now()) @updatedAt @map("updated_at")
 
-  @@index([id, projectId])
   @@index([projectId, queueId, status])
+  @@index([projectId, queueId, createdAt, id])
   @@index([objectId, objectType, projectId, queueId])
   @@index([annotatorUserId])
   @@index([createdAt])

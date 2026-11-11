@@ -51,6 +51,7 @@ class ProjectEntity(
     val taskRunCheckpoints by TaskRunCheckpointEntity referrersOn TaskRunCheckpointTable.projectId
     val waitpointTags by WaitpointTagEntity referrersOn WaitpointTagTable.projectId
     val connectedGithubRepository by ConnectedGithubRepositoryEntity optionalBackReferencedOn ConnectedGithubRepositoryTable.projectId
+    val trustedDeployRepository by TrustedDeployRepositoryEntity optionalBackReferencedOn TrustedDeployRepositoryTable.projectId
     val organizationProjectIntegration by OrganizationProjectIntegrationEntity referrersOn OrganizationProjectIntegrationTable.projectId
     val customerQueries by CustomerQueryEntity optionalReferrersOn CustomerQueryTable.projectId
     val playgroundConversations by PlaygroundConversationEntity referrersOn PlaygroundConversationTable.projectId

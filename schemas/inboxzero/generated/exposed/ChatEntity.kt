@@ -23,6 +23,7 @@ class ChatEntity(
     val messages by ChatMessageEntity referrersOn ChatMessageTable.chatId
     val compactions by ChatCompactionEntity referrersOn ChatCompactionTable.chatId
     val memories by ChatMemoryEntity optionalReferrersOn ChatMemoryTable.chatId
+    val actionTotals by ChatActionTotalEntity referrersOn ChatActionTotalTable.chatId
     var emailAccountId by ChatTable.emailAccountId
     var emailAccount by EmailAccountEntity referencedOn ChatTable.emailAccountId
 
