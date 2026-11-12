@@ -12,6 +12,8 @@ class RuntimeEnvironmentEntity(
 ) : Entity<String>(id) {
     companion object : EntityClass<String, RuntimeEnvironmentEntity>(RuntimeEnvironmentTable)
 
+    val encryptionPolicy by EnvironmentEncryptionPolicyEntity optionalBackReferencedOn EnvironmentEncryptionPolicyTable.id
+    val encryptionKeys by EnvironmentEncryptionKeyEntity referrersOn EnvironmentEncryptionKeyTable.environmentId
     var slug by RuntimeEnvironmentTable.slug
     var apiKey by RuntimeEnvironmentTable.apiKey
     var rootApiKeyHiddenAt by RuntimeEnvironmentTable.rootApiKeyHiddenAt

@@ -19,6 +19,8 @@ type User struct {
 	PaymentProcessorUserID *string              `gorm:"column:paymentProcessorUserId;uniqueIndex" json:"paymentProcessorUserId"`
 	SubscriptionStatus     *string              `gorm:"column:subscriptionStatus" json:"subscriptionStatus"`
 	SubscriptionPlan       *string              `gorm:"column:subscriptionPlan" json:"subscriptionPlan"`
+	CurrentPeriodEnd       *DateTime            `gorm:"column:currentPeriodEnd" json:"currentPeriodEnd"`
+	CancelAtPeriodEnd      bool                 `gorm:"column:cancelAtPeriodEnd;default:false;not null" json:"cancelAtPeriodEnd"`
 	DatePaid               *DateTime            `gorm:"column:datePaid" json:"datePaid"`
 	Credits                *int                 `gorm:"column:credits;default:3;not null" json:"credits"`
 	GptResponses           []GptResponse        `gorm:"foreignKey:UserID"`

@@ -81,6 +81,11 @@ class ProjectVersion(models.TextChoices):
     V3 = "V3"
 
 
+class EnvironmentKeyWrappingProvider(models.TextChoices):
+    PLATFORM_KEYRING = "PLATFORM_KEYRING"
+    AWS_KMS = "AWS_KMS"
+
+
 class SecretStoreProvider(models.TextChoices):
     DATABASE = "DATABASE"
     AWS_PARAM_STORE = "AWS_PARAM_STORE"
@@ -705,6 +710,36 @@ class Project(models.Model):
 
     class Meta:
         db_table = "Project"
+
+
+class EnvironmentEncryptionPolicy(models.Model):
+    environment = models.OneToOneField("RuntimeEnvironment", on_delete=models.CASCADE, related_name="encryption_policy", primary_key=True, db_column="environmentId")
+    revision = models.IntegerField(default=0)
+    wrapping_provider = models.TextField(choices=EnvironmentKeyWrappingProvider.choices, null=True, db_column="wrappingProvider")
+    wrapping_key_reference = models.TextField(null=True, db_column="wrappingKeyReference")
+    active_key_id = models.TextField(null=True, db_column="activeKeyId")
+
+    class Meta:
+        db_table = "EnvironmentEncryptionPolicy"
+
+
+class EnvironmentEncryptionKey(models.Model):
+    id = models.TextField(primary_key=True, default=None)
+    environment = models.ForeignKey("RuntimeEnvironment", on_delete=models.CASCADE, related_name="encryption_keys", db_column="environmentId", db_index=False)
+    wrapped_key = models.JSONField(db_column="wrappedKey")
+    wrapping_provider = models.TextField(choices=EnvironmentKeyWrappingProvider.choices, db_column="wrappingProvider")
+    wrapping_key_reference = models.TextField(db_column="wrappingKeyReference")
+    revision = models.IntegerField(default=0)
+    created_at = UtcDateTimeField(db_column="createdAt", default=timezone.now)
+
+    class Meta:
+        db_table = "EnvironmentEncryptionKey"
+        constraints = [
+            models.UniqueConstraint(fields=["id", "environment"], name="EnvironmentEncryptionKey_id_environmentId_key"),
+        ]
+        indexes = [
+            models.Index(fields=["environment"]),
+        ]
 
 
 class SecretReference(models.Model):
@@ -1801,6 +1836,7 @@ class EnvironmentVariableValue(models.Model):
         indexes = [
             models.Index(fields=["environment"]),
             models.Index(fields=["value_reference"]),
+            models.Index(fields=["environment", "-updated_at", "variable"]),
         ]
 
 

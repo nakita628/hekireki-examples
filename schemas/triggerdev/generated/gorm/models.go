@@ -460,35 +460,37 @@ type RuntimeEnvironment struct {
 	Organization                        *Organization
 	Project                             *Project
 	OrgMember                           *OrgMember
-	CurrentSession                      *RuntimeEnvironmentSession  `gorm:"foreignKey:CurrentSessionID"`
-	ChildEnvironments                   []RuntimeEnvironment        `gorm:"foreignKey:ParentEnvironmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	BackgroundWorkers                   []BackgroundWorker          `gorm:"foreignKey:RuntimeEnvironmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	BackgroundWorkerTasks               []BackgroundWorkerTask      `gorm:"foreignKey:RuntimeEnvironmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	TaskRuns                            []TaskRun                   `gorm:"foreignKey:RuntimeEnvironmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	TaskQueues                          []TaskQueue                 `gorm:"foreignKey:RuntimeEnvironmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	EnvironmentVariableValues           []EnvironmentVariableValue  `gorm:"foreignKey:EnvironmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	Checkpoints                         []Checkpoint                `gorm:"foreignKey:RuntimeEnvironmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	WorkerDeployments                   []WorkerDeployment          `gorm:"foreignKey:EnvironmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	WorkerDeploymentPromotions          []WorkerDeploymentPromotion `gorm:"foreignKey:EnvironmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	TaskRunAttempts                     []TaskRunAttempt            `gorm:"foreignKey:RuntimeEnvironmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	CheckpointRestoreEvent              []CheckpointRestoreEvent    `gorm:"foreignKey:RuntimeEnvironmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	TaskScheduleInstances               []TaskScheduleInstance      `gorm:"foreignKey:EnvironmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	Alerts                              []ProjectAlert              `gorm:"foreignKey:EnvironmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	Sessions                            []RuntimeEnvironmentSession `gorm:"foreignKey:EnvironmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	TaskRunNumberCounter                []TaskRunNumberCounter      `gorm:"foreignKey:EnvironmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	TaskRunCheckpoints                  []TaskRunCheckpoint         `gorm:"foreignKey:RuntimeEnvironmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	Waitpoints                          []Waitpoint                 `gorm:"foreignKey:EnvironmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	WorkerInstances                     []WorkerInstance            `gorm:"foreignKey:EnvironmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	WaitpointTags                       []WaitpointTag              `gorm:"foreignKey:EnvironmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	BulkActionGroup                     []BulkActionGroup           `gorm:"foreignKey:EnvironmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	CustomerQueries                     []CustomerQuery             `gorm:"foreignKey:EnvironmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	Prompts                             []Prompt                    `gorm:"foreignKey:RuntimeEnvironmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	PlaygroundConversations             []PlaygroundConversation    `gorm:"foreignKey:RuntimeEnvironmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	ErrorGroupStates                    []ErrorGroupState           `gorm:"foreignKey:EnvironmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	TaskIdentifiers                     []TaskIdentifier            `gorm:"foreignKey:RuntimeEnvironmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	APIKeys                             []APIKey                    `gorm:"foreignKey:RuntimeEnvironmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	RevokedAPIKeys                      []RevokedAPIKey             `gorm:"foreignKey:RuntimeEnvironmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	TrustedDeployGrant                  *TrustedDeployEnvironment   `gorm:"foreignKey:RuntimeEnvironmentID;constraint:OnDelete:CASCADE"`
+	CurrentSession                      *RuntimeEnvironmentSession   `gorm:"foreignKey:CurrentSessionID"`
+	EncryptionKeys                      []EnvironmentEncryptionKey   `gorm:"foreignKey:EnvironmentID;constraint:OnDelete:CASCADE"`
+	ChildEnvironments                   []RuntimeEnvironment         `gorm:"foreignKey:ParentEnvironmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	BackgroundWorkers                   []BackgroundWorker           `gorm:"foreignKey:RuntimeEnvironmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	BackgroundWorkerTasks               []BackgroundWorkerTask       `gorm:"foreignKey:RuntimeEnvironmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	TaskRuns                            []TaskRun                    `gorm:"foreignKey:RuntimeEnvironmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	TaskQueues                          []TaskQueue                  `gorm:"foreignKey:RuntimeEnvironmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	EnvironmentVariableValues           []EnvironmentVariableValue   `gorm:"foreignKey:EnvironmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	Checkpoints                         []Checkpoint                 `gorm:"foreignKey:RuntimeEnvironmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	WorkerDeployments                   []WorkerDeployment           `gorm:"foreignKey:EnvironmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	WorkerDeploymentPromotions          []WorkerDeploymentPromotion  `gorm:"foreignKey:EnvironmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	TaskRunAttempts                     []TaskRunAttempt             `gorm:"foreignKey:RuntimeEnvironmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	CheckpointRestoreEvent              []CheckpointRestoreEvent     `gorm:"foreignKey:RuntimeEnvironmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	TaskScheduleInstances               []TaskScheduleInstance       `gorm:"foreignKey:EnvironmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	Alerts                              []ProjectAlert               `gorm:"foreignKey:EnvironmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	Sessions                            []RuntimeEnvironmentSession  `gorm:"foreignKey:EnvironmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	TaskRunNumberCounter                []TaskRunNumberCounter       `gorm:"foreignKey:EnvironmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	TaskRunCheckpoints                  []TaskRunCheckpoint          `gorm:"foreignKey:RuntimeEnvironmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	Waitpoints                          []Waitpoint                  `gorm:"foreignKey:EnvironmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	WorkerInstances                     []WorkerInstance             `gorm:"foreignKey:EnvironmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	WaitpointTags                       []WaitpointTag               `gorm:"foreignKey:EnvironmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	BulkActionGroup                     []BulkActionGroup            `gorm:"foreignKey:EnvironmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	CustomerQueries                     []CustomerQuery              `gorm:"foreignKey:EnvironmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	Prompts                             []Prompt                     `gorm:"foreignKey:RuntimeEnvironmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	PlaygroundConversations             []PlaygroundConversation     `gorm:"foreignKey:RuntimeEnvironmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	ErrorGroupStates                    []ErrorGroupState            `gorm:"foreignKey:EnvironmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	TaskIdentifiers                     []TaskIdentifier             `gorm:"foreignKey:RuntimeEnvironmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	APIKeys                             []APIKey                     `gorm:"foreignKey:RuntimeEnvironmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	RevokedAPIKeys                      []RevokedAPIKey              `gorm:"foreignKey:RuntimeEnvironmentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	EncryptionPolicy                    *EnvironmentEncryptionPolicy `gorm:"foreignKey:EnvironmentID;constraint:OnDelete:CASCADE"`
+	TrustedDeployGrant                  *TrustedDeployEnvironment    `gorm:"foreignKey:RuntimeEnvironmentID;constraint:OnDelete:CASCADE"`
 }
 
 func (RuntimeEnvironment) TableName() string {
@@ -666,6 +668,47 @@ func (*Project) BeforeUpdate(tx *gorm.DB) error {
 	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
 	if !tx.Statement.Changed("UpdatedAt") {
 		tx.Statement.SetColumn("UpdatedAt", DateTime{Time: now})
+	}
+	return nil
+}
+
+type EnvironmentEncryptionPolicy struct {
+	EnvironmentID        string                    `gorm:"column:environmentId;primaryKey" json:"environmentId"`
+	Revision             int                       `gorm:"column:revision;default:0;not null" json:"revision"`
+	WrappingProvider     *string                   `gorm:"column:wrappingProvider" json:"wrappingProvider"`
+	WrappingKeyReference *string                   `gorm:"column:wrappingKeyReference" json:"wrappingKeyReference"`
+	ActiveKeyID          *string                   `gorm:"column:activeKeyId" json:"activeKeyId"`
+	Environment          *RuntimeEnvironment       `gorm:"foreignKey:EnvironmentID"`
+	ActiveKey            *EnvironmentEncryptionKey `gorm:"foreignKey:ActiveKeyID,EnvironmentID;references:ID,EnvironmentID"`
+}
+
+func (EnvironmentEncryptionPolicy) TableName() string {
+	return "EnvironmentEncryptionPolicy"
+}
+
+type EnvironmentEncryptionKey struct {
+	ID                   string                        `gorm:"column:id;primaryKey;uniqueIndex:EnvironmentEncryptionKey_id_environmentId_key" json:"id"`
+	EnvironmentID        string                        `gorm:"column:environmentId;uniqueIndex:EnvironmentEncryptionKey_id_environmentId_key;index:EnvironmentEncryptionKey_environmentId_idx;not null" json:"environmentId"`
+	WrappedKey           datatypes.JSON                `gorm:"column:wrappedKey;not null" json:"wrappedKey"`
+	WrappingProvider     string                        `gorm:"column:wrappingProvider;not null" json:"wrappingProvider"`
+	WrappingKeyReference string                        `gorm:"column:wrappingKeyReference;not null" json:"wrappingKeyReference"`
+	Revision             int                           `gorm:"column:revision;default:0;not null" json:"revision"`
+	CreatedAt            DateTime                      `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
+	Environment          *RuntimeEnvironment           `gorm:"foreignKey:EnvironmentID"`
+	ActiveFor            []EnvironmentEncryptionPolicy `gorm:"foreignKey:ActiveKeyID,EnvironmentID;references:ID,EnvironmentID;constraint:OnUpdate:NO ACTION,OnDelete:NO ACTION"`
+}
+
+func (EnvironmentEncryptionKey) TableName() string {
+	return "EnvironmentEncryptionKey"
+}
+
+func (m *EnvironmentEncryptionKey) BeforeCreate(tx *gorm.DB) error {
+	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
+	if m.ID == "" {
+		m.ID = cuid.New()
+	}
+	if m.CreatedAt.IsZero() {
+		m.CreatedAt = DateTime{Time: now}
 	}
 	return nil
 }
@@ -2409,11 +2452,11 @@ func (*EnvironmentVariable) BeforeUpdate(tx *gorm.DB) error {
 type EnvironmentVariableValue struct {
 	ID               string               `gorm:"column:id;primaryKey" json:"id"`
 	ValueReferenceID *string              `gorm:"column:valueReferenceId;index:EnvironmentVariableValue_valueReferenceId_idx" json:"valueReferenceId"`
-	VariableID       string               `gorm:"column:variableId;uniqueIndex:EnvironmentVariableValue_variableId_environmentId_key;not null" json:"variableId"`
-	EnvironmentID    string               `gorm:"column:environmentId;uniqueIndex:EnvironmentVariableValue_variableId_environmentId_key;index:EnvironmentVariableValue_environmentId_idx;not null" json:"environmentId"`
+	VariableID       string               `gorm:"column:variableId;uniqueIndex:EnvironmentVariableValue_variableId_environmentId_key;index:EnvironmentVariableValue_environmentId_updatedAt_variableId_idx;not null" json:"variableId"`
+	EnvironmentID    string               `gorm:"column:environmentId;uniqueIndex:EnvironmentVariableValue_variableId_environmentId_key;index:EnvironmentVariableValue_environmentId_idx;index:EnvironmentVariableValue_environmentId_updatedAt_variableId_idx;not null" json:"environmentId"`
 	IsSecret         bool                 `gorm:"column:isSecret;default:false;not null" json:"isSecret"`
 	CreatedAt        DateTime             `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
-	UpdatedAt        DateTime             `gorm:"column:updatedAt;autoUpdateTime:false;not null" json:"updatedAt"`
+	UpdatedAt        DateTime             `gorm:"column:updatedAt;index:EnvironmentVariableValue_environmentId_updatedAt_variableId_idx;autoUpdateTime:false;not null" json:"updatedAt"`
 	Version          *int                 `gorm:"column:version;default:1;not null" json:"version"`
 	LastUpdatedBy    datatypes.JSON       `gorm:"column:lastUpdatedBy" json:"lastUpdatedBy"`
 	ValueReference   *SecretReference     `gorm:"foreignKey:ValueReferenceID"`

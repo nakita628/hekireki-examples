@@ -16,6 +16,8 @@ class UserEntity(
     var paymentProcessorUserId by UserTable.paymentProcessorUserId
     var subscriptionStatus by UserTable.subscriptionStatus
     var subscriptionPlan by UserTable.subscriptionPlan
+    var currentPeriodEnd by UserTable.currentPeriodEnd
+    var cancelAtPeriodEnd by UserTable.cancelAtPeriodEnd
     var datePaid by UserTable.datePaid
     var credits by UserTable.credits
     val gptResponses by GptResponseEntity referrersOn GptResponseTable.userId

@@ -1,6 +1,6 @@
 // LiteLLM: LiteLLM AI gateway: virtual keys, teams, budgets, spend logs and model deployments.
 //
-// Imported from https://github.com/BerriAI/litellm/blob/ebd5a15b22ba012d2f5a5ee654afc93cd51add5e/schema.prisma
+// Imported from https://github.com/BerriAI/litellm/blob/43daa2598e67a97253d7fcef2536aec6129030ea/schema.prisma
 // (MIT license) by tools/import/import-schema.mjs, which dropped the original
 // generator blocks and the datasource's connection URLs and added the hekireki generators below.
 // The models, enums and `///` comments are the project's own, as they are at that commit.

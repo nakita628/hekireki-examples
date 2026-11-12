@@ -27,17 +27,22 @@ class User extends Model
         'paymentProcessorUserId',
         'subscriptionStatus',
         'subscriptionPlan',
+        'currentPeriodEnd',
+        'cancelAtPeriodEnd',
         'datePaid',
         'credits',
     ];
 
     protected $attributes = [
         'isAdmin' => false,
+        'cancelAtPeriodEnd' => false,
         'credits' => 3,
     ];
 
     protected $casts = [
         'isAdmin' => 'boolean',
+        'currentPeriodEnd' => 'datetime',
+        'cancelAtPeriodEnd' => 'boolean',
         'datePaid' => 'datetime',
         'credits' => 'integer',
     ];

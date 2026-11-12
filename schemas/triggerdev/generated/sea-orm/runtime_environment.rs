@@ -115,6 +115,8 @@ pub enum Relation {
         on_delete = "SetNull"
     )]
     CurrentSession,
+    #[sea_orm(has_many = "super::environment_encryption_key::Entity")]
+    EncryptionKeys,
     #[sea_orm(
         has_many = "super::runtime_environment::Entity",
         from = "Column::Id",
@@ -177,6 +179,8 @@ pub enum Relation {
     ApiKeys,
     #[sea_orm(has_many = "super::revoked_api_key::Entity")]
     RevokedApiKeys,
+    #[sea_orm(has_one = "super::environment_encryption_policy::Entity")]
+    EncryptionPolicy,
     #[sea_orm(has_one = "super::trusted_deploy_environment::Entity")]
     TrustedDeployGrant,
 }
@@ -208,6 +212,12 @@ impl Related<super::org_member::Entity> for Entity {
 impl Related<super::runtime_environment_session::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::CurrentSession.def()
+    }
+}
+
+impl Related<super::environment_encryption_key::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::EncryptionKeys.def()
     }
 }
 
@@ -358,6 +368,12 @@ impl Related<super::api_key::Entity> for Entity {
 impl Related<super::revoked_api_key::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::RevokedApiKeys.def()
+    }
+}
+
+impl Related<super::environment_encryption_policy::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::EncryptionPolicy.def()
     }
 }
 

@@ -16,6 +16,8 @@ export interface User {
   paymentProcessorUserId: string | null
   subscriptionStatus: string | null
   subscriptionPlan: string | null
+  currentPeriodEnd: Timestamp | null
+  cancelAtPeriodEnd: Generated<boolean>
   datePaid: Timestamp | null
   credits: Generated<number>
 }

@@ -1,4 +1,4 @@
-from sqlalchemy import ARRAY, BigInteger, Column, Dialect, Enum, ForeignKey, Index, MetaData, Numeric, PrimaryKeyConstraint, Table, Text, TypeDecorator, text
+from sqlalchemy import ARRAY, BigInteger, Column, Dialect, Enum, ForeignKey, ForeignKeyConstraint, Index, MetaData, Numeric, PrimaryKeyConstraint, Table, Text, TypeDecorator, text
 from sqlalchemy.dialects.postgresql import JSONB, TIMESTAMP
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from typing import Any, Optional
@@ -371,6 +371,7 @@ class RuntimeEnvironment(Base):
     project: Mapped["Project"] = relationship(back_populates="environments")
     org_member: Mapped[Optional["OrgMember"]] = relationship(back_populates="environments")
     current_session: Mapped[Optional["RuntimeEnvironmentSession"]] = relationship(foreign_keys=[current_session_id], back_populates="current_environments")
+    encryption_keys: Mapped[list["EnvironmentEncryptionKey"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="environment")
     child_environments: Mapped[list["RuntimeEnvironment"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="parent_environment")
     background_workers: Mapped[list["BackgroundWorker"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="runtime_environment")
     background_worker_tasks: Mapped[list["BackgroundWorkerTask"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="runtime_environment")
@@ -398,6 +399,7 @@ class RuntimeEnvironment(Base):
     task_identifiers: Mapped[list["TaskIdentifier"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="runtime_environment")
     api_keys: Mapped[list["ApiKey"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="runtime_environment")
     revoked_api_keys: Mapped[list["RevokedApiKey"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="runtime_environment")
+    encryption_policy: Mapped[Optional["EnvironmentEncryptionPolicy"]] = relationship(cascade="all, delete", passive_deletes=True, overlaps="active_for,active_key", back_populates="environment")
     trusted_deploy_grant: Mapped[Optional["TrustedDeployEnvironment"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="runtime_environment")
 
 class ApiKey(Base):
@@ -506,6 +508,41 @@ class Project(Base):
     task_identifiers: Mapped[list["TaskIdentifier"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="project")
     connected_github_repository: Mapped[Optional["ConnectedGithubRepository"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="project")
     trusted_deploy_repository: Mapped[Optional["TrustedDeployRepository"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="project")
+
+class EnvironmentEncryptionPolicy(Base):
+    __tablename__ = "EnvironmentEncryptionPolicy"
+
+    environment_id: Mapped[str] = mapped_column("environmentId", ForeignKey("RuntimeEnvironment.id", ondelete="CASCADE", onupdate="CASCADE", name="EnvironmentEncryptionPolicy_environmentId_fkey"), primary_key=True)
+    revision: Mapped[int] = mapped_column(default=0, server_default=text("0"))
+    wrapping_provider: Mapped[Optional[str]] = mapped_column("wrappingProvider", Enum("PLATFORM_KEYRING", "AWS_KMS", name="EnvironmentKeyWrappingProvider"))
+    wrapping_key_reference: Mapped[Optional[str]] = mapped_column("wrappingKeyReference")
+    active_key_id: Mapped[Optional[str]] = mapped_column("activeKeyId")
+
+    __table_args__ = (
+        ForeignKeyConstraint(["activeKeyId", "environmentId"], ["EnvironmentEncryptionKey.id", "EnvironmentEncryptionKey.environmentId"], ondelete="NO ACTION", onupdate="NO ACTION", name="EnvironmentEncryptionPolicy_activeKeyId_environmentId_fkey"),
+    )
+
+    environment: Mapped["RuntimeEnvironment"] = relationship(overlaps="active_for,active_key", back_populates="encryption_policy")
+    active_key: Mapped[Optional["EnvironmentEncryptionKey"]] = relationship(overlaps="encryption_policy,environment", back_populates="active_for")
+
+class EnvironmentEncryptionKey(Base):
+    __tablename__ = "EnvironmentEncryptionKey"
+
+    id: Mapped[str] = mapped_column(primary_key=True)
+    environment_id: Mapped[str] = mapped_column("environmentId", ForeignKey("RuntimeEnvironment.id", ondelete="CASCADE", onupdate="CASCADE", name="EnvironmentEncryptionKey_environmentId_fkey"))
+    wrapped_key: Mapped[dict[str, Any]] = mapped_column("wrappedKey", JSONB)
+    wrapping_provider: Mapped[str] = mapped_column("wrappingProvider", Enum("PLATFORM_KEYRING", "AWS_KMS", name="EnvironmentKeyWrappingProvider"))
+    wrapping_key_reference: Mapped[str] = mapped_column("wrappingKeyReference")
+    revision: Mapped[int] = mapped_column(default=0, server_default=text("0"))
+    created_at: Mapped[datetime] = mapped_column("createdAt", default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
+
+    __table_args__ = (
+        Index("EnvironmentEncryptionKey_environmentId_idx", "environmentId"),
+        Index("EnvironmentEncryptionKey_id_environmentId_key", "id", "environmentId", unique=True),
+    )
+
+    environment: Mapped["RuntimeEnvironment"] = relationship(back_populates="encryption_keys")
+    active_for: Mapped[list["EnvironmentEncryptionPolicy"]] = relationship(passive_deletes="all", overlaps="encryption_policy,environment", back_populates="active_key")
 
 class SecretReference(Base):
     __tablename__ = "SecretReference"
@@ -1685,6 +1722,7 @@ class EnvironmentVariableValue(Base):
     __table_args__ = (
         Index("EnvironmentVariableValue_environmentId_idx", "environmentId"),
         Index("EnvironmentVariableValue_valueReferenceId_idx", "valueReferenceId"),
+        Index("EnvironmentVariableValue_environmentId_updatedAt_variableId_idx", "environmentId", "updatedAt", "variableId"),
         Index("EnvironmentVariableValue_variableId_environmentId_key", "variableId", "environmentId", unique=True),
     )
 

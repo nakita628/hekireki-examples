@@ -14,6 +14,8 @@ erDiagram
         string paymentProcessorUserId UK
         string subscriptionStatus
         string subscriptionPlan
+        datetime currentPeriodEnd
+        boolean cancelAtPeriodEnd
         datetime datePaid
         int credits
     }

@@ -39,6 +39,8 @@ class User(Base):
     payment_processor_user_id: Mapped[Optional[str]] = mapped_column("paymentProcessorUserId")
     subscription_status: Mapped[Optional[str]] = mapped_column("subscriptionStatus")
     subscription_plan: Mapped[Optional[str]] = mapped_column("subscriptionPlan")
+    current_period_end: Mapped[Optional[datetime]] = mapped_column("currentPeriodEnd")
+    cancel_at_period_end: Mapped[bool] = mapped_column("cancelAtPeriodEnd", default=False, server_default=text("false"))
     date_paid: Mapped[Optional[datetime]] = mapped_column("datePaid")
     credits: Mapped[int] = mapped_column(default=3, server_default=text("3"))
 

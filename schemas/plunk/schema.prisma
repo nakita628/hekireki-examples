@@ -1,6 +1,6 @@
 // Plunk: Plunk email platform: projects, contacts, templates, campaigns, workflows and emails.
 //
-// Imported from https://github.com/useplunk/plunk/blob/37e5f818e8087fc5947ecdc399b7f59efed0b342/packages/db/prisma/schema.prisma
+// Imported from https://github.com/useplunk/plunk/blob/b7eafdef4f7569ad6bbe7617a9a8dee756fba8c4/packages/db/prisma/schema.prisma
 // (AGPL-3.0 license) by tools/import/import-schema.mjs, which dropped the original
 // generator blocks and the datasource's connection URLs and added the hekireki generators below.
 // The models, enums and `///` comments are the project's own, as they are at that commit.

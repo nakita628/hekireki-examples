@@ -13,6 +13,8 @@ defmodule OpenSaas.User do
           payment_processor_user_id: String.t() | nil,
           subscription_status: String.t() | nil,
           subscription_plan: String.t() | nil,
+          current_period_end: DateTime.t() | nil,
+          cancel_at_period_end: boolean(),
           date_paid: DateTime.t() | nil,
           credits: integer(),
           inserted_at: DateTime.t(),
@@ -29,6 +31,8 @@ defmodule OpenSaas.User do
     field(:payment_processor_user_id, :string, source: :paymentProcessorUserId)
     field(:subscription_status, :string, source: :subscriptionStatus)
     field(:subscription_plan, :string, source: :subscriptionPlan)
+    field(:current_period_end, OpenSaas.PrismaDateTime, source: :currentPeriodEnd)
+    field(:cancel_at_period_end, :boolean, default: false, source: :cancelAtPeriodEnd)
     field(:date_paid, OpenSaas.PrismaDateTime, source: :datePaid)
     field(:credits, :integer, default: 3)
     has_many(:gpt_responses, OpenSaas.GptResponse, foreign_key: :user_id)

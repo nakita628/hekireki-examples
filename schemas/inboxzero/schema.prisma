@@ -1,6 +1,6 @@
 // InboxZero: Inbox Zero email assistant: users, email accounts, threads, rules, drafts and digests.
 //
-// Imported from https://github.com/elie222/inbox-zero/blob/019bdb7c35a3be95cc07bc640211b09f11d2402c/apps/web/prisma/schema.prisma
+// Imported from https://github.com/elie222/inbox-zero/blob/18e9b339ecca3def0898a4f4da76ce66a71696e3/apps/web/prisma/schema.prisma
 // (AGPL-3.0-with-additional-terms license) by tools/import/import-schema.mjs, which dropped the original
 // generator blocks and the datasource's connection URLs and added the hekireki generators below.
 // The models, enums and `///` comments are the project's own, as they are at that commit.

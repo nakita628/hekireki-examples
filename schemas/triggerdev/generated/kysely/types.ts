@@ -19,6 +19,8 @@ export type EnvironmentPauseSource = 'BILLING_LIMIT' | 'ADMIN_BAN'
 
 export type ProjectVersion = 'V2' | 'V3'
 
+export type EnvironmentKeyWrappingProvider = 'PLATFORM_KEYRING' | 'AWS_KMS'
+
 export type SecretStoreProvider = 'DATABASE' | 'AWS_PARAM_STORE'
 
 export type OidcSigningKeyStatus = 'STAGED' | 'ACTIVE' | 'RETIRED'
@@ -403,6 +405,24 @@ export interface Project {
   allowedMasterQueues: Generated<string[]>
   buildSettings: unknown
   onboardingData: unknown
+}
+
+export interface EnvironmentEncryptionPolicy {
+  environmentId: string
+  revision: Generated<number>
+  wrappingProvider: EnvironmentKeyWrappingProvider | null
+  wrappingKeyReference: string | null
+  activeKeyId: string | null
+}
+
+export interface EnvironmentEncryptionKey {
+  id: string
+  environmentId: string
+  wrappedKey: unknown
+  wrappingProvider: EnvironmentKeyWrappingProvider
+  wrappingKeyReference: string
+  revision: Generated<number>
+  createdAt: Generated<Timestamp>
 }
 
 export interface SecretReference {
@@ -1728,6 +1748,8 @@ export interface DB {
   api_keys: ApiKey
   RevokedApiKey: RevokedApiKey
   Project: Project
+  EnvironmentEncryptionPolicy: EnvironmentEncryptionPolicy
+  EnvironmentEncryptionKey: EnvironmentEncryptionKey
   SecretReference: SecretReference
   SecretStore: SecretStore
   OidcSigningKey: OidcSigningKey

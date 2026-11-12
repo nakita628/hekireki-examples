@@ -17,6 +17,8 @@ pub use super::checkpoint_restore_event::Entity as CheckpointRestoreEvent;
 pub use super::connected_github_repository::Entity as ConnectedGithubRepository;
 pub use super::customer_query::Entity as CustomerQuery;
 pub use super::data_migration::Entity as DataMigration;
+pub use super::environment_encryption_key::Entity as EnvironmentEncryptionKey;
+pub use super::environment_encryption_policy::Entity as EnvironmentEncryptionPolicy;
 pub use super::environment_variable::Entity as EnvironmentVariable;
 pub use super::environment_variable_value::Entity as EnvironmentVariableValue;
 pub use super::error_group_state::Entity as ErrorGroupState;

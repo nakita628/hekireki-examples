@@ -23,6 +23,10 @@ public partial class User
 
     public string? SubscriptionPlan { get; set; }
 
+    public DateTime? CurrentPeriodEnd { get; set; }
+
+    public bool CancelAtPeriodEnd { get; set; } = false;
+
     public DateTime? DatePaid { get; set; }
 
     public int Credits { get; set; } = 3;

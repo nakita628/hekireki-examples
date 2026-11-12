@@ -54,6 +54,8 @@ class User(models.Model):
     payment_processor_user_id = models.TextField(null=True, unique=True, db_column="paymentProcessorUserId")
     subscription_status = models.TextField(null=True, db_column="subscriptionStatus")
     subscription_plan = models.TextField(null=True, db_column="subscriptionPlan")
+    current_period_end = UtcDateTimeField(null=True, db_column="currentPeriodEnd")
+    cancel_at_period_end = models.BooleanField(db_column="cancelAtPeriodEnd", default=False)
     date_paid = UtcDateTimeField(null=True, db_column="datePaid")
     credits = models.IntegerField(default=3)
 

@@ -43,6 +43,12 @@ object EnvironmentVariableValueTable : IdTable<String>("\"EnvironmentVariableVal
     init {
         index("\"EnvironmentVariableValue_environmentId_idx\"", false, environmentId)
         index("\"EnvironmentVariableValue_valueReferenceId_idx\"", false, valueReferenceId)
+        index(
+            "EnvironmentVariableValue_environmentId_updatedAt_variableId_idx",
+            false,
+            functions =
+                listOf(indexExpression("\"environmentId\""), indexExpression("\"updatedAt\" DESC"), indexExpression("\"variableId\"")),
+        )
         uniqueIndex("\"EnvironmentVariableValue_variableId_environmentId_key\"", variableId, environmentId)
     }
 }

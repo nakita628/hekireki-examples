@@ -14,6 +14,8 @@ object UserTable : IdTable<String>("\"User\"") {
     val paymentProcessorUserId = text("paymentProcessorUserId").nullable().uniqueIndex("\"User_paymentProcessorUserId_key\"")
     val subscriptionStatus = text("subscriptionStatus").nullable()
     val subscriptionPlan = text("subscriptionPlan").nullable()
+    val currentPeriodEnd = pgTimestamp("currentPeriodEnd", 3).nullable()
+    val cancelAtPeriodEnd = bool("cancelAtPeriodEnd").default(false)
     val datePaid = pgTimestamp("datePaid", 3).nullable()
     val credits = integer("credits").default(3)
     override val primaryKey = PrimaryKey(id, name = "\"User_pkey\"")

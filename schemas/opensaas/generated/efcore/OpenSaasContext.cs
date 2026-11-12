@@ -85,6 +85,14 @@ public partial class OpenSaasContext : DbContext
             entity.Property(e => e.PaymentProcessorUserId).HasColumnName("paymentProcessorUserId");
             entity.Property(e => e.SubscriptionStatus).HasColumnName("subscriptionStatus");
             entity.Property(e => e.SubscriptionPlan).HasColumnName("subscriptionPlan");
+            entity.Property(e => e.CurrentPeriodEnd)
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("currentPeriodEnd");
+            entity.Property(e => e.CancelAtPeriodEnd)
+                .ValueGeneratedNever()
+                .HasDefaultValue(false)
+                .HasColumnName("cancelAtPeriodEnd");
             entity.Property(e => e.DatePaid)
                 .HasConversion<UtcClockConverter>()
                 .HasColumnType("timestamp(3) without time zone")

@@ -14,6 +14,7 @@ import {
   primaryKey,
   text,
   timestamp,
+  unique,
   uniqueIndex,
 } from 'drizzle-orm/pg-core'
 import { defineRelations, sql } from 'drizzle-orm'
@@ -63,6 +64,11 @@ export const environmentPauseSourceEnum = pgEnum('EnvironmentPauseSource', [
 ])
 
 export const projectVersionEnum = pgEnum('ProjectVersion', ['V2', 'V3'])
+
+export const environmentKeyWrappingProviderEnum = pgEnum('EnvironmentKeyWrappingProvider', [
+  'PLATFORM_KEYRING',
+  'AWS_KMS',
+])
 
 export const secretStoreProviderEnum = pgEnum('SecretStoreProvider', [
   'DATABASE',
@@ -861,6 +867,62 @@ export const project = pgTable(
       foreignColumns: [workerInstanceGroup.id],
     })
       .onDelete('set null')
+      .onUpdate('cascade'),
+  ],
+)
+
+export const environmentEncryptionPolicy = pgTable(
+  'EnvironmentEncryptionPolicy',
+  {
+    environmentId: text('environmentId').primaryKey(),
+    revision: integer('revision').notNull().default(0),
+    wrappingProvider: environmentKeyWrappingProviderEnum('wrappingProvider'),
+    wrappingKeyReference: text('wrappingKeyReference'),
+    activeKeyId: text('activeKeyId'),
+  },
+  (table) => [
+    foreignKey({
+      name: 'EnvironmentEncryptionPolicy_environmentId_fkey',
+      columns: [table.environmentId],
+      foreignColumns: [runtimeEnvironment.id],
+    })
+      .onDelete('cascade')
+      .onUpdate('cascade'),
+    foreignKey({
+      name: 'EnvironmentEncryptionPolicy_activeKeyId_environmentId_fkey',
+      columns: [table.activeKeyId, table.environmentId],
+      foreignColumns: [environmentEncryptionKey.id, environmentEncryptionKey.environmentId],
+    })
+      .onDelete('no action')
+      .onUpdate('no action'),
+  ],
+)
+
+export const environmentEncryptionKey = pgTable(
+  'EnvironmentEncryptionKey',
+  {
+    id: text('id')
+      .primaryKey()
+      .$defaultFn(() => cuid()),
+    environmentId: text('environmentId').notNull(),
+    wrappedKey: jsonb('wrappedKey').notNull(),
+    wrappingProvider: environmentKeyWrappingProviderEnum('wrappingProvider').notNull(),
+    wrappingKeyReference: text('wrappingKeyReference').notNull(),
+    revision: integer('revision').notNull().default(0),
+    createdAt: timestamp('createdAt', { precision: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`)
+      .$defaultFn(utcNow),
+  },
+  (table) => [
+    index('EnvironmentEncryptionKey_environmentId_idx').on(table.environmentId),
+    unique('EnvironmentEncryptionKey_id_environmentId_key').on(table.id, table.environmentId),
+    foreignKey({
+      name: 'EnvironmentEncryptionKey_environmentId_fkey',
+      columns: [table.environmentId],
+      foreignColumns: [runtimeEnvironment.id],
+    })
+      .onDelete('cascade')
       .onUpdate('cascade'),
   ],
 )
@@ -2717,6 +2779,11 @@ export const environmentVariableValue = pgTable(
   (table) => [
     index('EnvironmentVariableValue_environmentId_idx').on(table.environmentId),
     index('EnvironmentVariableValue_valueReferenceId_idx').on(table.valueReferenceId),
+    index('EnvironmentVariableValue_environmentId_updatedAt_variableId_idx').on(
+      table.environmentId,
+      table.updatedAt,
+      table.variableId,
+    ),
     uniqueIndex('EnvironmentVariableValue_variableId_environmentId_key').on(
       table.variableId,
       table.environmentId,
@@ -4393,6 +4460,8 @@ export const relations = defineRelations(
     apiKeys,
     revokedApiKey,
     project,
+    environmentEncryptionPolicy,
+    environmentEncryptionKey,
     secretReference,
     secretStore,
     oidcSigningKey,
@@ -4557,6 +4626,11 @@ export const relations = defineRelations(
       inviter: r.one.user({ from: r.orgMemberInvite.inviterId, to: r.user.id, optional: false }),
     },
     runtimeEnvironment: {
+      encryptionPolicy: r.one.environmentEncryptionPolicy({
+        from: r.runtimeEnvironment.id,
+        to: r.environmentEncryptionPolicy.environmentId,
+      }),
+      encryptionKeys: r.many.environmentEncryptionKey(),
       parentEnvironment: r.one.runtimeEnvironment({
         from: r.runtimeEnvironment.parentEnvironmentId,
         to: r.runtimeEnvironment.id,
@@ -4678,6 +4752,28 @@ export const relations = defineRelations(
       platformNotifications: r.many.platformNotification(),
       errorGroupStates: r.many.errorGroupState(),
       taskIdentifiers: r.many.taskIdentifier(),
+    },
+    environmentEncryptionPolicy: {
+      environment: r.one.runtimeEnvironment({
+        from: r.environmentEncryptionPolicy.environmentId,
+        to: r.runtimeEnvironment.id,
+        optional: false,
+      }),
+      activeKey: r.one.environmentEncryptionKey({
+        from: [
+          r.environmentEncryptionPolicy.activeKeyId,
+          r.environmentEncryptionPolicy.environmentId,
+        ],
+        to: [r.environmentEncryptionKey.id, r.environmentEncryptionKey.environmentId],
+      }),
+    },
+    environmentEncryptionKey: {
+      environment: r.one.runtimeEnvironment({
+        from: r.environmentEncryptionKey.environmentId,
+        to: r.runtimeEnvironment.id,
+        optional: false,
+      }),
+      activeFor: r.many.environmentEncryptionPolicy(),
     },
     secretReference: {
       environmentVariableValues: r.many.environmentVariableValue(),

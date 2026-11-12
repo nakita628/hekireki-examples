@@ -32,6 +32,11 @@ Enum ProjectVersion {
   V3
 }
 
+Enum EnvironmentKeyWrappingProvider {
+  PLATFORM_KEYRING
+  AWS_KMS
+}
+
 Enum SecretStoreProvider {
   DATABASE
   AWS_PARAM_STORE
@@ -616,6 +621,28 @@ Table Project {
   allowedMasterQueues String[] [not null, note: 'The master queues they are allowed to use (impacts what they can set as default and trigger runs with)']
   buildSettings Json
   onboardingData Json
+}
+
+Table EnvironmentEncryptionPolicy {
+  environmentId String [pk]
+  revision Int [default: 0, not null]
+  wrappingProvider EnvironmentKeyWrappingProvider
+  wrappingKeyReference String
+  activeKeyId String
+}
+
+Table EnvironmentEncryptionKey {
+  id String [pk]
+  environmentId String [not null]
+  wrappedKey Json [not null]
+  wrappingProvider EnvironmentKeyWrappingProvider [not null]
+  wrappingKeyReference String [not null]
+  revision Int [default: 0, not null]
+  createdAt DateTime [default: `now()`, not null]
+
+  indexes {
+    (id, environmentId) [unique]
+  }
 }
 
 Table SecretReference {
@@ -2229,6 +2256,12 @@ Ref RevokedApiKey_runtimeEnvironmentId_fk: RevokedApiKey.runtimeEnvironmentId > 
 Ref Project_organizationId_fk: Project.organizationId > Organization.id [delete: cascade, update: cascade]
 
 Ref Project_defaultWorkerGroupId_fk: Project.defaultWorkerGroupId > WorkerInstanceGroup.id
+
+Ref EnvironmentEncryptionPolicy_environmentId_fk: EnvironmentEncryptionPolicy.environmentId - RuntimeEnvironment.id [delete: cascade]
+
+Ref EnvironmentEncryptionPolicy_(activeKeyId, environmentId)_fk: EnvironmentEncryptionPolicy.(activeKeyId, environmentId) > EnvironmentEncryptionKey.(id, environmentId) [delete: no action, update: no action]
+
+Ref EnvironmentEncryptionKey_environmentId_fk: EnvironmentEncryptionKey.environmentId > RuntimeEnvironment.id [delete: cascade]
 
 Ref BackgroundWorker_projectId_fk: BackgroundWorker.projectId > Project.id [delete: cascade, update: cascade]
 

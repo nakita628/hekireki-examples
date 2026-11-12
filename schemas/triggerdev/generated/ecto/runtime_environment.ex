@@ -35,7 +35,9 @@ defmodule Trigger.RuntimeEnvironment do
           project: Trigger.Project.t() | nil,
           org_member: Trigger.OrgMember.t() | nil,
           current_session: Trigger.RuntimeEnvironmentSession.t() | nil,
+          encryption_policy: Trigger.EnvironmentEncryptionPolicy.t() | nil,
           trusted_deploy_grant: Trigger.TrustedDeployEnvironment.t() | nil,
+          encryption_keys: [Trigger.EnvironmentEncryptionKey.t()],
           child_environments: [Trigger.RuntimeEnvironment.t()],
           background_workers: [Trigger.BackgroundWorker.t()],
           background_worker_tasks: [Trigger.BackgroundWorkerTask.t()],
@@ -99,7 +101,9 @@ defmodule Trigger.RuntimeEnvironment do
     belongs_to(:project, Trigger.Project, foreign_key: :project_id, define_field: false, type: :string)
     belongs_to(:org_member, Trigger.OrgMember, foreign_key: :org_member_id, define_field: false, type: :string)
     belongs_to(:current_session, Trigger.RuntimeEnvironmentSession, foreign_key: :current_session_id, define_field: false, type: :string)
+    has_one(:encryption_policy, Trigger.EnvironmentEncryptionPolicy, foreign_key: :environment_id, references: :id)
     has_one(:trusted_deploy_grant, Trigger.TrustedDeployEnvironment, foreign_key: :runtime_environment_id, references: :id)
+    has_many(:encryption_keys, Trigger.EnvironmentEncryptionKey, foreign_key: :environment_id, references: :id)
     has_many(:child_environments, Trigger.RuntimeEnvironment, foreign_key: :parent_environment_id, references: :id)
     has_many(:background_workers, Trigger.BackgroundWorker, foreign_key: :runtime_environment_id, references: :id)
     has_many(:background_worker_tasks, Trigger.BackgroundWorkerTask, foreign_key: :runtime_environment_id, references: :id)

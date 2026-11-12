@@ -1,0 +1,308 @@
+Table accounts {
+  id Int [pk, increment]
+  name String [default: '', not null]
+  nickname String [default: '', not null]
+  password String [default: '', not null]
+  image String [default: '', not null]
+  apiToken String [default: '', not null]
+  description String [default: '', not null]
+  note Int [default: 0, not null]
+  role String [default: '', not null]
+  loginType String [default: '', not null]
+  linkAccountId Int
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table attachments {
+  id Int [pk, increment]
+  isShare Boolean [default: false, not null]
+  sharePassword String [default: '', not null]
+  name String [default: '', not null]
+  path String [default: '', not null]
+  size Decimal [default: 0, not null]
+  type String [default: '', not null]
+  noteId Int
+  accountId Int
+  sortOrder Int [default: 0, not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  perfixPath String [default: '']
+  depth Int
+  metadata Json
+}
+
+Table config {
+  id Int [pk, increment]
+  key String [default: '', not null]
+  config Json
+  userId Int
+}
+
+Table notes {
+  id Int [pk, increment]
+  type Int [default: 0, not null]
+  content String [default: '', not null]
+  isArchived Boolean [default: false, not null]
+  isRecycle Boolean [default: false, not null]
+  isShare Boolean [default: false, not null]
+  isTop Boolean [default: false, not null]
+  isReviewed Boolean [default: false, not null]
+  sharePassword String [default: '', not null]
+  shareEncryptedUrl String
+  shareExpiryDate DateTime
+  shareMaxView Int [default: 0]
+  shareViewCount Int [default: 0]
+  metadata Json
+  accountId Int
+  sortOrder Int [default: 0, not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table comments {
+  id Int [pk, increment]
+  content String [not null]
+  accountId Int
+  guestName String
+  guestIP String
+  guestUA String
+  noteId Int [not null]
+  parentId Int
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table tag {
+  id Int [pk, increment]
+  name String [default: '', not null]
+  icon String [default: '', not null]
+  parent Int [default: 0, not null]
+  accountId Int
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  sortOrder Int [default: 0, not null]
+}
+
+Table tagsToNote {
+  id Int [increment, not null]
+  noteId Int [default: 0, not null]
+  tagId Int [default: 0, not null]
+
+  indexes {
+    (noteId, tagId) [pk]
+  }
+}
+
+Table noteReference {
+  id Int [pk, increment]
+  fromNoteId Int [not null]
+  toNoteId Int [not null]
+  createdAt DateTime [default: `now()`, not null]
+
+  indexes {
+    (fromNoteId, toNoteId) [unique]
+  }
+}
+
+Table follows {
+  id Int [pk, increment]
+  siteName String
+  siteUrl String [not null]
+  siteAvatar String
+  description String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  followType String [default: 'following', not null]
+  accountId Int [not null]
+}
+
+Table notifications {
+  id Int [pk, increment]
+  type String [not null]
+  title String [not null]
+  content String [not null]
+  metadata Json
+  isRead Boolean [default: false, not null]
+  accountId Int [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table cache {
+  id Int [pk, increment]
+  key String [unique, not null]
+  value Json [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table plugin {
+  id Int [pk, increment]
+  metadata Json [not null]
+  path String [not null]
+  isUse Boolean [default: true, not null]
+  isDev Boolean [default: false, not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table conversation {
+  id Int [pk, increment]
+  title String [default: '', not null]
+  isShare Boolean [default: false, not null]
+  accountId Int [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table message {
+  id Int [pk, increment]
+  content String [not null]
+  role String [not null]
+  conversationId Int [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  metadata Json
+}
+
+Table noteHistory {
+  id Int [pk, increment]
+  noteId Int [not null]
+  content String [not null]
+  metadata Json
+  version Int [not null]
+  accountId Int
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Table noteInternalShare {
+  id Int [pk, increment]
+  noteId Int [not null]
+  accountId Int [not null]
+  canEdit Boolean [default: true, not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (noteId, accountId) [unique]
+  }
+}
+
+Table session {
+  id String [pk]
+  sid String [unique, not null]
+  data String [not null]
+  expiresAt DateTime [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table aiProviders {
+  id Int [pk, increment]
+  title String [not null]
+  provider String [not null]
+  baseURL String
+  apiKey String
+  config Json
+  sortOrder Int [default: 0, not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table aiModels {
+  id Int [pk, increment]
+  providerId Int [not null]
+  title String [not null]
+  modelKey String [not null]
+  capabilities Json [not null]
+  config Json
+  sortOrder Int [default: 0, not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table aiScheduledTask {
+  id Int [pk, increment]
+  name String [not null]
+  prompt String [not null]
+  schedule String [not null]
+  isEnabled Boolean [default: true, not null]
+  lastRun DateTime
+  lastResult Json
+  accountId Int [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table mcpServers {
+  id Int [pk, increment]
+  name String [not null]
+  description String
+  type String [not null]
+  command String
+  args Json
+  url String
+  env Json
+  headers Json
+  isEnabled Boolean [default: true, not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table fonts {
+  id Int [pk, increment]
+  name String [unique, not null]
+  displayName String [not null]
+  url String
+  fileData Bytes
+  isLocal Boolean [default: false, not null]
+  isSystem Boolean [default: false, not null]
+  weights Json [not null]
+  category String [default: 'sans-serif', not null]
+  sortOrder Int [default: 0, not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Ref attachments_noteId_fk: attachments.noteId > notes.id
+
+Ref attachments_accountId_fk: attachments.accountId > accounts.id
+
+Ref config_userId_fk: config.userId > accounts.id
+
+Ref notes_accountId_fk: notes.accountId > accounts.id
+
+Ref comments_noteId_fk: comments.noteId > notes.id
+
+Ref comments_accountId_fk: comments.accountId > accounts.id
+
+Ref comments_parentId_fk: comments.parentId > comments.id
+
+Ref tag_accountId_fk: tag.accountId > accounts.id
+
+Ref tagsToNote_noteId_fk: tagsToNote.noteId > notes.id
+
+Ref tagsToNote_tagId_fk: tagsToNote.tagId > tag.id
+
+Ref noteReference_fromNoteId_fk: noteReference.fromNoteId > notes.id
+
+Ref noteReference_toNoteId_fk: noteReference.toNoteId > notes.id
+
+Ref follows_accountId_fk: follows.accountId > accounts.id
+
+Ref notifications_accountId_fk: notifications.accountId > accounts.id
+
+Ref conversation_accountId_fk: conversation.accountId > accounts.id
+
+Ref message_conversationId_fk: message.conversationId > conversation.id
+
+Ref noteHistory_noteId_fk: noteHistory.noteId > notes.id [delete: cascade]
+
+Ref noteInternalShare_noteId_fk: noteInternalShare.noteId > notes.id [delete: cascade]
+
+Ref noteInternalShare_accountId_fk: noteInternalShare.accountId > accounts.id
+
+Ref aiModels_providerId_fk: aiModels.providerId > aiProviders.id [delete: cascade]
+
+Ref aiScheduledTask_accountId_fk: aiScheduledTask.accountId > accounts.id

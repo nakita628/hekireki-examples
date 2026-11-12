@@ -4,6 +4,7 @@ class User < ApplicationRecord
 
   attribute :id, default: -> { SecureRandom.uuid }
   attribute :isAdmin, default: false
+  attribute :cancelAtPeriodEnd, default: false
   attribute :credits, default: 3
   alias_attribute :created_at, :createdAt
 

@@ -26,7 +26,7 @@
   "langfuse": {
     "repo": "langfuse/langfuse",
     "path": "packages/shared/prisma/schema.prisma",
-    "commit": "47a70342f1736561dfa157a654d011aac29db79d",
+    "commit": "72399b76e245443f9681ea93b77ca850e1edb55b",
     "license": "MIT",
     "app": "Langfuse",
     "description": "Langfuse LLM observability: organizations, projects, traces, prompts, datasets and evaluations."
@@ -34,7 +34,7 @@
   "calcom": {
     "repo": "calcom/cal.com",
     "path": "packages/prisma/schema.prisma",
-    "commit": "3030d88a1fd9a9b9acc986aac37879a6ba51cb8a",
+    "commit": "ef7954d16ab50882ca2f263c551537115b8a8bb1",
     "license": "MIT",
     "app": "Calcom",
     "description": "Cal.com scheduling: users, teams, event types, bookings, availability and integrations."
@@ -50,7 +50,7 @@
   "ghostfolio": {
     "repo": "ghostfolio/ghostfolio",
     "path": "prisma/schema.prisma",
-    "commit": "aea75a89a3ea840d1c32ec11ad3595bcca99c93e",
+    "commit": "4be43599808e686698e17c5e8711a53f868771cd",
     "license": "AGPL-3.0",
     "app": "Ghostfolio",
     "description": "Ghostfolio wealth management: users, accounts, orders, symbol profiles and market data."
@@ -82,7 +82,7 @@
   "rallly": {
     "repo": "lukevella/rallly",
     "path": "packages/database/prisma/",
-    "commit": "e435a14826f59fa84f3bbe9a3cf40ff540a3a3ad",
+    "commit": "4c7aeffb3a69723ab66bf0909c6abb84927a52f7",
     "license": "AGPL-3.0",
     "app": "Rallly",
     "description": "Rallly scheduling polls: users, spaces, polls, options, participants and votes."
@@ -90,7 +90,7 @@
   "documenso": {
     "repo": "documenso/documenso",
     "path": "packages/prisma/schema.prisma",
-    "commit": "fdd0337bdd8f6afac64faf97113c65ed2dd0e2a2",
+    "commit": "2d68c47da2b37c4c142b855b3e2135169ad3b4b3",
     "license": "AGPL-3.0",
     "app": "Documenso",
     "description": "Documenso document signing: users, teams, documents, recipients, fields and signatures."
@@ -98,7 +98,7 @@
   "teable": {
     "repo": "teableio/teable",
     "path": "packages/db-main-prisma/prisma/postgres/schema.prisma",
-    "commit": "10a97939829d8b3ea99d618a38bf760e0787a3fa",
+    "commit": "fc4126e945a212aa637c4134c373416df69bb982",
     "license": "MIT",
     "app": "Teable",
     "description": "Teable no-code database: spaces, bases, tables, fields, views and records."
@@ -106,7 +106,7 @@
   "postiz": {
     "repo": "gitroomhq/postiz-app",
     "path": "libraries/nestjs-libraries/src/database/prisma/schema.prisma",
-    "commit": "85a0246b600733d851ed0927020bd5735db860c8",
+    "commit": "b31d29fa4132a08aa82f728227df2938ccab7972",
     "license": "AGPL-3.0",
     "app": "Postiz",
     "description": "Postiz social media scheduling: organizations, integrations, posts, comments and media."
@@ -122,7 +122,7 @@
   "formbricks": {
     "repo": "formbricks/formbricks",
     "path": "packages/database/schema/",
-    "commit": "7f4619c3d3604831b5ccd5f65b67fb048fef02e2",
+    "commit": "31264bb7c6d747b31cd94cce8064b706d420a58a",
     "license": "AGPL-3.0",
     "app": "Formbricks",
     "description": "Formbricks surveys: organizations, environments, surveys, responses and contacts.",
@@ -133,7 +133,7 @@
   "triggerdev": {
     "repo": "triggerdotdev/trigger.dev",
     "path": "internal-packages/database/prisma/schema.prisma",
-    "commit": "bdcbc61ab2871f7cc81f29ec36e42c8676ff6aa9",
+    "commit": "7a2a7dc801fc5bc97a03add95dc1b2a12f978e58",
     "license": "Apache-2.0",
     "app": "Trigger",
     "description": "Trigger.dev background jobs: organizations, projects, tasks, runs, queues and deployments."
@@ -141,7 +141,7 @@
   "anythingllm": {
     "repo": "Mintplex-Labs/anything-llm",
     "path": "server/prisma/schema.prisma",
-    "commit": "728586d76c843ed25cb7a27c7403f4b79bd960c8",
+    "commit": "e8434c07c3d385411aec28e8f9758dfd073565ec",
     "license": "MIT",
     "app": "AnythingLLM",
     "description": "AnythingLLM local AI workspace: users, workspaces, documents, chats, embeddings and agents, on SQLite."
@@ -149,7 +149,7 @@
   "inboxzero": {
     "repo": "elie222/inbox-zero",
     "path": "apps/web/prisma/schema.prisma",
-    "commit": "019bdb7c35a3be95cc07bc640211b09f11d2402c",
+    "commit": "18e9b339ecca3def0898a4f4da76ce66a71696e3",
     "license": "AGPL-3.0-with-additional-terms",
     "app": "InboxZero",
     "description": "Inbox Zero email assistant: users, email accounts, threads, rules, drafts and digests.",
@@ -192,7 +192,7 @@
   "plunk": {
     "repo": "useplunk/plunk",
     "path": "packages/db/prisma/schema.prisma",
-    "commit": "37e5f818e8087fc5947ecdc399b7f59efed0b342",
+    "commit": "b7eafdef4f7569ad6bbe7617a9a8dee756fba8c4",
     "license": "AGPL-3.0",
     "app": "Plunk",
     "description": "Plunk email platform: projects, contacts, templates, campaigns, workflows and emails."
@@ -208,7 +208,7 @@
   "opensaas": {
     "repo": "wasp-lang/open-saas",
     "path": "template/app/schema.prisma",
-    "commit": "5f5dd77403b97952f6b3c3ff2131d1e9eea03f1f",
+    "commit": "1793ce9f58c4690034e19d1548e6de8e4cc13154",
     "license": "MIT",
     "app": "OpenSaas",
     "description": "Wasp Open SaaS starter: users, subscriptions, tasks, files, analytics and contact messages."
@@ -216,9 +216,17 @@
   "litellm": {
     "repo": "BerriAI/litellm",
     "path": "schema.prisma",
-    "commit": "ebd5a15b22ba012d2f5a5ee654afc93cd51add5e",
+    "commit": "43daa2598e67a97253d7fcef2536aec6129030ea",
     "license": "MIT",
     "app": "LiteLLM",
     "description": "LiteLLM AI gateway: virtual keys, teams, budgets, spend logs and model deployments."
+  },
+  "blinko": {
+    "repo": "blinkospace/blinko",
+    "path": "prisma/schema.prisma",
+    "commit": "a1c71e67f653f88aabee93c6e5dc433ef5780d18",
+    "license": "GPL-3.0",
+    "app": "Blinko",
+    "description": "Blinko personal notes: accounts, notes, tags, comments, conversations and AI models."
   }
 }

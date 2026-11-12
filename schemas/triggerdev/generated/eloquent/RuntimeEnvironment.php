@@ -102,9 +102,19 @@ class RuntimeEnvironment extends Model
         return $this->belongsTo(RuntimeEnvironmentSession::class, 'currentSessionId');
     }
 
+    public function encryptionPolicy(): HasOne
+    {
+        return $this->hasOne(EnvironmentEncryptionPolicy::class, 'environmentId');
+    }
+
     public function trustedDeployGrant(): HasOne
     {
         return $this->hasOne(TrustedDeployEnvironment::class, 'runtimeEnvironmentId');
+    }
+
+    public function encryptionKeys(): HasMany
+    {
+        return $this->hasMany(EnvironmentEncryptionKey::class, 'environmentId');
     }
 
     public function childEnvironments(): HasMany

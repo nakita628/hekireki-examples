@@ -23,6 +23,10 @@ pub struct Model {
     pub subscription_status: Option<String>,
     #[sea_orm(column_name = "subscriptionPlan")]
     pub subscription_plan: Option<String>,
+    #[sea_orm(column_name = "currentPeriodEnd")]
+    pub current_period_end: Option<DateTime>,
+    #[sea_orm(column_name = "cancelAtPeriodEnd", default_value = false)]
+    pub cancel_at_period_end: bool,
     #[sea_orm(column_name = "datePaid")]
     pub date_paid: Option<DateTime>,
     #[sea_orm(default_value = 3)]

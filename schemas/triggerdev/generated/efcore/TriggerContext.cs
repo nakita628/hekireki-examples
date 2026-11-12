@@ -48,6 +48,10 @@ public partial class TriggerContext : DbContext
 
     public virtual DbSet<Project> Projects { get; set; }
 
+    public virtual DbSet<EnvironmentEncryptionPolicy> EnvironmentEncryptionPolicies { get; set; }
+
+    public virtual DbSet<EnvironmentEncryptionKey> EnvironmentEncryptionKeys { get; set; }
+
     public virtual DbSet<SecretReference> SecretReferences { get; set; }
 
     public virtual DbSet<SecretStore> SecretStores { get; set; }
@@ -206,6 +210,7 @@ public partial class TriggerContext : DbContext
         npgsql.MapEnum<RuntimeEnvironmentType>("RuntimeEnvironmentType");
         npgsql.MapEnum<EnvironmentPauseSource>("EnvironmentPauseSource");
         npgsql.MapEnum<ProjectVersion>("ProjectVersion");
+        npgsql.MapEnum<EnvironmentKeyWrappingProvider>("EnvironmentKeyWrappingProvider");
         npgsql.MapEnum<SecretStoreProvider>("SecretStoreProvider");
         npgsql.MapEnum<OidcSigningKeyStatus>("OidcSigningKeyStatus");
         npgsql.MapEnum<OidcSigningKeyPurpose>("OidcSigningKeyPurpose");
@@ -265,6 +270,7 @@ public partial class TriggerContext : DbContext
         dataSource.MapEnum<RuntimeEnvironmentType>("RuntimeEnvironmentType");
         dataSource.MapEnum<EnvironmentPauseSource>("EnvironmentPauseSource");
         dataSource.MapEnum<ProjectVersion>("ProjectVersion");
+        dataSource.MapEnum<EnvironmentKeyWrappingProvider>("EnvironmentKeyWrappingProvider");
         dataSource.MapEnum<SecretStoreProvider>("SecretStoreProvider");
         dataSource.MapEnum<OidcSigningKeyStatus>("OidcSigningKeyStatus");
         dataSource.MapEnum<OidcSigningKeyPurpose>("OidcSigningKeyPurpose");
@@ -332,6 +338,7 @@ public partial class TriggerContext : DbContext
         modelBuilder.HasPostgresEnum<RuntimeEnvironmentType>(name: "RuntimeEnvironmentType");
         modelBuilder.HasPostgresEnum<EnvironmentPauseSource>(name: "EnvironmentPauseSource");
         modelBuilder.HasPostgresEnum<ProjectVersion>(name: "ProjectVersion");
+        modelBuilder.HasPostgresEnum<EnvironmentKeyWrappingProvider>(name: "EnvironmentKeyWrappingProvider");
         modelBuilder.HasPostgresEnum<SecretStoreProvider>(name: "SecretStoreProvider");
         modelBuilder.HasPostgresEnum<OidcSigningKeyStatus>(name: "OidcSigningKeyStatus");
         modelBuilder.HasPostgresEnum<OidcSigningKeyPurpose>(name: "OidcSigningKeyPurpose");
@@ -1144,6 +1151,69 @@ public partial class TriggerContext : DbContext
                 .HasForeignKey(d => d.DefaultWorkerGroupId)
                 .OnDelete(DeleteBehavior.SetNull)
                 .HasConstraintName("Project_defaultWorkerGroupId_fkey");
+        });
+
+        modelBuilder.Entity<EnvironmentEncryptionPolicy>(entity =>
+        {
+            entity.HasKey(e => e.EnvironmentId).HasName("EnvironmentEncryptionPolicy_pkey");
+
+            entity.ToTable("EnvironmentEncryptionPolicy");
+
+            entity.Property(e => e.EnvironmentId).HasColumnName("environmentId");
+            entity.Property(e => e.Revision)
+                .ValueGeneratedNever()
+                .HasDefaultValue(0)
+                .HasColumnName("revision");
+            entity.Property(e => e.WrappingProvider).HasColumnName("wrappingProvider");
+            entity.Property(e => e.WrappingKeyReference).HasColumnName("wrappingKeyReference");
+            entity.Property(e => e.ActiveKeyId).HasColumnName("activeKeyId");
+
+            entity.HasOne(d => d.Environment).WithOne(p => p.EncryptionPolicy)
+                .HasForeignKey<EnvironmentEncryptionPolicy>(d => d.EnvironmentId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("EnvironmentEncryptionPolicy_environmentId_fkey");
+
+            entity.HasOne(d => d.ActiveKey).WithMany(p => p.ActiveFor)
+                .HasPrincipalKey(p => new { p.Id, p.EnvironmentId })
+                .HasForeignKey(d => new { d.ActiveKeyId, d.EnvironmentId })
+                .OnDelete(DeleteBehavior.ClientNoAction)
+                .HasConstraintName("EnvironmentEncryptionPolicy_activeKeyId_environmentId_fkey");
+        });
+
+        modelBuilder.Entity<EnvironmentEncryptionKey>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("EnvironmentEncryptionKey_pkey");
+
+            entity.ToTable("EnvironmentEncryptionKey");
+
+            entity.HasIndex(e => e.EnvironmentId, "EnvironmentEncryptionKey_environmentId_idx");
+
+            entity.HasAlternateKey(e => new { e.Id, e.EnvironmentId }).HasName("EnvironmentEncryptionKey_id_environmentId_key");
+
+            entity.Property(e => e.Id)
+                .HasValueGenerator<CuidGenerator>()
+                .HasColumnName("id");
+            entity.Property(e => e.EnvironmentId).HasColumnName("environmentId");
+            entity.Property(e => e.WrappedKey)
+                .HasColumnType("jsonb")
+                .HasColumnName("wrappedKey");
+            entity.Property(e => e.WrappingProvider).HasColumnName("wrappingProvider");
+            entity.Property(e => e.WrappingKeyReference).HasColumnName("wrappingKeyReference");
+            entity.Property(e => e.Revision)
+                .ValueGeneratedNever()
+                .HasDefaultValue(0)
+                .HasColumnName("revision");
+            entity.Property(e => e.CreatedAt)
+                .HasValueGenerator<UtcNowGenerator>()
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("createdAt");
+
+            entity.HasOne(d => d.Environment).WithMany(p => p.EncryptionKeys)
+                .HasForeignKey(d => d.EnvironmentId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("EnvironmentEncryptionKey_environmentId_fkey");
         });
 
         modelBuilder.Entity<SecretReference>(entity =>
@@ -3632,6 +3702,8 @@ public partial class TriggerContext : DbContext
             entity.HasIndex(e => e.EnvironmentId, "EnvironmentVariableValue_environmentId_idx");
 
             entity.HasIndex(e => e.ValueReferenceId, "EnvironmentVariableValue_valueReferenceId_idx");
+
+            entity.HasIndex(e => new { e.EnvironmentId, e.UpdatedAt, e.VariableId }, "EnvironmentVariableValue_environmentId_updatedAt_variableId_idx").IsDescending(false, true, false);
 
             entity.HasIndex(e => new { e.VariableId, e.EnvironmentId }, "EnvironmentVariableValue_variableId_environmentId_key").IsUnique();
 

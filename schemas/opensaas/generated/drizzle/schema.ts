@@ -41,6 +41,8 @@ export const user = pgTable(
     paymentProcessorUserId: text('paymentProcessorUserId'),
     subscriptionStatus: text('subscriptionStatus'),
     subscriptionPlan: text('subscriptionPlan'),
+    currentPeriodEnd: timestamp('currentPeriodEnd', { precision: 3 }),
+    cancelAtPeriodEnd: boolean('cancelAtPeriodEnd').notNull().default(false),
     datePaid: timestamp('datePaid', { precision: 3 }),
     credits: integer('credits').notNull().default(3),
   },

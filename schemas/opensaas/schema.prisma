@@ -1,6 +1,6 @@
 // OpenSaas: Wasp Open SaaS starter: users, subscriptions, tasks, files, analytics and contact messages.
 //
-// Imported from https://github.com/wasp-lang/open-saas/blob/5f5dd77403b97952f6b3c3ff2131d1e9eea03f1f/template/app/schema.prisma
+// Imported from https://github.com/wasp-lang/open-saas/blob/1793ce9f58c4690034e19d1548e6de8e4cc13154/template/app/schema.prisma
 // (MIT license) by tools/import/import-schema.mjs, which dropped the original
 // generator blocks and the datasource's connection URLs and added the hekireki generators below.
 // The models, enums and `///` comments are the project's own, as they are at that commit.
@@ -88,8 +88,10 @@ model User {
   isAdmin                   Boolean         @default(false)
 
   paymentProcessorUserId    String?         @unique
-  subscriptionStatus        String?         // 'active', 'cancel_at_period_end', 'past_due', 'deleted'
+  subscriptionStatus        String?         // 'active', 'trialing', 'past_due', 'paused', 'canceled'
   subscriptionPlan          String?         // 'hobby', 'pro'
+  currentPeriodEnd          DateTime?
+  cancelAtPeriodEnd         Boolean         @default(false)
   datePaid                  DateTime?
   credits                   Int             @default(3)
 

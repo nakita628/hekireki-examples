@@ -7,6 +7,10 @@ namespace Trigger.Models;
 
 public partial class RuntimeEnvironment
 {
+    public virtual EnvironmentEncryptionPolicy? EncryptionPolicy { get; set; }
+
+    public virtual ICollection<EnvironmentEncryptionKey> EncryptionKeys { get; set; } = new List<EnvironmentEncryptionKey>();
+
     public string Id { get; set; } = null!;
 
     public string Slug { get; set; } = null!;

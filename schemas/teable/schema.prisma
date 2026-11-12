@@ -1,6 +1,6 @@
 // Teable: Teable no-code database: spaces, bases, tables, fields, views and records.
 //
-// Imported from https://github.com/teableio/teable/blob/10a97939829d8b3ea99d618a38bf760e0787a3fa/packages/db-main-prisma/prisma/postgres/schema.prisma
+// Imported from https://github.com/teableio/teable/blob/fc4126e945a212aa637c4134c373416df69bb982/packages/db-main-prisma/prisma/postgres/schema.prisma
 // (MIT license) by tools/import/import-schema.mjs, which dropped the original
 // generator blocks and the datasource's connection URLs and added the hekireki generators below.
 // The models, enums and `///` comments are the project's own, as they are at that commit.

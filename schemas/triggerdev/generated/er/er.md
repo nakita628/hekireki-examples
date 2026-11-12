@@ -20,6 +20,9 @@ erDiagram
     RuntimeEnvironment ||--o{ RevokedApiKey : "(id) - (runtimeEnvironmentId)"
     Organization ||--o{ Project : "(id) - (organizationId)"
     WorkerInstanceGroup |o--o{ Project : "(id) - (defaultWorkerGroupId)"
+    RuntimeEnvironment ||--o| EnvironmentEncryptionPolicy : "(id) - (environmentId)"
+    EnvironmentEncryptionKey |o--o{ EnvironmentEncryptionPolicy : "(id) - (activeKeyId)"
+    RuntimeEnvironment ||--o{ EnvironmentEncryptionKey : "(id) - (environmentId)"
     Project ||--o{ BackgroundWorker : "(id) - (projectId)"
     RuntimeEnvironment ||--o{ BackgroundWorker : "(id) - (runtimeEnvironmentId)"
     WorkerInstanceGroup |o--o{ BackgroundWorker : "(id) - (workerGroupId)"
@@ -375,6 +378,22 @@ erDiagram
         string[] allowedWorkerQueues "The master queues they are allowed to use (impacts what they can set as default and trigger runs with)"
         json buildSettings
         json onboardingData
+    }
+    EnvironmentEncryptionPolicy {
+        string environmentId PK, FK
+        int revision
+        environmentkeywrappingprovider wrappingProvider
+        string wrappingKeyReference
+        string activeKeyId FK
+    }
+    EnvironmentEncryptionKey {
+        string id PK, UK
+        string environmentId FK, UK
+        json wrappedKey
+        environmentkeywrappingprovider wrappingProvider
+        string wrappingKeyReference
+        int revision
+        datetime createdAt
     }
     SecretReference {
         string id PK
