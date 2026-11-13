@@ -8,11 +8,15 @@ object PrismaSchema {
     val enumTypes: List<String> =
         listOf(
             "CREATE TYPE \"JobStatus\" AS ENUM ('ACTIVE', 'INACTIVE')",
+            "CREATE TYPE \"ScheduledJobRunStatus\" AS ENUM ('PENDING', 'RUNNING', 'SUCCEEDED', 'FAILED', 'CANCELLED')",
             "CREATE TYPE \"AccountingDeliveryState\" AS ENUM ('pending', 'applied', 'parked')",
         )
     val tables: List<Table> =
         listOf(
             LiteLLMBudgetTableTable,
+            LiteLLMCustomerOrganizationTableTable,
+            LiteLLMCustomerTeamTableTable,
+            LiteLLMCustomerMemberTableTable,
             LiteLLMCredentialsTableTable,
             LiteLLMProxyModelTableTable,
             LiteLLMAgentsTableTable,
@@ -59,6 +63,7 @@ object PrismaSchema {
             LiteLLMDailyTagSpendTable,
             LiteLLMProxyWorkerHeartbeatTable,
             LiteLLMCronJobTable,
+            LiteLLMScheduledJobRunTable,
             LiteLLMManagedFileTableTable,
             LiteLLMManagedObjectTableTable,
             LiteLLMManagedFileContentTableTable,
@@ -120,5 +125,7 @@ object PrismaSchema {
             LiteLLMTelemetryReportTable,
             LiteLLMSpendLogDeliveryTable,
             LiteLLMSubscriptionAccountTableTable,
+            LiteLLMAlertTable,
+            LiteLLMPerformanceAlertStateTable,
         )
 }

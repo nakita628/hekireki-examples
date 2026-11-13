@@ -37,6 +37,12 @@ object SubscriptionTable : IdTable<String>("subscriptions") {
             onUpdate = ReferenceOption.CASCADE,
             fkName = "subscriptions_space_id_fkey",
         )
+    val apiAddonItemId = text("api_addon_item_id").nullable()
+    val apiAddonPriceId = text("api_addon_price_id").nullable()
+    val apiAddonAmount = integer("api_addon_amount").nullable()
+    val apiPollLimit = integer("api_poll_limit").nullable()
+    val apiPollRetainedLimit = integer("api_poll_retained_limit").nullable()
+    val apiPollRetainedUntil = pgTimestamp("api_poll_retained_until", 3).nullable()
     override val primaryKey = PrimaryKey(id, name = "subscriptions_pkey")
 
     init {

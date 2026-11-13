@@ -9,4 +9,6 @@ enum class GatewayProvider(
     OPENROUTER("openrouter"),
     XAI("xai"),
     VERCEL("vercel"),
+    AZURE("azure"),
+    GOOGLE_AI_STUDIO("google_ai_studio"),
 }

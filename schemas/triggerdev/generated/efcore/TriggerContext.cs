@@ -207,6 +207,7 @@ public partial class TriggerContext : DbContext
         npgsql.MapEnum<AuthenticationMethod>("AuthenticationMethod");
         npgsql.MapEnum<OrganizationAccessTokenType>("OrganizationAccessTokenType");
         npgsql.MapEnum<OrgMemberRole>("OrgMemberRole");
+        npgsql.MapEnum<ApiKeyIssuer>("ApiKeyIssuer");
         npgsql.MapEnum<RuntimeEnvironmentType>("RuntimeEnvironmentType");
         npgsql.MapEnum<EnvironmentPauseSource>("EnvironmentPauseSource");
         npgsql.MapEnum<ProjectVersion>("ProjectVersion");
@@ -267,6 +268,7 @@ public partial class TriggerContext : DbContext
         dataSource.MapEnum<AuthenticationMethod>("AuthenticationMethod");
         dataSource.MapEnum<OrganizationAccessTokenType>("OrganizationAccessTokenType");
         dataSource.MapEnum<OrgMemberRole>("OrgMemberRole");
+        dataSource.MapEnum<ApiKeyIssuer>("ApiKeyIssuer");
         dataSource.MapEnum<RuntimeEnvironmentType>("RuntimeEnvironmentType");
         dataSource.MapEnum<EnvironmentPauseSource>("EnvironmentPauseSource");
         dataSource.MapEnum<ProjectVersion>("ProjectVersion");
@@ -335,6 +337,7 @@ public partial class TriggerContext : DbContext
         modelBuilder.HasPostgresEnum<AuthenticationMethod>(name: "AuthenticationMethod");
         modelBuilder.HasPostgresEnum<OrganizationAccessTokenType>(name: "OrganizationAccessTokenType");
         modelBuilder.HasPostgresEnum<OrgMemberRole>(name: "OrgMemberRole");
+        modelBuilder.HasPostgresEnum<ApiKeyIssuer>(name: "ApiKeyIssuer");
         modelBuilder.HasPostgresEnum<RuntimeEnvironmentType>(name: "RuntimeEnvironmentType");
         modelBuilder.HasPostgresEnum<EnvironmentPauseSource>(name: "EnvironmentPauseSource");
         modelBuilder.HasPostgresEnum<ProjectVersion>(name: "ProjectVersion");
@@ -1003,6 +1006,8 @@ public partial class TriggerContext : DbContext
 
             entity.HasIndex(e => new { e.RuntimeEnvironmentId, e.RevokedAt, e.CreatedAt }, "api_keys_runtime_environment_id_revoked_at_created_at_idx").IsDescending(false, false, true);
 
+            entity.HasIndex(e => new { e.RuntimeEnvironmentId, e.IssuedBy, e.RevokedAt, e.CreatedAt }, "api_keys_env_issued_by_revoked_at_created_at_idx").IsDescending(false, false, false, true);
+
             entity.Property(e => e.Id)
                 .HasValueGenerator<CuidGenerator>()
                 .HasColumnName("id");
@@ -1012,6 +1017,10 @@ public partial class TriggerContext : DbContext
             entity.Property(e => e.Description).HasColumnName("description");
             entity.Property(e => e.RuntimeEnvironmentId).HasColumnName("runtime_environment_id");
             entity.Property(e => e.CreatedByUserId).HasColumnName("created_by_user_id");
+            entity.Property(e => e.IssuedBy)
+                .ValueGeneratedNever()
+                .HasDefaultValue(ApiKeyIssuer.User)
+                .HasColumnName("issued_by");
             entity.Property(e => e.PresetId).HasColumnName("preset_id");
             entity.Property(e => e.Scopes).HasColumnName("scopes");
             entity.Property(e => e.AllowedIpRanges)

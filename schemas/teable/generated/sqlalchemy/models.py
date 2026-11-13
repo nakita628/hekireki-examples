@@ -1093,6 +1093,7 @@ class Dashboard(Base):
     created_time: Mapped[datetime] = mapped_column(default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
     last_modified_time: Mapped[Optional[datetime]] = mapped_column(default=utc_now, onupdate=utc_now)
     last_modified_by: Mapped[Optional[str]]
+    deleted_time: Mapped[Optional[datetime]]
 
     __table_args__ = (
         Index("dashboard_base_id_idx", "base_id"),
@@ -1368,9 +1369,10 @@ class BaseNodeFolder(Base):
     created_by: Mapped[str]
     last_modified_time: Mapped[Optional[datetime]] = mapped_column(default=utc_now, onupdate=utc_now)
     last_modified_by: Mapped[Optional[str]]
+    deleted_time: Mapped[Optional[datetime]]
 
     __table_args__ = (
-        Index("base_node_folder_base_id_name_key", "base_id", "name", unique=True),
+        Index("base_node_folder_base_id_idx", "base_id"),
     )
 
 class BaseShare(Base):

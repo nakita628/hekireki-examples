@@ -311,4 +311,40 @@ erDiagram
         string key PK
         string value
     }
+    error_issue {
+        string id PK
+        string websiteId UK
+        string fingerprint UK
+        int groupingVersion UK
+        string title
+        string status
+        datetime resolvedAt
+        datetime createdAt
+    }
+    error_event {
+        string websiteId PK
+        string id PK
+        string issueId
+        string sessionId
+        string visitId
+        datetime createdAt
+        datetime receivedAt
+        string name
+        string message
+        string stack
+        json frames
+        json tags
+        boolean handled
+        string urlPath
+        string release
+        string environment
+        string browser
+        string os
+        string device
+    }
+    error_rate_limit {
+        string websiteId PK
+        datetime bucket
+        int count
+    }
 ```

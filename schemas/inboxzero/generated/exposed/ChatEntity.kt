@@ -24,6 +24,7 @@ class ChatEntity(
     val compactions by ChatCompactionEntity referrersOn ChatCompactionTable.chatId
     val memories by ChatMemoryEntity optionalReferrersOn ChatMemoryTable.chatId
     val actionTotals by ChatActionTotalEntity referrersOn ChatActionTotalTable.chatId
+    val bulkInboxActionJobs by BulkInboxActionJobEntity optionalReferrersOn BulkInboxActionJobTable.chatId
     var emailAccountId by ChatTable.emailAccountId
     var emailAccount by EmailAccountEntity referencedOn ChatTable.emailAccountId
 

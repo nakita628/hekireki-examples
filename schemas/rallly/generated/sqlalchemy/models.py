@@ -1,8 +1,8 @@
-from sqlalchemy import ARRAY, Dialect, Enum, ForeignKey, Index, MetaData, Text, TypeDecorator, Uuid, text
+from sqlalchemy import ARRAY, Date, Dialect, Enum, ForeignKey, Index, MetaData, Text, TypeDecorator, Uuid, text
 from sqlalchemy.dialects.postgresql import CITEXT, JSONB, TIMESTAMP
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from typing import Any, Optional
-from datetime import datetime, timezone
+from datetime import datetime, date, timezone
 import uuid as uuid_mod
 
 
@@ -28,6 +28,19 @@ class Base(DeclarativeBase):
     type_annotation_map = {datetime: UtcDateTime(precision=3), str: Text}
 
 
+class ApiUsage(Base):
+    __tablename__ = "api_usage"
+
+    space_id: Mapped[str] = mapped_column(ForeignKey("spaces.id", ondelete="CASCADE", onupdate="CASCADE", name="api_usage_space_id_fkey"), primary_key=True)
+    resource: Mapped[str] = mapped_column(Enum("poll", name="api_usage_resource"), primary_key=True)
+    period: Mapped[date] = mapped_column(Date, primary_key=True)
+    count: Mapped[int] = mapped_column(default=0, server_default=text("0"))
+    near_limit_warned_at: Mapped[Optional[datetime]]
+    at_limit_warned_at: Mapped[Optional[datetime]]
+    updated_at: Mapped[datetime] = mapped_column(default=utc_now, onupdate=utc_now)
+
+    space: Mapped["Space"] = relationship(back_populates="api_usage")
+
 class Subscription(Base):
     __tablename__ = "subscriptions"
 
@@ -48,6 +61,12 @@ class Subscription(Base):
     cancel_at_period_end: Mapped[bool] = mapped_column(default=False, server_default=text("false"))
     user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE", onupdate="CASCADE", name="subscriptions_user_id_fkey"))
     space_id: Mapped[str] = mapped_column(ForeignKey("spaces.id", ondelete="CASCADE", onupdate="CASCADE", name="subscriptions_space_id_fkey"))
+    api_addon_item_id: Mapped[Optional[str]]
+    api_addon_price_id: Mapped[Optional[str]]
+    api_addon_amount: Mapped[Optional[int]]
+    api_poll_limit: Mapped[Optional[int]]
+    api_poll_retained_limit: Mapped[Optional[int]]
+    api_poll_retained_until: Mapped[Optional[datetime]]
 
     __table_args__ = (
         Index("subscriptions_user_id_idx", "user_id"),
@@ -652,6 +671,7 @@ class Space(Base):
     hide_attribution: Mapped[bool] = mapped_column(default=False, server_default=text("false"))
     shared: Mapped[bool] = mapped_column(default=False, server_default=text("false"))
     nonprofit_discount_granted_at: Mapped[Optional[datetime]]
+    api_poll_quota_override: Mapped[Optional[int]]
     created_at: Mapped[datetime] = mapped_column(default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
     updated_at: Mapped[datetime] = mapped_column(default=utc_now, onupdate=utc_now)
 
@@ -670,6 +690,7 @@ class Space(Base):
     api_keys: Mapped[list["SpaceApiKey"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="space")
     nonprofit_applications: Mapped[list["NonprofitApplication"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="space")
     webhooks: Mapped[list["SpaceWebhook"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="space")
+    api_usage: Mapped[list["ApiUsage"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="space")
 
 class SpaceMember(Base):
     __tablename__ = "space_members"

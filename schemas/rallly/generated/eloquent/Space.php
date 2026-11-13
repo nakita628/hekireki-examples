@@ -30,6 +30,7 @@ class Space extends Model
         'hide_attribution',
         'shared',
         'nonprofit_discount_granted_at',
+        'api_poll_quota_override',
     ];
 
     protected $attributes = [
@@ -46,6 +47,7 @@ class Space extends Model
         'hide_attribution' => 'boolean',
         'shared' => 'boolean',
         'nonprofit_discount_granted_at' => 'datetime',
+        'api_poll_quota_override' => 'integer',
     ];
 
     public function owner(): BelongsTo
@@ -101,5 +103,10 @@ class Space extends Model
     public function webhooks(): HasMany
     {
         return $this->hasMany(SpaceWebhook::class, 'space_id');
+    }
+
+    public function apiUsage(): HasMany
+    {
+        return $this->hasMany(ApiUsage::class, 'space_id');
     }
 }

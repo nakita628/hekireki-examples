@@ -841,6 +841,73 @@ func (AppSetting) TableName() string {
 	return "app_setting"
 }
 
+type ErrorIssue struct {
+	ID              string    `gorm:"column:issue_id;primaryKey;type:char(36)" json:"issue_id"`
+	WebsiteID       string    `gorm:"column:website_id;uniqueIndex:error_issue_website_id_grouping_version_fingerprint_key;index:error_issue_website_id_status_idx;type:char(36);not null" json:"website_id"`
+	Fingerprint     string    `gorm:"column:fingerprint;uniqueIndex:error_issue_website_id_grouping_version_fingerprint_key;type:varchar(64);not null" json:"fingerprint"`
+	GroupingVersion *int      `gorm:"column:grouping_version;uniqueIndex:error_issue_website_id_grouping_version_fingerprint_key;default:1;not null" json:"grouping_version"`
+	Title           string    `gorm:"column:title;type:varchar(2200);not null" json:"title"`
+	Status          *string   `gorm:"column:status;index:error_issue_website_id_status_idx;type:varchar(20);default:'unresolved';not null" json:"status"`
+	ResolvedAt      *DateTime `gorm:"column:resolved_at;type:timestamptz(6)" json:"resolved_at"`
+	CreatedAt       DateTime  `gorm:"column:created_at;type:timestamptz(6);autoCreateTime:false;not null" json:"created_at"`
+}
+
+func (ErrorIssue) TableName() string {
+	return "error_issue"
+}
+
+func (m *ErrorIssue) BeforeCreate(tx *gorm.DB) error {
+	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
+	if m.CreatedAt.IsZero() {
+		m.CreatedAt = DateTime{Time: now}
+	}
+	return nil
+}
+
+type ErrorEvent struct {
+	WebsiteID   string         `gorm:"column:website_id;primaryKey;index:error_event_website_id_created_at_idx;index:error_event_website_id_issue_id_created_at_idx;type:char(36)" json:"website_id"`
+	ID          string         `gorm:"column:event_id;primaryKey;type:char(36)" json:"event_id"`
+	IssueID     string         `gorm:"column:issue_id;index:error_event_website_id_issue_id_created_at_idx;type:char(36);not null" json:"issue_id"`
+	SessionID   string         `gorm:"column:session_id;type:char(36);not null" json:"session_id"`
+	VisitID     string         `gorm:"column:visit_id;type:char(36);not null" json:"visit_id"`
+	CreatedAt   DateTime       `gorm:"column:created_at;index:error_event_website_id_created_at_idx;index:error_event_website_id_issue_id_created_at_idx;type:timestamptz(6);autoCreateTime:false;not null" json:"created_at"`
+	ReceivedAt  DateTime       `gorm:"column:received_at;type:timestamptz(6);not null" json:"received_at"`
+	Name        string         `gorm:"column:name;type:varchar(200);not null" json:"name"`
+	Message     string         `gorm:"column:message;type:varchar(2000);not null" json:"message"`
+	Stack       string         `gorm:"column:stack;type:text;not null" json:"stack"`
+	Frames      datatypes.JSON `gorm:"column:frames;not null" json:"frames"`
+	Tags        datatypes.JSON `gorm:"column:tags;not null" json:"tags"`
+	Handled     bool           `gorm:"column:handled;not null" json:"handled"`
+	URLPath     string         `gorm:"column:url_path;type:varchar(500);not null" json:"url_path"`
+	Release     string         `gorm:"column:release;type:varchar(100);not null" json:"release"`
+	Environment string         `gorm:"column:environment;type:varchar(50);not null" json:"environment"`
+	Browser     string         `gorm:"column:browser;type:varchar(50);not null" json:"browser"`
+	Os          string         `gorm:"column:os;type:varchar(50);not null" json:"os"`
+	Device      string         `gorm:"column:device;type:varchar(50);not null" json:"device"`
+}
+
+func (ErrorEvent) TableName() string {
+	return "error_event"
+}
+
+func (m *ErrorEvent) BeforeCreate(tx *gorm.DB) error {
+	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
+	if m.ReceivedAt.IsZero() {
+		m.ReceivedAt = DateTime{Time: now}
+	}
+	return nil
+}
+
+type ErrorRateLimit struct {
+	WebsiteID string   `gorm:"column:website_id;primaryKey;type:char(36)" json:"website_id"`
+	Bucket    DateTime `gorm:"column:bucket;type:timestamptz(6);not null" json:"bucket"`
+	Count     int      `gorm:"column:count;not null" json:"count"`
+}
+
+func (ErrorRateLimit) TableName() string {
+	return "error_rate_limit"
+}
+
 type DateTime struct{ time.Time }
 
 func (DateTime) GormDataType() string {

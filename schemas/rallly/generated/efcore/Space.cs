@@ -31,6 +31,8 @@ public partial class Space
 
     public DateTime? NonprofitDiscountGrantedAt { get; set; }
 
+    public int? ApiPollQuotaOverride { get; set; }
+
     public DateTime CreatedAt { get; set; }
 
     public DateTime UpdatedAt { get; set; }
@@ -56,4 +58,6 @@ public partial class Space
     public virtual ICollection<NonprofitApplication> NonprofitApplications { get; set; } = new List<NonprofitApplication>();
 
     public virtual ICollection<SpaceWebhook> Webhooks { get; set; } = new List<SpaceWebhook>();
+
+    public virtual ICollection<ApiUsage> ApiUsage { get; set; } = new List<ApiUsage>();
 }

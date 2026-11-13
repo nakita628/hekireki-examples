@@ -91,6 +91,8 @@ class GatewayProvider(models.TextChoices):
     OPENROUTER = "openrouter"
     XAI = "xai"
     VERCEL = "vercel"
+    AZURE = "azure"
+    GOOGLE_AI_STUDIO = "google_ai_studio"
 
 
 class GatewayConnectionStatus(models.TextChoices):

@@ -63,3 +63,31 @@ defmodule Rallly.PrismaDateTime do
     %{datetime | microsecond: {div(microsecond, 1000) * 1000, 3}}
   end
 end
+
+defmodule Rallly.PrismaDate do
+  use Ecto.Type
+
+  @impl true
+  def type, do: :date
+
+  @impl true
+  def cast(%Date{} = value), do: {:ok, value}
+
+  def cast(value) do
+    case Ecto.Type.cast(:utc_datetime_usec, value) do
+      {:ok, datetime} -> {:ok, DateTime.to_date(datetime)}
+      _ -> Ecto.Type.cast(:date, value)
+    end
+  end
+
+  @impl true
+  def load(%Date{} = value), do: {:ok, value}
+  def load(_), do: :error
+
+  @impl true
+  def dump(%Date{} = value), do: {:ok, value}
+  def dump(_), do: :error
+
+  @impl true
+  def autogenerate, do: Date.utc_today()
+end

@@ -30,6 +30,32 @@ pub struct Model {
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
+    #[sea_orm(
+        has_many = "super::lite_llm_customer_organization_table::Entity",
+        from = "Column::BudgetId",
+        to = "super::lite_llm_customer_organization_table::Column::DefaultBudgetId"
+    )]
+    CustomerOrganizationDefaults,
+    #[sea_orm(
+        has_many = "super::lite_llm_customer_organization_table::Entity",
+        from = "Column::BudgetId",
+        to = "super::lite_llm_customer_organization_table::Column::BudgetId"
+    )]
+    CustomerOrganizations,
+    #[sea_orm(
+        has_many = "super::lite_llm_customer_member_table::Entity",
+        from = "Column::BudgetId",
+        to = "super::lite_llm_customer_member_table::Column::BudgetTemplateId"
+    )]
+    CustomerMemberTemplates,
+    #[sea_orm(has_many = "super::lite_llm_customer_team_table::Entity")]
+    CustomerTeams,
+    #[sea_orm(
+        has_many = "super::lite_llm_customer_member_table::Entity",
+        from = "Column::BudgetId",
+        to = "super::lite_llm_customer_member_table::Column::BudgetId"
+    )]
+    CustomerMembers,
     #[sea_orm(has_many = "super::lite_llm_organization_table::Entity")]
     Organization,
     #[sea_orm(has_many = "super::lite_llm_project_table::Entity")]
@@ -46,6 +72,24 @@ pub enum Relation {
     TeamMembership,
     #[sea_orm(has_many = "super::lite_llm_organization_membership::Entity")]
     OrganizationMembership,
+}
+
+impl Related<super::lite_llm_customer_organization_table::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::CustomerOrganizationDefaults.def()
+    }
+}
+
+impl Related<super::lite_llm_customer_member_table::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::CustomerMemberTemplates.def()
+    }
+}
+
+impl Related<super::lite_llm_customer_team_table::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::CustomerTeams.def()
+    }
 }
 
 impl Related<super::lite_llm_organization_table::Entity> for Entity {

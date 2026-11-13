@@ -5,6 +5,8 @@ class ApiKey < ApplicationRecord
   attribute :scopes, default: -> { [] }
   attribute :allowed_ip_ranges, default: -> { [] }
 
+  enum :issued_by, { user: "USER", system: "SYSTEM" }, default: :user, prefix: true, validate: true
+
   validates :name, presence: true
   validates :key_hash, presence: true, uniqueness: true
   validates :last_four, presence: true

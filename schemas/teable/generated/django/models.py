@@ -1153,6 +1153,7 @@ class Dashboard(models.Model):
     created_time = UtcDateTimeField(default=timezone.now)
     last_modified_time = UtcDateTimeField(null=True, auto_now=True)
     last_modified_by = models.TextField(null=True)
+    deleted_time = UtcDateTimeField(null=True)
     objects = AutoNowQuerySet.as_manager()
 
     class Meta:
@@ -1437,12 +1438,13 @@ class BaseNodeFolder(models.Model):
     created_by = models.TextField()
     last_modified_time = UtcDateTimeField(null=True, auto_now=True)
     last_modified_by = models.TextField(null=True)
+    deleted_time = UtcDateTimeField(null=True)
     objects = AutoNowQuerySet.as_manager()
 
     class Meta:
         db_table = "base_node_folder"
-        constraints = [
-            models.UniqueConstraint(fields=["base_id", "name"], name="base_node_folder_base_id_name_key"),
+        indexes = [
+            models.Index(fields=["base_id"]),
         ]
 
 

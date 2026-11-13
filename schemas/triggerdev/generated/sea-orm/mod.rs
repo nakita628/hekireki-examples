@@ -3,6 +3,7 @@ pub mod alert_delivery;
 pub mod alert_event;
 pub mod alert_occurrence_seen;
 pub mod api_key;
+pub mod api_key_issuer;
 pub mod authentication_method;
 pub mod authorization_code;
 pub mod background_worker;

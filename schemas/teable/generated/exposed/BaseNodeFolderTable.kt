@@ -13,9 +13,10 @@ object BaseNodeFolderTable : IdTable<String>("base_node_folder") {
     val createdBy = text("created_by")
     val lastModifiedTime = pgTimestamp("last_modified_time", 3).nullable().clientDefault { Instant.now().truncatedTo(ChronoUnit.MILLIS) }
     val lastModifiedBy = text("last_modified_by").nullable()
+    val deletedTime = pgTimestamp("deleted_time", 3).nullable()
     override val primaryKey = PrimaryKey(id, name = "base_node_folder_pkey")
 
     init {
-        uniqueIndex("base_node_folder_base_id_name_key", baseId, name)
+        index("base_node_folder_base_id_idx", false, baseId)
     }
 }

@@ -296,6 +296,13 @@ class ProcessorType(models.TextChoices):
     STRIPE = "STRIPE"
 
 
+class BulkInboxActionJobStatus(models.TextChoices):
+    RUNNING = "RUNNING"
+    COMPLETED = "COMPLETED"
+    FAILED = "FAILED"
+    CANCELLED = "CANCELLED"
+
+
 class CleanAction(models.TextChoices):
     ARCHIVE = "ARCHIVE"
     MARK_READ = "MARK_READ"
@@ -1593,6 +1600,53 @@ class CleanupThread(models.Model):
             models.Index(fields=["job"]),
             models.Index(fields=["email_account"]),
         ]
+
+
+class BulkInboxActionJob(models.Model):
+    id = models.TextField(primary_key=True, default=None)
+    created_at = UtcDateTimeField(db_column="createdAt", default=timezone.now)
+    updated_at = UtcDateTimeField(db_column="updatedAt", auto_now=True)
+    status = models.TextField(choices=BulkInboxActionJobStatus.choices, default=BulkInboxActionJobStatus.RUNNING)
+    search = models.JSONField()
+    action = models.TextField()
+    label_id = models.TextField(null=True, db_column="labelId")
+    label_name = models.TextField(null=True, db_column="labelName")
+    instruction = models.TextField(null=True)
+    page_token = models.TextField(null=True, db_column="pageToken")
+    rate_limited_until = UtcDateTimeField(null=True, db_column="rateLimitedUntil")
+    lease_expires_at = UtcDateTimeField(null=True, db_column="leaseExpiresAt")
+    chunk_token = models.TextField(null=True, db_column="chunkToken")
+    recovery_count = models.IntegerField(db_column="recoveryCount", default=0)
+    processed_count = models.IntegerField(db_column="processedCount", default=0)
+    matched_count = models.IntegerField(db_column="matchedCount", default=0)
+    acted_count = models.IntegerField(db_column="actedCount", default=0)
+    skipped_count = models.IntegerField(db_column="skippedCount", default=0)
+    failed_count = models.IntegerField(db_column="failedCount", default=0)
+    limit_reached = models.BooleanField(db_column="limitReached", default=False)
+    error = models.TextField(null=True)
+    completed_at = UtcDateTimeField(null=True, db_column="completedAt")
+    confirmation_key = models.TextField(db_column="confirmationKey")
+    chat = models.ForeignKey("Chat", on_delete=models.SET_NULL, related_name="bulk_inbox_action_jobs", db_column="chatId", null=True, db_index=False)
+    email_account = models.ForeignKey("EmailAccount", on_delete=models.CASCADE, related_name="bulk_inbox_action_jobs", db_column="emailAccountId", db_index=False)
+    objects = AutoNowQuerySet.as_manager()
+
+    class Meta:
+        db_table = "BulkInboxActionJob"
+        constraints = [
+            models.UniqueConstraint(fields=["email_account", "confirmation_key"], name="BulkInboxActionJob_emailAccountId_confirmationKey_key"),
+        ]
+        indexes = [
+            models.Index(fields=["chat", "updated_at"]),
+        ]
+
+
+class BulkInboxActionThread(models.Model):
+    pk = models.CompositePrimaryKey("job_id", "thread_id")
+    job = models.ForeignKey("BulkInboxActionJob", on_delete=models.CASCADE, related_name="handled_threads", db_column="jobId", db_index=False)
+    thread_id = models.TextField(db_column="threadId")
+
+    class Meta:
+        db_table = "BulkInboxActionThread"
 
 
 class Knowledge(models.Model):

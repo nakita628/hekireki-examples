@@ -3,6 +3,14 @@ Enum JobStatus {
   INACTIVE
 }
 
+Enum ScheduledJobRunStatus {
+  PENDING
+  RUNNING
+  SUCCEEDED
+  FAILED
+  CANCELLED
+}
+
 Enum AccountingDeliveryState {
   pending
   applied
@@ -25,6 +33,49 @@ Table LiteLLM_BudgetTable {
   allowed_models String[] [not null]
   temp_budget_increase Float
   temp_budget_expiry DateTime
+  created_at DateTime [default: `now()`, not null]
+  created_by String [not null]
+  updated_at DateTime [default: `now()`, not null]
+  updated_by String [not null]
+}
+
+Table LiteLLM_CustomerOrganizationTable {
+  spend Float [default: 0, not null]
+  budget_reset_at DateTime
+  budget_ids String[] [not null]
+  budget_names Json [default: '{}', not null]
+  budget_id String
+  customer_org_id String [pk]
+  alias String
+  default_budget_id String
+  created_at DateTime [default: `now()`, not null]
+  created_by String [not null]
+  updated_at DateTime [default: `now()`, not null]
+  updated_by String [not null]
+}
+
+Table LiteLLM_CustomerTeamTable {
+  spend Float [default: 0, not null]
+  budget_reset_at DateTime
+  customer_team_id String [pk]
+  alias String
+  parent_org_id String [not null]
+  budget_id String
+  created_at DateTime [default: `now()`, not null]
+  created_by String [not null]
+  updated_at DateTime [default: `now()`, not null]
+  updated_by String [not null]
+}
+
+Table LiteLLM_CustomerMemberTable {
+  spend Float [default: 0, not null]
+  budget_reset_at DateTime
+  customer_member_id String [pk]
+  alias String
+  parent_team_id String [not null]
+  budget_id String
+  budget_template_id String
+  budget_override_expires_at DateTime
   created_at DateTime [default: `now()`, not null]
   created_by String [not null]
   updated_at DateTime [default: `now()`, not null]
@@ -969,6 +1020,20 @@ Table LiteLLM_CronJob {
   ttl DateTime [not null]
 }
 
+Table LiteLLM_ScheduledJobRun {
+  id String [pk]
+  job_name String [not null]
+  lock_group String [not null]
+  schedule String [not null]
+  scheduled_for DateTime [not null]
+  status ScheduledJobRunStatus [default: 'PENDING', not null]
+  claimed_by String
+  claimed_at DateTime
+  lease_expires_at DateTime
+  finished_at DateTime
+  created_at DateTime [default: `now()`, not null]
+}
+
 Table LiteLLM_ManagedFileTable {
   id String [pk]
   unified_file_id String [unique, not null]
@@ -1149,6 +1214,8 @@ Table LiteLLM_DailyModelUsage {
   request_count BigInt [default: 0, not null]
   successful_requests BigInt [default: 0, not null]
   failed_requests BigInt [default: 0, not null]
+  total_response_time_ms BigInt [default: 0, not null]
+  timed_requests BigInt [default: 0, not null]
   created_at DateTime [default: `now()`, not null]
   updated_at DateTime [not null]
 
@@ -1367,6 +1434,7 @@ Table LiteLLM_AccessGroupTable {
   mcp_tool_permissions Json
   access_agent_ids String[] [not null]
   access_skill_names String[] [not null]
+  access_vector_store_ids String[] [not null]
   assigned_team_ids String[] [not null]
   assigned_key_ids String[] [not null]
   created_at DateTime [default: `now()`, not null]
@@ -1832,6 +1900,53 @@ Table LiteLLM_SubscriptionAccountTable {
     (custom_llm_provider, account_id) [unique]
   }
 }
+
+Table LiteLLM_Alert {
+  id BigInt [pk, increment]
+  detection_key String [unique, not null]
+  type String [not null]
+  resource_type String [not null]
+  resource_id String [not null]
+  status String [default: 'open', not null]
+  window_start DateTime [not null]
+  window_end DateTime [not null]
+  evidence Json [not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+  updated_by String
+}
+
+Table LiteLLM_PerformanceAlertState {
+  enabled Boolean [default: true, not null]
+  alerts_used Int
+  id Int [pk]
+  owner String [not null]
+  next_run_at DateTime [not null]
+  day String
+  scope String
+  resume_after String [default: '', not null]
+  wrapped Boolean [default: false, not null]
+  checked Int [default: 0, not null]
+  skipped Int [default: 0, not null]
+  start_scope String
+  start_after String [default: '', not null]
+  completed_at DateTime
+  updated_at DateTime [default: `now()`, not null]
+}
+
+Ref LiteLLM_CustomerOrganizationTable_budget_id_fk: LiteLLM_CustomerOrganizationTable.budget_id > LiteLLM_BudgetTable.budget_id
+
+Ref LiteLLM_CustomerOrganizationTable_default_budget_id_fk: LiteLLM_CustomerOrganizationTable.default_budget_id > LiteLLM_BudgetTable.budget_id
+
+Ref LiteLLM_CustomerTeamTable_parent_org_id_fk: LiteLLM_CustomerTeamTable.parent_org_id > LiteLLM_CustomerOrganizationTable.customer_org_id
+
+Ref LiteLLM_CustomerTeamTable_budget_id_fk: LiteLLM_CustomerTeamTable.budget_id > LiteLLM_BudgetTable.budget_id
+
+Ref LiteLLM_CustomerMemberTable_parent_team_id_fk: LiteLLM_CustomerMemberTable.parent_team_id > LiteLLM_CustomerTeamTable.customer_team_id
+
+Ref LiteLLM_CustomerMemberTable_budget_id_fk: LiteLLM_CustomerMemberTable.budget_id > LiteLLM_BudgetTable.budget_id [delete: restrict]
+
+Ref LiteLLM_CustomerMemberTable_budget_template_id_fk: LiteLLM_CustomerMemberTable.budget_template_id > LiteLLM_BudgetTable.budget_id [delete: restrict]
 
 Ref LiteLLM_AgentsTable_object_permission_id_fk: LiteLLM_AgentsTable.object_permission_id > LiteLLM_ObjectPermissionTable.object_permission_id
 

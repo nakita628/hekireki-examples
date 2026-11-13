@@ -237,6 +237,13 @@ export const threadTrackerTypeEnum = pgEnum('ThreadTrackerType', [
 
 export const processorTypeEnum = pgEnum('ProcessorType', ['LEMON_SQUEEZY', 'STRIPE'])
 
+export const bulkInboxActionJobStatusEnum = pgEnum('BulkInboxActionJobStatus', [
+  'RUNNING',
+  'COMPLETED',
+  'FAILED',
+  'CANCELLED',
+])
+
 export const cleanActionEnum = pgEnum('CleanAction', ['ARCHIVE', 'MARK_READ'])
 
 export const systemTypeEnum = pgEnum('SystemType', [
@@ -2228,6 +2235,78 @@ export const cleanupThread = pgTable(
       name: 'CleanupThread_emailAccountId_fkey',
       columns: [table.emailAccountId],
       foreignColumns: [emailAccount.id],
+    })
+      .onDelete('cascade')
+      .onUpdate('cascade'),
+  ],
+)
+
+export const bulkInboxActionJob = pgTable(
+  'BulkInboxActionJob',
+  {
+    id: text('id')
+      .primaryKey()
+      .$defaultFn(() => cuid()),
+    createdAt: timestamp('createdAt', { precision: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`)
+      .$defaultFn(utcNow),
+    updatedAt: timestamp('updatedAt', { precision: 3 }).notNull().$onUpdate(utcNow),
+    status: bulkInboxActionJobStatusEnum('status').notNull().default('RUNNING'),
+    search: jsonb('search').notNull(),
+    action: text('action').notNull(),
+    labelId: text('labelId'),
+    labelName: text('labelName'),
+    instruction: text('instruction'),
+    pageToken: text('pageToken'),
+    rateLimitedUntil: timestamp('rateLimitedUntil', { precision: 3 }),
+    leaseExpiresAt: timestamp('leaseExpiresAt', { precision: 3 }),
+    chunkToken: text('chunkToken'),
+    recoveryCount: integer('recoveryCount').notNull().default(0),
+    processedCount: integer('processedCount').notNull().default(0),
+    matchedCount: integer('matchedCount').notNull().default(0),
+    actedCount: integer('actedCount').notNull().default(0),
+    skippedCount: integer('skippedCount').notNull().default(0),
+    failedCount: integer('failedCount').notNull().default(0),
+    limitReached: boolean('limitReached').notNull().default(false),
+    error: text('error'),
+    completedAt: timestamp('completedAt', { precision: 3 }),
+    confirmationKey: text('confirmationKey').notNull(),
+    chatId: text('chatId'),
+    emailAccountId: text('emailAccountId').notNull(),
+  },
+  (table) => [
+    index('BulkInboxActionJob_chatId_updatedAt_idx').on(table.chatId, table.updatedAt),
+    uniqueIndex('BulkInboxActionJob_emailAccountId_confirmationKey_key').on(
+      table.emailAccountId,
+      table.confirmationKey,
+    ),
+    foreignKey({
+      name: 'BulkInboxActionJob_chatId_fkey',
+      columns: [table.chatId],
+      foreignColumns: [chat.id],
+    })
+      .onDelete('set null')
+      .onUpdate('cascade'),
+    foreignKey({
+      name: 'BulkInboxActionJob_emailAccountId_fkey',
+      columns: [table.emailAccountId],
+      foreignColumns: [emailAccount.id],
+    })
+      .onDelete('cascade')
+      .onUpdate('cascade'),
+  ],
+)
+
+export const bulkInboxActionThread = pgTable(
+  'BulkInboxActionThread',
+  { jobId: text('jobId').notNull(), threadId: text('threadId').notNull() },
+  (table) => [
+    primaryKey({ name: 'BulkInboxActionThread_pkey', columns: [table.jobId, table.threadId] }),
+    foreignKey({
+      name: 'BulkInboxActionThread_jobId_fkey',
+      columns: [table.jobId],
+      foreignColumns: [bulkInboxActionJob.id],
     })
       .onDelete('cascade')
       .onUpdate('cascade'),
@@ -4387,6 +4466,8 @@ export const relations = defineRelations(
     threadTracker,
     cleanupJob,
     cleanupThread,
+    bulkInboxActionJob,
+    bulkInboxActionThread,
     knowledge,
     snippet,
     emailSignature,
@@ -4504,6 +4585,7 @@ export const relations = defineRelations(
       categories: r.many.category(),
       threadTrackers: r.many.threadTracker(),
       cleanupJobs: r.many.cleanupJob(),
+      bulkInboxActionJobs: r.many.bulkInboxActionJob(),
       cleanupThreads: r.many.cleanupThread(),
       emailMessages: r.many.emailMessage(),
       emailTokens: r.many.emailToken(),
@@ -4894,6 +4976,22 @@ export const relations = defineRelations(
         optional: false,
       }),
     },
+    bulkInboxActionJob: {
+      chat: r.one.chat({ from: r.bulkInboxActionJob.chatId, to: r.chat.id }),
+      handledThreads: r.many.bulkInboxActionThread(),
+      emailAccount: r.one.emailAccount({
+        from: r.bulkInboxActionJob.emailAccountId,
+        to: r.emailAccount.id,
+        optional: false,
+      }),
+    },
+    bulkInboxActionThread: {
+      job: r.one.bulkInboxActionJob({
+        from: r.bulkInboxActionThread.jobId,
+        to: r.bulkInboxActionJob.id,
+        optional: false,
+      }),
+    },
     knowledge: {
       emailAccount: r.one.emailAccount({
         from: r.knowledge.emailAccountId,
@@ -4960,6 +5058,7 @@ export const relations = defineRelations(
       compactions: r.many.chatCompaction(),
       memories: r.many.chatMemory(),
       actionTotals: r.many.chatActionTotal(),
+      bulkInboxActionJobs: r.many.bulkInboxActionJob(),
       emailAccount: r.one.emailAccount({
         from: r.chat.emailAccountId,
         to: r.emailAccount.id,

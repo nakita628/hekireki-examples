@@ -1,6 +1,6 @@
 // Trigger: Trigger.dev background jobs: organizations, projects, tasks, runs, queues and deployments.
 //
-// Imported from https://github.com/triggerdotdev/trigger.dev/blob/7a2a7dc801fc5bc97a03add95dc1b2a12f978e58/internal-packages/database/prisma/schema.prisma
+// Imported from https://github.com/triggerdotdev/trigger.dev/blob/2fbd5c7cf4e9c8e19b88e2b72a7133795611e33d/internal-packages/database/prisma/schema.prisma
 // (Apache-2.0 license) by tools/import/import-schema.mjs, which dropped the original
 // generator blocks and the datasource's connection URLs and added the hekireki generators below.
 // The models, enums and `///` comments are the project's own, as they are at that commit.
@@ -522,6 +522,11 @@ model RuntimeEnvironment {
   @@index([organizationId])
 }
 
+enum ApiKeyIssuer {
+  USER
+  SYSTEM
+}
+
 model ApiKey {
   id       String @id @default(cuid())
   name     String
@@ -537,6 +542,8 @@ model ApiKey {
   createdBy       User?   @relation(fields: [createdByUserId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   createdByUserId String? @map("created_by_user_id")
 
+  issuedBy ApiKeyIssuer @default(USER) @map("issued_by")
+
   presetId String?  @map("preset_id")
   scopes   String[]
 
@@ -551,6 +558,7 @@ model ApiKey {
   createdAt  DateTime  @default(now()) @map("created_at")
 
   @@index([runtimeEnvironmentId, revokedAt, createdAt(sort: Desc)])
+  @@index([runtimeEnvironmentId, issuedBy, revokedAt, createdAt(sort: Desc)], map: "api_keys_env_issued_by_revoked_at_created_at_idx")
   @@map("api_keys")
 }
 

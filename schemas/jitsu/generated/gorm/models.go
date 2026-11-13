@@ -298,6 +298,8 @@ type UserAPIToken struct {
 	Type          *string            `gorm:"column:type" json:"type"`
 	Name          *string            `gorm:"column:name" json:"name"`
 	ExpiresAt     *DateTime          `gorm:"column:expiresAt" json:"expiresAt"`
+	WorkspaceID   *string            `gorm:"column:workspaceId" json:"workspaceId"`
+	Role          *string            `gorm:"column:role" json:"role"`
 	OauthClientID *string            `gorm:"column:oauthClientId" json:"oauthClientId"`
 	User          *UserProfile       `gorm:"foreignKey:UserID"`
 	OauthClient   *OAuthClient       `gorm:"foreignKey:OauthClientID"`

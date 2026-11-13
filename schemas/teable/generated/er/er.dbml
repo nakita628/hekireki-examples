@@ -864,6 +864,7 @@ Table dashboard {
   created_time DateTime [default: `now()`, not null]
   last_modified_time DateTime
   last_modified_by String
+  deleted_time DateTime
 }
 
 Table comment {
@@ -1060,10 +1061,7 @@ Table base_node_folder {
   created_by String [not null]
   last_modified_time DateTime
   last_modified_by String
-
-  indexes {
-    (base_id, name) [unique]
-  }
+  deleted_time DateTime
 }
 
 Table base_share {

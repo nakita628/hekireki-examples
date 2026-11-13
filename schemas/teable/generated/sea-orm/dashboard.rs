@@ -15,6 +15,7 @@ pub struct Model {
     pub created_time: DateTime,
     pub last_modified_time: Option<DateTime>,
     pub last_modified_by: Option<String>,
+    pub deleted_time: Option<DateTime>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

@@ -12,6 +12,12 @@ class LiteLLMBudgetTableEntity(
 ) : Entity<String>(id) {
     companion object : EntityClass<String, LiteLLMBudgetTableEntity>(LiteLLMBudgetTableTable)
 
+    val customerOrganizationDefaults by LiteLLMCustomerOrganizationTableEntity optionalReferrersOn
+        LiteLLMCustomerOrganizationTableTable.defaultBudgetId
+    val customerOrganizations by LiteLLMCustomerOrganizationTableEntity optionalReferrersOn LiteLLMCustomerOrganizationTableTable.budgetId
+    val customerMemberTemplates by LiteLLMCustomerMemberTableEntity optionalReferrersOn LiteLLMCustomerMemberTableTable.budgetTemplateId
+    val customerTeams by LiteLLMCustomerTeamTableEntity optionalReferrersOn LiteLLMCustomerTeamTableTable.budgetId
+    val customerMembers by LiteLLMCustomerMemberTableEntity optionalReferrersOn LiteLLMCustomerMemberTableTable.budgetId
     var maxBudget by LiteLLMBudgetTableTable.maxBudget
     var softBudget by LiteLLMBudgetTableTable.softBudget
     var maxParallelRequests by LiteLLMBudgetTableTable.maxParallelRequests

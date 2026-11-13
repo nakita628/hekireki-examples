@@ -1,6 +1,6 @@
 // Jitsu: Jitsu event collection: workspaces, connections, sources, destinations and syncs.
 //
-// Imported from https://github.com/jitsucom/jitsu/blob/e74ffe2bfcabca86d07aaa8384febe6b225898bc/webapps/console/prisma/schema.prisma
+// Imported from https://github.com/jitsucom/jitsu/blob/fb20aa95e172f46b4638a3e543f68dd433a075be/webapps/console/prisma/schema.prisma
 // (MIT license) by tools/import/import-schema.mjs, which dropped the original
 // generator blocks and the datasource's connection URLs and added the hekireki generators below.
 // The models, enums and `///` comments are the project's own, as they are at that commit.
@@ -210,6 +210,10 @@ model UserApiToken {
   type      String?
   name      String?
   expiresAt DateTime? /// @zod.custom(z.coerce.date())
+  // When set, the key works only in this workspace. Null (all keys created before scoping) = every workspace of the user.
+  workspaceId String?
+  // Upper limit on what the key may do ("owner" | "editor" | "analyst"). Null = whatever the user's role allows.
+  role        String?
 
   // For MCP-issued tokens: oauthClientId is set and this row IS the refresh
   // token. MCP-ness is inferred from oauthClientId IS NOT NULL (we don't set

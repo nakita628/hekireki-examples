@@ -23,6 +23,7 @@ class ApiKey extends Model
         'description',
         'runtime_environment_id',
         'created_by_user_id',
+        'issued_by',
         'preset_id',
         'scopes',
         'allowed_ip_ranges',
@@ -32,7 +33,12 @@ class ApiKey extends Model
         'expires_at',
     ];
 
+    protected $attributes = [
+        'issued_by' => 'USER',
+    ];
+
     protected $casts = [
+        'issued_by' => ApiKeyIssuer::class,
         'last_used_at' => 'datetime',
         'revoked_at' => 'datetime',
         'expires_at' => 'datetime',

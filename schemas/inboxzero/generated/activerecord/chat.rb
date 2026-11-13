@@ -12,4 +12,5 @@ class Chat < ApplicationRecord
   has_many :compactions, class_name: "ChatCompaction", foreign_key: "chatId", inverse_of: :chat, dependent: :destroy
   has_many :memories, class_name: "ChatMemory", foreign_key: "chatId", inverse_of: :chat, dependent: :nullify
   has_many :action_totals, class_name: "ChatActionTotal", foreign_key: "chatId", inverse_of: :chat, dependent: :destroy
+  has_many :bulk_inbox_action_jobs, foreign_key: "chatId", inverse_of: :chat, dependent: :nullify
 end

@@ -545,3 +545,62 @@ class AppSetting(models.Model):
 
     class Meta:
         db_table = "app_setting"
+
+
+class ErrorIssue(models.Model):
+    id = models.UUIDField(primary_key=True, db_column="issue_id")
+    website_id = models.UUIDField()
+    fingerprint = models.CharField(max_length=64)
+    grouping_version = models.IntegerField(default=1)
+    title = models.CharField(max_length=2200)
+    status = models.CharField(max_length=20, default="unresolved")
+    resolved_at = models.DateTimeField(null=True)
+    created_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        db_table = "error_issue"
+        constraints = [
+            models.UniqueConstraint(fields=["website_id", "grouping_version", "fingerprint"], name="error_issue_website_id_grouping_version_fingerprint_key"),
+        ]
+        indexes = [
+            models.Index(fields=["website_id", "status"]),
+        ]
+
+
+class ErrorEvent(models.Model):
+    pk = models.CompositePrimaryKey("website_id", "id")
+    website_id = models.UUIDField()
+    id = models.UUIDField(db_column="event_id")
+    issue_id = models.UUIDField()
+    session_id = models.UUIDField()
+    visit_id = models.UUIDField()
+    created_at = models.DateTimeField()
+    received_at = models.DateTimeField(default=timezone.now)
+    name = models.CharField(max_length=200)
+    message = models.CharField(max_length=2000)
+    stack = models.TextField()
+    frames = models.JSONField()
+    tags = models.JSONField()
+    handled = models.BooleanField()
+    url_path = models.CharField(max_length=500)
+    release = models.CharField(max_length=100)
+    environment = models.CharField(max_length=50)
+    browser = models.CharField(max_length=50)
+    os = models.CharField(max_length=50)
+    device = models.CharField(max_length=50)
+
+    class Meta:
+        db_table = "error_event"
+        indexes = [
+            models.Index(fields=["website_id", "created_at"]),
+            models.Index(fields=["website_id", "issue_id", "created_at"]),
+        ]
+
+
+class ErrorRateLimit(models.Model):
+    website_id = models.UUIDField(primary_key=True)
+    bucket = models.DateTimeField()
+    count = models.IntegerField()
+
+    class Meta:
+        db_table = "error_rate_limit"

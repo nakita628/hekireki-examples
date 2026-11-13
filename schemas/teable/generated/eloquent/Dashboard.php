@@ -25,10 +25,12 @@ class Dashboard extends Model
         'created_by',
         'created_time',
         'last_modified_by',
+        'deleted_time',
     ];
 
     protected $casts = [
         'created_time' => 'datetime',
+        'deleted_time' => 'datetime',
     ];
 
     public function save(array $options = [])

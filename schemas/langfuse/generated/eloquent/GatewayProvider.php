@@ -10,4 +10,6 @@ enum GatewayProvider: string
     case OPENROUTER = 'openrouter';
     case XAI = 'xai';
     case VERCEL = 'vercel';
+    case AZURE = 'azure';
+    case GOOGLE_AI_STUDIO = 'google_ai_studio';
 }

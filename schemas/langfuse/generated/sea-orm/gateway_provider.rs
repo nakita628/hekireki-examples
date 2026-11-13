@@ -16,4 +16,8 @@ pub enum GatewayProvider {
     Xai,
     #[sea_orm(string_value = "vercel")]
     Vercel,
+    #[sea_orm(string_value = "azure")]
+    Azure,
+    #[sea_orm(string_value = "google_ai_studio")]
+    GoogleAiStudio,
 }

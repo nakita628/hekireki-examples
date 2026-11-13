@@ -1,4 +1,6 @@
 pub mod account;
+pub mod api_usage;
+pub mod api_usage_resource;
 pub mod calendar_connection;
 pub mod comment;
 pub mod conferencing_connection;

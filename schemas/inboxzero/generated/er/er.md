@@ -64,6 +64,9 @@ erDiagram
     EmailAccount ||--o{ CleanupJob : "(id) - (emailAccountId)"
     CleanupJob ||--o{ CleanupThread : "(id) - (jobId)"
     EmailAccount ||--o{ CleanupThread : "(id) - (emailAccountId)"
+    Chat |o--o{ BulkInboxActionJob : "(id) - (chatId)"
+    EmailAccount ||--o{ BulkInboxActionJob : "(id) - (emailAccountId)"
+    BulkInboxActionJob ||--o{ BulkInboxActionThread : "(id) - (jobId)"
     EmailAccount ||--o{ Knowledge : "(id) - (emailAccountId)"
     EmailAccount ||--o{ Snippet : "(id) - (emailAccountId)"
     EmailAccount ||--o{ EmailSignature : "(id) - (emailAccountId)"
@@ -850,6 +853,37 @@ erDiagram
         boolean archived
         string jobId FK
         string emailAccountId FK
+    }
+    BulkInboxActionJob {
+        string id PK
+        datetime createdAt
+        datetime updatedAt
+        bulkinboxactionjobstatus status
+        json search
+        string action
+        string labelId
+        string labelName
+        string instruction
+        string pageToken
+        datetime rateLimitedUntil
+        datetime leaseExpiresAt
+        string chunkToken
+        int recoveryCount
+        int processedCount
+        int matchedCount
+        int actedCount
+        int skippedCount
+        int failedCount
+        boolean limitReached
+        string error
+        datetime completedAt
+        string confirmationKey UK
+        string chatId FK
+        string emailAccountId FK, UK
+    }
+    BulkInboxActionThread {
+        string jobId PK, FK
+        string threadId PK
     }
     Knowledge {
         string id PK

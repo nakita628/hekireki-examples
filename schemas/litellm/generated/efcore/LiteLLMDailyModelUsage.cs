@@ -28,6 +28,10 @@ public partial class LiteLLMDailyModelUsage
 
     public long FailedRequests { get; set; } = 0L;
 
+    public long TotalResponseTimeMs { get; set; } = 0L;
+
+    public long TimedRequests { get; set; } = 0L;
+
     public DateTime CreatedAt { get; set; }
 
     public DateTime UpdatedAt { get; set; }

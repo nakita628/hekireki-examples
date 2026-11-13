@@ -696,6 +696,7 @@ erDiagram
         datetime createdTime
         datetime lastModifiedTime
         string lastModifiedBy
+        datetime deletedTime
     }
     comment {
         string id PK
@@ -851,12 +852,13 @@ erDiagram
     }
     base_node_folder {
         string id PK
-        string baseId UK
-        string name UK
+        string baseId
+        string name
         datetime createdTime
         string createdBy
         datetime lastModifiedTime
         string lastModifiedBy
+        datetime deletedTime
     }
     base_share {
         string id PK

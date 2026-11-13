@@ -57,6 +57,14 @@ class JobStatus(models.TextChoices):
     INACTIVE = "INACTIVE"
 
 
+class ScheduledJobRunStatus(models.TextChoices):
+    PENDING = "PENDING"
+    RUNNING = "RUNNING"
+    SUCCEEDED = "SUCCEEDED"
+    FAILED = "FAILED"
+    CANCELLED = "CANCELLED"
+
+
 class AccountingDeliveryState(models.TextChoices):
     pending = "pending"
     applied = "applied"
@@ -87,6 +95,68 @@ class LiteLLMBudgetTable(models.Model):
 
     class Meta:
         db_table = "LiteLLM_BudgetTable"
+
+
+class LiteLLMCustomerOrganizationTable(models.Model):
+    spend = models.FloatField(default=0)
+    budget_reset_at = UtcDateTimeField(null=True)
+    budget_ids = ArrayField(models.TextField(), default=list)
+    budget_names = models.JSONField(default=dict)
+    budget = models.ForeignKey("LiteLLMBudgetTable", on_delete=models.SET_NULL, related_name="customer_organizations", null=True, db_index=False)
+    customer_org_id = models.TextField(primary_key=True, default=uuid4_str)
+    alias = models.TextField(null=True)
+    default_budget = models.ForeignKey("LiteLLMBudgetTable", on_delete=models.SET_NULL, related_name="customer_organization_defaults", null=True, db_index=False)
+    created_at = UtcDateTimeField(default=timezone.now)
+    created_by = models.TextField()
+    updated_at = UtcDateTimeField(auto_now=True)
+    updated_by = models.TextField()
+    objects = AutoNowQuerySet.as_manager()
+
+    class Meta:
+        db_table = "LiteLLM_CustomerOrganizationTable"
+
+
+class LiteLLMCustomerTeamTable(models.Model):
+    spend = models.FloatField(default=0)
+    budget_reset_at = UtcDateTimeField(null=True)
+    customer_team_id = models.TextField(primary_key=True, default=uuid4_str)
+    alias = models.TextField(null=True)
+    parent_org = models.ForeignKey("LiteLLMCustomerOrganizationTable", on_delete=models.RESTRICT, related_name="teams", db_index=False)
+    budget = models.ForeignKey("LiteLLMBudgetTable", on_delete=models.SET_NULL, related_name="customer_teams", null=True, db_index=False)
+    created_at = UtcDateTimeField(default=timezone.now)
+    created_by = models.TextField()
+    updated_at = UtcDateTimeField(auto_now=True)
+    updated_by = models.TextField()
+    objects = AutoNowQuerySet.as_manager()
+
+    class Meta:
+        db_table = "LiteLLM_CustomerTeamTable"
+        indexes = [
+            models.Index(fields=["parent_org"]),
+        ]
+
+
+class LiteLLMCustomerMemberTable(models.Model):
+    spend = models.FloatField(default=0)
+    budget_reset_at = UtcDateTimeField(null=True)
+    customer_member_id = models.TextField(primary_key=True, default=uuid4_str)
+    alias = models.TextField(null=True)
+    parent_team = models.ForeignKey("LiteLLMCustomerTeamTable", on_delete=models.RESTRICT, related_name="members", db_index=False)
+    budget = models.ForeignKey("LiteLLMBudgetTable", on_delete=models.RESTRICT, related_name="customer_members", null=True, db_index=False)
+    budget_template = models.ForeignKey("LiteLLMBudgetTable", on_delete=models.RESTRICT, related_name="customer_member_templates", null=True, db_index=False)
+    budget_override_expires_at = UtcDateTimeField(null=True)
+    created_at = UtcDateTimeField(default=timezone.now)
+    created_by = models.TextField()
+    updated_at = UtcDateTimeField(auto_now=True)
+    updated_by = models.TextField()
+    objects = AutoNowQuerySet.as_manager()
+
+    class Meta:
+        db_table = "LiteLLM_CustomerMemberTable"
+        indexes = [
+            models.Index(fields=["parent_team"]),
+            models.Index(fields=["budget_template"]),
+        ]
 
 
 class LiteLLMCredentialsTable(models.Model):
@@ -989,6 +1059,7 @@ class LiteLLMDailyUserSpend(models.Model):
             models.Index(fields=["date"]),
             models.Index(fields=["user_id", "date"]),
             models.Index(fields=["api_key"]),
+            models.Index(fields=["api_key", "date"]),
             models.Index(fields=["model"]),
             models.Index(fields=["mcp_namespaced_tool_name"]),
             models.Index(fields=["endpoint"]),
@@ -1281,6 +1352,27 @@ class LiteLLMCronJob(models.Model):
         db_table = "LiteLLM_CronJob"
 
 
+class LiteLLMScheduledJobRun(models.Model):
+    id = models.TextField(primary_key=True, default=uuid4_str)
+    job_name = models.TextField()
+    lock_group = models.TextField()
+    schedule = models.TextField()
+    scheduled_for = models.DateTimeField()
+    status = models.TextField(choices=ScheduledJobRunStatus.choices, default=ScheduledJobRunStatus.PENDING)
+    claimed_by = models.TextField(null=True)
+    claimed_at = models.DateTimeField(null=True)
+    lease_expires_at = models.DateTimeField(null=True)
+    finished_at = models.DateTimeField(null=True)
+    created_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        db_table = "LiteLLM_ScheduledJobRun"
+        indexes = [
+            models.Index(fields=["job_name", "status"]),
+            models.Index(fields=["lock_group", "status"]),
+        ]
+
+
 class LiteLLMManagedFileTable(models.Model):
     id = models.TextField(primary_key=True, default=uuid4_str)
     unified_file_id = models.TextField(unique=True)
@@ -1530,6 +1622,8 @@ class LiteLLMDailyModelUsage(models.Model):
     request_count = models.BigIntegerField(default=0)
     successful_requests = models.BigIntegerField(default=0)
     failed_requests = models.BigIntegerField(default=0)
+    total_response_time_ms = models.BigIntegerField(default=0)
+    timed_requests = models.BigIntegerField(default=0)
     created_at = UtcDateTimeField(default=timezone.now)
     updated_at = UtcDateTimeField(auto_now=True)
     objects = AutoNowQuerySet.as_manager()
@@ -1828,6 +1922,7 @@ class LiteLLMAccessGroupTable(models.Model):
     mcp_tool_permissions = models.JSONField(null=True)
     access_agent_ids = ArrayField(models.TextField(), default=list)
     access_skill_names = ArrayField(models.TextField(), default=list)
+    access_vector_store_ids = ArrayField(models.TextField(), default=list)
     assigned_team_ids = ArrayField(models.TextField(), default=list)
     assigned_key_ids = ArrayField(models.TextField(), default=list)
     created_at = UtcDateTimeField(default=timezone.now)
@@ -2443,3 +2538,47 @@ class LiteLLMSubscriptionAccountTable(models.Model):
         constraints = [
             models.UniqueConstraint(fields=["custom_llm_provider", "account_id"], name="LiteLLM_SubscriptionAccountTable_provider_account_key"),
         ]
+
+
+class LiteLLMAlert(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    detection_key = models.CharField(max_length=64, unique=True)
+    type = models.CharField(max_length=32)
+    resource_type = models.CharField(max_length=16)
+    resource_id = models.CharField(max_length=1024)
+    status = models.CharField(max_length=16, default="open")
+    window_start = UtcDateTimeField()
+    window_end = UtcDateTimeField()
+    evidence = models.JSONField()
+    created_at = UtcDateTimeField(default=timezone.now)
+    updated_at = UtcDateTimeField(auto_now=True)
+    updated_by = models.CharField(max_length=1024, null=True)
+    objects = AutoNowQuerySet.as_manager()
+
+    class Meta:
+        db_table = "LiteLLM_Alert"
+        indexes = [
+            models.Index(fields=["status", "id"]),
+        ]
+
+
+class LiteLLMPerformanceAlertState(models.Model):
+    enabled = models.BooleanField(default=True)
+    alerts_used = models.IntegerField(null=True)
+    id = models.IntegerField(primary_key=True)
+    owner = models.CharField(max_length=32)
+    next_run_at = models.DateTimeField()
+    day = models.CharField(max_length=10, null=True)
+    scope = models.CharField(max_length=16, null=True)
+    resume_after = models.CharField(max_length=1024, default="")
+    wrapped = models.BooleanField(default=False)
+    checked = models.IntegerField(default=0)
+    skipped = models.IntegerField(default=0)
+    start_scope = models.CharField(max_length=16, null=True)
+    start_after = models.CharField(max_length=1024, default="")
+    completed_at = UtcDateTimeField(null=True)
+    updated_at = UtcDateTimeField(auto_now=True)
+    objects = AutoNowQuerySet.as_manager()
+
+    class Meta:
+        db_table = "LiteLLM_PerformanceAlertState"

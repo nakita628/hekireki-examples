@@ -13,6 +13,8 @@ export type OrganizationAccessTokenType = 'USER' | 'SYSTEM'
 
 export type OrgMemberRole = 'ADMIN' | 'MEMBER'
 
+export type ApiKeyIssuer = 'USER' | 'SYSTEM'
+
 export type RuntimeEnvironmentType = 'PRODUCTION' | 'STAGING' | 'DEVELOPMENT' | 'PREVIEW'
 
 export type EnvironmentPauseSource = 'BILLING_LIMIT' | 'ADMIN_BAN'
@@ -368,6 +370,7 @@ export interface ApiKey {
   description: string | null
   runtime_environment_id: string
   created_by_user_id: string | null
+  issued_by: Generated<ApiKeyIssuer>
   preset_id: string | null
   scopes: string[]
   allowed_ip_ranges: Generated<string[]>

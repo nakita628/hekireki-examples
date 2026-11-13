@@ -56,6 +56,7 @@ class EmailAccount < ApplicationRecord
   has_many :categories, foreign_key: "emailAccountId", inverse_of: :email_account, dependent: :destroy
   has_many :thread_trackers, foreign_key: "emailAccountId", inverse_of: :email_account, dependent: :destroy
   has_many :cleanup_jobs, foreign_key: "emailAccountId", inverse_of: :email_account, dependent: :destroy
+  has_many :bulk_inbox_action_jobs, foreign_key: "emailAccountId", inverse_of: :email_account, dependent: :destroy
   has_many :cleanup_threads, foreign_key: "emailAccountId", inverse_of: :email_account, dependent: :destroy
   has_many :email_messages, foreign_key: "emailAccountId", inverse_of: :email_account, dependent: :destroy
   has_many :email_tokens, foreign_key: "emailAccountId", inverse_of: :email_account, dependent: :destroy

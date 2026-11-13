@@ -873,6 +873,74 @@ export const appSetting = pgTable('app_setting', {
   value: text('value').notNull(),
 })
 
+export const errorIssue = pgTable(
+  'error_issue',
+  {
+    id: uuid('issue_id').primaryKey(),
+    websiteId: uuid('website_id').notNull(),
+    fingerprint: varchar('fingerprint', { length: 64 }).notNull(),
+    groupingVersion: integer('grouping_version').notNull().default(1),
+    title: varchar('title', { length: 2200 }).notNull(),
+    status: varchar('status', { length: 20 }).notNull().default('unresolved'),
+    resolvedAt: timestamp('resolved_at', { withTimezone: true, precision: 6 }),
+    createdAt: timestamp('created_at', { withTimezone: true, precision: 6 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`)
+      .$defaultFn(utcNow),
+  },
+  (table) => [
+    index('error_issue_website_id_status_idx').on(table.websiteId, table.status),
+    uniqueIndex('error_issue_website_id_grouping_version_fingerprint_key').on(
+      table.websiteId,
+      table.groupingVersion,
+      table.fingerprint,
+    ),
+  ],
+)
+
+export const errorEvent = pgTable(
+  'error_event',
+  {
+    websiteId: uuid('website_id').notNull(),
+    id: uuid('event_id').notNull(),
+    issueId: uuid('issue_id').notNull(),
+    sessionId: uuid('session_id').notNull(),
+    visitId: uuid('visit_id').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true, precision: 6 }).notNull(),
+    receivedAt: timestamp('received_at', { withTimezone: true, precision: 6 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`)
+      .$defaultFn(utcNow),
+    name: varchar('name', { length: 200 }).notNull(),
+    message: varchar('message', { length: 2000 }).notNull(),
+    stack: text('stack').notNull(),
+    frames: jsonb('frames').notNull(),
+    tags: jsonb('tags').notNull(),
+    handled: boolean('handled').notNull(),
+    urlPath: varchar('url_path', { length: 500 }).notNull(),
+    release: varchar('release', { length: 100 }).notNull(),
+    environment: varchar('environment', { length: 50 }).notNull(),
+    browser: varchar('browser', { length: 50 }).notNull(),
+    os: varchar('os', { length: 50 }).notNull(),
+    device: varchar('device', { length: 50 }).notNull(),
+  },
+  (table) => [
+    primaryKey({ name: 'error_event_pkey', columns: [table.websiteId, table.id] }),
+    index('error_event_website_id_created_at_idx').on(table.websiteId, table.createdAt),
+    index('error_event_website_id_issue_id_created_at_idx').on(
+      table.websiteId,
+      table.issueId,
+      table.createdAt,
+    ),
+  ],
+)
+
+export const errorRateLimit = pgTable('error_rate_limit', {
+  websiteId: uuid('website_id').primaryKey(),
+  bucket: timestamp('bucket', { withTimezone: true, precision: 6 }).notNull(),
+  count: integer('count').notNull(),
+})
+
 export const relations = defineRelations(
   {
     user,
@@ -901,6 +969,9 @@ export const relations = defineRelations(
     twoFactorOtpUsed,
     twoFactorRateLimit,
     appSetting,
+    errorIssue,
+    errorEvent,
+    errorRateLimit,
   },
   (r) => ({
     user: {

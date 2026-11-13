@@ -343,6 +343,7 @@ erDiagram
         string description "Optional one-line note the creator adds to say what the key is for."
         string runtimeEnvironmentId FK
         string createdByUserId FK
+        apikeyissuer issuedBy
         string presetId
         string[] scopes
         string[] allowedIpRanges "CIDR ranges this key may be used from. Empty means any IP."

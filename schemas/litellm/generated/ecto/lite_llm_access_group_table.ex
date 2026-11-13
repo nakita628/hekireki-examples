@@ -14,6 +14,7 @@ defmodule LiteLLM.LiteLLMAccessGroupTable do
           mcp_tool_permissions: map() | nil,
           access_agent_ids: [String.t()],
           access_skill_names: [String.t()],
+          access_vector_store_ids: [String.t()],
           assigned_team_ids: [String.t()],
           assigned_key_ids: [String.t()],
           created_by: String.t() | nil,
@@ -30,6 +31,7 @@ defmodule LiteLLM.LiteLLMAccessGroupTable do
     field(:mcp_tool_permissions, :map)
     field(:access_agent_ids, {:array, :string})
     field(:access_skill_names, {:array, :string})
+    field(:access_vector_store_ids, {:array, :string})
     field(:assigned_team_ids, {:array, :string})
     field(:assigned_key_ids, {:array, :string})
     field(:created_by, :string)

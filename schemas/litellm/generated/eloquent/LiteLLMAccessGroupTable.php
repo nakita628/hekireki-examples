@@ -26,6 +26,7 @@ class LiteLLMAccessGroupTable extends Model
         'mcp_tool_permissions',
         'access_agent_ids',
         'access_skill_names',
+        'access_vector_store_ids',
         'assigned_team_ids',
         'assigned_key_ids',
         'created_by',

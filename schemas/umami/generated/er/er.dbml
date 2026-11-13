@@ -321,6 +321,53 @@ Table app_setting {
   value String [not null]
 }
 
+Table error_issue {
+  issue_id String [pk]
+  website_id String [not null]
+  fingerprint String [not null]
+  grouping_version Int [default: 1, not null]
+  title String [not null]
+  status String [default: 'unresolved', not null]
+  resolved_at DateTime
+  created_at DateTime [default: `now()`, not null]
+
+  indexes {
+    (website_id, grouping_version, fingerprint) [unique]
+  }
+}
+
+Table error_event {
+  website_id String [not null]
+  event_id String [not null]
+  issue_id String [not null]
+  session_id String [not null]
+  visit_id String [not null]
+  created_at DateTime [not null]
+  received_at DateTime [default: `now()`, not null]
+  name String [not null]
+  message String [not null]
+  stack String [not null]
+  frames Json [not null]
+  tags Json [not null]
+  handled Boolean [not null]
+  url_path String [not null]
+  release String [not null]
+  environment String [not null]
+  browser String [not null]
+  os String [not null]
+  device String [not null]
+
+  indexes {
+    (website_id, event_id) [pk]
+  }
+}
+
+Table error_rate_limit {
+  website_id String [pk]
+  bucket DateTime [not null]
+  count Int [not null]
+}
+
 Ref api_key_user_id_fk: api_key.user_id > user.user_id [delete: cascade]
 
 Ref website_user_id_fk: website.user_id > user.user_id

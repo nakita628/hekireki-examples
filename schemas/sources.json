@@ -10,7 +10,7 @@
   "umami": {
     "repo": "umami-software/umami",
     "path": "prisma/schema.prisma",
-    "commit": "559e3c607c23d2c72d9bd4f6481bda428255323c",
+    "commit": "b18d5144dfe7342edeeca6f61d13ba3baabed9ad",
     "license": "MIT",
     "app": "Umami",
     "description": "Umami web analytics: websites, sessions, events and the reports over them."
@@ -26,7 +26,7 @@
   "langfuse": {
     "repo": "langfuse/langfuse",
     "path": "packages/shared/prisma/schema.prisma",
-    "commit": "72399b76e245443f9681ea93b77ca850e1edb55b",
+    "commit": "6decf5af5f374c01b56cfc41b60794c8735028bb",
     "license": "MIT",
     "app": "Langfuse",
     "description": "Langfuse LLM observability: organizations, projects, traces, prompts, datasets and evaluations."
@@ -82,7 +82,7 @@
   "rallly": {
     "repo": "lukevella/rallly",
     "path": "packages/database/prisma/",
-    "commit": "4c7aeffb3a69723ab66bf0909c6abb84927a52f7",
+    "commit": "5e1cb41682ae749bb111d5a95a1a0f4fb56d137f",
     "license": "AGPL-3.0",
     "app": "Rallly",
     "description": "Rallly scheduling polls: users, spaces, polls, options, participants and votes."
@@ -98,7 +98,7 @@
   "teable": {
     "repo": "teableio/teable",
     "path": "packages/db-main-prisma/prisma/postgres/schema.prisma",
-    "commit": "fc4126e945a212aa637c4134c373416df69bb982",
+    "commit": "33ffe918e526231263a63baa90b769a47c5e185d",
     "license": "MIT",
     "app": "Teable",
     "description": "Teable no-code database: spaces, bases, tables, fields, views and records."
@@ -133,7 +133,7 @@
   "triggerdev": {
     "repo": "triggerdotdev/trigger.dev",
     "path": "internal-packages/database/prisma/schema.prisma",
-    "commit": "7a2a7dc801fc5bc97a03add95dc1b2a12f978e58",
+    "commit": "2fbd5c7cf4e9c8e19b88e2b72a7133795611e33d",
     "license": "Apache-2.0",
     "app": "Trigger",
     "description": "Trigger.dev background jobs: organizations, projects, tasks, runs, queues and deployments."
@@ -149,7 +149,7 @@
   "inboxzero": {
     "repo": "elie222/inbox-zero",
     "path": "apps/web/prisma/schema.prisma",
-    "commit": "18e9b339ecca3def0898a4f4da76ce66a71696e3",
+    "commit": "723733a68436889398a624b08f7f98c446c00b0b",
     "license": "AGPL-3.0-with-additional-terms",
     "app": "InboxZero",
     "description": "Inbox Zero email assistant: users, email accounts, threads, rules, drafts and digests.",
@@ -200,7 +200,7 @@
   "jitsu": {
     "repo": "jitsucom/jitsu",
     "path": "webapps/console/prisma/schema.prisma",
-    "commit": "e74ffe2bfcabca86d07aaa8384febe6b225898bc",
+    "commit": "fb20aa95e172f46b4638a3e543f68dd433a075be",
     "license": "MIT",
     "app": "Jitsu",
     "description": "Jitsu event collection: workspaces, connections, sources, destinations and syncs."
@@ -215,8 +215,8 @@
   },
   "litellm": {
     "repo": "BerriAI/litellm",
-    "path": "schema.prisma",
-    "commit": "43daa2598e67a97253d7fcef2536aec6129030ea",
+    "path": "litellm/schema.prisma",
+    "commit": "a7052ea8a80296ca3db064e438904f562f176933",
     "license": "MIT",
     "app": "LiteLLM",
     "description": "LiteLLM AI gateway: virtual keys, teams, budgets, spend logs and model deployments."
@@ -228,5 +228,13 @@
     "license": "GPL-3.0",
     "app": "Blinko",
     "description": "Blinko personal notes: accounts, notes, tags, comments, conversations and AI models."
+  },
+  "superproductivity": {
+    "repo": "johannesjo/super-productivity",
+    "path": "packages/super-sync-server/prisma/schema.prisma",
+    "commit": "124138eedc154814847f6af9e2e2ebd2a8543881",
+    "license": "MIT",
+    "app": "SuperProductivity",
+    "description": "Super Productivity sync server: users, passkeys, sync operations, devices and agent task captures."
   }
 }

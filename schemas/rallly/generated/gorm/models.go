@@ -12,26 +12,63 @@ import (
 	"gorm.io/gorm"
 )
 
+type APIUsage struct {
+	SpaceID           string    `gorm:"column:space_id;primaryKey" json:"space_id"`
+	Resource          string    `gorm:"column:resource;primaryKey" json:"resource"`
+	Period            Date      `gorm:"column:period;primaryKey;type:date" json:"period"`
+	Count             int       `gorm:"column:count;default:0;not null" json:"count"`
+	NearLimitWarnedAt *DateTime `gorm:"column:near_limit_warned_at" json:"near_limit_warned_at"`
+	AtLimitWarnedAt   *DateTime `gorm:"column:at_limit_warned_at" json:"at_limit_warned_at"`
+	UpdatedAt         DateTime  `gorm:"column:updated_at;autoUpdateTime:false;not null" json:"updated_at"`
+	Space             *Space
+}
+
+func (APIUsage) TableName() string {
+	return "api_usage"
+}
+
+func (m *APIUsage) BeforeCreate(tx *gorm.DB) error {
+	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
+	if m.UpdatedAt.IsZero() {
+		m.UpdatedAt = DateTime{Time: now}
+	}
+	return nil
+}
+
+func (*APIUsage) BeforeUpdate(tx *gorm.DB) error {
+	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
+	if !tx.Statement.Changed("UpdatedAt") {
+		tx.Statement.SetColumn("UpdatedAt", DateTime{Time: now})
+	}
+	return nil
+}
+
 type Subscription struct {
-	ID                 string   `gorm:"column:id;primaryKey" json:"id"`
-	PriceID            string   `gorm:"column:price_id;not null" json:"price_id"`
-	Quantity           *int     `gorm:"column:quantity;default:1;not null" json:"quantity"`
-	SubscriptionItemID string   `gorm:"column:subscription_item_id;not null" json:"subscription_item_id"`
-	Amount             int      `gorm:"column:amount;not null" json:"amount"`
-	DiscountPercentOff *float64 `gorm:"column:discount_percent_off" json:"discount_percent_off"`
-	DiscountAmountOff  *int     `gorm:"column:discount_amount_off" json:"discount_amount_off"`
-	Status             string   `gorm:"column:status;not null" json:"status"`
-	Active             bool     `gorm:"column:active;not null" json:"active"`
-	Currency           string   `gorm:"column:currency;not null" json:"currency"`
-	Interval           string   `gorm:"column:interval;not null" json:"interval"`
-	CreatedAt          DateTime `gorm:"column:created_at;autoCreateTime:false;not null" json:"created_at"`
-	PeriodStart        DateTime `gorm:"column:period_start;not null" json:"period_start"`
-	PeriodEnd          DateTime `gorm:"column:period_end;not null" json:"period_end"`
-	CancelAtPeriodEnd  bool     `gorm:"column:cancel_at_period_end;default:false;not null" json:"cancel_at_period_end"`
-	UserID             string   `gorm:"column:user_id;index:subscriptions_user_id_idx;not null" json:"user_id"`
-	SpaceID            string   `gorm:"column:space_id;index:subscriptions_space_id_idx;not null" json:"space_id"`
-	User               *User
-	Space              *Space
+	ID                   string    `gorm:"column:id;primaryKey" json:"id"`
+	PriceID              string    `gorm:"column:price_id;not null" json:"price_id"`
+	Quantity             *int      `gorm:"column:quantity;default:1;not null" json:"quantity"`
+	SubscriptionItemID   string    `gorm:"column:subscription_item_id;not null" json:"subscription_item_id"`
+	Amount               int       `gorm:"column:amount;not null" json:"amount"`
+	DiscountPercentOff   *float64  `gorm:"column:discount_percent_off" json:"discount_percent_off"`
+	DiscountAmountOff    *int      `gorm:"column:discount_amount_off" json:"discount_amount_off"`
+	Status               string    `gorm:"column:status;not null" json:"status"`
+	Active               bool      `gorm:"column:active;not null" json:"active"`
+	Currency             string    `gorm:"column:currency;not null" json:"currency"`
+	Interval             string    `gorm:"column:interval;not null" json:"interval"`
+	CreatedAt            DateTime  `gorm:"column:created_at;autoCreateTime:false;not null" json:"created_at"`
+	PeriodStart          DateTime  `gorm:"column:period_start;not null" json:"period_start"`
+	PeriodEnd            DateTime  `gorm:"column:period_end;not null" json:"period_end"`
+	CancelAtPeriodEnd    bool      `gorm:"column:cancel_at_period_end;default:false;not null" json:"cancel_at_period_end"`
+	UserID               string    `gorm:"column:user_id;index:subscriptions_user_id_idx;not null" json:"user_id"`
+	SpaceID              string    `gorm:"column:space_id;index:subscriptions_space_id_idx;not null" json:"space_id"`
+	APIAddonItemID       *string   `gorm:"column:api_addon_item_id" json:"api_addon_item_id"`
+	APIAddonPriceID      *string   `gorm:"column:api_addon_price_id" json:"api_addon_price_id"`
+	APIAddonAmount       *int      `gorm:"column:api_addon_amount" json:"api_addon_amount"`
+	APIPollLimit         *int      `gorm:"column:api_poll_limit" json:"api_poll_limit"`
+	APIPollRetainedLimit *int      `gorm:"column:api_poll_retained_limit" json:"api_poll_retained_limit"`
+	APIPollRetainedUntil *DateTime `gorm:"column:api_poll_retained_until" json:"api_poll_retained_until"`
+	User                 *User
+	Space                *Space
 }
 
 func (Subscription) TableName() string {
@@ -1053,6 +1090,7 @@ type Space struct {
 	HideAttribution            bool                   `gorm:"column:hide_attribution;default:false;not null" json:"hide_attribution"`
 	Shared                     bool                   `gorm:"column:shared;default:false;not null" json:"shared"`
 	NonprofitDiscountGrantedAt *DateTime              `gorm:"column:nonprofit_discount_granted_at" json:"nonprofit_discount_granted_at"`
+	APIPollQuotaOverride       *int                   `gorm:"column:api_poll_quota_override" json:"api_poll_quota_override"`
 	CreatedAt                  DateTime               `gorm:"column:created_at;autoCreateTime:false;not null" json:"created_at"`
 	UpdatedAt                  DateTime               `gorm:"column:updated_at;autoUpdateTime:false;not null" json:"updated_at"`
 	Owner                      *User                  `gorm:"foreignKey:OwnerID"`
@@ -1066,6 +1104,7 @@ type Space struct {
 	APIKeys                    []SpaceAPIKey          `gorm:"foreignKey:SpaceID;constraint:OnDelete:CASCADE"`
 	NonprofitApplications      []NonprofitApplication `gorm:"foreignKey:SpaceID;constraint:OnDelete:CASCADE"`
 	Webhooks                   []SpaceWebhook         `gorm:"foreignKey:SpaceID;constraint:OnDelete:CASCADE"`
+	APIUsage                   []APIUsage             `gorm:"foreignKey:SpaceID;constraint:OnDelete:CASCADE"`
 }
 
 func (Space) TableName() string {
@@ -1510,6 +1549,26 @@ func (dateTime *DateTime) Scan(src any) error {
 	read, err := readPrismaTime(src)
 	dateTime.Time = read
 	return err
+}
+
+type Date struct{ time.Time }
+
+func (Date) GormDataType() string {
+	return "time"
+}
+
+func (date Date) Value() (driver.Value, error) {
+	return date.UTC().Format("2006-01-02"), nil
+}
+
+func (date *Date) Scan(src any) error {
+	read, err := readPrismaTime(src)
+	if err != nil || read.IsZero() {
+		date.Time = time.Time{}
+		return err
+	}
+	date.Time = time.Date(read.Year(), read.Month(), read.Day(), 0, 0, 0, 0, time.UTC)
+	return nil
 }
 
 var prismaTimeLayouts = []string{

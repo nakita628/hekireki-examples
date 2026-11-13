@@ -24,10 +24,12 @@ class BaseNodeFolder extends Model
         'created_time',
         'created_by',
         'last_modified_by',
+        'deleted_time',
     ];
 
     protected $casts = [
         'created_time' => 'datetime',
+        'deleted_time' => 'datetime',
     ];
 
     public function save(array $options = [])

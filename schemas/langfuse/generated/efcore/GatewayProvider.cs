@@ -23,4 +23,10 @@ public enum GatewayProvider
 
     [PgName("vercel")]
     Vercel,
+
+    [PgName("azure")]
+    Azure,
+
+    [PgName("google_ai_studio")]
+    GoogleAiStudio,
 }

@@ -78,6 +78,7 @@ defmodule InboxZero.EmailAccount do
           categories: [InboxZero.Category.t()],
           thread_trackers: [InboxZero.ThreadTracker.t()],
           cleanup_jobs: [InboxZero.CleanupJob.t()],
+          bulk_inbox_action_jobs: [InboxZero.BulkInboxActionJob.t()],
           cleanup_threads: [InboxZero.CleanupThread.t()],
           email_messages: [InboxZero.EmailMessage.t()],
           email_tokens: [InboxZero.EmailToken.t()],
@@ -190,6 +191,7 @@ defmodule InboxZero.EmailAccount do
     has_many(:categories, InboxZero.Category, foreign_key: :email_account_id, references: :id)
     has_many(:thread_trackers, InboxZero.ThreadTracker, foreign_key: :email_account_id, references: :id)
     has_many(:cleanup_jobs, InboxZero.CleanupJob, foreign_key: :email_account_id, references: :id)
+    has_many(:bulk_inbox_action_jobs, InboxZero.BulkInboxActionJob, foreign_key: :email_account_id, references: :id)
     has_many(:cleanup_threads, InboxZero.CleanupThread, foreign_key: :email_account_id, references: :id)
     has_many(:email_messages, InboxZero.EmailMessage, foreign_key: :email_account_id, references: :id)
     has_many(:email_tokens, InboxZero.EmailToken, foreign_key: :email_account_id, references: :id)

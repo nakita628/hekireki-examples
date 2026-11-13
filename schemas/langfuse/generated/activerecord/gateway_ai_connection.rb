@@ -5,7 +5,7 @@ class GatewayAiConnection < ApplicationRecord
   attribute :custom_models, default: -> { JSON.parse("[]") }
   attribute :extra_header_keys, default: -> { [] }
 
-  enum :provider, { openai: "openai", anthropic: "anthropic", bedrock: "bedrock", openrouter: "openrouter", xai: "xai", vercel: "vercel" },
+  enum :provider, { openai: "openai", anthropic: "anthropic", bedrock: "bedrock", openrouter: "openrouter", xai: "xai", vercel: "vercel", azure: "azure", google_ai_studio: "google_ai_studio" },
        validate: true
   enum :status, { enabled: "enabled", disabled: "disabled", error: "error" }, default: :enabled, validate: true
 

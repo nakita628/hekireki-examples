@@ -252,6 +252,13 @@ Enum ProcessorType {
   STRIPE
 }
 
+Enum BulkInboxActionJobStatus {
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
 Enum CleanAction {
   ARCHIVE
   MARK_READ
@@ -1259,6 +1266,47 @@ Table CleanupThread {
   archived Boolean [not null]
   jobId String [not null]
   emailAccountId String [not null]
+}
+
+Table BulkInboxActionJob {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  status BulkInboxActionJobStatus [default: 'RUNNING', not null]
+  search Json [not null]
+  action String [not null]
+  labelId String
+  labelName String
+  instruction String
+  pageToken String
+  rateLimitedUntil DateTime
+  leaseExpiresAt DateTime
+  chunkToken String
+  recoveryCount Int [default: 0, not null]
+  processedCount Int [default: 0, not null]
+  matchedCount Int [default: 0, not null]
+  actedCount Int [default: 0, not null]
+  skippedCount Int [default: 0, not null]
+  failedCount Int [default: 0, not null]
+  limitReached Boolean [default: false, not null]
+  error String
+  completedAt DateTime
+  confirmationKey String [not null]
+  chatId String
+  emailAccountId String [not null]
+
+  indexes {
+    (emailAccountId, confirmationKey) [unique]
+  }
+}
+
+Table BulkInboxActionThread {
+  jobId String [not null]
+  threadId String [not null]
+
+  indexes {
+    (jobId, threadId) [pk]
+  }
 }
 
 Table Knowledge {
@@ -2303,6 +2351,12 @@ Ref CleanupJob_emailAccountId_fk: CleanupJob.emailAccountId > EmailAccount.id [d
 Ref CleanupThread_jobId_fk: CleanupThread.jobId > CleanupJob.id [delete: cascade]
 
 Ref CleanupThread_emailAccountId_fk: CleanupThread.emailAccountId > EmailAccount.id [delete: cascade]
+
+Ref BulkInboxActionJob_chatId_fk: BulkInboxActionJob.chatId > Chat.id [delete: set null]
+
+Ref BulkInboxActionJob_emailAccountId_fk: BulkInboxActionJob.emailAccountId > EmailAccount.id [delete: cascade]
+
+Ref BulkInboxActionThread_jobId_fk: BulkInboxActionThread.jobId > BulkInboxActionJob.id [delete: cascade]
 
 Ref Knowledge_emailAccountId_fk: Knowledge.emailAccountId > EmailAccount.id [delete: cascade]
 

@@ -242,6 +242,7 @@ class EmailAccount(Base):
     categories: Mapped[list["Category"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="email_account")
     thread_trackers: Mapped[list["ThreadTracker"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="email_account")
     cleanup_jobs: Mapped[list["CleanupJob"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="email_account")
+    bulk_inbox_action_jobs: Mapped[list["BulkInboxActionJob"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="email_account")
     cleanup_threads: Mapped[list["CleanupThread"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="email_account")
     email_messages: Mapped[list["EmailMessage"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="email_account")
     email_tokens: Mapped[list["EmailToken"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="email_account")
@@ -1310,6 +1311,52 @@ class CleanupThread(Base):
     job: Mapped["CleanupJob"] = relationship(back_populates="threads")
     email_account: Mapped["EmailAccount"] = relationship(back_populates="cleanup_threads")
 
+class BulkInboxActionJob(Base):
+    __tablename__ = "BulkInboxActionJob"
+
+    id: Mapped[str] = mapped_column(primary_key=True)
+    created_at: Mapped[datetime] = mapped_column("createdAt", default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
+    updated_at: Mapped[datetime] = mapped_column("updatedAt", default=utc_now, onupdate=utc_now)
+    status: Mapped[str] = mapped_column(Enum("RUNNING", "COMPLETED", "FAILED", "CANCELLED", name="BulkInboxActionJobStatus"), default="RUNNING", server_default=text("'RUNNING'"))
+    search: Mapped[dict[str, Any]] = mapped_column(JSONB)
+    action: Mapped[str]
+    label_id: Mapped[Optional[str]] = mapped_column("labelId")
+    label_name: Mapped[Optional[str]] = mapped_column("labelName")
+    instruction: Mapped[Optional[str]]
+    page_token: Mapped[Optional[str]] = mapped_column("pageToken")
+    rate_limited_until: Mapped[Optional[datetime]] = mapped_column("rateLimitedUntil")
+    lease_expires_at: Mapped[Optional[datetime]] = mapped_column("leaseExpiresAt")
+    chunk_token: Mapped[Optional[str]] = mapped_column("chunkToken")
+    recovery_count: Mapped[int] = mapped_column("recoveryCount", default=0, server_default=text("0"))
+    processed_count: Mapped[int] = mapped_column("processedCount", default=0, server_default=text("0"))
+    matched_count: Mapped[int] = mapped_column("matchedCount", default=0, server_default=text("0"))
+    acted_count: Mapped[int] = mapped_column("actedCount", default=0, server_default=text("0"))
+    skipped_count: Mapped[int] = mapped_column("skippedCount", default=0, server_default=text("0"))
+    failed_count: Mapped[int] = mapped_column("failedCount", default=0, server_default=text("0"))
+    limit_reached: Mapped[bool] = mapped_column("limitReached", default=False, server_default=text("false"))
+    error: Mapped[Optional[str]]
+    completed_at: Mapped[Optional[datetime]] = mapped_column("completedAt")
+    confirmation_key: Mapped[str] = mapped_column("confirmationKey")
+    chat_id: Mapped[Optional[str]] = mapped_column("chatId", ForeignKey("Chat.id", ondelete="SET NULL", onupdate="CASCADE", name="BulkInboxActionJob_chatId_fkey"))
+    email_account_id: Mapped[str] = mapped_column("emailAccountId", ForeignKey("EmailAccount.id", ondelete="CASCADE", onupdate="CASCADE", name="BulkInboxActionJob_emailAccountId_fkey"))
+
+    __table_args__ = (
+        Index("BulkInboxActionJob_chatId_updatedAt_idx", "chatId", "updatedAt"),
+        Index("BulkInboxActionJob_emailAccountId_confirmationKey_key", "emailAccountId", "confirmationKey", unique=True),
+    )
+
+    chat: Mapped[Optional["Chat"]] = relationship(back_populates="bulk_inbox_action_jobs")
+    email_account: Mapped["EmailAccount"] = relationship(back_populates="bulk_inbox_action_jobs")
+    handled_threads: Mapped[list["BulkInboxActionThread"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="job")
+
+class BulkInboxActionThread(Base):
+    __tablename__ = "BulkInboxActionThread"
+
+    job_id: Mapped[str] = mapped_column("jobId", ForeignKey("BulkInboxActionJob.id", ondelete="CASCADE", onupdate="CASCADE", name="BulkInboxActionThread_jobId_fkey"), primary_key=True)
+    thread_id: Mapped[str] = mapped_column("threadId", primary_key=True)
+
+    job: Mapped["BulkInboxActionJob"] = relationship(back_populates="handled_threads")
+
 class Knowledge(Base):
     __tablename__ = "Knowledge"
 
@@ -1515,6 +1562,7 @@ class Chat(Base):
     compactions: Mapped[list["ChatCompaction"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="chat")
     memories: Mapped[list["ChatMemory"]] = relationship(back_populates="chat")
     action_totals: Mapped[list["ChatActionTotal"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="chat")
+    bulk_inbox_action_jobs: Mapped[list["BulkInboxActionJob"]] = relationship(back_populates="chat")
 
 class ChatMessage(Base):
     __tablename__ = "ChatMessage"

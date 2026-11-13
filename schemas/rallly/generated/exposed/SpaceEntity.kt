@@ -23,6 +23,7 @@ class SpaceEntity(
     var hideAttribution by SpaceTable.hideAttribution
     var shared by SpaceTable.shared
     var nonprofitDiscountGrantedAt by SpaceTable.nonprofitDiscountGrantedAt
+    var apiPollQuotaOverride by SpaceTable.apiPollQuotaOverride
     var createdAt by SpaceTable.createdAt
     var updatedAt by SpaceTable.updatedAt
     var owner by UserEntity referencedOn SpaceTable.ownerId
@@ -36,6 +37,7 @@ class SpaceEntity(
     val apiKeys by SpaceApiKeyEntity referrersOn SpaceApiKeyTable.spaceId
     val nonprofitApplications by NonprofitApplicationEntity referrersOn NonprofitApplicationTable.spaceId
     val webhooks by SpaceWebhookEntity referrersOn SpaceWebhookTable.spaceId
+    val apiUsage by ApiUsageEntity referrersOn ApiUsageTable.spaceId
 
     override fun flush(batch: EntityBatchUpdate?): Boolean {
         if (writeValues.isNotEmpty()) {

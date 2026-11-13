@@ -10,6 +10,7 @@ defmodule Trigger.ApiKey do
           key_hash: String.t(),
           last_four: String.t(),
           description: String.t() | nil,
+          issued_by: atom(),
           preset_id: String.t() | nil,
           scopes: [String.t()],
           allowed_ip_ranges: [String.t()],
@@ -29,6 +30,7 @@ defmodule Trigger.ApiKey do
     field(:key_hash, :string)
     field(:last_four, :string)
     field(:description, :string)
+    field(:issued_by, Ecto.Enum, values: [:USER, :SYSTEM], default: :USER)
     field(:preset_id, :string)
     field(:scopes, {:array, :string})
     field(:allowed_ip_ranges, {:array, :string})

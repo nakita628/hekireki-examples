@@ -1,3 +1,4 @@
+use super::api_key_issuer::ApiKeyIssuer;
 use chrono::SubsecRound;
 use sea_orm::entity::prelude::*;
 use sea_orm::Set;
@@ -15,6 +16,8 @@ pub struct Model {
     pub description: Option<String>,
     pub runtime_environment_id: String,
     pub created_by_user_id: Option<String>,
+    #[sea_orm(default_value = "USER")]
+    pub issued_by: ApiKeyIssuer,
     pub preset_id: Option<String>,
     pub scopes: Vec<String>,
     pub allowed_ip_ranges: Vec<String>,

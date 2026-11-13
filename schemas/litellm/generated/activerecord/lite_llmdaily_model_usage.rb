@@ -8,4 +8,6 @@ class LiteLLMDailyModelUsage < ApplicationRecord
   attribute :request_count, default: 0
   attribute :successful_requests, default: 0
   attribute :failed_requests, default: 0
+  attribute :total_response_time_ms, default: 0
+  attribute :timed_requests, default: 0
 end

@@ -44,6 +44,8 @@ pub enum Relation {
     Memories,
     #[sea_orm(has_many = "super::chat_action_total::Entity")]
     ActionTotals,
+    #[sea_orm(has_many = "super::bulk_inbox_action_job::Entity")]
+    BulkInboxActionJobs,
 }
 
 impl Related<super::email_account::Entity> for Entity {
@@ -73,6 +75,12 @@ impl Related<super::chat_memory::Entity> for Entity {
 impl Related<super::chat_action_total::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::ActionTotals.def()
+    }
+}
+
+impl Related<super::bulk_inbox_action_job::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::BulkInboxActionJobs.def()
     }
 }
 

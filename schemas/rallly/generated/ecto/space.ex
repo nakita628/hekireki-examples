@@ -17,6 +17,7 @@ defmodule Rallly.Space do
           hide_attribution: boolean(),
           shared: boolean(),
           nonprofit_discount_granted_at: DateTime.t() | nil,
+          api_poll_quota_override: integer() | nil,
           inserted_at: DateTime.t(),
           updated_at: DateTime.t(),
           owner: Rallly.User.t() | nil,
@@ -29,7 +30,8 @@ defmodule Rallly.Space do
           member_invites: [Rallly.SpaceMemberInvite.t()],
           api_keys: [Rallly.SpaceApiKey.t()],
           nonprofit_applications: [Rallly.NonprofitApplication.t()],
-          webhooks: [Rallly.SpaceWebhook.t()]
+          webhooks: [Rallly.SpaceWebhook.t()],
+          api_usage: [Rallly.ApiUsage.t()]
         }
 
   schema "spaces" do
@@ -43,6 +45,7 @@ defmodule Rallly.Space do
     field(:hide_attribution, :boolean, default: false)
     field(:shared, :boolean, default: false)
     field(:nonprofit_discount_granted_at, Rallly.PrismaDateTime)
+    field(:api_poll_quota_override, :integer)
     belongs_to(:owner, Rallly.User, foreign_key: :owner_id, type: :string)
     has_many(:polls, Rallly.Poll, foreign_key: :space_id)
     has_many(:scheduled_events, Rallly.ScheduledEvent, foreign_key: :space_id)
@@ -54,6 +57,7 @@ defmodule Rallly.Space do
     has_many(:api_keys, Rallly.SpaceApiKey, foreign_key: :space_id)
     has_many(:nonprofit_applications, Rallly.NonprofitApplication, foreign_key: :space_id)
     has_many(:webhooks, Rallly.SpaceWebhook, foreign_key: :space_id)
+    has_many(:api_usage, Rallly.ApiUsage, foreign_key: :space_id)
     timestamps(inserted_at_source: :created_at)
   end
 end

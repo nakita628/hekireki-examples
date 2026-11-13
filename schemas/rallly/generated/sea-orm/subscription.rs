@@ -28,6 +28,12 @@ pub struct Model {
     pub cancel_at_period_end: bool,
     pub user_id: String,
     pub space_id: String,
+    pub api_addon_item_id: Option<String>,
+    pub api_addon_price_id: Option<String>,
+    pub api_addon_amount: Option<i32>,
+    pub api_poll_limit: Option<i32>,
+    pub api_poll_retained_limit: Option<i32>,
+    pub api_poll_retained_until: Option<DateTime>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

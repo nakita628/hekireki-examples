@@ -25,6 +25,7 @@ pub struct Model {
     #[sea_orm(default_value = false)]
     pub shared: bool,
     pub nonprofit_discount_granted_at: Option<DateTime>,
+    pub api_poll_quota_override: Option<i32>,
     pub created_at: DateTime,
     pub updated_at: DateTime,
 }
@@ -58,6 +59,8 @@ pub enum Relation {
     NonprofitApplications,
     #[sea_orm(has_many = "super::space_webhook::Entity")]
     Webhooks,
+    #[sea_orm(has_many = "super::api_usage::Entity")]
+    ApiUsage,
 }
 
 impl Related<super::user::Entity> for Entity {
@@ -123,6 +126,12 @@ impl Related<super::nonprofit_application::Entity> for Entity {
 impl Related<super::space_webhook::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Webhooks.def()
+    }
+}
+
+impl Related<super::api_usage::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::ApiUsage.def()
     }
 }
 

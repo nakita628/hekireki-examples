@@ -28,6 +28,10 @@ pub struct Model {
     pub successful_requests: i64,
     #[sea_orm(default_value = "0")]
     pub failed_requests: i64,
+    #[sea_orm(default_value = "0")]
+    pub total_response_time_ms: i64,
+    #[sea_orm(default_value = "0")]
+    pub timed_requests: i64,
     pub created_at: DateTime,
     pub updated_at: DateTime,
 }

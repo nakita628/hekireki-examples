@@ -19,6 +19,7 @@ class DashboardEntity(
     var createdTime by DashboardTable.createdTime
     var lastModifiedTime by DashboardTable.lastModifiedTime
     var lastModifiedBy by DashboardTable.lastModifiedBy
+    var deletedTime by DashboardTable.deletedTime
 
     override fun flush(batch: EntityBatchUpdate?): Boolean {
         if (writeValues.isNotEmpty()) {

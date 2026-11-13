@@ -314,6 +314,45 @@ export interface AppSetting {
   value: string
 }
 
+export interface ErrorIssue {
+  issue_id: string
+  website_id: string
+  fingerprint: string
+  grouping_version: Generated<number>
+  title: string
+  status: Generated<string>
+  resolved_at: Timestamp | null
+  created_at: Generated<Timestamp>
+}
+
+export interface ErrorEvent {
+  website_id: string
+  event_id: string
+  issue_id: string
+  session_id: string
+  visit_id: string
+  created_at: Timestamp
+  received_at: Generated<Timestamp>
+  name: string
+  message: string
+  stack: string
+  frames: unknown
+  tags: unknown
+  handled: boolean
+  url_path: string
+  release: string
+  environment: string
+  browser: string
+  os: string
+  device: string
+}
+
+export interface ErrorRateLimit {
+  website_id: string
+  bucket: Timestamp
+  count: number
+}
+
 export interface DB {
   user: User
   api_key: ApiKey
@@ -341,4 +380,7 @@ export interface DB {
   two_factor_otp_used: TwoFactorOtpUsed
   two_factor_rate_limit: TwoFactorRateLimit
   app_setting: AppSetting
+  error_issue: ErrorIssue
+  error_event: ErrorEvent
+  error_rate_limit: ErrorRateLimit
 }

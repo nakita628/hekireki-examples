@@ -195,6 +195,8 @@ class UserApiToken(models.Model):
     type = models.TextField(null=True)
     name = models.TextField(null=True)
     expires_at = UtcDateTimeField(null=True, db_column="expiresAt")
+    workspace_id = models.TextField(null=True, db_column="workspaceId")
+    role = models.TextField(null=True)
     oauth_client = models.ForeignKey("OAuthClient", on_delete=models.SET_NULL, related_name="tokens", db_column="oauthClientId", null=True, db_index=False)
     objects = AutoNowQuerySet.as_manager()
 

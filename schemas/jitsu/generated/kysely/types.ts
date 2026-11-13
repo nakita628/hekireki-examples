@@ -98,6 +98,8 @@ export interface UserApiToken {
   type: string | null
   name: string | null
   expiresAt: Timestamp | null
+  workspaceId: string | null
+  role: string | null
   oauthClientId: string | null
 }
 

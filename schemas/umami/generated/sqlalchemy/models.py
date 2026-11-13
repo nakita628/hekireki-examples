@@ -612,3 +612,55 @@ class AppSetting(Base):
 
     key: Mapped[str] = mapped_column(primary_key=True)
     value: Mapped[str]
+
+class ErrorIssue(Base):
+    __tablename__ = "error_issue"
+
+    id: Mapped[uuid_mod.UUID] = mapped_column("issue_id", Uuid, primary_key=True)
+    website_id: Mapped[uuid_mod.UUID] = mapped_column(Uuid)
+    fingerprint: Mapped[str] = mapped_column(String(64))
+    grouping_version: Mapped[int] = mapped_column(default=1, server_default=text("1"))
+    title: Mapped[str] = mapped_column(String(2200))
+    status: Mapped[str] = mapped_column(String(20), default="unresolved", server_default=text("'unresolved'"))
+    resolved_at: Mapped[Optional[datetime]] = mapped_column(UtcDateTimeTz(precision=6))
+    created_at: Mapped[datetime] = mapped_column(UtcDateTimeTz(precision=6), default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
+
+    __table_args__ = (
+        Index("error_issue_website_id_status_idx", "website_id", "status"),
+        Index("error_issue_website_id_grouping_version_fingerprint_key", "website_id", "grouping_version", "fingerprint", unique=True),
+    )
+
+class ErrorEvent(Base):
+    __tablename__ = "error_event"
+
+    website_id: Mapped[uuid_mod.UUID] = mapped_column(Uuid, primary_key=True)
+    id: Mapped[uuid_mod.UUID] = mapped_column("event_id", Uuid, primary_key=True)
+    issue_id: Mapped[uuid_mod.UUID] = mapped_column(Uuid)
+    session_id: Mapped[uuid_mod.UUID] = mapped_column(Uuid)
+    visit_id: Mapped[uuid_mod.UUID] = mapped_column(Uuid)
+    created_at: Mapped[datetime] = mapped_column(UtcDateTimeTz(precision=6))
+    received_at: Mapped[datetime] = mapped_column(UtcDateTimeTz(precision=6), default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
+    name: Mapped[str] = mapped_column(String(200))
+    message: Mapped[str] = mapped_column(String(2000))
+    stack: Mapped[str]
+    frames: Mapped[dict[str, Any]] = mapped_column(JSONB)
+    tags: Mapped[dict[str, Any]] = mapped_column(JSONB)
+    handled: Mapped[bool]
+    url_path: Mapped[str] = mapped_column(String(500))
+    release: Mapped[str] = mapped_column(String(100))
+    environment: Mapped[str] = mapped_column(String(50))
+    browser: Mapped[str] = mapped_column(String(50))
+    os: Mapped[str] = mapped_column(String(50))
+    device: Mapped[str] = mapped_column(String(50))
+
+    __table_args__ = (
+        Index("error_event_website_id_created_at_idx", "website_id", "created_at"),
+        Index("error_event_website_id_issue_id_created_at_idx", "website_id", "issue_id", "created_at"),
+    )
+
+class ErrorRateLimit(Base):
+    __tablename__ = "error_rate_limit"
+
+    website_id: Mapped[uuid_mod.UUID] = mapped_column(Uuid, primary_key=True)
+    bucket: Mapped[datetime] = mapped_column(UtcDateTimeTz(precision=6))
+    count: Mapped[int]

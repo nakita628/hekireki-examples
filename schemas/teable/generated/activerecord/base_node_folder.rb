@@ -4,7 +4,7 @@ class BaseNodeFolder < ApplicationRecord
   attribute :id, default: -> { Cuid.generate }
   alias_attribute :updated_at, :last_modified_time
 
-  validates :base_id, presence: true, uniqueness: { scope: :name }
+  validates :base_id, presence: true
   validates :name, presence: true
   validates :created_by, presence: true
 end

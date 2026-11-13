@@ -112,6 +112,10 @@ public partial class InboxZeroContext : DbContext
 
     public virtual DbSet<CleanupThread> CleanupThreads { get; set; }
 
+    public virtual DbSet<BulkInboxActionJob> BulkInboxActionJobs { get; set; }
+
+    public virtual DbSet<BulkInboxActionThread> BulkInboxActionThreads { get; set; }
+
     public virtual DbSet<Knowledge> Knowledges { get; set; }
 
     public virtual DbSet<Snippet> Snippets { get; set; }
@@ -265,6 +269,7 @@ public partial class InboxZeroContext : DbContext
         npgsql.MapEnum<LogicalOperator>("LogicalOperator");
         npgsql.MapEnum<ThreadTrackerType>("ThreadTrackerType");
         npgsql.MapEnum<ProcessorType>("ProcessorType");
+        npgsql.MapEnum<BulkInboxActionJobStatus>("BulkInboxActionJobStatus");
         npgsql.MapEnum<CleanAction>("CleanAction");
         npgsql.MapEnum<SystemType>("SystemType");
         npgsql.MapEnum<ReferralStatus>("ReferralStatus");
@@ -321,6 +326,7 @@ public partial class InboxZeroContext : DbContext
         dataSource.MapEnum<LogicalOperator>("LogicalOperator");
         dataSource.MapEnum<ThreadTrackerType>("ThreadTrackerType");
         dataSource.MapEnum<ProcessorType>("ProcessorType");
+        dataSource.MapEnum<BulkInboxActionJobStatus>("BulkInboxActionJobStatus");
         dataSource.MapEnum<CleanAction>("CleanAction");
         dataSource.MapEnum<SystemType>("SystemType");
         dataSource.MapEnum<ReferralStatus>("ReferralStatus");
@@ -385,6 +391,7 @@ public partial class InboxZeroContext : DbContext
         modelBuilder.HasPostgresEnum<LogicalOperator>(name: "LogicalOperator");
         modelBuilder.HasPostgresEnum<ThreadTrackerType>(name: "ThreadTrackerType");
         modelBuilder.HasPostgresEnum<ProcessorType>(name: "ProcessorType");
+        modelBuilder.HasPostgresEnum<BulkInboxActionJobStatus>(name: "BulkInboxActionJobStatus");
         modelBuilder.HasPostgresEnum<CleanAction>(name: "CleanAction");
         modelBuilder.HasPostgresEnum<SystemType>(name: "SystemType");
         modelBuilder.HasPostgresEnum<ReferralStatus>(name: "ReferralStatus");
@@ -2827,6 +2834,113 @@ public partial class InboxZeroContext : DbContext
                 .HasForeignKey(d => d.EmailAccountId)
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("CleanupThread_emailAccountId_fkey");
+        });
+
+        modelBuilder.Entity<BulkInboxActionJob>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("BulkInboxActionJob_pkey");
+
+            entity.ToTable("BulkInboxActionJob");
+
+            entity.HasIndex(e => new { e.ChatId, e.UpdatedAt }, "BulkInboxActionJob_chatId_updatedAt_idx");
+
+            entity.HasIndex(e => new { e.EmailAccountId, e.ConfirmationKey }, "BulkInboxActionJob_emailAccountId_confirmationKey_key").IsUnique();
+
+            entity.Property(e => e.Id)
+                .HasValueGenerator<CuidGenerator>()
+                .HasColumnName("id");
+            entity.Property(e => e.CreatedAt)
+                .HasValueGenerator<UtcNowGenerator>()
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("createdAt");
+            entity.Property(e => e.UpdatedAt)
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("updatedAt");
+            entity.Property(e => e.Status)
+                .ValueGeneratedNever()
+                .HasDefaultValue(BulkInboxActionJobStatus.Running)
+                .HasColumnName("status");
+            entity.Property(e => e.Search)
+                .HasColumnType("jsonb")
+                .HasColumnName("search");
+            entity.Property(e => e.Action).HasColumnName("action");
+            entity.Property(e => e.LabelId).HasColumnName("labelId");
+            entity.Property(e => e.LabelName).HasColumnName("labelName");
+            entity.Property(e => e.Instruction).HasColumnName("instruction");
+            entity.Property(e => e.PageToken).HasColumnName("pageToken");
+            entity.Property(e => e.RateLimitedUntil)
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("rateLimitedUntil");
+            entity.Property(e => e.LeaseExpiresAt)
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("leaseExpiresAt");
+            entity.Property(e => e.ChunkToken).HasColumnName("chunkToken");
+            entity.Property(e => e.RecoveryCount)
+                .ValueGeneratedNever()
+                .HasDefaultValue(0)
+                .HasColumnName("recoveryCount");
+            entity.Property(e => e.ProcessedCount)
+                .ValueGeneratedNever()
+                .HasDefaultValue(0)
+                .HasColumnName("processedCount");
+            entity.Property(e => e.MatchedCount)
+                .ValueGeneratedNever()
+                .HasDefaultValue(0)
+                .HasColumnName("matchedCount");
+            entity.Property(e => e.ActedCount)
+                .ValueGeneratedNever()
+                .HasDefaultValue(0)
+                .HasColumnName("actedCount");
+            entity.Property(e => e.SkippedCount)
+                .ValueGeneratedNever()
+                .HasDefaultValue(0)
+                .HasColumnName("skippedCount");
+            entity.Property(e => e.FailedCount)
+                .ValueGeneratedNever()
+                .HasDefaultValue(0)
+                .HasColumnName("failedCount");
+            entity.Property(e => e.LimitReached)
+                .ValueGeneratedNever()
+                .HasDefaultValue(false)
+                .HasColumnName("limitReached");
+            entity.Property(e => e.Error).HasColumnName("error");
+            entity.Property(e => e.CompletedAt)
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("completedAt");
+            entity.Property(e => e.ConfirmationKey).HasColumnName("confirmationKey");
+            entity.Property(e => e.ChatId).HasColumnName("chatId");
+            entity.Property(e => e.EmailAccountId).HasColumnName("emailAccountId");
+
+            entity.HasOne(d => d.Chat).WithMany(p => p.BulkInboxActionJobs)
+                .HasForeignKey(d => d.ChatId)
+                .OnDelete(DeleteBehavior.SetNull)
+                .HasConstraintName("BulkInboxActionJob_chatId_fkey");
+
+            entity.HasOne(d => d.EmailAccount).WithMany(p => p.BulkInboxActionJobs)
+                .HasForeignKey(d => d.EmailAccountId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("BulkInboxActionJob_emailAccountId_fkey");
+        });
+
+        modelBuilder.Entity<BulkInboxActionThread>(entity =>
+        {
+            entity.HasKey(e => new { e.JobId, e.ThreadId }).HasName("BulkInboxActionThread_pkey");
+
+            entity.ToTable("BulkInboxActionThread");
+
+            entity.Property(e => e.JobId).HasColumnName("jobId");
+            entity.Property(e => e.ThreadId).HasColumnName("threadId");
+
+            entity.HasOne(d => d.Job).WithMany(p => p.HandledThreads)
+                .HasForeignKey(d => d.JobId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("BulkInboxActionThread_jobId_fkey");
         });
 
         modelBuilder.Entity<Knowledge>(entity =>
@@ -5751,6 +5865,15 @@ public partial class InboxZeroContext : DbContext
         }
 
         foreach (var entry in ChangeTracker.Entries<CleanupThread>())
+        {
+            if ((entry.State == EntityState.Added && entry.Entity.UpdatedAt == default)
+                || (entry.State == EntityState.Modified && !entry.Property(e => e.UpdatedAt).IsModified))
+            {
+                entry.Entity.UpdatedAt = now;
+            }
+        }
+
+        foreach (var entry in ChangeTracker.Entries<BulkInboxActionJob>())
         {
             if ((entry.State == EntityState.Added && entry.Entity.UpdatedAt == default)
                 || (entry.State == EntityState.Modified && !entry.Property(e => e.UpdatedAt).IsModified))

@@ -24,6 +24,8 @@ class LiteLLMDailyModelUsageEntity(
     var requestCount by LiteLLMDailyModelUsageTable.requestCount
     var successfulRequests by LiteLLMDailyModelUsageTable.successfulRequests
     var failedRequests by LiteLLMDailyModelUsageTable.failedRequests
+    var totalResponseTimeMs by LiteLLMDailyModelUsageTable.totalResponseTimeMs
+    var timedRequests by LiteLLMDailyModelUsageTable.timedRequests
     var createdAt by LiteLLMDailyModelUsageTable.createdAt
     var updatedAt by LiteLLMDailyModelUsageTable.updatedAt
 

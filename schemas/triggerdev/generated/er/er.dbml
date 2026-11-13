@@ -15,6 +15,11 @@ Enum OrgMemberRole {
   MEMBER
 }
 
+Enum ApiKeyIssuer {
+  USER
+  SYSTEM
+}
+
 Enum RuntimeEnvironmentType {
   PRODUCTION
   STAGING
@@ -581,6 +586,7 @@ Table api_keys {
   description String [note: 'Optional one-line note the creator adds to say what the key is for.']
   runtime_environment_id String [not null]
   created_by_user_id String
+  issued_by ApiKeyIssuer [default: 'USER', not null]
   preset_id String
   scopes String[] [not null]
   allowed_ip_ranges String[] [not null, note: 'CIDR ranges this key may be used from. Empty means any IP.']

@@ -10,6 +10,7 @@ import org.jetbrains.exposed.v1.core.TextColumnType
 import org.jetbrains.exposed.v1.core.statements.api.RowApi
 import org.jetbrains.exposed.v1.dao.Entity
 import java.time.Instant
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit
@@ -59,6 +60,25 @@ internal fun Table.pgTimestamp(
     name: String,
     precision: Int? = null,
 ): Column<Instant> = registerColumn(name, PgTimestampColumnType(precision))
+
+internal class PgDateColumnType : ColumnType<LocalDate>() {
+    override fun sqlType(): String = "DATE"
+
+    override fun valueFromDB(value: Any): LocalDate =
+        when (value) {
+            is LocalDate -> value
+            else -> error("Unexpected value of type ${value::class.qualifiedName}: $value")
+        }
+
+    override fun readObject(
+        rs: RowApi,
+        index: Int,
+    ): Any? = rs.getObject(index, LocalDate::class.java)
+
+    override fun nonNullValueToString(value: LocalDate): String = "'$value'"
+}
+
+internal fun Table.pgDate(name: String): Column<LocalDate> = registerColumn(name, PgDateColumnType())
 
 internal class PgEnumColumnType<E : Enum<E>>(
     val typeName: String,

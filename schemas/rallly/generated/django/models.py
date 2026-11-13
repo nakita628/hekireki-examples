@@ -48,6 +48,10 @@ def uuid4_str() -> str:
     return str(uuid.uuid4())
 
 
+class ApiUsageResource(models.TextChoices):
+    poll = "poll"
+
+
 class SubscriptionStatus(models.TextChoices):
     incomplete = "incomplete"
     incomplete_expired = "incomplete_expired"
@@ -167,6 +171,21 @@ class UserRole(models.TextChoices):
     user = "user"
 
 
+class ApiUsage(models.Model):
+    pk = models.CompositePrimaryKey("space_id", "resource", "period")
+    space = models.ForeignKey("Space", on_delete=models.CASCADE, related_name="api_usage", db_index=False)
+    resource = models.TextField(choices=ApiUsageResource.choices)
+    period = models.DateField()
+    count = models.IntegerField(default=0)
+    near_limit_warned_at = UtcDateTimeField(null=True)
+    at_limit_warned_at = UtcDateTimeField(null=True)
+    updated_at = UtcDateTimeField(auto_now=True)
+    objects = AutoNowQuerySet.as_manager()
+
+    class Meta:
+        db_table = "api_usage"
+
+
 class Subscription(models.Model):
     id = models.TextField(primary_key=True, default=None)
     price_id = models.TextField()
@@ -185,6 +204,12 @@ class Subscription(models.Model):
     cancel_at_period_end = models.BooleanField(default=False)
     user = models.ForeignKey("User", on_delete=models.CASCADE, related_name="subscriptions", db_index=False)
     space = models.ForeignKey("Space", on_delete=models.CASCADE, related_name="subscriptions", db_index=False)
+    api_addon_item_id = models.TextField(null=True)
+    api_addon_price_id = models.TextField(null=True)
+    api_addon_amount = models.IntegerField(null=True)
+    api_poll_limit = models.IntegerField(null=True)
+    api_poll_retained_limit = models.IntegerField(null=True)
+    api_poll_retained_until = UtcDateTimeField(null=True)
 
     class Meta:
         db_table = "subscriptions"
@@ -732,6 +757,7 @@ class Space(models.Model):
     hide_attribution = models.BooleanField(default=False)
     shared = models.BooleanField(default=False)
     nonprofit_discount_granted_at = UtcDateTimeField(null=True)
+    api_poll_quota_override = models.IntegerField(null=True)
     created_at = UtcDateTimeField(default=timezone.now)
     updated_at = UtcDateTimeField(auto_now=True)
     objects = AutoNowQuerySet.as_manager()

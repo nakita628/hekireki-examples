@@ -24,6 +24,8 @@ object UserApiTokenTable : IdTable<String>("\"UserApiToken\"") {
     val type = text("type").nullable()
     val name = text("name").nullable()
     val expiresAt = pgTimestamp("expiresAt", 3).nullable()
+    val workspaceId = text("workspaceId").nullable()
+    val role = text("role").nullable()
     val oauthClientId =
         optReference(
             "oauthClientId",

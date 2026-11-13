@@ -22,6 +22,9 @@ pub struct Model {
     pub name: Option<String>,
     #[sea_orm(column_name = "expiresAt")]
     pub expires_at: Option<DateTime>,
+    #[sea_orm(column_name = "workspaceId")]
+    pub workspace_id: Option<String>,
+    pub role: Option<String>,
     #[sea_orm(column_name = "oauthClientId")]
     pub oauth_client_id: Option<String>,
 }

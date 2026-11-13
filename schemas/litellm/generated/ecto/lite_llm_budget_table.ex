@@ -25,6 +25,11 @@ defmodule LiteLLM.LiteLLMBudgetTable do
           updated_by: String.t(),
           inserted_at: DateTime.t(),
           updated_at: DateTime.t(),
+          customer_organization_defaults: [LiteLLM.LiteLLMCustomerOrganizationTable.t()],
+          customer_organizations: [LiteLLM.LiteLLMCustomerOrganizationTable.t()],
+          customer_member_templates: [LiteLLM.LiteLLMCustomerMemberTable.t()],
+          customer_teams: [LiteLLM.LiteLLMCustomerTeamTable.t()],
+          customer_members: [LiteLLM.LiteLLMCustomerMemberTable.t()],
           organization: [LiteLLM.LiteLLMOrganizationTable.t()],
           projects: [LiteLLM.LiteLLMProjectTable.t()],
           keys: [LiteLLM.LiteLLMVerificationToken.t()],
@@ -52,6 +57,11 @@ defmodule LiteLLM.LiteLLMBudgetTable do
     field(:temp_budget_expiry, LiteLLM.PrismaDateTime)
     field(:created_by, :string)
     field(:updated_by, :string)
+    has_many(:customer_organization_defaults, LiteLLM.LiteLLMCustomerOrganizationTable, foreign_key: :default_budget_id)
+    has_many(:customer_organizations, LiteLLM.LiteLLMCustomerOrganizationTable, foreign_key: :budget_id)
+    has_many(:customer_member_templates, LiteLLM.LiteLLMCustomerMemberTable, foreign_key: :budget_template_id)
+    has_many(:customer_teams, LiteLLM.LiteLLMCustomerTeamTable, foreign_key: :budget_id)
+    has_many(:customer_members, LiteLLM.LiteLLMCustomerMemberTable, foreign_key: :budget_id)
     has_many(:organization, LiteLLM.LiteLLMOrganizationTable, foreign_key: :budget_id)
     has_many(:projects, LiteLLM.LiteLLMProjectTable, foreign_key: :budget_id)
     has_many(:keys, LiteLLM.LiteLLMVerificationToken, foreign_key: :budget_id)

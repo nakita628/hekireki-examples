@@ -1,31 +1,64 @@
 // Rallly: Rallly scheduling polls: users, spaces, polls, options, participants and votes.
 //
-// Imported from https://github.com/lukevella/rallly/tree/4c7aeffb3a69723ab66bf0909c6abb84927a52f7/packages/database/prisma/
+// Imported from https://github.com/lukevella/rallly/tree/5e1cb41682ae749bb111d5a95a1a0f4fb56d137f/packages/database/prisma/
 // (AGPL-3.0 license) by tools/import/import-schema.mjs, which dropped the original
 // generator blocks and the datasource's connection URLs and added the hekireki generators below.
-// The project keeps its schema in 14 files (prismaSchemaFolder), joined here in name order.
+// The project keeps its schema in 15 files (prismaSchemaFolder), joined here in name order.
 // The models, enums and `///` comments are the project's own, as they are at that commit.
+
+// ---- models/api-usage.prisma
+
+enum ApiUsageResource {
+  poll
+
+  @@map("api_usage_resource")
+}
+
+model ApiUsage {
+  spaceId           String           @map("space_id")
+  resource          ApiUsageResource
+  period            DateTime         @db.Date
+  count             Int              @default(0)
+  nearLimitWarnedAt DateTime?        @map("near_limit_warned_at")
+  atLimitWarnedAt   DateTime?        @map("at_limit_warned_at")
+  updatedAt         DateTime         @updatedAt @map("updated_at")
+
+  space Space @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+
+  @@id([spaceId, resource, period])
+  @@map("api_usage")
+}
 
 // ---- models/billing.prisma
 
 model Subscription {
-  id                 String               @id
-  priceId            String               @map("price_id")
-  quantity           Int                  @default(1)
-  subscriptionItemId String               @map("subscription_item_id")
-  amount             Int
-  discountPercentOff Float?               @map("discount_percent_off")
-  discountAmountOff  Int?                 @map("discount_amount_off")
-  status             SubscriptionStatus
-  active             Boolean
-  currency           String
-  interval           SubscriptionInterval
-  createdAt          DateTime             @default(now()) @map("created_at")
-  periodStart        DateTime             @map("period_start")
-  periodEnd          DateTime             @map("period_end")
-  cancelAtPeriodEnd  Boolean              @default(false) @map("cancel_at_period_end")
-  userId             String               @map("user_id")
-  spaceId            String               @map("space_id")
+  id                   String               @id
+  priceId              String               @map("price_id")
+  quantity             Int                  @default(1)
+  subscriptionItemId   String               @map("subscription_item_id")
+  amount               Int
+  discountPercentOff   Float?               @map("discount_percent_off")
+  discountAmountOff    Int?                 @map("discount_amount_off")
+  status               SubscriptionStatus
+  active               Boolean
+  currency             String
+  interval             SubscriptionInterval
+  createdAt            DateTime             @default(now()) @map("created_at")
+  periodStart          DateTime             @map("period_start")
+  periodEnd            DateTime             @map("period_end")
+  cancelAtPeriodEnd    Boolean              @default(false) @map("cancel_at_period_end")
+  userId               String               @map("user_id")
+  spaceId              String               @map("space_id")
+  // API poll add-on, a second item on the same Stripe subscription.
+  apiAddonItemId       String?              @map("api_addon_item_id")
+  apiAddonPriceId      String?              @map("api_addon_price_id")
+  apiAddonAmount       Int?                 @map("api_addon_amount")
+  // Monthly API poll limit granted by the add-on.
+  apiPollLimit         Int?                 @map("api_poll_limit")
+  // A lapsed add-on's limit, kept until retainedUntil so usage already
+  // accrued in the period is not suddenly over the limit.
+  apiPollRetainedLimit Int?                 @map("api_poll_retained_limit")
+  apiPollRetainedUntil DateTime?            @map("api_poll_retained_until")
 
   user  User  @relation("UserToSubscription", fields: [userId], references: [id], onDelete: Cascade)
   space Space @relation("SpaceToSubscription", fields: [spaceId], references: [id], onDelete: Cascade)
@@ -777,6 +810,9 @@ model Space {
   // Set by hand when support grants the nonprofit discount; checkout applies
   // the coupon from this. An existing subscription gets it in Stripe.
   nonprofitDiscountGrantedAt DateTime?  @map("nonprofit_discount_granted_at")
+  // Set by hand by support; raises the monthly API poll limit above the
+  // included amount. Never lowers it and never adds to a purchased add-on.
+  apiPollQuotaOverride       Int?       @map("api_poll_quota_override")
   createdAt                  DateTime   @default(now()) @map("created_at")
   updatedAt                  DateTime   @updatedAt @map("updated_at")
 
@@ -796,6 +832,8 @@ model Space {
   nonprofitApplications NonprofitApplication[]
 
   webhooks SpaceWebhook[]
+
+  apiUsage ApiUsage[]
 
   @@index([ownerId])
   @@map("spaces")

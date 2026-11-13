@@ -18,6 +18,7 @@ class BaseNodeFolderEntity(
     var createdBy by BaseNodeFolderTable.createdBy
     var lastModifiedTime by BaseNodeFolderTable.lastModifiedTime
     var lastModifiedBy by BaseNodeFolderTable.lastModifiedBy
+    var deletedTime by BaseNodeFolderTable.deletedTime
 
     override fun flush(batch: EntityBatchUpdate?): Boolean {
         if (writeValues.isNotEmpty()) {

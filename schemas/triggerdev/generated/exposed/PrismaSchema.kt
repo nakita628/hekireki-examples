@@ -10,6 +10,7 @@ object PrismaSchema {
             "CREATE TYPE \"AuthenticationMethod\" AS ENUM ('GITHUB', 'MAGIC_LINK', 'GOOGLE', 'SSO')",
             "CREATE TYPE \"OrganizationAccessTokenType\" AS ENUM ('USER', 'SYSTEM')",
             "CREATE TYPE \"OrgMemberRole\" AS ENUM ('ADMIN', 'MEMBER')",
+            "CREATE TYPE \"ApiKeyIssuer\" AS ENUM ('USER', 'SYSTEM')",
             "CREATE TYPE \"RuntimeEnvironmentType\" AS ENUM ('PRODUCTION', 'STAGING', 'DEVELOPMENT', 'PREVIEW')",
             "CREATE TYPE \"EnvironmentPauseSource\" AS ENUM ('BILLING_LIMIT', 'ADMIN_BAN')",
             "CREATE TYPE \"ProjectVersion\" AS ENUM ('V2', 'V3')",

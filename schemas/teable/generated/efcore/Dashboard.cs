@@ -21,4 +21,6 @@ public partial class Dashboard
     public DateTime? LastModifiedTime { get; set; }
 
     public string? LastModifiedBy { get; set; }
+
+    public DateTime? DeletedTime { get; set; }
 }

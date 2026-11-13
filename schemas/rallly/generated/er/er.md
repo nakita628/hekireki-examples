@@ -1,5 +1,6 @@
 ```mermaid
 erDiagram
+    spaces ||--o{ api_usage : "(id) - (spaceId)"
     users ||--o{ subscriptions : "(id) - (userId)"
     spaces ||--o{ subscriptions : "(id) - (spaceId)"
     users ||--o{ payment_methods : "(id) - (userId)"
@@ -53,6 +54,15 @@ erDiagram
     provider_calendars |o--o{ users : "(id) - (defaultDestinationCalendarId)"
     users ||--o{ sessions : "(id) - (userId)"
     users |o--o{ sessions : "(id) - (impersonatedBy)"
+    api_usage {
+        string spaceId PK, FK
+        apiusageresource resource PK
+        datetime period PK
+        int count
+        datetime nearLimitWarnedAt
+        datetime atLimitWarnedAt
+        datetime updatedAt
+    }
     subscriptions {
         string id PK
         string priceId
@@ -71,6 +81,12 @@ erDiagram
         boolean cancelAtPeriodEnd
         string userId FK
         string spaceId FK
+        string apiAddonItemId
+        string apiAddonPriceId
+        int apiAddonAmount
+        int apiPollLimit
+        int apiPollRetainedLimit
+        datetime apiPollRetainedUntil
     }
     payment_methods {
         string id PK
@@ -400,6 +416,7 @@ erDiagram
         boolean hideAttribution
         boolean shared
         datetime nonprofitDiscountGrantedAt
+        int apiPollQuotaOverride
         datetime createdAt
         datetime updatedAt
     }

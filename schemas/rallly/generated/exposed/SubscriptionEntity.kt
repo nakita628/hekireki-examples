@@ -25,6 +25,12 @@ class SubscriptionEntity(
     var cancelAtPeriodEnd by SubscriptionTable.cancelAtPeriodEnd
     var userId by SubscriptionTable.userId
     var spaceId by SubscriptionTable.spaceId
+    var apiAddonItemId by SubscriptionTable.apiAddonItemId
+    var apiAddonPriceId by SubscriptionTable.apiAddonPriceId
+    var apiAddonAmount by SubscriptionTable.apiAddonAmount
+    var apiPollLimit by SubscriptionTable.apiPollLimit
+    var apiPollRetainedLimit by SubscriptionTable.apiPollRetainedLimit
+    var apiPollRetainedUntil by SubscriptionTable.apiPollRetainedUntil
     var user by UserEntity referencedOn SubscriptionTable.userId
     var space by SpaceEntity referencedOn SubscriptionTable.spaceId
 }

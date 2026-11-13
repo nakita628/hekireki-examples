@@ -26,7 +26,7 @@ defmodule Langfuse.GatewayAiConnection do
   schema "gateway_ai_connections" do
     field(:id, :string, primary_key: true)
     field(:name, :string)
-    field(:provider, Ecto.Enum, values: [OPENAI: "openai", ANTHROPIC: "anthropic", BEDROCK: "bedrock", OPENROUTER: "openrouter", XAI: "xai", VERCEL: "vercel"])
+    field(:provider, Ecto.Enum, values: [OPENAI: "openai", ANTHROPIC: "anthropic", BEDROCK: "bedrock", OPENROUTER: "openrouter", XAI: "xai", VERCEL: "vercel", AZURE: "azure", GOOGLE_AI_STUDIO: "google_ai_studio"])
     field(:encrypted_credential, :string, source: :encrypted_credentials)
     field(:display_secret, :string, source: :display_secret_key)
     field(:created_by_id, :string)

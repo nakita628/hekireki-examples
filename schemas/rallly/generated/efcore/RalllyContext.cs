@@ -21,6 +21,8 @@ public partial class RalllyContext : DbContext
     {
     }
 
+    public virtual DbSet<ApiUsage> ApiUsages { get; set; }
+
     public virtual DbSet<Subscription> Subscriptions { get; set; }
 
     public virtual DbSet<PaymentMethod> PaymentMethods { get; set; }
@@ -97,6 +99,7 @@ public partial class RalllyContext : DbContext
 
     public static void MapEnums(NpgsqlDbContextOptionsBuilder npgsql)
     {
+        npgsql.MapEnum<ApiUsageResource>("api_usage_resource");
         npgsql.MapEnum<SubscriptionStatus>("subscription_status");
         npgsql.MapEnum<SubscriptionInterval>("subscription_interval");
         npgsql.MapEnum<NonprofitApplicationStatus>("nonprofit_application_status");
@@ -121,6 +124,7 @@ public partial class RalllyContext : DbContext
 
     public static void MapEnums(NpgsqlDataSourceBuilder dataSource)
     {
+        dataSource.MapEnum<ApiUsageResource>("api_usage_resource");
         dataSource.MapEnum<SubscriptionStatus>("subscription_status");
         dataSource.MapEnum<SubscriptionInterval>("subscription_interval");
         dataSource.MapEnum<NonprofitApplicationStatus>("nonprofit_application_status");
@@ -153,6 +157,7 @@ public partial class RalllyContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.HasPostgresEnum<ApiUsageResource>(name: "api_usage_resource");
         modelBuilder.HasPostgresEnum<SubscriptionStatus>(name: "subscription_status");
         modelBuilder.HasPostgresEnum<SubscriptionInterval>(name: "subscription_interval");
         modelBuilder.HasPostgresEnum<NonprofitApplicationStatus>(name: "nonprofit_application_status");
@@ -173,6 +178,38 @@ public partial class RalllyContext : DbContext
         modelBuilder.HasPostgresEnum<WebhookDeliveryStatus>(name: "webhook_delivery_status");
         modelBuilder.HasPostgresEnum<TimeFormat>(name: "time_format");
         modelBuilder.HasPostgresEnum<UserRole>(name: "user_role");
+
+        modelBuilder.Entity<ApiUsage>(entity =>
+        {
+            entity.HasKey(e => new { e.SpaceId, e.Resource, e.Period }).HasName("api_usage_pkey");
+
+            entity.ToTable("api_usage");
+
+            entity.Property(e => e.SpaceId).HasColumnName("space_id");
+            entity.Property(e => e.Resource).HasColumnName("resource");
+            entity.Property(e => e.Period).HasColumnName("period");
+            entity.Property(e => e.Count)
+                .ValueGeneratedNever()
+                .HasDefaultValue(0)
+                .HasColumnName("count");
+            entity.Property(e => e.NearLimitWarnedAt)
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("near_limit_warned_at");
+            entity.Property(e => e.AtLimitWarnedAt)
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("at_limit_warned_at");
+            entity.Property(e => e.UpdatedAt)
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("updated_at");
+
+            entity.HasOne(d => d.Space).WithMany(p => p.ApiUsage)
+                .HasForeignKey(d => d.SpaceId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("api_usage_space_id_fkey");
+        });
 
         modelBuilder.Entity<Subscription>(entity =>
         {
@@ -218,6 +255,15 @@ public partial class RalllyContext : DbContext
                 .HasColumnName("cancel_at_period_end");
             entity.Property(e => e.UserId).HasColumnName("user_id");
             entity.Property(e => e.SpaceId).HasColumnName("space_id");
+            entity.Property(e => e.ApiAddonItemId).HasColumnName("api_addon_item_id");
+            entity.Property(e => e.ApiAddonPriceId).HasColumnName("api_addon_price_id");
+            entity.Property(e => e.ApiAddonAmount).HasColumnName("api_addon_amount");
+            entity.Property(e => e.ApiPollLimit).HasColumnName("api_poll_limit");
+            entity.Property(e => e.ApiPollRetainedLimit).HasColumnName("api_poll_retained_limit");
+            entity.Property(e => e.ApiPollRetainedUntil)
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("api_poll_retained_until");
 
             entity.HasOne(d => d.User).WithMany(p => p.Subscriptions)
                 .HasForeignKey(d => d.UserId)
@@ -1474,6 +1520,7 @@ public partial class RalllyContext : DbContext
                 .HasConversion<UtcClockConverter>()
                 .HasColumnType("timestamp(3) without time zone")
                 .HasColumnName("nonprofit_discount_granted_at");
+            entity.Property(e => e.ApiPollQuotaOverride).HasColumnName("api_poll_quota_override");
             entity.Property(e => e.CreatedAt)
                 .HasValueGenerator<UtcNowGenerator>()
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
@@ -1954,6 +2001,15 @@ public partial class RalllyContext : DbContext
     private void StampUpdatedAt()
     {
         var now = DateTime.UtcNow;
+        foreach (var entry in ChangeTracker.Entries<ApiUsage>())
+        {
+            if ((entry.State == EntityState.Added && entry.Entity.UpdatedAt == default)
+                || (entry.State == EntityState.Modified && !entry.Property(e => e.UpdatedAt).IsModified))
+            {
+                entry.Entity.UpdatedAt = now;
+            }
+        }
+
         foreach (var entry in ChangeTracker.Entries<PaymentMethod>())
         {
             if ((entry.State == EntityState.Added && entry.Entity.UpdatedAt == default)

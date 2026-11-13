@@ -23,6 +23,8 @@ public partial class LiteLLMAccessGroupTable
 
     public List<string>? AccessSkillNames { get; set; } = new List<string>();
 
+    public List<string>? AccessVectorStoreIds { get; set; } = new List<string>();
+
     public List<string>? AssignedTeamIds { get; set; } = new List<string>();
 
     public List<string>? AssignedKeyIds { get; set; } = new List<string>();

@@ -33,6 +33,8 @@ public partial class Chat
 
     public virtual ICollection<ChatActionTotal> ActionTotals { get; set; } = new List<ChatActionTotal>();
 
+    public virtual ICollection<BulkInboxActionJob> BulkInboxActionJobs { get; set; } = new List<BulkInboxActionJob>();
+
     public string EmailAccountId { get; set; } = null!;
 
     public virtual EmailAccount EmailAccount { get; set; } = null!;

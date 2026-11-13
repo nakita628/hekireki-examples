@@ -19,6 +19,7 @@ class LiteLLMAccessGroupTableEntity(
     var mcpToolPermissions by LiteLLMAccessGroupTableTable.mcpToolPermissions
     var accessAgentIds by LiteLLMAccessGroupTableTable.accessAgentIds
     var accessSkillNames by LiteLLMAccessGroupTableTable.accessSkillNames
+    var accessVectorStoreIds by LiteLLMAccessGroupTableTable.accessVectorStoreIds
     var assignedTeamIds by LiteLLMAccessGroupTableTable.assignedTeamIds
     var assignedKeyIds by LiteLLMAccessGroupTableTable.assignedKeyIds
     var createdAt by LiteLLMAccessGroupTableTable.createdAt

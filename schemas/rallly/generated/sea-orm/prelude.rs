@@ -1,4 +1,5 @@
 pub use super::account::Entity as Account;
+pub use super::api_usage::Entity as ApiUsage;
 pub use super::calendar_connection::Entity as CalendarConnection;
 pub use super::comment::Entity as Comment;
 pub use super::conferencing_connection::Entity as ConferencingConnection;

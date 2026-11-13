@@ -1522,6 +1522,7 @@ export const dashboard = pgTable(
       .$defaultFn(utcNow),
     lastModifiedTime: timestamp('last_modified_time', { precision: 3 }).$onUpdate(utcNow),
     lastModifiedBy: text('last_modified_by'),
+    deletedTime: timestamp('deleted_time', { precision: 3 }),
   },
   (table) => [index('dashboard_base_id_idx').on(table.baseId)],
 )
@@ -1925,8 +1926,9 @@ export const baseNodeFolder = pgTable(
     createdBy: text('created_by').notNull(),
     lastModifiedTime: timestamp('last_modified_time', { precision: 3 }).$onUpdate(utcNow),
     lastModifiedBy: text('last_modified_by'),
+    deletedTime: timestamp('deleted_time', { precision: 3 }),
   },
-  (table) => [uniqueIndex('base_node_folder_base_id_name_key').on(table.baseId, table.name)],
+  (table) => [index('base_node_folder_base_id_idx').on(table.baseId)],
 )
 
 export const baseShare = pgTable(

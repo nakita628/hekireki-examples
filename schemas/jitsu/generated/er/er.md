@@ -99,6 +99,8 @@ erDiagram
         string type
         string name
         datetime expiresAt "@zod.custom(z.coerce.date())"
+        string workspaceId
+        string role
         string oauthClientId FK
     }
     OAuthClient {

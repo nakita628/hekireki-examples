@@ -771,6 +771,7 @@ export interface Dashboard {
   created_time: Generated<Timestamp>
   last_modified_time: ColumnType<Date | null, Date | string, Date | string | null>
   last_modified_by: string | null
+  deleted_time: Timestamp | null
 }
 
 export interface Comment {
@@ -947,6 +948,7 @@ export interface BaseNodeFolder {
   created_by: string
   last_modified_time: ColumnType<Date | null, Date | string, Date | string | null>
   last_modified_by: string | null
+  deleted_time: Timestamp | null
 }
 
 export interface BaseShare {

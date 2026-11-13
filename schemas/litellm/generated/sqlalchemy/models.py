@@ -1,4 +1,4 @@
-from sqlalchemy import ARRAY, BigInteger, Dialect, Enum, ForeignKey, Index, MetaData, Text, TypeDecorator, text
+from sqlalchemy import ARRAY, BigInteger, Dialect, Enum, ForeignKey, Index, MetaData, String, Text, TypeDecorator, text
 from sqlalchemy.dialects.postgresql import JSONB, TIMESTAMP
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from typing import Any, Optional
@@ -17,6 +17,20 @@ class UtcDateTime(TypeDecorator[datetime]):
 
     def process_result_value(self, value: Optional[datetime], dialect: Dialect) -> Optional[datetime]:
         return None if value is None else value.replace(tzinfo=timezone.utc)
+
+
+class UtcDateTimeTz(TypeDecorator[datetime]):
+    impl = TIMESTAMP
+    cache_ok = True
+
+    def __init__(self, precision: Optional[int] = None) -> None:
+        super().__init__(timezone=True, precision=precision)
+
+    def process_bind_param(self, value: Optional[datetime], dialect: Dialect) -> Optional[datetime]:
+        return value if value is None or value.tzinfo else value.replace(tzinfo=timezone.utc)
+
+    def process_result_value(self, value: Optional[datetime], dialect: Dialect) -> Optional[datetime]:
+        return None if value is None else value.astimezone(timezone.utc)
 
 
 def utc_now() -> datetime:
@@ -51,6 +65,11 @@ class LiteLLMBudgetTable(Base):
     updated_at: Mapped[datetime] = mapped_column(default=utc_now, server_default=text("CURRENT_TIMESTAMP"), onupdate=utc_now)
     updated_by: Mapped[str]
 
+    customer_organization_defaults: Mapped[list["LiteLLMCustomerOrganizationTable"]] = relationship(foreign_keys="LiteLLMCustomerOrganizationTable.default_budget_id", back_populates="default_budget")
+    customer_organizations: Mapped[list["LiteLLMCustomerOrganizationTable"]] = relationship(foreign_keys="LiteLLMCustomerOrganizationTable.budget_id", back_populates="budget")
+    customer_member_templates: Mapped[list["LiteLLMCustomerMemberTable"]] = relationship(foreign_keys="LiteLLMCustomerMemberTable.budget_template_id", passive_deletes="all", back_populates="budget_template")
+    customer_teams: Mapped[list["LiteLLMCustomerTeamTable"]] = relationship(back_populates="budget")
+    customer_members: Mapped[list["LiteLLMCustomerMemberTable"]] = relationship(foreign_keys="LiteLLMCustomerMemberTable.budget_id", passive_deletes="all", back_populates="budget")
     organization: Mapped[list["LiteLLMOrganizationTable"]] = relationship(back_populates="litellm_budget_table")
     projects: Mapped[list["LiteLLMProjectTable"]] = relationship(back_populates="litellm_budget_table")
     keys: Mapped[list["LiteLLMVerificationToken"]] = relationship(back_populates="litellm_budget_table")
@@ -59,6 +78,73 @@ class LiteLLMBudgetTable(Base):
     model_access_groups: Mapped[list["LiteLLMModelAccessGroupBudgetTable"]] = relationship(back_populates="litellm_budget_table")
     team_membership: Mapped[list["LiteLLMTeamMembership"]] = relationship(back_populates="litellm_budget_table")
     organization_membership: Mapped[list["LiteLLMOrganizationMembership"]] = relationship(back_populates="litellm_budget_table")
+
+class LiteLLMCustomerOrganizationTable(Base):
+    __tablename__ = "LiteLLM_CustomerOrganizationTable"
+
+    spend: Mapped[float] = mapped_column(default=0, server_default=text("0"))
+    budget_reset_at: Mapped[Optional[datetime]]
+    budget_ids: Mapped[list[str]] = mapped_column(ARRAY(Text), nullable=True, default=lambda: [], server_default=text("ARRAY[]::text[]"))
+    budget_names: Mapped[dict[str, Any]] = mapped_column(JSONB, default=lambda: {}, server_default=text("'{}'"))
+    budget_id: Mapped[Optional[str]] = mapped_column(ForeignKey("LiteLLM_BudgetTable.budget_id", ondelete="SET NULL", onupdate="CASCADE", name="LiteLLM_CustomerOrganizationTable_budget_id_fkey"))
+    customer_org_id: Mapped[str] = mapped_column(primary_key=True, default=lambda: str(uuid_mod.uuid4()))
+    alias: Mapped[Optional[str]]
+    default_budget_id: Mapped[Optional[str]] = mapped_column(ForeignKey("LiteLLM_BudgetTable.budget_id", ondelete="SET NULL", onupdate="CASCADE", name="LiteLLM_CustomerOrganizationTable_default_budget_id_fkey"))
+    created_at: Mapped[datetime] = mapped_column(default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
+    created_by: Mapped[str]
+    updated_at: Mapped[datetime] = mapped_column(default=utc_now, server_default=text("CURRENT_TIMESTAMP"), onupdate=utc_now)
+    updated_by: Mapped[str]
+
+    budget: Mapped[Optional["LiteLLMBudgetTable"]] = relationship(foreign_keys=[budget_id], back_populates="customer_organizations")
+    default_budget: Mapped[Optional["LiteLLMBudgetTable"]] = relationship(foreign_keys=[default_budget_id], back_populates="customer_organization_defaults")
+    teams: Mapped[list["LiteLLMCustomerTeamTable"]] = relationship(passive_deletes="all", back_populates="parent_org")
+
+class LiteLLMCustomerTeamTable(Base):
+    __tablename__ = "LiteLLM_CustomerTeamTable"
+
+    spend: Mapped[float] = mapped_column(default=0, server_default=text("0"))
+    budget_reset_at: Mapped[Optional[datetime]]
+    customer_team_id: Mapped[str] = mapped_column(primary_key=True, default=lambda: str(uuid_mod.uuid4()))
+    alias: Mapped[Optional[str]]
+    parent_org_id: Mapped[str] = mapped_column(ForeignKey("LiteLLM_CustomerOrganizationTable.customer_org_id", ondelete="RESTRICT", onupdate="CASCADE", name="LiteLLM_CustomerTeamTable_parent_org_id_fkey"))
+    budget_id: Mapped[Optional[str]] = mapped_column(ForeignKey("LiteLLM_BudgetTable.budget_id", ondelete="SET NULL", onupdate="CASCADE", name="LiteLLM_CustomerTeamTable_budget_id_fkey"))
+    created_at: Mapped[datetime] = mapped_column(default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
+    created_by: Mapped[str]
+    updated_at: Mapped[datetime] = mapped_column(default=utc_now, server_default=text("CURRENT_TIMESTAMP"), onupdate=utc_now)
+    updated_by: Mapped[str]
+
+    __table_args__ = (
+        Index("LiteLLM_CustomerTeamTable_parent_org_id_idx", "parent_org_id"),
+    )
+
+    parent_org: Mapped["LiteLLMCustomerOrganizationTable"] = relationship(back_populates="teams")
+    budget: Mapped[Optional["LiteLLMBudgetTable"]] = relationship(back_populates="customer_teams")
+    members: Mapped[list["LiteLLMCustomerMemberTable"]] = relationship(passive_deletes="all", back_populates="parent_team")
+
+class LiteLLMCustomerMemberTable(Base):
+    __tablename__ = "LiteLLM_CustomerMemberTable"
+
+    spend: Mapped[float] = mapped_column(default=0, server_default=text("0"))
+    budget_reset_at: Mapped[Optional[datetime]]
+    customer_member_id: Mapped[str] = mapped_column(primary_key=True, default=lambda: str(uuid_mod.uuid4()))
+    alias: Mapped[Optional[str]]
+    parent_team_id: Mapped[str] = mapped_column(ForeignKey("LiteLLM_CustomerTeamTable.customer_team_id", ondelete="RESTRICT", onupdate="CASCADE", name="LiteLLM_CustomerMemberTable_parent_team_id_fkey"))
+    budget_id: Mapped[Optional[str]] = mapped_column(ForeignKey("LiteLLM_BudgetTable.budget_id", ondelete="RESTRICT", onupdate="CASCADE", name="LiteLLM_CustomerMemberTable_budget_id_fkey"))
+    budget_template_id: Mapped[Optional[str]] = mapped_column(ForeignKey("LiteLLM_BudgetTable.budget_id", ondelete="RESTRICT", onupdate="CASCADE", name="LiteLLM_CustomerMemberTable_budget_template_id_fkey"))
+    budget_override_expires_at: Mapped[Optional[datetime]]
+    created_at: Mapped[datetime] = mapped_column(default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
+    created_by: Mapped[str]
+    updated_at: Mapped[datetime] = mapped_column(default=utc_now, server_default=text("CURRENT_TIMESTAMP"), onupdate=utc_now)
+    updated_by: Mapped[str]
+
+    __table_args__ = (
+        Index("LiteLLM_CustomerMemberTable_parent_team_id_idx", "parent_team_id"),
+        Index("LiteLLM_CustomerMemberTable_budget_template_id_idx", "budget_template_id"),
+    )
+
+    parent_team: Mapped["LiteLLMCustomerTeamTable"] = relationship(back_populates="members")
+    budget: Mapped[Optional["LiteLLMBudgetTable"]] = relationship(foreign_keys=[budget_id], back_populates="customer_members")
+    budget_template: Mapped[Optional["LiteLLMBudgetTable"]] = relationship(foreign_keys=[budget_template_id], back_populates="customer_member_templates")
 
 class LiteLLMCredentialsTable(Base):
     __tablename__ = "LiteLLM_CredentialsTable"
@@ -949,6 +1035,7 @@ class LiteLLMDailyUserSpend(Base):
         Index("LiteLLM_DailyUserSpend_date_idx", "date"),
         Index("LiteLLM_DailyUserSpend_user_id_date_idx", "user_id", "date"),
         Index("LiteLLM_DailyUserSpend_api_key_idx", "api_key"),
+        Index("LiteLLM_DailyUserSpend_api_key_date_idx", "api_key", "date"),
         Index("LiteLLM_DailyUserSpend_model_idx", "model"),
         Index("LiteLLM_DailyUserSpend_mcp_namespaced_tool_name_idx", "mcp_namespaced_tool_name"),
         Index("LiteLLM_DailyUserSpend_endpoint_idx", "endpoint"),
@@ -1213,6 +1300,26 @@ class LiteLLMCronJob(Base):
     last_updated: Mapped[datetime] = mapped_column(default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
     ttl: Mapped[datetime]
 
+class LiteLLMScheduledJobRun(Base):
+    __tablename__ = "LiteLLM_ScheduledJobRun"
+
+    id: Mapped[str] = mapped_column(primary_key=True, default=lambda: str(uuid_mod.uuid4()))
+    job_name: Mapped[str]
+    lock_group: Mapped[str]
+    schedule: Mapped[str]
+    scheduled_for: Mapped[datetime] = mapped_column(UtcDateTimeTz(precision=3))
+    status: Mapped[str] = mapped_column(Enum("PENDING", "RUNNING", "SUCCEEDED", "FAILED", "CANCELLED", name="ScheduledJobRunStatus"), default="PENDING", server_default=text("'PENDING'"))
+    claimed_by: Mapped[Optional[str]]
+    claimed_at: Mapped[Optional[datetime]] = mapped_column(UtcDateTimeTz(precision=3))
+    lease_expires_at: Mapped[Optional[datetime]] = mapped_column(UtcDateTimeTz(precision=3))
+    finished_at: Mapped[Optional[datetime]] = mapped_column(UtcDateTimeTz(precision=3))
+    created_at: Mapped[datetime] = mapped_column(UtcDateTimeTz(precision=3), default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
+
+    __table_args__ = (
+        Index("LiteLLM_ScheduledJobRun_job_name_status_idx", "job_name", "status"),
+        Index("LiteLLM_ScheduledJobRun_lock_group_status_idx", "lock_group", "status"),
+    )
+
 class LiteLLMManagedFileTable(Base):
     __tablename__ = "LiteLLM_ManagedFileTable"
 
@@ -1439,6 +1546,8 @@ class LiteLLMDailyModelUsage(Base):
     request_count: Mapped[int] = mapped_column(BigInteger, default=0, server_default=text("0"))
     successful_requests: Mapped[int] = mapped_column(BigInteger, default=0, server_default=text("0"))
     failed_requests: Mapped[int] = mapped_column(BigInteger, default=0, server_default=text("0"))
+    total_response_time_ms: Mapped[int] = mapped_column(BigInteger, default=0, server_default=text("0"))
+    timed_requests: Mapped[int] = mapped_column(BigInteger, default=0, server_default=text("0"))
     created_at: Mapped[datetime] = mapped_column(default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
     updated_at: Mapped[datetime] = mapped_column(default=utc_now, onupdate=utc_now)
 
@@ -1699,6 +1808,7 @@ class LiteLLMAccessGroupTable(Base):
     mcp_tool_permissions: Mapped[Optional[dict[str, Any]]] = mapped_column(JSONB(none_as_null=True))
     access_agent_ids: Mapped[list[str]] = mapped_column(ARRAY(Text), nullable=True, default=lambda: [], server_default=text("ARRAY[]::text[]"))
     access_skill_names: Mapped[list[str]] = mapped_column(ARRAY(Text), nullable=True, default=lambda: [], server_default=text("ARRAY[]::text[]"))
+    access_vector_store_ids: Mapped[list[str]] = mapped_column(ARRAY(Text), nullable=True, default=lambda: [], server_default=text("ARRAY[]::text[]"))
     assigned_team_ids: Mapped[list[str]] = mapped_column(ARRAY(Text), nullable=True, default=lambda: [], server_default=text("ARRAY[]::text[]"))
     assigned_key_ids: Mapped[list[str]] = mapped_column(ARRAY(Text), nullable=True, default=lambda: [], server_default=text("ARRAY[]::text[]"))
     created_at: Mapped[datetime] = mapped_column(default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
@@ -2281,3 +2391,43 @@ class LiteLLMSubscriptionAccountTable(Base):
     __table_args__ = (
         Index("LiteLLM_SubscriptionAccountTable_provider_account_key", "custom_llm_provider", "account_id", unique=True),
     )
+
+class LiteLLMAlert(Base):
+    __tablename__ = "LiteLLM_Alert"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    detection_key: Mapped[str] = mapped_column(String(64))
+    type: Mapped[str] = mapped_column(String(32))
+    resource_type: Mapped[str] = mapped_column(String(16))
+    resource_id: Mapped[str] = mapped_column(String(1024))
+    status: Mapped[str] = mapped_column(String(16), default="open", server_default=text("'open'"))
+    window_start: Mapped[datetime]
+    window_end: Mapped[datetime]
+    evidence: Mapped[dict[str, Any]] = mapped_column(JSONB)
+    created_at: Mapped[datetime] = mapped_column(default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
+    updated_at: Mapped[datetime] = mapped_column(default=utc_now, server_default=text("CURRENT_TIMESTAMP"), onupdate=utc_now)
+    updated_by: Mapped[Optional[str]] = mapped_column(String(1024))
+
+    __table_args__ = (
+        Index("LiteLLM_Alert_detection_key_key", "detection_key", unique=True),
+        Index("LiteLLM_Alert_status_id_idx", "status", "id"),
+    )
+
+class LiteLLMPerformanceAlertState(Base):
+    __tablename__ = "LiteLLM_PerformanceAlertState"
+
+    enabled: Mapped[bool] = mapped_column(default=True, server_default=text("true"))
+    alerts_used: Mapped[Optional[int]]
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=False)
+    owner: Mapped[str] = mapped_column(String(32))
+    next_run_at: Mapped[datetime] = mapped_column(UtcDateTimeTz(precision=3))
+    day: Mapped[Optional[str]] = mapped_column(String(10))
+    scope: Mapped[Optional[str]] = mapped_column(String(16))
+    resume_after: Mapped[str] = mapped_column(String(1024), default="", server_default=text("''"))
+    wrapped: Mapped[bool] = mapped_column(default=False, server_default=text("false"))
+    checked: Mapped[int] = mapped_column(default=0, server_default=text("0"))
+    skipped: Mapped[int] = mapped_column(default=0, server_default=text("0"))
+    start_scope: Mapped[Optional[str]] = mapped_column(String(16))
+    start_after: Mapped[str] = mapped_column(String(1024), default="", server_default=text("''"))
+    completed_at: Mapped[Optional[datetime]]
+    updated_at: Mapped[datetime] = mapped_column(default=utc_now, server_default=text("CURRENT_TIMESTAMP"), onupdate=utc_now)

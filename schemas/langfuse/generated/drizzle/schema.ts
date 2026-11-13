@@ -60,6 +60,8 @@ export const gatewayProviderEnum = pgEnum('GatewayProvider', [
   'openrouter',
   'xai',
   'vercel',
+  'azure',
+  'google_ai_studio',
 ])
 
 export const gatewayConnectionStatusEnum = pgEnum('GatewayConnectionStatus', [

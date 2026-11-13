@@ -30,6 +30,8 @@ Enum GatewayProvider {
   openrouter
   xai
   vercel
+  azure
+  google_ai_studio
 }
 
 Enum GatewayConnectionStatus {

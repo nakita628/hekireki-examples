@@ -34,5 +34,8 @@ object PrismaSchema {
             TwoFactorOtpUsedTable,
             TwoFactorRateLimitTable,
             AppSettingTable,
+            ErrorIssueTable,
+            ErrorEventTable,
+            ErrorRateLimitTable,
         )
 }

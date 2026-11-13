@@ -2167,6 +2167,10 @@ public partial class TeableContext : DbContext
                 .HasColumnType("timestamp(3) without time zone")
                 .HasColumnName("last_modified_time");
             entity.Property(e => e.LastModifiedBy).HasColumnName("last_modified_by");
+            entity.Property(e => e.DeletedTime)
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("deleted_time");
         });
 
         modelBuilder.Entity<Comment>(entity =>
@@ -2647,7 +2651,7 @@ public partial class TeableContext : DbContext
 
             entity.ToTable("base_node_folder");
 
-            entity.HasIndex(e => new { e.BaseId, e.Name }, "base_node_folder_base_id_name_key").IsUnique();
+            entity.HasIndex(e => e.BaseId, "base_node_folder_base_id_idx");
 
             entity.Property(e => e.Id)
                 .HasValueGenerator<CuidGenerator>()
@@ -2666,6 +2670,10 @@ public partial class TeableContext : DbContext
                 .HasColumnType("timestamp(3) without time zone")
                 .HasColumnName("last_modified_time");
             entity.Property(e => e.LastModifiedBy).HasColumnName("last_modified_by");
+            entity.Property(e => e.DeletedTime)
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("deleted_time");
         });
 
         modelBuilder.Entity<BaseShare>(entity =>

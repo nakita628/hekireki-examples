@@ -16,6 +16,7 @@ pub struct Model {
     pub mcp_tool_permissions: Option<Json>,
     pub access_agent_ids: Vec<String>,
     pub access_skill_names: Vec<String>,
+    pub access_vector_store_ids: Vec<String>,
     pub assigned_team_ids: Vec<String>,
     pub assigned_key_ids: Vec<String>,
     pub created_at: DateTime,

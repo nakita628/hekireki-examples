@@ -11,6 +11,7 @@ import org.jetbrains.exposed.v1.core.statements.api.RowApi
 import org.jetbrains.exposed.v1.dao.Entity
 import java.time.Instant
 import java.time.LocalDateTime
+import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit
 
@@ -59,6 +60,33 @@ internal fun Table.pgTimestamp(
     name: String,
     precision: Int? = null,
 ): Column<Instant> = registerColumn(name, PgTimestampColumnType(precision))
+
+internal class PgTimestamptzColumnType(
+    val precision: Int? = null,
+) : ColumnType<Instant>() {
+    override fun sqlType(): String = if (precision == null) "TIMESTAMPTZ" else "TIMESTAMPTZ($precision)"
+
+    override fun valueFromDB(value: Any): Instant =
+        when (value) {
+            is Instant -> value
+            is OffsetDateTime -> value.toInstant()
+            else -> error("Unexpected value of type ${value::class.qualifiedName}: $value")
+        }.truncatedTo(ChronoUnit.MILLIS)
+
+    override fun readObject(
+        rs: RowApi,
+        index: Int,
+    ): Any? = rs.getObject(index, OffsetDateTime::class.java)
+
+    override fun notNullValueToDB(value: Instant): Any = value.truncatedTo(ChronoUnit.MILLIS).atOffset(ZoneOffset.UTC)
+
+    override fun nonNullValueToString(value: Instant): String = "'${notNullValueToDB(value)}'"
+}
+
+internal fun Table.pgTimestamptz(
+    name: String,
+    precision: Int? = null,
+): Column<Instant> = registerColumn(name, PgTimestamptzColumnType(precision))
 
 internal class PgEnumColumnType<E : Enum<E>>(
     val typeName: String,

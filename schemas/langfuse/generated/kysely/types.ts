@@ -23,7 +23,15 @@ export type SystemRole =
 
 export type GatewayIngestionMode = 'none' | 'usage' | 'full'
 
-export type GatewayProvider = 'openai' | 'anthropic' | 'bedrock' | 'openrouter' | 'xai' | 'vercel'
+export type GatewayProvider =
+  | 'openai'
+  | 'anthropic'
+  | 'bedrock'
+  | 'openrouter'
+  | 'xai'
+  | 'vercel'
+  | 'azure'
+  | 'google_ai_studio'
 
 export type GatewayConnectionStatus = 'enabled' | 'disabled' | 'error'
 

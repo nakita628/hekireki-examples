@@ -7,6 +7,16 @@ namespace LiteLLM.Models;
 
 public partial class LiteLLMBudgetTable
 {
+    public virtual ICollection<LiteLLMCustomerOrganizationTable> CustomerOrganizationDefaults { get; set; } = new List<LiteLLMCustomerOrganizationTable>();
+
+    public virtual ICollection<LiteLLMCustomerOrganizationTable> CustomerOrganizations { get; set; } = new List<LiteLLMCustomerOrganizationTable>();
+
+    public virtual ICollection<LiteLLMCustomerMemberTable> CustomerMemberTemplates { get; set; } = new List<LiteLLMCustomerMemberTable>();
+
+    public virtual ICollection<LiteLLMCustomerTeamTable> CustomerTeams { get; set; } = new List<LiteLLMCustomerTeamTable>();
+
+    public virtual ICollection<LiteLLMCustomerMemberTable> CustomerMembers { get; set; } = new List<LiteLLMCustomerMemberTable>();
+
     public string BudgetId { get; set; } = null!;
 
     public double? MaxBudget { get; set; }

@@ -1,0 +1,199 @@
+Table users {
+  id Int [pk, increment]
+  email String [unique, not null]
+  password_hash String
+  is_verified Int [default: 0, not null]
+  verification_token String
+  verification_token_expires_at BigInt
+  verification_resend_count Int [default: 0, not null]
+  reset_password_token String
+  reset_password_token_expires_at BigInt
+  passkey_recovery_token String
+  passkey_recovery_token_expires_at BigInt
+  login_token String
+  login_token_expires_at BigInt
+  failed_login_attempts Int [default: 0, not null]
+  locked_until BigInt
+  token_version Int [default: 0, not null]
+  terms_accepted_at BigInt
+  created_at DateTime [default: `now()`, not null]
+  storage_quota_bytes BigInt [default: 104857600, not null]
+  storage_used_bytes BigInt [default: 0, not null]
+}
+
+Table passkeys {
+  id String [pk]
+  credential_id Bytes [unique, not null]
+  public_key Bytes [not null]
+  counter BigInt [default: 0, not null]
+  transports String
+  created_at DateTime [default: `now()`, not null]
+  last_used_at DateTime
+  user_id Int [not null]
+}
+
+Table pending_passkey_registrations {
+  id String [pk]
+  verification_token String [unique, not null]
+  verification_token_expires_at BigInt [not null]
+  credential_id Bytes [not null]
+  public_key Bytes [not null]
+  counter BigInt [default: 0, not null]
+  transports String
+  created_at DateTime [default: `now()`, not null]
+  user_id Int [not null]
+}
+
+Table operations {
+  id String [pk]
+  user_id Int [not null]
+  client_id String [not null]
+  server_seq Int [not null]
+  action_type String [not null]
+  op_type String [not null]
+  entity_type String [not null]
+  entity_id String
+  entity_ids String[] [not null]
+  payload Json [not null]
+  payload_bytes BigInt [default: 0, not null]
+  vector_clock Json [not null]
+  schema_version Int [not null]
+  client_timestamp BigInt [not null]
+  received_at BigInt [not null]
+  is_payload_encrypted Boolean [default: false, not null]
+  sync_import_reason String
+  repair_base_server_seq Int
+
+  indexes {
+    (user_id, server_seq) [unique]
+  }
+}
+
+Table user_sync_state {
+  user_id Int [pk]
+  last_seq Int [default: 0, not null]
+  last_snapshot_seq Int
+  snapshot_data Bytes
+  snapshot_at BigInt
+  snapshot_schema_version Int [default: 1]
+  latest_full_state_seq Int
+  latest_full_state_vector_clock Json
+  latest_state_replacement_seq Int
+}
+
+Table sync_devices {
+  client_id String [not null]
+  user_id Int [not null]
+  device_name String
+  user_agent String
+  app_version String [note: '''Bare semver the client last reported on download (`18.22.0`), NULL until
+it does. Read by the checkpoint gate (#9962); never shown to users.''']
+  last_seen_at BigInt [not null]
+  last_acked_seq Int [default: 0, not null, note: 'Reserved: written once at device registration, never read or updated.']
+  created_at BigInt [not null]
+
+  indexes {
+    (user_id, client_id) [pk]
+  }
+}
+
+Table capture_keys {
+  user_id Int [pk]
+  public_key String [not null, note: 'Base64 SPKI DER of an ECDH P-256 public key.']
+  fingerprint String [not null]
+  created_at BigInt [not null]
+  disabled_at BigInt
+
+  Note: '''Public half of the user\'s capture key. The row outlives switching the
+feature off: `disabledAt` stops a stale device re-registering that key.'''
+}
+
+Table capture_grants {
+  id String [pk]
+  user_id Int [not null]
+  kind String [not null]
+  client_name String [not null]
+  secret_hash String [not null]
+  created_at BigInt [not null]
+  expires_at BigInt [not null]
+  last_used_at BigInt
+  revoked_at BigInt
+  client_id String
+  resource String
+  refresh_hash String
+  prev_refresh_hash String
+  rotated_at BigInt
+  refresh_expires_at BigInt
+
+  Note: 'Capture tokens and OAuth grants store only hashes of bearer credentials.'
+}
+
+Table capture_items {
+  id String [pk]
+  user_id Int [not null]
+  grant_id String [not null]
+  ciphertext String [not null]
+  task_id String [not null, note: 'Task id the claiming device must use; replaced when another device takes over.']
+  created_at BigInt [not null]
+  lease_device_id String
+  lease_until BigInt
+
+  Note: '''One sealed capture waiting for a device. No relation to its grant: items
+outlive a grant that is revoked without discarding them.'''
+}
+
+Table capture_connect_codes {
+  user_id Int [pk]
+  code_hash String [unique, not null]
+  token_version Int [not null]
+  expires_at BigInt [not null]
+}
+
+Table capture_auth {
+  id String [pk]
+  user_id Int
+  client_id String [not null]
+  client_name String [not null]
+  redirect_uri String [not null]
+  code_challenge String [not null]
+  resource String [not null]
+  state String [not null]
+  scope String [not null]
+  code_hash String [unique]
+  token_version Int
+  expires_at BigInt [not null]
+}
+
+Table connect_requests {
+  id String [pk]
+  poll_secret_hash String [not null]
+  match_code String [not null]
+  device_name String [not null]
+  platform String [not null]
+  status String [default: 'pending', not null]
+  user_id Int
+  token_version Int
+  expires_at BigInt [not null]
+}
+
+Ref passkeys_user_id_fk: passkeys.user_id > users.id [delete: cascade]
+
+Ref pending_passkey_registrations_user_id_fk: pending_passkey_registrations.user_id > users.id [delete: cascade]
+
+Ref operations_user_id_fk: operations.user_id > users.id [delete: cascade]
+
+Ref user_sync_state_user_id_fk: user_sync_state.user_id - users.id [delete: cascade]
+
+Ref sync_devices_user_id_fk: sync_devices.user_id > users.id [delete: cascade]
+
+Ref capture_keys_user_id_fk: capture_keys.user_id - users.id [delete: cascade]
+
+Ref capture_grants_user_id_fk: capture_grants.user_id > users.id [delete: cascade]
+
+Ref capture_items_user_id_fk: capture_items.user_id > users.id [delete: cascade]
+
+Ref capture_connect_codes_user_id_fk: capture_connect_codes.user_id - users.id [delete: cascade]
+
+Ref capture_auth_user_id_fk: capture_auth.user_id > users.id [delete: cascade]
+
+Ref connect_requests_user_id_fk: connect_requests.user_id > users.id [delete: cascade]

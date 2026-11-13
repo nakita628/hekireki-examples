@@ -111,6 +111,8 @@ Table UserApiToken {
   type String
   name String
   expiresAt DateTime [note: '@zod.custom(z.coerce.date())']
+  workspaceId String
+  role String
   oauthClientId String
 }
 

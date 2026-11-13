@@ -64,6 +64,11 @@ class OrgMemberRole(models.TextChoices):
     MEMBER = "MEMBER"
 
 
+class ApiKeyIssuer(models.TextChoices):
+    USER = "USER"
+    SYSTEM = "SYSTEM"
+
+
 class RuntimeEnvironmentType(models.TextChoices):
     PRODUCTION = "PRODUCTION"
     STAGING = "STAGING"
@@ -655,6 +660,7 @@ class ApiKey(models.Model):
     description = models.TextField(null=True)
     runtime_environment = models.ForeignKey("RuntimeEnvironment", on_delete=models.CASCADE, related_name="api_keys", db_index=False)
     created_by = models.ForeignKey("User", on_delete=models.SET_NULL, related_name="created_api_keys", db_column="created_by_user_id", null=True, db_index=False)
+    issued_by = models.TextField(choices=ApiKeyIssuer.choices, default=ApiKeyIssuer.USER)
     preset_id = models.TextField(null=True)
     scopes = ArrayField(models.TextField())
     allowed_ip_ranges = ArrayField(models.TextField(), default=list)
@@ -670,6 +676,7 @@ class ApiKey(models.Model):
         db_table = "api_keys"
         indexes = [
             models.Index(fields=["runtime_environment", "revoked_at", "-created_at"]),
+            models.Index(fields=["runtime_environment", "issued_by", "revoked_at", "-created_at"]),
         ]
 
 

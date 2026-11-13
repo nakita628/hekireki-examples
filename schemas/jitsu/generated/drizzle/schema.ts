@@ -305,6 +305,8 @@ export const userApiToken = pgTable(
     type: text('type'),
     name: text('name'),
     expiresAt: timestamp('expiresAt', { precision: 3 }),
+    workspaceId: text('workspaceId'),
+    role: text('role'),
     oauthClientId: text('oauthClientId'),
   },
   (table) => [

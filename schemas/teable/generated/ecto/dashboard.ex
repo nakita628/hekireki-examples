@@ -12,6 +12,7 @@ defmodule Teable.Dashboard do
           created_by: String.t(),
           created_time: DateTime.t(),
           last_modified_by: String.t() | nil,
+          deleted_time: DateTime.t() | nil,
           updated_at: DateTime.t() | nil
         }
 
@@ -23,6 +24,7 @@ defmodule Teable.Dashboard do
     field(:created_by, :string)
     field(:created_time, Teable.PrismaDateTime, autogenerate: true)
     field(:last_modified_by, :string)
+    field(:deleted_time, Teable.PrismaDateTime)
     timestamps(inserted_at: false, updated_at_source: :last_modified_time)
   end
 end

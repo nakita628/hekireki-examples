@@ -16,6 +16,8 @@ defmodule LiteLLM.LiteLLMDailyModelUsage do
           request_count: integer(),
           successful_requests: integer(),
           failed_requests: integer(),
+          total_response_time_ms: integer(),
+          timed_requests: integer(),
           inserted_at: DateTime.t(),
           updated_at: DateTime.t()
         }
@@ -32,6 +34,8 @@ defmodule LiteLLM.LiteLLMDailyModelUsage do
     field(:request_count, :integer, default: 0)
     field(:successful_requests, :integer, default: 0)
     field(:failed_requests, :integer, default: 0)
+    field(:total_response_time_ms, :integer, default: 0)
+    field(:timed_requests, :integer, default: 0)
     timestamps(inserted_at_source: :created_at)
   end
 end

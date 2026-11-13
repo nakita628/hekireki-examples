@@ -1,3 +1,7 @@
+Enum api_usage_resource {
+  poll
+}
+
 Enum subscription_status {
   incomplete
   incomplete_expired
@@ -117,6 +121,20 @@ Enum user_role {
   user
 }
 
+Table api_usage {
+  space_id String [not null]
+  resource api_usage_resource [not null]
+  period DateTime [not null]
+  count Int [default: 0, not null]
+  near_limit_warned_at DateTime
+  at_limit_warned_at DateTime
+  updated_at DateTime [not null]
+
+  indexes {
+    (space_id, resource, period) [pk]
+  }
+}
+
 Table subscriptions {
   id String [pk]
   price_id String [not null]
@@ -135,6 +153,12 @@ Table subscriptions {
   cancel_at_period_end Boolean [default: false, not null]
   user_id String [not null]
   space_id String [not null]
+  api_addon_item_id String
+  api_addon_price_id String
+  api_addon_amount Int
+  api_poll_limit Int
+  api_poll_retained_limit Int
+  api_poll_retained_until DateTime
 }
 
 Table payment_methods {
@@ -528,6 +552,7 @@ Table spaces {
   hide_attribution Boolean [default: false, not null]
   shared Boolean [default: false, not null]
   nonprofit_discount_granted_at DateTime
+  api_poll_quota_override Int
   created_at DateTime [default: `now()`, not null]
   updated_at DateTime [not null]
 }
@@ -676,6 +701,8 @@ Table verifications {
   created_at DateTime [default: `now()`, not null]
   updated_at DateTime [default: `now()`, not null]
 }
+
+Ref api_usage_space_id_fk: api_usage.space_id > spaces.id [delete: cascade]
 
 Ref subscriptions_user_id_fk: subscriptions.user_id > users.id [delete: cascade]
 

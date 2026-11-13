@@ -53,6 +53,31 @@ class LiteLLMBudgetTable extends Model
         'temp_budget_expiry' => 'datetime',
     ];
 
+    public function customer_organization_defaults(): HasMany
+    {
+        return $this->hasMany(LiteLLMCustomerOrganizationTable::class, 'default_budget_id');
+    }
+
+    public function customer_organizations(): HasMany
+    {
+        return $this->hasMany(LiteLLMCustomerOrganizationTable::class, 'budget_id');
+    }
+
+    public function customer_member_templates(): HasMany
+    {
+        return $this->hasMany(LiteLLMCustomerMemberTable::class, 'budget_template_id');
+    }
+
+    public function customer_teams(): HasMany
+    {
+        return $this->hasMany(LiteLLMCustomerTeamTable::class, 'budget_id');
+    }
+
+    public function customer_members(): HasMany
+    {
+        return $this->hasMany(LiteLLMCustomerMemberTable::class, 'budget_id');
+    }
+
     public function organization(): HasMany
     {
         return $this->hasMany(LiteLLMOrganizationTable::class, 'budget_id');

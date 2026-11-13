@@ -73,6 +73,12 @@ public partial class UmamiContext : DbContext
 
     public virtual DbSet<AppSetting> AppSettings { get; set; }
 
+    public virtual DbSet<ErrorIssue> ErrorIssues { get; set; }
+
+    public virtual DbSet<ErrorEvent> ErrorEvents { get; set; }
+
+    public virtual DbSet<ErrorRateLimit> ErrorRateLimits { get; set; }
+
     public static void MapEnums(NpgsqlDbContextOptionsBuilder npgsql)
     {
     }
@@ -1296,6 +1302,122 @@ public partial class UmamiContext : DbContext
 
             entity.Property(e => e.Key).HasColumnName("key");
             entity.Property(e => e.Value).HasColumnName("value");
+        });
+
+        modelBuilder.Entity<ErrorIssue>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("error_issue_pkey");
+
+            entity.ToTable("error_issue");
+
+            entity.HasIndex(e => new { e.WebsiteId, e.Status }, "error_issue_website_id_status_idx");
+
+            entity.HasIndex(e => new { e.WebsiteId, e.GroupingVersion, e.Fingerprint }, "error_issue_website_id_grouping_version_fingerprint_key").IsUnique();
+
+            entity.Property(e => e.Id)
+                .ValueGeneratedNever()
+                .HasColumnName("issue_id");
+            entity.Property(e => e.WebsiteId).HasColumnName("website_id");
+            entity.Property(e => e.Fingerprint)
+                .HasMaxLength(64)
+                .HasColumnName("fingerprint");
+            entity.Property(e => e.GroupingVersion)
+                .ValueGeneratedNever()
+                .HasDefaultValue(1)
+                .HasColumnName("grouping_version");
+            entity.Property(e => e.Title)
+                .HasMaxLength(2200)
+                .HasColumnName("title");
+            entity.Property(e => e.Status)
+                .ValueGeneratedNever()
+                .HasMaxLength(20)
+                .HasDefaultValue("unresolved")
+                .HasColumnName("status");
+            entity.Property(e => e.ResolvedAt)
+                .HasPrecision(6)
+                .HasConversion<UtcConverter>()
+                .HasColumnName("resolved_at");
+            entity.Property(e => e.CreatedAt)
+                .HasValueGenerator<UtcNowGenerator>()
+                .HasPrecision(6)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasConversion<UtcConverter>()
+                .HasColumnName("created_at");
+        });
+
+        modelBuilder.Entity<ErrorEvent>(entity =>
+        {
+            entity.HasKey(e => new { e.WebsiteId, e.Id }).HasName("error_event_pkey");
+
+            entity.ToTable("error_event");
+
+            entity.HasIndex(e => new { e.WebsiteId, e.CreatedAt }, "error_event_website_id_created_at_idx");
+
+            entity.HasIndex(e => new { e.WebsiteId, e.IssueId, e.CreatedAt }, "error_event_website_id_issue_id_created_at_idx");
+
+            entity.Property(e => e.WebsiteId).HasColumnName("website_id");
+            entity.Property(e => e.Id).HasColumnName("event_id");
+            entity.Property(e => e.IssueId).HasColumnName("issue_id");
+            entity.Property(e => e.SessionId).HasColumnName("session_id");
+            entity.Property(e => e.VisitId).HasColumnName("visit_id");
+            entity.Property(e => e.CreatedAt)
+                .HasPrecision(6)
+                .HasConversion<UtcConverter>()
+                .HasColumnName("created_at");
+            entity.Property(e => e.ReceivedAt)
+                .HasValueGenerator<UtcNowGenerator>()
+                .HasPrecision(6)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasConversion<UtcConverter>()
+                .HasColumnName("received_at");
+            entity.Property(e => e.Name)
+                .HasMaxLength(200)
+                .HasColumnName("name");
+            entity.Property(e => e.Message)
+                .HasMaxLength(2000)
+                .HasColumnName("message");
+            entity.Property(e => e.Stack).HasColumnName("stack");
+            entity.Property(e => e.Frames)
+                .HasColumnType("jsonb")
+                .HasColumnName("frames");
+            entity.Property(e => e.Tags)
+                .HasColumnType("jsonb")
+                .HasColumnName("tags");
+            entity.Property(e => e.Handled).HasColumnName("handled");
+            entity.Property(e => e.UrlPath)
+                .HasMaxLength(500)
+                .HasColumnName("url_path");
+            entity.Property(e => e.Release)
+                .HasMaxLength(100)
+                .HasColumnName("release");
+            entity.Property(e => e.Environment)
+                .HasMaxLength(50)
+                .HasColumnName("environment");
+            entity.Property(e => e.Browser)
+                .HasMaxLength(50)
+                .HasColumnName("browser");
+            entity.Property(e => e.Os)
+                .HasMaxLength(50)
+                .HasColumnName("os");
+            entity.Property(e => e.Device)
+                .HasMaxLength(50)
+                .HasColumnName("device");
+        });
+
+        modelBuilder.Entity<ErrorRateLimit>(entity =>
+        {
+            entity.HasKey(e => e.WebsiteId).HasName("error_rate_limit_pkey");
+
+            entity.ToTable("error_rate_limit");
+
+            entity.Property(e => e.WebsiteId)
+                .ValueGeneratedNever()
+                .HasColumnName("website_id");
+            entity.Property(e => e.Bucket)
+                .HasPrecision(6)
+                .HasConversion<UtcConverter>()
+                .HasColumnName("bucket");
+            entity.Property(e => e.Count).HasColumnName("count");
         });
 
         OnModelCreatingPartial(modelBuilder);

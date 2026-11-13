@@ -1,5 +1,12 @@
 ```mermaid
 erDiagram
+    LiteLLM_BudgetTable |o--o{ LiteLLM_CustomerOrganizationTable : "(budget_id) - (budget_id)"
+    LiteLLM_BudgetTable |o--o{ LiteLLM_CustomerOrganizationTable : "(budget_id) - (default_budget_id)"
+    LiteLLM_CustomerOrganizationTable ||--o{ LiteLLM_CustomerTeamTable : "(customer_org_id) - (parent_org_id)"
+    LiteLLM_BudgetTable |o--o{ LiteLLM_CustomerTeamTable : "(budget_id) - (budget_id)"
+    LiteLLM_CustomerTeamTable ||--o{ LiteLLM_CustomerMemberTable : "(customer_team_id) - (parent_team_id)"
+    LiteLLM_BudgetTable |o--o{ LiteLLM_CustomerMemberTable : "(budget_id) - (budget_id)"
+    LiteLLM_BudgetTable |o--o{ LiteLLM_CustomerMemberTable : "(budget_id) - (budget_template_id)"
     LiteLLM_ObjectPermissionTable |o--o{ LiteLLM_AgentsTable : "(object_permission_id) - (object_permission_id)"
     LiteLLM_AgentsTable ||--o| LiteLLM_AgentIdentity : "(agent_id) - (agent_id)"
     LiteLLM_AgentsTable |o--o{ LiteLLM_RetiredAgentIdentity : "(agent_id) - (agent_id)"
@@ -52,6 +59,46 @@ erDiagram
         string[] allowed_models
         float temp_budget_increase
         datetime temp_budget_expiry
+        datetime created_at
+        string created_by
+        datetime updated_at
+        string updated_by
+    }
+    LiteLLM_CustomerOrganizationTable {
+        float spend
+        datetime budget_reset_at
+        string[] budget_ids
+        json budget_names
+        string budget_id FK
+        string customer_org_id PK
+        string alias
+        string default_budget_id FK
+        datetime created_at
+        string created_by
+        datetime updated_at
+        string updated_by
+    }
+    LiteLLM_CustomerTeamTable {
+        float spend
+        datetime budget_reset_at
+        string customer_team_id PK
+        string alias
+        string parent_org_id FK
+        string budget_id FK
+        datetime created_at
+        string created_by
+        datetime updated_at
+        string updated_by
+    }
+    LiteLLM_CustomerMemberTable {
+        float spend
+        datetime budget_reset_at
+        string customer_member_id PK
+        string alias
+        string parent_team_id FK
+        string budget_id FK
+        string budget_template_id FK
+        datetime budget_override_expires_at
         datetime created_at
         string created_by
         datetime updated_at
@@ -879,6 +926,19 @@ erDiagram
         datetime last_updated
         datetime ttl
     }
+    LiteLLM_ScheduledJobRun {
+        string id PK
+        string job_name
+        string lock_group
+        string schedule
+        datetime scheduled_for
+        scheduledjobrunstatus status
+        string claimed_by
+        datetime claimed_at
+        datetime lease_expires_at
+        datetime finished_at
+        datetime created_at
+    }
     LiteLLM_ManagedFileTable {
         string id PK
         string unified_file_id UK
@@ -1023,6 +1083,8 @@ erDiagram
         bigint request_count
         bigint successful_requests
         bigint failed_requests
+        bigint total_response_time_ms
+        bigint timed_requests
         datetime created_at
         datetime updated_at
     }
@@ -1201,6 +1263,7 @@ erDiagram
         json mcp_tool_permissions
         string[] access_agent_ids
         string[] access_skill_names
+        string[] access_vector_store_ids
         string[] assigned_team_ids
         string[] assigned_key_ids
         datetime created_at
@@ -1585,5 +1648,36 @@ erDiagram
         string created_by
         datetime updated_at
         string updated_by
+    }
+    LiteLLM_Alert {
+        bigint id PK
+        string detection_key UK
+        string type
+        string resource_type
+        string resource_id
+        string status
+        datetime window_start
+        datetime window_end
+        json evidence
+        datetime created_at
+        datetime updated_at
+        string updated_by
+    }
+    LiteLLM_PerformanceAlertState {
+        boolean enabled
+        int alerts_used
+        int id PK
+        string owner
+        datetime next_run_at
+        string day
+        string scope
+        string resume_after
+        boolean wrapped
+        int checked
+        int skipped
+        string start_scope
+        string start_after
+        datetime completed_at
+        datetime updated_at
     }
 ```

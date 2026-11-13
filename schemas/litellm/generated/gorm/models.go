@@ -13,33 +13,38 @@ import (
 )
 
 type LiteLLMBudgetTable struct {
-	BudgetID               string                               `gorm:"column:budget_id;primaryKey;type:char(36)" json:"budget_id"`
-	MaxBudget              *float64                             `gorm:"column:max_budget" json:"max_budget"`
-	SoftBudget             *float64                             `gorm:"column:soft_budget" json:"soft_budget"`
-	MaxParallelRequests    *int                                 `gorm:"column:max_parallel_requests" json:"max_parallel_requests"`
-	TpmLimit               *int64                               `gorm:"column:tpm_limit" json:"tpm_limit"`
-	RpmLimit               *int64                               `gorm:"column:rpm_limit" json:"rpm_limit"`
-	TpdLimit               *int64                               `gorm:"column:tpd_limit" json:"tpd_limit"`
-	ModelMaxBudget         datatypes.JSON                       `gorm:"column:model_max_budget" json:"model_max_budget"`
-	ModelTpmLimit          datatypes.JSON                       `gorm:"column:model_tpm_limit" json:"model_tpm_limit"`
-	ModelRpmLimit          datatypes.JSON                       `gorm:"column:model_rpm_limit" json:"model_rpm_limit"`
-	BudgetDuration         *string                              `gorm:"column:budget_duration" json:"budget_duration"`
-	BudgetResetAt          *DateTime                            `gorm:"column:budget_reset_at" json:"budget_reset_at"`
-	AllowedModels          []string                             `gorm:"column:allowed_models;serializer:json;not null" json:"allowed_models"`
-	TempBudgetIncrease     *float64                             `gorm:"column:temp_budget_increase" json:"temp_budget_increase"`
-	TempBudgetExpiry       *DateTime                            `gorm:"column:temp_budget_expiry" json:"temp_budget_expiry"`
-	CreatedAt              DateTime                             `gorm:"column:created_at;autoCreateTime:false;not null" json:"created_at"`
-	CreatedBy              string                               `gorm:"column:created_by;not null" json:"created_by"`
-	UpdatedAt              DateTime                             `gorm:"column:updated_at;autoUpdateTime:false;not null" json:"updated_at"`
-	UpdatedBy              string                               `gorm:"column:updated_by;not null" json:"updated_by"`
-	Organization           []LiteLLMOrganizationTable           `gorm:"foreignKey:BudgetID;references:BudgetID"`
-	Projects               []LiteLLMProjectTable                `gorm:"foreignKey:BudgetID;references:BudgetID"`
-	Keys                   []LiteLLMVerificationToken           `gorm:"foreignKey:BudgetID;references:BudgetID"`
-	EndUsers               []LiteLLMEndUserTable                `gorm:"foreignKey:BudgetID;references:BudgetID"`
-	Tags                   []LiteLLMTagTable                    `gorm:"foreignKey:BudgetID;references:BudgetID"`
-	ModelAccessGroups      []LiteLLMModelAccessGroupBudgetTable `gorm:"foreignKey:BudgetID;references:BudgetID"`
-	TeamMembership         []LiteLLMTeamMembership              `gorm:"foreignKey:BudgetID;references:BudgetID"`
-	OrganizationMembership []LiteLLMOrganizationMembership      `gorm:"foreignKey:BudgetID;references:BudgetID"`
+	BudgetID                     string                               `gorm:"column:budget_id;primaryKey;type:char(36)" json:"budget_id"`
+	MaxBudget                    *float64                             `gorm:"column:max_budget" json:"max_budget"`
+	SoftBudget                   *float64                             `gorm:"column:soft_budget" json:"soft_budget"`
+	MaxParallelRequests          *int                                 `gorm:"column:max_parallel_requests" json:"max_parallel_requests"`
+	TpmLimit                     *int64                               `gorm:"column:tpm_limit" json:"tpm_limit"`
+	RpmLimit                     *int64                               `gorm:"column:rpm_limit" json:"rpm_limit"`
+	TpdLimit                     *int64                               `gorm:"column:tpd_limit" json:"tpd_limit"`
+	ModelMaxBudget               datatypes.JSON                       `gorm:"column:model_max_budget" json:"model_max_budget"`
+	ModelTpmLimit                datatypes.JSON                       `gorm:"column:model_tpm_limit" json:"model_tpm_limit"`
+	ModelRpmLimit                datatypes.JSON                       `gorm:"column:model_rpm_limit" json:"model_rpm_limit"`
+	BudgetDuration               *string                              `gorm:"column:budget_duration" json:"budget_duration"`
+	BudgetResetAt                *DateTime                            `gorm:"column:budget_reset_at" json:"budget_reset_at"`
+	AllowedModels                []string                             `gorm:"column:allowed_models;serializer:json;not null" json:"allowed_models"`
+	TempBudgetIncrease           *float64                             `gorm:"column:temp_budget_increase" json:"temp_budget_increase"`
+	TempBudgetExpiry             *DateTime                            `gorm:"column:temp_budget_expiry" json:"temp_budget_expiry"`
+	CreatedAt                    DateTime                             `gorm:"column:created_at;autoCreateTime:false;not null" json:"created_at"`
+	CreatedBy                    string                               `gorm:"column:created_by;not null" json:"created_by"`
+	UpdatedAt                    DateTime                             `gorm:"column:updated_at;autoUpdateTime:false;not null" json:"updated_at"`
+	UpdatedBy                    string                               `gorm:"column:updated_by;not null" json:"updated_by"`
+	CustomerOrganizationDefaults []LiteLLMCustomerOrganizationTable   `gorm:"foreignKey:DefaultBudgetID;references:BudgetID"`
+	CustomerOrganizations        []LiteLLMCustomerOrganizationTable   `gorm:"foreignKey:BudgetID;references:BudgetID"`
+	CustomerMemberTemplates      []LiteLLMCustomerMemberTable         `gorm:"foreignKey:BudgetTemplateID;references:BudgetID;constraint:OnDelete:RESTRICT"`
+	CustomerTeams                []LiteLLMCustomerTeamTable           `gorm:"foreignKey:BudgetID;references:BudgetID"`
+	CustomerMembers              []LiteLLMCustomerMemberTable         `gorm:"foreignKey:BudgetID;references:BudgetID;constraint:OnDelete:RESTRICT"`
+	Organization                 []LiteLLMOrganizationTable           `gorm:"foreignKey:BudgetID;references:BudgetID"`
+	Projects                     []LiteLLMProjectTable                `gorm:"foreignKey:BudgetID;references:BudgetID"`
+	Keys                         []LiteLLMVerificationToken           `gorm:"foreignKey:BudgetID;references:BudgetID"`
+	EndUsers                     []LiteLLMEndUserTable                `gorm:"foreignKey:BudgetID;references:BudgetID"`
+	Tags                         []LiteLLMTagTable                    `gorm:"foreignKey:BudgetID;references:BudgetID"`
+	ModelAccessGroups            []LiteLLMModelAccessGroupBudgetTable `gorm:"foreignKey:BudgetID;references:BudgetID"`
+	TeamMembership               []LiteLLMTeamMembership              `gorm:"foreignKey:BudgetID;references:BudgetID"`
+	OrganizationMembership       []LiteLLMOrganizationMembership      `gorm:"foreignKey:BudgetID;references:BudgetID"`
 }
 
 func (LiteLLMBudgetTable) TableName() string {
@@ -61,6 +66,136 @@ func (m *LiteLLMBudgetTable) BeforeCreate(tx *gorm.DB) error {
 }
 
 func (*LiteLLMBudgetTable) BeforeUpdate(tx *gorm.DB) error {
+	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
+	if !tx.Statement.Changed("UpdatedAt") {
+		tx.Statement.SetColumn("UpdatedAt", DateTime{Time: now})
+	}
+	return nil
+}
+
+type LiteLLMCustomerOrganizationTable struct {
+	Spend           float64                    `gorm:"column:spend;default:0;not null" json:"spend"`
+	BudgetResetAt   *DateTime                  `gorm:"column:budget_reset_at" json:"budget_reset_at"`
+	BudgetIds       []string                   `gorm:"column:budget_ids;serializer:json;not null" json:"budget_ids"`
+	BudgetNames     datatypes.JSON             `gorm:"column:budget_names;default:'{}';not null" json:"budget_names"`
+	BudgetID        *string                    `gorm:"column:budget_id" json:"budget_id"`
+	CustomerOrgID   string                     `gorm:"column:customer_org_id;primaryKey;type:char(36)" json:"customer_org_id"`
+	Alias           *string                    `gorm:"column:alias" json:"alias"`
+	DefaultBudgetID *string                    `gorm:"column:default_budget_id" json:"default_budget_id"`
+	CreatedAt       DateTime                   `gorm:"column:created_at;autoCreateTime:false;not null" json:"created_at"`
+	CreatedBy       string                     `gorm:"column:created_by;not null" json:"created_by"`
+	UpdatedAt       DateTime                   `gorm:"column:updated_at;autoUpdateTime:false;not null" json:"updated_at"`
+	UpdatedBy       string                     `gorm:"column:updated_by;not null" json:"updated_by"`
+	Budget          *LiteLLMBudgetTable        `gorm:"foreignKey:BudgetID;references:BudgetID"`
+	DefaultBudget   *LiteLLMBudgetTable        `gorm:"foreignKey:DefaultBudgetID;references:BudgetID"`
+	Teams           []LiteLLMCustomerTeamTable `gorm:"foreignKey:ParentOrgID;references:CustomerOrgID"`
+}
+
+func (LiteLLMCustomerOrganizationTable) TableName() string {
+	return "LiteLLM_CustomerOrganizationTable"
+}
+
+func (m *LiteLLMCustomerOrganizationTable) BeforeCreate(tx *gorm.DB) error {
+	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
+	if m.CustomerOrgID == "" {
+		m.CustomerOrgID = uuid.NewString()
+	}
+	if m.CreatedAt.IsZero() {
+		m.CreatedAt = DateTime{Time: now}
+	}
+	if m.UpdatedAt.IsZero() {
+		m.UpdatedAt = DateTime{Time: now}
+	}
+	return nil
+}
+
+func (*LiteLLMCustomerOrganizationTable) BeforeUpdate(tx *gorm.DB) error {
+	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
+	if !tx.Statement.Changed("UpdatedAt") {
+		tx.Statement.SetColumn("UpdatedAt", DateTime{Time: now})
+	}
+	return nil
+}
+
+type LiteLLMCustomerTeamTable struct {
+	Spend          float64                           `gorm:"column:spend;default:0;not null" json:"spend"`
+	BudgetResetAt  *DateTime                         `gorm:"column:budget_reset_at" json:"budget_reset_at"`
+	CustomerTeamID string                            `gorm:"column:customer_team_id;primaryKey;type:char(36)" json:"customer_team_id"`
+	Alias          *string                           `gorm:"column:alias" json:"alias"`
+	ParentOrgID    string                            `gorm:"column:parent_org_id;index:LiteLLM_CustomerTeamTable_parent_org_id_idx;not null" json:"parent_org_id"`
+	BudgetID       *string                           `gorm:"column:budget_id" json:"budget_id"`
+	CreatedAt      DateTime                          `gorm:"column:created_at;autoCreateTime:false;not null" json:"created_at"`
+	CreatedBy      string                            `gorm:"column:created_by;not null" json:"created_by"`
+	UpdatedAt      DateTime                          `gorm:"column:updated_at;autoUpdateTime:false;not null" json:"updated_at"`
+	UpdatedBy      string                            `gorm:"column:updated_by;not null" json:"updated_by"`
+	ParentOrg      *LiteLLMCustomerOrganizationTable `gorm:"foreignKey:ParentOrgID;references:CustomerOrgID"`
+	Budget         *LiteLLMBudgetTable               `gorm:"foreignKey:BudgetID;references:BudgetID"`
+	Members        []LiteLLMCustomerMemberTable      `gorm:"foreignKey:ParentTeamID;references:CustomerTeamID"`
+}
+
+func (LiteLLMCustomerTeamTable) TableName() string {
+	return "LiteLLM_CustomerTeamTable"
+}
+
+func (m *LiteLLMCustomerTeamTable) BeforeCreate(tx *gorm.DB) error {
+	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
+	if m.CustomerTeamID == "" {
+		m.CustomerTeamID = uuid.NewString()
+	}
+	if m.CreatedAt.IsZero() {
+		m.CreatedAt = DateTime{Time: now}
+	}
+	if m.UpdatedAt.IsZero() {
+		m.UpdatedAt = DateTime{Time: now}
+	}
+	return nil
+}
+
+func (*LiteLLMCustomerTeamTable) BeforeUpdate(tx *gorm.DB) error {
+	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
+	if !tx.Statement.Changed("UpdatedAt") {
+		tx.Statement.SetColumn("UpdatedAt", DateTime{Time: now})
+	}
+	return nil
+}
+
+type LiteLLMCustomerMemberTable struct {
+	Spend                   float64                   `gorm:"column:spend;default:0;not null" json:"spend"`
+	BudgetResetAt           *DateTime                 `gorm:"column:budget_reset_at" json:"budget_reset_at"`
+	CustomerMemberID        string                    `gorm:"column:customer_member_id;primaryKey;type:char(36)" json:"customer_member_id"`
+	Alias                   *string                   `gorm:"column:alias" json:"alias"`
+	ParentTeamID            string                    `gorm:"column:parent_team_id;index:LiteLLM_CustomerMemberTable_parent_team_id_idx;not null" json:"parent_team_id"`
+	BudgetID                *string                   `gorm:"column:budget_id" json:"budget_id"`
+	BudgetTemplateID        *string                   `gorm:"column:budget_template_id;index:LiteLLM_CustomerMemberTable_budget_template_id_idx" json:"budget_template_id"`
+	BudgetOverrideExpiresAt *DateTime                 `gorm:"column:budget_override_expires_at" json:"budget_override_expires_at"`
+	CreatedAt               DateTime                  `gorm:"column:created_at;autoCreateTime:false;not null" json:"created_at"`
+	CreatedBy               string                    `gorm:"column:created_by;not null" json:"created_by"`
+	UpdatedAt               DateTime                  `gorm:"column:updated_at;autoUpdateTime:false;not null" json:"updated_at"`
+	UpdatedBy               string                    `gorm:"column:updated_by;not null" json:"updated_by"`
+	ParentTeam              *LiteLLMCustomerTeamTable `gorm:"foreignKey:ParentTeamID;references:CustomerTeamID"`
+	Budget                  *LiteLLMBudgetTable       `gorm:"foreignKey:BudgetID;references:BudgetID"`
+	BudgetTemplate          *LiteLLMBudgetTable       `gorm:"foreignKey:BudgetTemplateID;references:BudgetID"`
+}
+
+func (LiteLLMCustomerMemberTable) TableName() string {
+	return "LiteLLM_CustomerMemberTable"
+}
+
+func (m *LiteLLMCustomerMemberTable) BeforeCreate(tx *gorm.DB) error {
+	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
+	if m.CustomerMemberID == "" {
+		m.CustomerMemberID = uuid.NewString()
+	}
+	if m.CreatedAt.IsZero() {
+		m.CreatedAt = DateTime{Time: now}
+	}
+	if m.UpdatedAt.IsZero() {
+		m.UpdatedAt = DateTime{Time: now}
+	}
+	return nil
+}
+
+func (*LiteLLMCustomerMemberTable) BeforeUpdate(tx *gorm.DB) error {
 	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
 	if !tx.Statement.Changed("UpdatedAt") {
 		tx.Statement.SetColumn("UpdatedAt", DateTime{Time: now})
@@ -1466,8 +1601,8 @@ func (m *LiteLLMAuditLog) BeforeCreate(tx *gorm.DB) error {
 type LiteLLMDailyUserSpend struct {
 	ID                                 string   `gorm:"column:id;primaryKey;type:char(36)" json:"id"`
 	UserID                             *string  `gorm:"column:user_id;uniqueIndex:LiteLLM_DailyUserSpend_user_id_date_api_key_model_custom_llm_provider_mcp_namespaced_tool_name_endpoint_key;index:LiteLLM_DailyUserSpend_user_id_date_idx" json:"user_id"`
-	Date                               string   `gorm:"column:date;uniqueIndex:LiteLLM_DailyUserSpend_user_id_date_api_key_model_custom_llm_provider_mcp_namespaced_tool_name_endpoint_key;index:LiteLLM_DailyUserSpend_date_idx;index:LiteLLM_DailyUserSpend_user_id_date_idx;not null" json:"date"`
-	APIKey                             string   `gorm:"column:api_key;uniqueIndex:LiteLLM_DailyUserSpend_user_id_date_api_key_model_custom_llm_provider_mcp_namespaced_tool_name_endpoint_key;index:LiteLLM_DailyUserSpend_api_key_idx;not null" json:"api_key"`
+	Date                               string   `gorm:"column:date;uniqueIndex:LiteLLM_DailyUserSpend_user_id_date_api_key_model_custom_llm_provider_mcp_namespaced_tool_name_endpoint_key;index:LiteLLM_DailyUserSpend_date_idx;index:LiteLLM_DailyUserSpend_user_id_date_idx;index:LiteLLM_DailyUserSpend_api_key_date_idx;not null" json:"date"`
+	APIKey                             string   `gorm:"column:api_key;uniqueIndex:LiteLLM_DailyUserSpend_user_id_date_api_key_model_custom_llm_provider_mcp_namespaced_tool_name_endpoint_key;index:LiteLLM_DailyUserSpend_api_key_idx;index:LiteLLM_DailyUserSpend_api_key_date_idx;not null" json:"api_key"`
 	Model                              *string  `gorm:"column:model;uniqueIndex:LiteLLM_DailyUserSpend_user_id_date_api_key_model_custom_llm_provider_mcp_namespaced_tool_name_endpoint_key;index:LiteLLM_DailyUserSpend_model_idx" json:"model"`
 	ModelGroup                         *string  `gorm:"column:model_group" json:"model_group"`
 	CustomLlmProvider                  *string  `gorm:"column:custom_llm_provider;uniqueIndex:LiteLLM_DailyUserSpend_user_id_date_api_key_model_custom_llm_provider_mcp_namespaced_tool_name_endpoint_key" json:"custom_llm_provider"`
@@ -1900,6 +2035,35 @@ func (m *LiteLLMCronJob) BeforeCreate(tx *gorm.DB) error {
 	return nil
 }
 
+type LiteLLMScheduledJobRun struct {
+	ID             string    `gorm:"column:id;primaryKey;type:char(36)" json:"id"`
+	JobName        string    `gorm:"column:job_name;index:LiteLLM_ScheduledJobRun_job_name_status_idx;not null" json:"job_name"`
+	LockGroup      string    `gorm:"column:lock_group;index:LiteLLM_ScheduledJobRun_lock_group_status_idx;not null" json:"lock_group"`
+	Schedule       string    `gorm:"column:schedule;not null" json:"schedule"`
+	ScheduledFor   DateTime  `gorm:"column:scheduled_for;type:timestamptz(3);not null" json:"scheduled_for"`
+	Status         string    `gorm:"column:status;index:LiteLLM_ScheduledJobRun_job_name_status_idx;index:LiteLLM_ScheduledJobRun_lock_group_status_idx;default:'PENDING';not null" json:"status"`
+	ClaimedBy      *string   `gorm:"column:claimed_by" json:"claimed_by"`
+	ClaimedAt      *DateTime `gorm:"column:claimed_at;type:timestamptz(3)" json:"claimed_at"`
+	LeaseExpiresAt *DateTime `gorm:"column:lease_expires_at;type:timestamptz(3)" json:"lease_expires_at"`
+	FinishedAt     *DateTime `gorm:"column:finished_at;type:timestamptz(3)" json:"finished_at"`
+	CreatedAt      DateTime  `gorm:"column:created_at;type:timestamptz(3);autoCreateTime:false;not null" json:"created_at"`
+}
+
+func (LiteLLMScheduledJobRun) TableName() string {
+	return "LiteLLM_ScheduledJobRun"
+}
+
+func (m *LiteLLMScheduledJobRun) BeforeCreate(tx *gorm.DB) error {
+	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
+	if m.ID == "" {
+		m.ID = uuid.NewString()
+	}
+	if m.CreatedAt.IsZero() {
+		m.CreatedAt = DateTime{Time: now}
+	}
+	return nil
+}
+
 type LiteLLMManagedFileTable struct {
 	ID               string         `gorm:"column:id;primaryKey;type:char(36)" json:"id"`
 	UnifiedFileID    string         `gorm:"column:unified_file_id;uniqueIndex;index:LiteLLM_ManagedFileTable_unified_file_id_idx;not null" json:"unified_file_id"`
@@ -2287,19 +2451,21 @@ func (*LiteLLMDailyToolSpend) BeforeUpdate(tx *gorm.DB) error {
 }
 
 type LiteLLMDailyModelUsage struct {
-	Date               string   `gorm:"column:date;primaryKey;index:LiteLLM_DailyModelUsage_date_idx" json:"date"`
-	ModelGroup         string   `gorm:"column:model_group;primaryKey;index:LiteLLM_DailyModelUsage_model_group_idx" json:"model_group"`
-	Model              string   `gorm:"column:model;primaryKey" json:"model"`
-	CustomLlmProvider  string   `gorm:"column:custom_llm_provider;primaryKey" json:"custom_llm_provider"`
-	TaskType           string   `gorm:"column:task_type;primaryKey" json:"task_type"`
-	Spend              float64  `gorm:"column:spend;default:0;not null" json:"spend"`
-	PromptTokens       int64    `gorm:"column:prompt_tokens;default:0;not null" json:"prompt_tokens"`
-	CompletionTokens   int64    `gorm:"column:completion_tokens;default:0;not null" json:"completion_tokens"`
-	RequestCount       int64    `gorm:"column:request_count;default:0;not null" json:"request_count"`
-	SuccessfulRequests int64    `gorm:"column:successful_requests;default:0;not null" json:"successful_requests"`
-	FailedRequests     int64    `gorm:"column:failed_requests;default:0;not null" json:"failed_requests"`
-	CreatedAt          DateTime `gorm:"column:created_at;autoCreateTime:false;not null" json:"created_at"`
-	UpdatedAt          DateTime `gorm:"column:updated_at;autoUpdateTime:false;not null" json:"updated_at"`
+	Date                string   `gorm:"column:date;primaryKey;index:LiteLLM_DailyModelUsage_date_idx" json:"date"`
+	ModelGroup          string   `gorm:"column:model_group;primaryKey;index:LiteLLM_DailyModelUsage_model_group_idx" json:"model_group"`
+	Model               string   `gorm:"column:model;primaryKey" json:"model"`
+	CustomLlmProvider   string   `gorm:"column:custom_llm_provider;primaryKey" json:"custom_llm_provider"`
+	TaskType            string   `gorm:"column:task_type;primaryKey" json:"task_type"`
+	Spend               float64  `gorm:"column:spend;default:0;not null" json:"spend"`
+	PromptTokens        int64    `gorm:"column:prompt_tokens;default:0;not null" json:"prompt_tokens"`
+	CompletionTokens    int64    `gorm:"column:completion_tokens;default:0;not null" json:"completion_tokens"`
+	RequestCount        int64    `gorm:"column:request_count;default:0;not null" json:"request_count"`
+	SuccessfulRequests  int64    `gorm:"column:successful_requests;default:0;not null" json:"successful_requests"`
+	FailedRequests      int64    `gorm:"column:failed_requests;default:0;not null" json:"failed_requests"`
+	TotalResponseTimeMs int64    `gorm:"column:total_response_time_ms;default:0;not null" json:"total_response_time_ms"`
+	TimedRequests       int64    `gorm:"column:timed_requests;default:0;not null" json:"timed_requests"`
+	CreatedAt           DateTime `gorm:"column:created_at;autoCreateTime:false;not null" json:"created_at"`
+	UpdatedAt           DateTime `gorm:"column:updated_at;autoUpdateTime:false;not null" json:"updated_at"`
 }
 
 func (LiteLLMDailyModelUsage) TableName() string {
@@ -2879,20 +3045,21 @@ func (*LiteLLMToolTable) BeforeUpdate(tx *gorm.DB) error {
 }
 
 type LiteLLMAccessGroupTable struct {
-	AccessGroupID      string         `gorm:"column:access_group_id;primaryKey;type:char(36)" json:"access_group_id"`
-	AccessGroupName    string         `gorm:"column:access_group_name;uniqueIndex;not null" json:"access_group_name"`
-	Description        *string        `gorm:"column:description" json:"description"`
-	AccessModelNames   []string       `gorm:"column:access_model_names;serializer:json;not null" json:"access_model_names"`
-	AccessMcpServerIds []string       `gorm:"column:access_mcp_server_ids;serializer:json;not null" json:"access_mcp_server_ids"`
-	McpToolPermissions datatypes.JSON `gorm:"column:mcp_tool_permissions" json:"mcp_tool_permissions"`
-	AccessAgentIds     []string       `gorm:"column:access_agent_ids;serializer:json;not null" json:"access_agent_ids"`
-	AccessSkillNames   []string       `gorm:"column:access_skill_names;serializer:json;not null" json:"access_skill_names"`
-	AssignedTeamIds    []string       `gorm:"column:assigned_team_ids;serializer:json;not null" json:"assigned_team_ids"`
-	AssignedKeyIds     []string       `gorm:"column:assigned_key_ids;serializer:json;not null" json:"assigned_key_ids"`
-	CreatedAt          DateTime       `gorm:"column:created_at;autoCreateTime:false;not null" json:"created_at"`
-	CreatedBy          *string        `gorm:"column:created_by" json:"created_by"`
-	UpdatedAt          DateTime       `gorm:"column:updated_at;autoUpdateTime:false;not null" json:"updated_at"`
-	UpdatedBy          *string        `gorm:"column:updated_by" json:"updated_by"`
+	AccessGroupID        string         `gorm:"column:access_group_id;primaryKey;type:char(36)" json:"access_group_id"`
+	AccessGroupName      string         `gorm:"column:access_group_name;uniqueIndex;not null" json:"access_group_name"`
+	Description          *string        `gorm:"column:description" json:"description"`
+	AccessModelNames     []string       `gorm:"column:access_model_names;serializer:json;not null" json:"access_model_names"`
+	AccessMcpServerIds   []string       `gorm:"column:access_mcp_server_ids;serializer:json;not null" json:"access_mcp_server_ids"`
+	McpToolPermissions   datatypes.JSON `gorm:"column:mcp_tool_permissions" json:"mcp_tool_permissions"`
+	AccessAgentIds       []string       `gorm:"column:access_agent_ids;serializer:json;not null" json:"access_agent_ids"`
+	AccessSkillNames     []string       `gorm:"column:access_skill_names;serializer:json;not null" json:"access_skill_names"`
+	AccessVectorStoreIds []string       `gorm:"column:access_vector_store_ids;serializer:json;not null" json:"access_vector_store_ids"`
+	AssignedTeamIds      []string       `gorm:"column:assigned_team_ids;serializer:json;not null" json:"assigned_team_ids"`
+	AssignedKeyIds       []string       `gorm:"column:assigned_key_ids;serializer:json;not null" json:"assigned_key_ids"`
+	CreatedAt            DateTime       `gorm:"column:created_at;autoCreateTime:false;not null" json:"created_at"`
+	CreatedBy            *string        `gorm:"column:created_by" json:"created_by"`
+	UpdatedAt            DateTime       `gorm:"column:updated_at;autoUpdateTime:false;not null" json:"updated_at"`
+	UpdatedBy            *string        `gorm:"column:updated_by" json:"updated_by"`
 }
 
 func (LiteLLMAccessGroupTable) TableName() string {
@@ -3700,6 +3867,82 @@ func (m *LiteLLMSubscriptionAccountTable) BeforeCreate(tx *gorm.DB) error {
 }
 
 func (*LiteLLMSubscriptionAccountTable) BeforeUpdate(tx *gorm.DB) error {
+	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
+	if !tx.Statement.Changed("UpdatedAt") {
+		tx.Statement.SetColumn("UpdatedAt", DateTime{Time: now})
+	}
+	return nil
+}
+
+type LiteLLMAlert struct {
+	ID           int64          `gorm:"column:id;primaryKey;autoIncrement;index:LiteLLM_Alert_status_id_idx" json:"id"`
+	DetectionKey string         `gorm:"column:detection_key;uniqueIndex;type:varchar(64);not null" json:"detection_key"`
+	Type         string         `gorm:"column:type;type:varchar(32);not null" json:"type"`
+	ResourceType string         `gorm:"column:resource_type;type:varchar(16);not null" json:"resource_type"`
+	ResourceID   string         `gorm:"column:resource_id;type:varchar(1024);not null" json:"resource_id"`
+	Status       *string        `gorm:"column:status;index:LiteLLM_Alert_status_id_idx;type:varchar(16);default:'open';not null" json:"status"`
+	WindowStart  DateTime       `gorm:"column:window_start;not null" json:"window_start"`
+	WindowEnd    DateTime       `gorm:"column:window_end;not null" json:"window_end"`
+	Evidence     datatypes.JSON `gorm:"column:evidence;not null" json:"evidence"`
+	CreatedAt    DateTime       `gorm:"column:created_at;autoCreateTime:false;not null" json:"created_at"`
+	UpdatedAt    DateTime       `gorm:"column:updated_at;autoUpdateTime:false;not null" json:"updated_at"`
+	UpdatedBy    *string        `gorm:"column:updated_by;type:varchar(1024)" json:"updated_by"`
+}
+
+func (LiteLLMAlert) TableName() string {
+	return "LiteLLM_Alert"
+}
+
+func (m *LiteLLMAlert) BeforeCreate(tx *gorm.DB) error {
+	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
+	if m.CreatedAt.IsZero() {
+		m.CreatedAt = DateTime{Time: now}
+	}
+	if m.UpdatedAt.IsZero() {
+		m.UpdatedAt = DateTime{Time: now}
+	}
+	return nil
+}
+
+func (*LiteLLMAlert) BeforeUpdate(tx *gorm.DB) error {
+	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
+	if !tx.Statement.Changed("UpdatedAt") {
+		tx.Statement.SetColumn("UpdatedAt", DateTime{Time: now})
+	}
+	return nil
+}
+
+type LiteLLMPerformanceAlertState struct {
+	Enabled     *bool     `gorm:"column:enabled;default:true;not null" json:"enabled"`
+	AlertsUsed  *int      `gorm:"column:alerts_used" json:"alerts_used"`
+	ID          int       `gorm:"column:id;primaryKey" json:"id"`
+	Owner       string    `gorm:"column:owner;type:varchar(32);not null" json:"owner"`
+	NextRunAt   DateTime  `gorm:"column:next_run_at;type:timestamptz(3);not null" json:"next_run_at"`
+	Day         *string   `gorm:"column:day;type:varchar(10)" json:"day"`
+	Scope       *string   `gorm:"column:scope;type:varchar(16)" json:"scope"`
+	ResumeAfter string    `gorm:"column:resume_after;type:varchar(1024);default:'';not null" json:"resume_after"`
+	Wrapped     bool      `gorm:"column:wrapped;default:false;not null" json:"wrapped"`
+	Checked     int       `gorm:"column:checked;default:0;not null" json:"checked"`
+	Skipped     int       `gorm:"column:skipped;default:0;not null" json:"skipped"`
+	StartScope  *string   `gorm:"column:start_scope;type:varchar(16)" json:"start_scope"`
+	StartAfter  string    `gorm:"column:start_after;type:varchar(1024);default:'';not null" json:"start_after"`
+	CompletedAt *DateTime `gorm:"column:completed_at" json:"completed_at"`
+	UpdatedAt   DateTime  `gorm:"column:updated_at;autoUpdateTime:false;not null" json:"updated_at"`
+}
+
+func (LiteLLMPerformanceAlertState) TableName() string {
+	return "LiteLLM_PerformanceAlertState"
+}
+
+func (m *LiteLLMPerformanceAlertState) BeforeCreate(tx *gorm.DB) error {
+	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
+	if m.UpdatedAt.IsZero() {
+		m.UpdatedAt = DateTime{Time: now}
+	}
+	return nil
+}
+
+func (*LiteLLMPerformanceAlertState) BeforeUpdate(tx *gorm.DB) error {
 	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
 	if !tx.Statement.Changed("UpdatedAt") {
 		tx.Statement.SetColumn("UpdatedAt", DateTime{Time: now})

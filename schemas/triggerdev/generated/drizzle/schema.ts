@@ -51,6 +51,8 @@ export const organizationAccessTokenTypeEnum = pgEnum('OrganizationAccessTokenTy
 
 export const orgMemberRoleEnum = pgEnum('OrgMemberRole', ['ADMIN', 'MEMBER'])
 
+export const apiKeyIssuerEnum = pgEnum('ApiKeyIssuer', ['USER', 'SYSTEM'])
+
 export const runtimeEnvironmentTypeEnum = pgEnum('RuntimeEnvironmentType', [
   'PRODUCTION',
   'STAGING',
@@ -761,6 +763,7 @@ export const apiKeys = pgTable(
     description: text('description'),
     runtimeEnvironmentId: text('runtime_environment_id').notNull(),
     createdByUserId: text('created_by_user_id'),
+    issuedBy: apiKeyIssuerEnum('issued_by').notNull().default('USER'),
     presetId: text('preset_id'),
     scopes: text('scopes').array(),
     allowedIpRanges: text('allowed_ip_ranges').array().default([]),
@@ -778,6 +781,12 @@ export const apiKeys = pgTable(
     uniqueIndex('api_keys_key_hash_key').on(table.keyHash),
     index('api_keys_runtime_environment_id_revoked_at_created_at_idx').on(
       table.runtimeEnvironmentId,
+      table.revokedAt,
+      table.createdAt,
+    ),
+    index('api_keys_env_issued_by_revoked_at_created_at_idx').on(
+      table.runtimeEnvironmentId,
+      table.issuedBy,
       table.revokedAt,
       table.createdAt,
     ),

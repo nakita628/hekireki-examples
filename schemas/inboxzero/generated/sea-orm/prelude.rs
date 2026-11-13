@@ -9,6 +9,8 @@ pub use super::availability_schedule::Entity as AvailabilitySchedule;
 pub use super::availability_window::Entity as AvailabilityWindow;
 pub use super::booking::Entity as Booking;
 pub use super::booking_link::Entity as BookingLink;
+pub use super::bulk_inbox_action_job::Entity as BulkInboxActionJob;
+pub use super::bulk_inbox_action_thread::Entity as BulkInboxActionThread;
 pub use super::calendar::Entity as Calendar;
 pub use super::calendar_connection::Entity as CalendarConnection;
 pub use super::category::Entity as Category;

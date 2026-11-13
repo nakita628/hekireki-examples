@@ -86,6 +86,7 @@ class EmailAccountEntity(
     val categories by CategoryEntity referrersOn CategoryTable.emailAccountId
     val threadTrackers by ThreadTrackerEntity referrersOn ThreadTrackerTable.emailAccountId
     val cleanupJobs by CleanupJobEntity referrersOn CleanupJobTable.emailAccountId
+    val bulkInboxActionJobs by BulkInboxActionJobEntity referrersOn BulkInboxActionJobTable.emailAccountId
     val cleanupThreads by CleanupThreadEntity referrersOn CleanupThreadTable.emailAccountId
     val emailMessages by EmailMessageEntity referrersOn EmailMessageTable.emailAccountId
     val emailTokens by EmailTokenEntity referrersOn EmailTokenTable.emailAccountId

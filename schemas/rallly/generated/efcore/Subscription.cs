@@ -40,6 +40,18 @@ public partial class Subscription
 
     public string SpaceId { get; set; } = null!;
 
+    public string? ApiAddonItemId { get; set; }
+
+    public string? ApiAddonPriceId { get; set; }
+
+    public int? ApiAddonAmount { get; set; }
+
+    public int? ApiPollLimit { get; set; }
+
+    public int? ApiPollRetainedLimit { get; set; }
+
+    public DateTime? ApiPollRetainedUntil { get; set; }
+
     public virtual User User { get; set; } = null!;
 
     public virtual Space Space { get; set; } = null!;

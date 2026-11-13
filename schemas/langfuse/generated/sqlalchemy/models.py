@@ -352,7 +352,7 @@ class GatewayAiConnection(Base):
     id: Mapped[str] = mapped_column(primary_key=True)
     organization_id: Mapped[str] = mapped_column(ForeignKey("organizations.id", ondelete="CASCADE", onupdate="CASCADE", name="gateway_ai_connections_organization_id_fkey"))
     name: Mapped[str]
-    provider: Mapped[str] = mapped_column(Enum("openai", "anthropic", "bedrock", "openrouter", "xai", "vercel", name="GatewayProvider"))
+    provider: Mapped[str] = mapped_column(Enum("openai", "anthropic", "bedrock", "openrouter", "xai", "vercel", "azure", "google_ai_studio", name="GatewayProvider"))
     encrypted_credential: Mapped[str] = mapped_column("encrypted_credentials")
     display_secret: Mapped[str] = mapped_column("display_secret_key")
     created_by_id: Mapped[Optional[str]]

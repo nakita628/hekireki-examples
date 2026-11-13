@@ -164,6 +164,8 @@ export type ThreadTrackerType = 'AWAITING' | 'NEEDS_REPLY' | 'NEEDS_ACTION'
 
 export type ProcessorType = 'LEMON_SQUEEZY' | 'STRIPE'
 
+export type BulkInboxActionJobStatus = 'RUNNING' | 'COMPLETED' | 'FAILED' | 'CANCELLED'
+
 export type CleanAction = 'ARCHIVE' | 'MARK_READ'
 
 export type SystemType =
@@ -981,6 +983,39 @@ export interface CleanupThread {
   archived: boolean
   jobId: string
   emailAccountId: string
+}
+
+export interface BulkInboxActionJob {
+  id: string
+  createdAt: Generated<Timestamp>
+  updatedAt: Timestamp
+  status: Generated<BulkInboxActionJobStatus>
+  search: unknown
+  action: string
+  labelId: string | null
+  labelName: string | null
+  instruction: string | null
+  pageToken: string | null
+  rateLimitedUntil: Timestamp | null
+  leaseExpiresAt: Timestamp | null
+  chunkToken: string | null
+  recoveryCount: Generated<number>
+  processedCount: Generated<number>
+  matchedCount: Generated<number>
+  actedCount: Generated<number>
+  skippedCount: Generated<number>
+  failedCount: Generated<number>
+  limitReached: Generated<boolean>
+  error: string | null
+  completedAt: Timestamp | null
+  confirmationKey: string
+  chatId: string | null
+  emailAccountId: string
+}
+
+export interface BulkInboxActionThread {
+  jobId: string
+  threadId: string
 }
 
 export interface Knowledge {
@@ -1838,6 +1873,8 @@ export interface DB {
   ThreadTracker: ThreadTracker
   CleanupJob: CleanupJob
   CleanupThread: CleanupThread
+  BulkInboxActionJob: BulkInboxActionJob
+  BulkInboxActionThread: BulkInboxActionThread
   Knowledge: Knowledge
   Snippet: Snippet
   EmailSignature: EmailSignature

@@ -184,6 +184,8 @@ class UserApiToken(Base):
     type: Mapped[Optional[str]]
     name: Mapped[Optional[str]]
     expires_at: Mapped[Optional[datetime]] = mapped_column("expiresAt")
+    workspace_id: Mapped[Optional[str]] = mapped_column("workspaceId")
+    role: Mapped[Optional[str]]
     oauth_client_id: Mapped[Optional[str]] = mapped_column("oauthClientId", ForeignKey("OAuthClient.id", ondelete="SET NULL", onupdate="CASCADE", name="UserApiToken_oauthClientId_fkey"))
 
     user: Mapped["UserProfile"] = relationship(back_populates="tokens")

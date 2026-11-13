@@ -28,6 +28,8 @@ class UserApiToken extends Model
         'type',
         'name',
         'expiresAt',
+        'workspaceId',
+        'role',
         'oauthClientId',
     ];
 

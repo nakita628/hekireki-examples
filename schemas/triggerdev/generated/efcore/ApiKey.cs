@@ -25,6 +25,8 @@ public partial class ApiKey
 
     public string? CreatedByUserId { get; set; }
 
+    public ApiKeyIssuer IssuedBy { get; set; } = ApiKeyIssuer.User;
+
     public string? PresetId { get; set; }
 
     public List<string>? Scopes { get; set; }

@@ -525,17 +525,18 @@ type APIKey struct {
 	KeyHash              string    `gorm:"column:key_hash;uniqueIndex;not null" json:"key_hash"`
 	LastFour             string    `gorm:"column:last_four;not null" json:"last_four"`
 	Description          *string   `gorm:"column:description" json:"description"`
-	RuntimeEnvironmentID string    `gorm:"column:runtime_environment_id;index:api_keys_runtime_environment_id_revoked_at_created_at_idx;not null" json:"runtime_environment_id"`
+	RuntimeEnvironmentID string    `gorm:"column:runtime_environment_id;index:api_keys_runtime_environment_id_revoked_at_created_at_idx;index:api_keys_env_issued_by_revoked_at_created_at_idx;not null" json:"runtime_environment_id"`
 	CreatedByUserID      *string   `gorm:"column:created_by_user_id" json:"created_by_user_id"`
+	IssuedBy             string    `gorm:"column:issued_by;index:api_keys_env_issued_by_revoked_at_created_at_idx;default:'USER';not null" json:"issued_by"`
 	PresetID             *string   `gorm:"column:preset_id" json:"preset_id"`
 	Scopes               []string  `gorm:"column:scopes;serializer:json;not null" json:"scopes"`
 	AllowedIPRanges      []string  `gorm:"column:allowed_ip_ranges;serializer:json;not null" json:"allowed_ip_ranges"`
 	LastUsedAt           *DateTime `gorm:"column:last_used_at" json:"last_used_at"`
 	LastUsedIP           *string   `gorm:"column:last_used_ip" json:"last_used_ip"`
-	RevokedAt            *DateTime `gorm:"column:revoked_at;index:api_keys_runtime_environment_id_revoked_at_created_at_idx" json:"revoked_at"`
+	RevokedAt            *DateTime `gorm:"column:revoked_at;index:api_keys_runtime_environment_id_revoked_at_created_at_idx;index:api_keys_env_issued_by_revoked_at_created_at_idx" json:"revoked_at"`
 	ExpiresAt            *DateTime `gorm:"column:expires_at" json:"expires_at"`
 	UpdatedAt            DateTime  `gorm:"column:updated_at;autoUpdateTime:false;not null" json:"updated_at"`
-	CreatedAt            DateTime  `gorm:"column:created_at;index:api_keys_runtime_environment_id_revoked_at_created_at_idx;autoCreateTime:false;not null" json:"created_at"`
+	CreatedAt            DateTime  `gorm:"column:created_at;index:api_keys_runtime_environment_id_revoked_at_created_at_idx;index:api_keys_env_issued_by_revoked_at_created_at_idx;autoCreateTime:false;not null" json:"created_at"`
 	RuntimeEnvironment   *RuntimeEnvironment
 	CreatedBy            *User `gorm:"foreignKey:CreatedByUserID"`
 }

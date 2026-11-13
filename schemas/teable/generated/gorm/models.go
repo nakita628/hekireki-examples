@@ -1602,6 +1602,7 @@ type Dashboard struct {
 	CreatedTime      DateTime  `gorm:"column:created_time;not null" json:"created_time"`
 	LastModifiedTime *DateTime `gorm:"column:last_modified_time" json:"last_modified_time"`
 	LastModifiedBy   *string   `gorm:"column:last_modified_by" json:"last_modified_by"`
+	DeletedTime      *DateTime `gorm:"column:deleted_time" json:"deleted_time"`
 }
 
 func (Dashboard) TableName() string {
@@ -2123,12 +2124,13 @@ func (*BaseNode) BeforeUpdate(tx *gorm.DB) error {
 
 type BaseNodeFolder struct {
 	ID               string    `gorm:"column:id;primaryKey" json:"id"`
-	BaseID           string    `gorm:"column:base_id;uniqueIndex:base_node_folder_base_id_name_key;not null" json:"base_id"`
-	Name             string    `gorm:"column:name;uniqueIndex:base_node_folder_base_id_name_key;not null" json:"name"`
+	BaseID           string    `gorm:"column:base_id;index:base_node_folder_base_id_idx;not null" json:"base_id"`
+	Name             string    `gorm:"column:name;not null" json:"name"`
 	CreatedTime      DateTime  `gorm:"column:created_time;not null" json:"created_time"`
 	CreatedBy        string    `gorm:"column:created_by;not null" json:"created_by"`
 	LastModifiedTime *DateTime `gorm:"column:last_modified_time" json:"last_modified_time"`
 	LastModifiedBy   *string   `gorm:"column:last_modified_by" json:"last_modified_by"`
+	DeletedTime      *DateTime `gorm:"column:deleted_time" json:"deleted_time"`
 }
 
 func (BaseNodeFolder) TableName() string {

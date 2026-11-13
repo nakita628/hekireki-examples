@@ -39,6 +39,7 @@ object LiteLLMDailyUserSpendTable : IdTable<String>("\"LiteLLM_DailyUserSpend\""
         index("\"LiteLLM_DailyUserSpend_date_idx\"", false, date)
         index("\"LiteLLM_DailyUserSpend_user_id_date_idx\"", false, userId, date)
         index("\"LiteLLM_DailyUserSpend_api_key_idx\"", false, apiKey)
+        index("\"LiteLLM_DailyUserSpend_api_key_date_idx\"", false, apiKey, date)
         index("\"LiteLLM_DailyUserSpend_model_idx\"", false, model)
         index("\"LiteLLM_DailyUserSpend_mcp_namespaced_tool_name_idx\"", false, mcpNamespacedToolName)
         index("\"LiteLLM_DailyUserSpend_endpoint_idx\"", false, endpoint)

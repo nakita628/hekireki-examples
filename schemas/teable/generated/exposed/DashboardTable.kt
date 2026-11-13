@@ -14,6 +14,7 @@ object DashboardTable : IdTable<String>("dashboard") {
     val createdTime = pgTimestamp("created_time", 3).databaseDefault("CURRENT_TIMESTAMP") { Instant.now().truncatedTo(ChronoUnit.MILLIS) }
     val lastModifiedTime = pgTimestamp("last_modified_time", 3).nullable().clientDefault { Instant.now().truncatedTo(ChronoUnit.MILLIS) }
     val lastModifiedBy = text("last_modified_by").nullable()
+    val deletedTime = pgTimestamp("deleted_time", 3).nullable()
     override val primaryKey = PrimaryKey(id, name = "dashboard_pkey")
 
     init {

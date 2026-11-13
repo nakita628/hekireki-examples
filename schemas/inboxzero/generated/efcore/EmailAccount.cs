@@ -157,6 +157,8 @@ public partial class EmailAccount
 
     public virtual ICollection<CleanupJob> CleanupJobs { get; set; } = new List<CleanupJob>();
 
+    public virtual ICollection<BulkInboxActionJob> BulkInboxActionJobs { get; set; } = new List<BulkInboxActionJob>();
+
     public virtual ICollection<CleanupThread> CleanupThreads { get; set; } = new List<CleanupThread>();
 
     public virtual ICollection<EmailMessage> EmailMessages { get; set; } = new List<EmailMessage>();

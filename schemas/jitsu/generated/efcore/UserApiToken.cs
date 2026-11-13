@@ -29,6 +29,10 @@ public partial class UserApiToken
 
     public DateTime? ExpiresAt { get; set; }
 
+    public string? WorkspaceId { get; set; }
+
+    public string? Role { get; set; }
+
     public string? OauthClientId { get; set; }
 
     public virtual OAuthClient? OauthClient { get; set; }

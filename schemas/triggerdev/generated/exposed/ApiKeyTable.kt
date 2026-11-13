@@ -29,6 +29,7 @@ object ApiKeyTable : IdTable<String>("api_keys") {
             onUpdate = ReferenceOption.CASCADE,
             fkName = "api_keys_created_by_user_id_fkey",
         )
+    val issuedBy = pgEnum("issued_by", "\"ApiKeyIssuer\"", ApiKeyIssuer.entries, ApiKeyIssuer::dbName).default(ApiKeyIssuer.USER)
     val presetId = text("preset_id").nullable()
     val scopes = array("scopes", TextColumnType()).nullable()
     val allowedIpRanges = array("allowed_ip_ranges", TextColumnType()).nullable().databaseDefault("'{}'") { emptyList() }
@@ -47,6 +48,17 @@ object ApiKeyTable : IdTable<String>("api_keys") {
             functions =
                 listOf(
                     indexExpression("\"runtime_environment_id\""),
+                    indexExpression("\"revoked_at\""),
+                    indexExpression("\"created_at\" DESC"),
+                ),
+        )
+        index(
+            "api_keys_env_issued_by_revoked_at_created_at_idx",
+            false,
+            functions =
+                listOf(
+                    indexExpression("\"runtime_environment_id\""),
+                    indexExpression("\"issued_by\""),
                     indexExpression("\"revoked_at\""),
                     indexExpression("\"created_at\" DESC"),
                 ),

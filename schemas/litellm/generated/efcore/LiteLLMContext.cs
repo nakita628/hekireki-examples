@@ -24,6 +24,12 @@ public partial class LiteLLMContext : DbContext
 
     public virtual DbSet<LiteLLMBudgetTable> LiteLLMBudgetTables { get; set; }
 
+    public virtual DbSet<LiteLLMCustomerOrganizationTable> LiteLLMCustomerOrganizationTables { get; set; }
+
+    public virtual DbSet<LiteLLMCustomerTeamTable> LiteLLMCustomerTeamTables { get; set; }
+
+    public virtual DbSet<LiteLLMCustomerMemberTable> LiteLLMCustomerMemberTables { get; set; }
+
     public virtual DbSet<LiteLLMCredentialsTable> LiteLLMCredentialsTables { get; set; }
 
     public virtual DbSet<LiteLLMProxyModelTable> LiteLLMProxyModelTables { get; set; }
@@ -115,6 +121,8 @@ public partial class LiteLLMContext : DbContext
     public virtual DbSet<LiteLLMProxyWorkerHeartbeat> LiteLLMProxyWorkerHeartbeats { get; set; }
 
     public virtual DbSet<LiteLLMCronJob> LiteLLMCronJobs { get; set; }
+
+    public virtual DbSet<LiteLLMScheduledJobRun> LiteLLMScheduledJobRuns { get; set; }
 
     public virtual DbSet<LiteLLMManagedFileTable> LiteLLMManagedFileTables { get; set; }
 
@@ -238,15 +246,21 @@ public partial class LiteLLMContext : DbContext
 
     public virtual DbSet<LiteLLMSubscriptionAccountTable> LiteLLMSubscriptionAccountTables { get; set; }
 
+    public virtual DbSet<LiteLLMAlert> LiteLLMAlerts { get; set; }
+
+    public virtual DbSet<LiteLLMPerformanceAlertState> LiteLLMPerformanceAlertStates { get; set; }
+
     public static void MapEnums(NpgsqlDbContextOptionsBuilder npgsql)
     {
         npgsql.MapEnum<JobStatus>("JobStatus");
+        npgsql.MapEnum<ScheduledJobRunStatus>("ScheduledJobRunStatus");
         npgsql.MapEnum<AccountingDeliveryState>("AccountingDeliveryState");
     }
 
     public static void MapEnums(NpgsqlDataSourceBuilder dataSource)
     {
         dataSource.MapEnum<JobStatus>("JobStatus");
+        dataSource.MapEnum<ScheduledJobRunStatus>("ScheduledJobRunStatus");
         dataSource.MapEnum<AccountingDeliveryState>("AccountingDeliveryState");
     }
 
@@ -261,6 +275,7 @@ public partial class LiteLLMContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasPostgresEnum<JobStatus>(name: "JobStatus");
+        modelBuilder.HasPostgresEnum<ScheduledJobRunStatus>(name: "ScheduledJobRunStatus");
         modelBuilder.HasPostgresEnum<AccountingDeliveryState>(name: "AccountingDeliveryState");
 
         modelBuilder.Entity<LiteLLMBudgetTable>(entity =>
@@ -315,6 +330,169 @@ public partial class LiteLLMContext : DbContext
                 .HasColumnType("timestamp(3) without time zone")
                 .HasColumnName("updated_at");
             entity.Property(e => e.UpdatedBy).HasColumnName("updated_by");
+        });
+
+        modelBuilder.Entity<LiteLLMCustomerOrganizationTable>(entity =>
+        {
+            entity.HasKey(e => e.CustomerOrgId).HasName("LiteLLM_CustomerOrganizationTable_pkey");
+
+            entity.ToTable("LiteLLM_CustomerOrganizationTable");
+
+            entity.Property(e => e.Spend)
+                .ValueGeneratedNever()
+                .HasDefaultValue(0.0)
+                .HasColumnName("spend");
+            entity.Property(e => e.BudgetResetAt)
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("budget_reset_at");
+            entity.Property(e => e.BudgetIds)
+                .ValueGeneratedNever()
+                .HasDefaultValue(new List<string>())
+                .HasColumnName("budget_ids");
+            entity.Property(e => e.BudgetNames)
+                .ValueGeneratedNever()
+                .HasDefaultValue("{}")
+                .HasColumnType("jsonb")
+                .HasColumnName("budget_names");
+            entity.Property(e => e.BudgetId).HasColumnName("budget_id");
+            entity.Property(e => e.CustomerOrgId)
+                .HasValueGenerator<UuidV4StringGenerator>()
+                .HasColumnName("customer_org_id");
+            entity.Property(e => e.Alias).HasColumnName("alias");
+            entity.Property(e => e.DefaultBudgetId).HasColumnName("default_budget_id");
+            entity.Property(e => e.CreatedAt)
+                .HasValueGenerator<UtcNowGenerator>()
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("created_at");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+            entity.Property(e => e.UpdatedAt)
+                .HasValueGenerator<UtcNowGenerator>()
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("updated_at");
+            entity.Property(e => e.UpdatedBy).HasColumnName("updated_by");
+
+            entity.HasOne(d => d.Budget).WithMany(p => p.CustomerOrganizations)
+                .HasForeignKey(d => d.BudgetId)
+                .OnDelete(DeleteBehavior.SetNull)
+                .HasConstraintName("LiteLLM_CustomerOrganizationTable_budget_id_fkey");
+
+            entity.HasOne(d => d.DefaultBudget).WithMany(p => p.CustomerOrganizationDefaults)
+                .HasForeignKey(d => d.DefaultBudgetId)
+                .OnDelete(DeleteBehavior.SetNull)
+                .HasConstraintName("LiteLLM_CustomerOrganizationTable_default_budget_id_fkey");
+        });
+
+        modelBuilder.Entity<LiteLLMCustomerTeamTable>(entity =>
+        {
+            entity.HasKey(e => e.CustomerTeamId).HasName("LiteLLM_CustomerTeamTable_pkey");
+
+            entity.ToTable("LiteLLM_CustomerTeamTable");
+
+            entity.HasIndex(e => e.ParentOrgId, "LiteLLM_CustomerTeamTable_parent_org_id_idx");
+
+            entity.Property(e => e.Spend)
+                .ValueGeneratedNever()
+                .HasDefaultValue(0.0)
+                .HasColumnName("spend");
+            entity.Property(e => e.BudgetResetAt)
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("budget_reset_at");
+            entity.Property(e => e.CustomerTeamId)
+                .HasValueGenerator<UuidV4StringGenerator>()
+                .HasColumnName("customer_team_id");
+            entity.Property(e => e.Alias).HasColumnName("alias");
+            entity.Property(e => e.ParentOrgId).HasColumnName("parent_org_id");
+            entity.Property(e => e.BudgetId).HasColumnName("budget_id");
+            entity.Property(e => e.CreatedAt)
+                .HasValueGenerator<UtcNowGenerator>()
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("created_at");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+            entity.Property(e => e.UpdatedAt)
+                .HasValueGenerator<UtcNowGenerator>()
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("updated_at");
+            entity.Property(e => e.UpdatedBy).HasColumnName("updated_by");
+
+            entity.HasOne(d => d.ParentOrg).WithMany(p => p.Teams)
+                .HasForeignKey(d => d.ParentOrgId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("LiteLLM_CustomerTeamTable_parent_org_id_fkey");
+
+            entity.HasOne(d => d.Budget).WithMany(p => p.CustomerTeams)
+                .HasForeignKey(d => d.BudgetId)
+                .OnDelete(DeleteBehavior.SetNull)
+                .HasConstraintName("LiteLLM_CustomerTeamTable_budget_id_fkey");
+        });
+
+        modelBuilder.Entity<LiteLLMCustomerMemberTable>(entity =>
+        {
+            entity.HasKey(e => e.CustomerMemberId).HasName("LiteLLM_CustomerMemberTable_pkey");
+
+            entity.ToTable("LiteLLM_CustomerMemberTable");
+
+            entity.HasIndex(e => e.ParentTeamId, "LiteLLM_CustomerMemberTable_parent_team_id_idx");
+
+            entity.HasIndex(e => e.BudgetTemplateId, "LiteLLM_CustomerMemberTable_budget_template_id_idx");
+
+            entity.Property(e => e.Spend)
+                .ValueGeneratedNever()
+                .HasDefaultValue(0.0)
+                .HasColumnName("spend");
+            entity.Property(e => e.BudgetResetAt)
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("budget_reset_at");
+            entity.Property(e => e.CustomerMemberId)
+                .HasValueGenerator<UuidV4StringGenerator>()
+                .HasColumnName("customer_member_id");
+            entity.Property(e => e.Alias).HasColumnName("alias");
+            entity.Property(e => e.ParentTeamId).HasColumnName("parent_team_id");
+            entity.Property(e => e.BudgetId).HasColumnName("budget_id");
+            entity.Property(e => e.BudgetTemplateId).HasColumnName("budget_template_id");
+            entity.Property(e => e.BudgetOverrideExpiresAt)
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("budget_override_expires_at");
+            entity.Property(e => e.CreatedAt)
+                .HasValueGenerator<UtcNowGenerator>()
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("created_at");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+            entity.Property(e => e.UpdatedAt)
+                .HasValueGenerator<UtcNowGenerator>()
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("updated_at");
+            entity.Property(e => e.UpdatedBy).HasColumnName("updated_by");
+
+            entity.HasOne(d => d.ParentTeam).WithMany(p => p.Members)
+                .HasForeignKey(d => d.ParentTeamId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("LiteLLM_CustomerMemberTable_parent_team_id_fkey");
+
+            entity.HasOne(d => d.Budget).WithMany(p => p.CustomerMembers)
+                .HasForeignKey(d => d.BudgetId)
+                .OnDelete(DeleteBehavior.ClientNoAction)
+                .HasConstraintName("LiteLLM_CustomerMemberTable_budget_id_fkey");
+
+            entity.HasOne(d => d.BudgetTemplate).WithMany(p => p.CustomerMemberTemplates)
+                .HasForeignKey(d => d.BudgetTemplateId)
+                .OnDelete(DeleteBehavior.ClientNoAction)
+                .HasConstraintName("LiteLLM_CustomerMemberTable_budget_template_id_fkey");
         });
 
         modelBuilder.Entity<LiteLLMCredentialsTable>(entity =>
@@ -2366,6 +2544,8 @@ public partial class LiteLLMContext : DbContext
 
             entity.HasIndex(e => e.ApiKey, "LiteLLM_DailyUserSpend_api_key_idx");
 
+            entity.HasIndex(e => new { e.ApiKey, e.Date }, "LiteLLM_DailyUserSpend_api_key_date_idx");
+
             entity.HasIndex(e => e.Model, "LiteLLM_DailyUserSpend_model_idx");
 
             entity.HasIndex(e => e.McpNamespacedToolName, "LiteLLM_DailyUserSpend_mcp_namespaced_tool_name_idx");
@@ -3144,6 +3324,51 @@ public partial class LiteLLMContext : DbContext
                 .HasColumnName("ttl");
         });
 
+        modelBuilder.Entity<LiteLLMScheduledJobRun>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("LiteLLM_ScheduledJobRun_pkey");
+
+            entity.ToTable("LiteLLM_ScheduledJobRun");
+
+            entity.HasIndex(e => new { e.JobName, e.Status }, "LiteLLM_ScheduledJobRun_job_name_status_idx");
+
+            entity.HasIndex(e => new { e.LockGroup, e.Status }, "LiteLLM_ScheduledJobRun_lock_group_status_idx");
+
+            entity.Property(e => e.Id)
+                .HasValueGenerator<UuidV4StringGenerator>()
+                .HasColumnName("id");
+            entity.Property(e => e.JobName).HasColumnName("job_name");
+            entity.Property(e => e.LockGroup).HasColumnName("lock_group");
+            entity.Property(e => e.Schedule).HasColumnName("schedule");
+            entity.Property(e => e.ScheduledFor)
+                .HasPrecision(3)
+                .HasConversion<UtcConverter>()
+                .HasColumnName("scheduled_for");
+            entity.Property(e => e.Status)
+                .ValueGeneratedNever()
+                .HasDefaultValue(ScheduledJobRunStatus.Pending)
+                .HasColumnName("status");
+            entity.Property(e => e.ClaimedBy).HasColumnName("claimed_by");
+            entity.Property(e => e.ClaimedAt)
+                .HasPrecision(3)
+                .HasConversion<UtcConverter>()
+                .HasColumnName("claimed_at");
+            entity.Property(e => e.LeaseExpiresAt)
+                .HasPrecision(3)
+                .HasConversion<UtcConverter>()
+                .HasColumnName("lease_expires_at");
+            entity.Property(e => e.FinishedAt)
+                .HasPrecision(3)
+                .HasConversion<UtcConverter>()
+                .HasColumnName("finished_at");
+            entity.Property(e => e.CreatedAt)
+                .HasValueGenerator<UtcNowGenerator>()
+                .HasPrecision(3)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasConversion<UtcConverter>()
+                .HasColumnName("created_at");
+        });
+
         modelBuilder.Entity<LiteLLMManagedFileTable>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("LiteLLM_ManagedFileTable_pkey");
@@ -3611,6 +3836,14 @@ public partial class LiteLLMContext : DbContext
                 .ValueGeneratedNever()
                 .HasDefaultValue(0L)
                 .HasColumnName("failed_requests");
+            entity.Property(e => e.TotalResponseTimeMs)
+                .ValueGeneratedNever()
+                .HasDefaultValue(0L)
+                .HasColumnName("total_response_time_ms");
+            entity.Property(e => e.TimedRequests)
+                .ValueGeneratedNever()
+                .HasDefaultValue(0L)
+                .HasColumnName("timed_requests");
             entity.Property(e => e.CreatedAt)
                 .HasValueGenerator<UtcNowGenerator>()
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
@@ -4225,6 +4458,10 @@ public partial class LiteLLMContext : DbContext
                 .ValueGeneratedNever()
                 .HasDefaultValue(new List<string>())
                 .HasColumnName("access_skill_names");
+            entity.Property(e => e.AccessVectorStoreIds)
+                .ValueGeneratedNever()
+                .HasDefaultValue(new List<string>())
+                .HasColumnName("access_vector_store_ids");
             entity.Property(e => e.AssignedTeamIds)
                 .ValueGeneratedNever()
                 .HasDefaultValue(new List<string>())
@@ -5473,6 +5710,128 @@ public partial class LiteLLMContext : DbContext
             entity.Property(e => e.UpdatedBy).HasColumnName("updated_by");
         });
 
+        modelBuilder.Entity<LiteLLMAlert>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("LiteLLM_Alert_pkey");
+
+            entity.ToTable("LiteLLM_Alert");
+
+            entity.HasIndex(e => e.DetectionKey, "LiteLLM_Alert_detection_key_key").IsUnique();
+
+            entity.HasIndex(e => new { e.Status, e.Id }, "LiteLLM_Alert_status_id_idx");
+
+            entity.Property(e => e.Id)
+                .UseSerialColumn()
+                .HasColumnName("id");
+            entity.Property(e => e.DetectionKey)
+                .HasMaxLength(64)
+                .HasColumnName("detection_key");
+            entity.Property(e => e.Type)
+                .HasMaxLength(32)
+                .HasColumnName("type");
+            entity.Property(e => e.ResourceType)
+                .HasMaxLength(16)
+                .HasColumnName("resource_type");
+            entity.Property(e => e.ResourceId)
+                .HasMaxLength(1024)
+                .HasColumnName("resource_id");
+            entity.Property(e => e.Status)
+                .ValueGeneratedNever()
+                .HasMaxLength(16)
+                .HasDefaultValue("open")
+                .HasColumnName("status");
+            entity.Property(e => e.WindowStart)
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("window_start");
+            entity.Property(e => e.WindowEnd)
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("window_end");
+            entity.Property(e => e.Evidence)
+                .HasColumnType("jsonb")
+                .HasColumnName("evidence");
+            entity.Property(e => e.CreatedAt)
+                .HasValueGenerator<UtcNowGenerator>()
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("created_at");
+            entity.Property(e => e.UpdatedAt)
+                .HasValueGenerator<UtcNowGenerator>()
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("updated_at");
+            entity.Property(e => e.UpdatedBy)
+                .HasMaxLength(1024)
+                .HasColumnName("updated_by");
+        });
+
+        modelBuilder.Entity<LiteLLMPerformanceAlertState>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("LiteLLM_PerformanceAlertState_pkey");
+
+            entity.ToTable("LiteLLM_PerformanceAlertState");
+
+            entity.Property(e => e.Enabled)
+                .ValueGeneratedNever()
+                .HasDefaultValue(true)
+                .HasColumnName("enabled");
+            entity.Property(e => e.AlertsUsed).HasColumnName("alerts_used");
+            entity.Property(e => e.Id)
+                .ValueGeneratedNever()
+                .HasColumnName("id");
+            entity.Property(e => e.Owner)
+                .HasMaxLength(32)
+                .HasColumnName("owner");
+            entity.Property(e => e.NextRunAt)
+                .HasPrecision(3)
+                .HasConversion<UtcConverter>()
+                .HasColumnName("next_run_at");
+            entity.Property(e => e.Day)
+                .HasMaxLength(10)
+                .HasColumnName("day");
+            entity.Property(e => e.Scope)
+                .HasMaxLength(16)
+                .HasColumnName("scope");
+            entity.Property(e => e.ResumeAfter)
+                .ValueGeneratedNever()
+                .HasMaxLength(1024)
+                .HasDefaultValue("")
+                .HasColumnName("resume_after");
+            entity.Property(e => e.Wrapped)
+                .ValueGeneratedNever()
+                .HasDefaultValue(false)
+                .HasColumnName("wrapped");
+            entity.Property(e => e.Checked)
+                .ValueGeneratedNever()
+                .HasDefaultValue(0)
+                .HasColumnName("checked");
+            entity.Property(e => e.Skipped)
+                .ValueGeneratedNever()
+                .HasDefaultValue(0)
+                .HasColumnName("skipped");
+            entity.Property(e => e.StartScope)
+                .HasMaxLength(16)
+                .HasColumnName("start_scope");
+            entity.Property(e => e.StartAfter)
+                .ValueGeneratedNever()
+                .HasMaxLength(1024)
+                .HasDefaultValue("")
+                .HasColumnName("start_after");
+            entity.Property(e => e.CompletedAt)
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("completed_at");
+            entity.Property(e => e.UpdatedAt)
+                .HasValueGenerator<UtcNowGenerator>()
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("updated_at");
+        });
+
         OnModelCreatingPartial(modelBuilder);
     }
 
@@ -5494,6 +5853,33 @@ public partial class LiteLLMContext : DbContext
     {
         var now = DateTime.UtcNow;
         foreach (var entry in ChangeTracker.Entries<LiteLLMBudgetTable>())
+        {
+            if ((entry.State == EntityState.Added && entry.Entity.UpdatedAt == default)
+                || (entry.State == EntityState.Modified && !entry.Property(e => e.UpdatedAt).IsModified))
+            {
+                entry.Entity.UpdatedAt = now;
+            }
+        }
+
+        foreach (var entry in ChangeTracker.Entries<LiteLLMCustomerOrganizationTable>())
+        {
+            if ((entry.State == EntityState.Added && entry.Entity.UpdatedAt == default)
+                || (entry.State == EntityState.Modified && !entry.Property(e => e.UpdatedAt).IsModified))
+            {
+                entry.Entity.UpdatedAt = now;
+            }
+        }
+
+        foreach (var entry in ChangeTracker.Entries<LiteLLMCustomerTeamTable>())
+        {
+            if ((entry.State == EntityState.Added && entry.Entity.UpdatedAt == default)
+                || (entry.State == EntityState.Modified && !entry.Property(e => e.UpdatedAt).IsModified))
+            {
+                entry.Entity.UpdatedAt = now;
+            }
+        }
+
+        foreach (var entry in ChangeTracker.Entries<LiteLLMCustomerMemberTable>())
         {
             if ((entry.State == EntityState.Added && entry.Entity.UpdatedAt == default)
                 || (entry.State == EntityState.Modified && !entry.Property(e => e.UpdatedAt).IsModified))
@@ -6050,6 +6436,24 @@ public partial class LiteLLMContext : DbContext
                 entry.Entity.UpdatedAt = now;
             }
         }
+
+        foreach (var entry in ChangeTracker.Entries<LiteLLMAlert>())
+        {
+            if ((entry.State == EntityState.Added && entry.Entity.UpdatedAt == default)
+                || (entry.State == EntityState.Modified && !entry.Property(e => e.UpdatedAt).IsModified))
+            {
+                entry.Entity.UpdatedAt = now;
+            }
+        }
+
+        foreach (var entry in ChangeTracker.Entries<LiteLLMPerformanceAlertState>())
+        {
+            if ((entry.State == EntityState.Added && entry.Entity.UpdatedAt == default)
+                || (entry.State == EntityState.Modified && !entry.Property(e => e.UpdatedAt).IsModified))
+            {
+                entry.Entity.UpdatedAt = now;
+            }
+        }
     }
 }
 
@@ -6080,6 +6484,14 @@ file sealed class UtcClockConverter : ValueConverter<DateTime, DateTime>
 {
     public UtcClockConverter()
         : base(v => DateTime.SpecifyKind(v.Kind == DateTimeKind.Local ? v.ToUniversalTime() : v, DateTimeKind.Unspecified), v => DateTime.SpecifyKind(v, DateTimeKind.Utc))
+    {
+    }
+}
+
+file sealed class UtcConverter : ValueConverter<DateTime, DateTime>
+{
+    public UtcConverter()
+        : base(v => DateTime.SpecifyKind(v.Kind == DateTimeKind.Local ? v.ToUniversalTime() : v, DateTimeKind.Utc), v => v)
     {
     }
 }

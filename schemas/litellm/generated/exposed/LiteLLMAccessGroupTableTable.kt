@@ -16,6 +16,7 @@ object LiteLLMAccessGroupTableTable : IdTable<String>("\"LiteLLM_AccessGroupTabl
     val mcpToolPermissions = jsonb<String>("mcp_tool_permissions", { it }, { it }).nullable()
     val accessAgentIds = array("access_agent_ids", TextColumnType()).nullable().databaseDefault("'{}'") { emptyList() }
     val accessSkillNames = array("access_skill_names", TextColumnType()).nullable().databaseDefault("'{}'") { emptyList() }
+    val accessVectorStoreIds = array("access_vector_store_ids", TextColumnType()).nullable().databaseDefault("'{}'") { emptyList() }
     val assignedTeamIds = array("assigned_team_ids", TextColumnType()).nullable().databaseDefault("'{}'") { emptyList() }
     val assignedKeyIds = array("assigned_key_ids", TextColumnType()).nullable().databaseDefault("'{}'") { emptyList() }
     val createdAt = pgTimestamp("created_at", 3).databaseDefault("CURRENT_TIMESTAMP") { Instant.now().truncatedTo(ChronoUnit.MILLIS) }

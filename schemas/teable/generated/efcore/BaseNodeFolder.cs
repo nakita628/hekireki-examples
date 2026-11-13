@@ -19,4 +19,6 @@ public partial class BaseNodeFolder
     public DateTime? LastModifiedTime { get; set; }
 
     public string? LastModifiedBy { get; set; }
+
+    public DateTime? DeletedTime { get; set; }
 }

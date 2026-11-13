@@ -12,6 +12,8 @@ defmodule Jitsu.UserApiToken do
           type: String.t() | nil,
           name: String.t() | nil,
           expires_at: DateTime.t() | nil,
+          workspace_id: String.t() | nil,
+          role: String.t() | nil,
           inserted_at: DateTime.t(),
           updated_at: DateTime.t(),
           user: Jitsu.UserProfile.t() | nil,
@@ -27,6 +29,8 @@ defmodule Jitsu.UserApiToken do
     field(:type, :string)
     field(:name, :string)
     field(:expires_at, Jitsu.PrismaDateTime, source: :expiresAt)
+    field(:workspace_id, :string, source: :workspaceId)
+    field(:role, :string)
     field(:user_id, :string, source: :userId)
     field(:oauth_client_id, :string, source: :oauthClientId)
     belongs_to(:user, Jitsu.UserProfile, foreign_key: :user_id, define_field: false, type: :string)

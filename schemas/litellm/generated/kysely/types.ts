@@ -9,6 +9,8 @@ export type Timestamp = ColumnType<Date, Date | string, Date | string>
 
 export type JobStatus = 'ACTIVE' | 'INACTIVE'
 
+export type ScheduledJobRunStatus = 'PENDING' | 'RUNNING' | 'SUCCEEDED' | 'FAILED' | 'CANCELLED'
+
 export type AccountingDeliveryState = 'pending' | 'applied' | 'parked'
 
 export interface LiteLLM_BudgetTable {
@@ -27,6 +29,49 @@ export interface LiteLLM_BudgetTable {
   allowed_models: Generated<string[]>
   temp_budget_increase: number | null
   temp_budget_expiry: Timestamp | null
+  created_at: Generated<Timestamp>
+  created_by: string
+  updated_at: Generated<Timestamp>
+  updated_by: string
+}
+
+export interface LiteLLM_CustomerOrganizationTable {
+  spend: Generated<number>
+  budget_reset_at: Timestamp | null
+  budget_ids: Generated<string[]>
+  budget_names: Generated<unknown>
+  budget_id: string | null
+  customer_org_id: string
+  alias: string | null
+  default_budget_id: string | null
+  created_at: Generated<Timestamp>
+  created_by: string
+  updated_at: Generated<Timestamp>
+  updated_by: string
+}
+
+export interface LiteLLM_CustomerTeamTable {
+  spend: Generated<number>
+  budget_reset_at: Timestamp | null
+  customer_team_id: string
+  alias: string | null
+  parent_org_id: string
+  budget_id: string | null
+  created_at: Generated<Timestamp>
+  created_by: string
+  updated_at: Generated<Timestamp>
+  updated_by: string
+}
+
+export interface LiteLLM_CustomerMemberTable {
+  spend: Generated<number>
+  budget_reset_at: Timestamp | null
+  customer_member_id: string
+  alias: string | null
+  parent_team_id: string
+  budget_id: string | null
+  budget_template_id: string | null
+  budget_override_expires_at: Timestamp | null
   created_at: Generated<Timestamp>
   created_by: string
   updated_at: Generated<Timestamp>
@@ -901,6 +946,20 @@ export interface LiteLLM_CronJob {
   ttl: Timestamp
 }
 
+export interface LiteLLM_ScheduledJobRun {
+  id: string
+  job_name: string
+  lock_group: string
+  schedule: string
+  scheduled_for: Timestamp
+  status: Generated<ScheduledJobRunStatus>
+  claimed_by: string | null
+  claimed_at: Timestamp | null
+  lease_expires_at: Timestamp | null
+  finished_at: Timestamp | null
+  created_at: Generated<Timestamp>
+}
+
 export interface LiteLLM_ManagedFileTable {
   id: string
   unified_file_id: string
@@ -1057,6 +1116,8 @@ export interface LiteLLM_DailyModelUsage {
   request_count: Generated<bigint>
   successful_requests: Generated<bigint>
   failed_requests: Generated<bigint>
+  total_response_time_ms: Generated<bigint>
+  timed_requests: Generated<bigint>
   created_at: Generated<Timestamp>
   updated_at: Timestamp
 }
@@ -1251,6 +1312,7 @@ export interface LiteLLM_AccessGroupTable {
   mcp_tool_permissions: unknown
   access_agent_ids: Generated<string[]>
   access_skill_names: Generated<string[]>
+  access_vector_store_ids: Generated<string[]>
   assigned_team_ids: Generated<string[]>
   assigned_key_ids: Generated<string[]>
   created_at: Generated<Timestamp>
@@ -1669,8 +1731,44 @@ export interface LiteLLM_SubscriptionAccountTable {
   updated_by: string
 }
 
+export interface LiteLLM_Alert {
+  id: Generated<bigint>
+  detection_key: string
+  type: string
+  resource_type: string
+  resource_id: string
+  status: Generated<string>
+  window_start: Timestamp
+  window_end: Timestamp
+  evidence: unknown
+  created_at: Generated<Timestamp>
+  updated_at: Generated<Timestamp>
+  updated_by: string | null
+}
+
+export interface LiteLLM_PerformanceAlertState {
+  enabled: Generated<boolean>
+  alerts_used: number | null
+  id: number
+  owner: string
+  next_run_at: Timestamp
+  day: string | null
+  scope: string | null
+  resume_after: Generated<string>
+  wrapped: Generated<boolean>
+  checked: Generated<number>
+  skipped: Generated<number>
+  start_scope: string | null
+  start_after: Generated<string>
+  completed_at: Timestamp | null
+  updated_at: Generated<Timestamp>
+}
+
 export interface DB {
   LiteLLM_BudgetTable: LiteLLM_BudgetTable
+  LiteLLM_CustomerOrganizationTable: LiteLLM_CustomerOrganizationTable
+  LiteLLM_CustomerTeamTable: LiteLLM_CustomerTeamTable
+  LiteLLM_CustomerMemberTable: LiteLLM_CustomerMemberTable
   LiteLLM_CredentialsTable: LiteLLM_CredentialsTable
   LiteLLM_ProxyModelTable: LiteLLM_ProxyModelTable
   LiteLLM_AgentsTable: LiteLLM_AgentsTable
@@ -1717,6 +1815,7 @@ export interface DB {
   LiteLLM_DailyTagSpend: LiteLLM_DailyTagSpend
   LiteLLM_ProxyWorkerHeartbeat: LiteLLM_ProxyWorkerHeartbeat
   LiteLLM_CronJob: LiteLLM_CronJob
+  LiteLLM_ScheduledJobRun: LiteLLM_ScheduledJobRun
   LiteLLM_ManagedFileTable: LiteLLM_ManagedFileTable
   LiteLLM_ManagedObjectTable: LiteLLM_ManagedObjectTable
   LiteLLM_ManagedFileContentTable: LiteLLM_ManagedFileContentTable
@@ -1778,4 +1877,6 @@ export interface DB {
   LiteLLM_TelemetryReport: LiteLLM_TelemetryReport
   LiteLLM_SpendLogDelivery: LiteLLM_SpendLogDelivery
   LiteLLM_SubscriptionAccountTable: LiteLLM_SubscriptionAccountTable
+  LiteLLM_Alert: LiteLLM_Alert
+  LiteLLM_PerformanceAlertState: LiteLLM_PerformanceAlertState
 }

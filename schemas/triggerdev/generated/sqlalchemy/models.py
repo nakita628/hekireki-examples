@@ -412,6 +412,7 @@ class ApiKey(Base):
     description: Mapped[Optional[str]]
     runtime_environment_id: Mapped[str] = mapped_column(ForeignKey("RuntimeEnvironment.id", ondelete="CASCADE", onupdate="CASCADE", name="api_keys_runtime_environment_id_fkey"))
     created_by_user_id: Mapped[Optional[str]] = mapped_column(ForeignKey("User.id", ondelete="SET NULL", onupdate="CASCADE", name="api_keys_created_by_user_id_fkey"))
+    issued_by: Mapped[str] = mapped_column(Enum("USER", "SYSTEM", name="ApiKeyIssuer"), default="USER", server_default=text("'USER'"))
     preset_id: Mapped[Optional[str]]
     scopes: Mapped[list[str]] = mapped_column(ARRAY(Text), nullable=True)
     allowed_ip_ranges: Mapped[list[str]] = mapped_column(ARRAY(Text), nullable=True, default=lambda: [], server_default=text("ARRAY[]::text[]"))
@@ -425,6 +426,7 @@ class ApiKey(Base):
     __table_args__ = (
         Index("api_keys_key_hash_key", "key_hash", unique=True),
         Index("api_keys_runtime_environment_id_revoked_at_created_at_idx", "runtime_environment_id", "revoked_at", "created_at"),
+        Index("api_keys_env_issued_by_revoked_at_created_at_idx", "runtime_environment_id", "issued_by", "revoked_at", "created_at"),
     )
 
     runtime_environment: Mapped["RuntimeEnvironment"] = relationship(back_populates="api_keys")

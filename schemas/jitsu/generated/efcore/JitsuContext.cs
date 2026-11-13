@@ -433,6 +433,8 @@ public partial class JitsuContext : DbContext
                 .HasConversion<UtcClockConverter>()
                 .HasColumnType("timestamp(3) without time zone")
                 .HasColumnName("expiresAt");
+            entity.Property(e => e.WorkspaceId).HasColumnName("workspaceId");
+            entity.Property(e => e.Role).HasColumnName("role");
             entity.Property(e => e.OauthClientId).HasColumnName("oauthClientId");
 
             entity.HasOne(d => d.User).WithMany(p => p.Tokens)

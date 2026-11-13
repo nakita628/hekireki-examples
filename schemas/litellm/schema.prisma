@@ -1,6 +1,6 @@
 // LiteLLM: LiteLLM AI gateway: virtual keys, teams, budgets, spend logs and model deployments.
 //
-// Imported from https://github.com/BerriAI/litellm/blob/43daa2598e67a97253d7fcef2536aec6129030ea/schema.prisma
+// Imported from https://github.com/BerriAI/litellm/blob/a7052ea8a80296ca3db064e438904f562f176933/litellm/schema.prisma
 // (MIT license) by tools/import/import-schema.mjs, which dropped the original
 // generator blocks and the datasource's connection URLs and added the hekireki generators below.
 // The models, enums and `///` comments are the project's own, as they are at that commit.
@@ -81,6 +81,11 @@ generator Hekireki-ER {
 
 // Budget / Rate Limits for an org
 model LiteLLM_BudgetTable {
+  customer_organization_defaults LiteLLM_CustomerOrganizationTable[] @relation("CustomerOrganizationDefaultBudget")
+  customer_organizations LiteLLM_CustomerOrganizationTable[] @relation("CustomerOrganizationBudget")
+  customer_member_templates LiteLLM_CustomerMemberTable[] @relation("CustomerMemberTemplate")
+  customer_teams LiteLLM_CustomerTeamTable[] @relation("CustomerTeamBudget")
+  customer_members LiteLLM_CustomerMemberTable[] @relation("CustomerMemberBudget")
   budget_id String @id @default(uuid())
   max_budget Float?
   soft_budget Float?
@@ -108,6 +113,61 @@ model LiteLLM_BudgetTable {
   model_access_groups LiteLLM_ModelAccessGroupBudgetTable[] // multiple model access groups can have the same budget
   team_membership LiteLLM_TeamMembership[] // budgets of Users within a Team 
   organization_membership LiteLLM_OrganizationMembership[] // budgets of Users within a Organization
+}
+
+model LiteLLM_CustomerOrganizationTable {
+  spend Float @default(0.0)
+  budget_reset_at DateTime?
+  budget_ids String[] @default([])
+  budget_names Json @default("{}")
+  budget_id String?
+  budget LiteLLM_BudgetTable? @relation("CustomerOrganizationBudget", fields: [budget_id], references: [budget_id])
+  customer_org_id String @id @default(uuid())
+  alias String?
+  default_budget_id String?
+  default_budget LiteLLM_BudgetTable? @relation("CustomerOrganizationDefaultBudget", fields: [default_budget_id], references: [budget_id])
+  teams LiteLLM_CustomerTeamTable[]
+  created_at DateTime @default(now())
+  created_by String
+  updated_at DateTime @default(now()) @updatedAt
+  updated_by String
+}
+
+model LiteLLM_CustomerTeamTable {
+  spend Float @default(0.0)
+  budget_reset_at DateTime?
+  customer_team_id String @id @default(uuid())
+  alias String?
+  parent_org_id String
+  parent_org LiteLLM_CustomerOrganizationTable @relation(fields: [parent_org_id], references: [customer_org_id])
+  budget_id String?
+  budget LiteLLM_BudgetTable? @relation("CustomerTeamBudget", fields: [budget_id], references: [budget_id])
+  members LiteLLM_CustomerMemberTable[]
+  created_at DateTime @default(now())
+  created_by String
+  updated_at DateTime @default(now()) @updatedAt
+  updated_by String
+  @@index([parent_org_id])
+}
+
+model LiteLLM_CustomerMemberTable {
+  spend Float @default(0.0)
+  budget_reset_at DateTime?
+  customer_member_id String @id @default(uuid())
+  alias String?
+  parent_team_id String
+  parent_team LiteLLM_CustomerTeamTable @relation(fields: [parent_team_id], references: [customer_team_id])
+  budget_id String?
+  budget LiteLLM_BudgetTable? @relation("CustomerMemberBudget", fields: [budget_id], references: [budget_id], onDelete: Restrict)
+  budget_template_id String?
+  budget_template LiteLLM_BudgetTable? @relation("CustomerMemberTemplate", fields: [budget_template_id], references: [budget_id], onDelete: Restrict)
+  budget_override_expires_at DateTime?
+  created_at DateTime @default(now())
+  created_by String
+  updated_at DateTime @default(now()) @updatedAt
+  updated_by String
+  @@index([parent_team_id])
+  @@index([budget_template_id])
 }
 
 // Models on proxy
@@ -967,6 +1027,7 @@ model LiteLLM_DailyUserSpend {
   @@index([date])
   @@index([user_id, date])
   @@index([api_key])
+  @@index([api_key, date])
   @@index([model])
   @@index([mcp_namespaced_tool_name])
   @@index([endpoint])
@@ -1225,6 +1286,31 @@ enum JobStatus {
   INACTIVE
 }
 
+model LiteLLM_ScheduledJobRun {
+  id               String                @id @default(uuid())
+  job_name         String
+  lock_group       String
+  schedule         String
+  scheduled_for    DateTime              @client.Timestamptz(3)
+  status           ScheduledJobRunStatus @default(PENDING)
+  claimed_by       String?
+  claimed_at       DateTime?             @client.Timestamptz(3)
+  lease_expires_at DateTime?             @client.Timestamptz(3)
+  finished_at      DateTime?             @client.Timestamptz(3)
+  created_at       DateTime              @default(now()) @client.Timestamptz(3)
+
+  @@index([job_name, status])
+  @@index([lock_group, status])
+}
+
+enum ScheduledJobRunStatus {
+  PENDING
+  RUNNING
+  SUCCEEDED
+  FAILED
+  CANCELLED
+}
+
 model LiteLLM_ManagedFileTable {
   id String @id @default(uuid())
   unified_file_id String @unique // The base64 encoded unified file ID
@@ -1428,6 +1514,8 @@ model LiteLLM_DailyModelUsage {
   request_count       BigInt   @default(0)
   successful_requests BigInt   @default(0)
   failed_requests     BigInt   @default(0)
+  total_response_time_ms BigInt @default(0)
+  timed_requests      BigInt   @default(0)
   created_at          DateTime @default(now())
   updated_at          DateTime @updatedAt
 
@@ -1672,6 +1760,7 @@ model LiteLLM_AccessGroupTable {
   mcp_tool_permissions    Json?
   access_agent_ids        String[] @default([])
   access_skill_names      String[] @default([])
+  access_vector_store_ids String[] @default([])
 
   assigned_team_ids         String[] @default([])
   assigned_key_ids          String[] @default([])
@@ -2251,4 +2340,39 @@ model LiteLLM_SubscriptionAccountTable {
   updated_by String
 
   @@unique([custom_llm_provider, account_id], map: "LiteLLM_SubscriptionAccountTable_provider_account_key")
+}
+
+model LiteLLM_Alert {
+  id            BigInt   @id @default(autoincrement())
+  detection_key String   @unique @client.VarChar(64)
+  type          String   @client.VarChar(32)
+  resource_type String   @client.VarChar(16)
+  resource_id   String   @client.VarChar(1024)
+  status        String   @default("open") @client.VarChar(16)
+  window_start  DateTime
+  window_end    DateTime
+  evidence      Json
+  created_at    DateTime @default(now())
+  updated_at    DateTime @default(now()) @updatedAt
+  updated_by    String?  @client.VarChar(1024)
+
+  @@index([status, id])
+}
+
+model LiteLLM_PerformanceAlertState {
+  enabled      Boolean  @default(true)
+  alerts_used  Int?
+  id           Int       @id
+  owner        String    @client.VarChar(32)
+  next_run_at  DateTime  @client.Timestamptz(3)
+  day          String?   @client.VarChar(10)
+  scope        String?   @client.VarChar(16)
+  resume_after String    @default("") @client.VarChar(1024)
+  wrapped      Boolean   @default(false)
+  checked      Int       @default(0)
+  skipped      Int       @default(0)
+  start_scope  String?   @client.VarChar(16)
+  start_after  String    @default("") @client.VarChar(1024)
+  completed_at DateTime?
+  updated_at   DateTime  @default(now()) @updatedAt
 }

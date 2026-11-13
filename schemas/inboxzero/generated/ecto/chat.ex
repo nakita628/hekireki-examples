@@ -18,7 +18,8 @@ defmodule InboxZero.Chat do
           messages: [InboxZero.ChatMessage.t()],
           compactions: [InboxZero.ChatCompaction.t()],
           memories: [InboxZero.ChatMemory.t()],
-          action_totals: [InboxZero.ChatActionTotal.t()]
+          action_totals: [InboxZero.ChatActionTotal.t()],
+          bulk_inbox_action_jobs: [InboxZero.BulkInboxActionJob.t()]
         }
 
   schema "Chat" do
@@ -35,6 +36,7 @@ defmodule InboxZero.Chat do
     has_many(:compactions, InboxZero.ChatCompaction, foreign_key: :chat_id, references: :id)
     has_many(:memories, InboxZero.ChatMemory, foreign_key: :chat_id, references: :id)
     has_many(:action_totals, InboxZero.ChatActionTotal, foreign_key: :chat_id, references: :id)
+    has_many(:bulk_inbox_action_jobs, InboxZero.BulkInboxActionJob, foreign_key: :chat_id, references: :id)
     timestamps(inserted_at_source: :createdAt, updated_at_source: :updatedAt)
   end
 end

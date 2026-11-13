@@ -20,6 +20,7 @@ class ApiKeyEntity(
     var runtimeEnvironmentId by ApiKeyTable.runtimeEnvironmentId
     var createdBy by UserEntity optionalReferencedOn ApiKeyTable.createdByUserId
     var createdByUserId by ApiKeyTable.createdByUserId
+    var issuedBy by ApiKeyTable.issuedBy
     var presetId by ApiKeyTable.presetId
     var scopes by ApiKeyTable.scopes
     var allowedIpRanges by ApiKeyTable.allowedIpRanges

@@ -7,6 +7,8 @@ export type Generated<T> =
 
 export type Timestamp = ColumnType<Date, Date | string, Date | string>
 
+export type ApiUsageResource = 'poll'
+
 export type SubscriptionStatus =
   | 'incomplete'
   | 'incomplete_expired'
@@ -53,6 +55,16 @@ export type TimeFormat = 'hours12' | 'hours24'
 
 export type UserRole = 'admin' | 'user'
 
+export interface ApiUsage {
+  space_id: string
+  resource: ApiUsageResource
+  period: Timestamp
+  count: Generated<number>
+  near_limit_warned_at: Timestamp | null
+  at_limit_warned_at: Timestamp | null
+  updated_at: Timestamp
+}
+
 export interface Subscription {
   id: string
   price_id: string
@@ -71,6 +83,12 @@ export interface Subscription {
   cancel_at_period_end: Generated<boolean>
   user_id: string
   space_id: string
+  api_addon_item_id: string | null
+  api_addon_price_id: string | null
+  api_addon_amount: number | null
+  api_poll_limit: number | null
+  api_poll_retained_limit: number | null
+  api_poll_retained_until: Timestamp | null
 }
 
 export interface PaymentMethod {
@@ -427,6 +445,7 @@ export interface Space {
   hide_attribution: Generated<boolean>
   shared: Generated<boolean>
   nonprofit_discount_granted_at: Timestamp | null
+  api_poll_quota_override: number | null
   created_at: Generated<Timestamp>
   updated_at: Timestamp
 }
@@ -561,6 +580,7 @@ export interface Verification {
 }
 
 export interface DB {
+  api_usage: ApiUsage
   subscriptions: Subscription
   payment_methods: PaymentMethod
   nonprofit_applications: NonprofitApplication

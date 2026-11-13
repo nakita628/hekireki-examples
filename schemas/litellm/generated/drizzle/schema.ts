@@ -16,6 +16,7 @@ import {
   timestamp,
   unique,
   uniqueIndex,
+  varchar,
 } from 'drizzle-orm/pg-core'
 import { defineRelations, sql } from 'drizzle-orm'
 import cuid from 'cuid'
@@ -38,6 +39,14 @@ const utcNow = (() => {
 })()
 
 export const jobStatusEnum = pgEnum('JobStatus', ['ACTIVE', 'INACTIVE'])
+
+export const scheduledJobRunStatusEnum = pgEnum('ScheduledJobRunStatus', [
+  'PENDING',
+  'RUNNING',
+  'SUCCEEDED',
+  'FAILED',
+  'CANCELLED',
+])
 
 export const accountingDeliveryStateEnum = pgEnum('AccountingDeliveryState', [
   'pending',
@@ -75,6 +84,143 @@ export const liteLLMBudgetTable = pgTable('LiteLLM_BudgetTable', {
     .$onUpdate(utcNow),
   updated_by: text('updated_by').notNull(),
 })
+
+export const liteLLMCustomerOrganizationTable = pgTable(
+  'LiteLLM_CustomerOrganizationTable',
+  {
+    spend: doublePrecision('spend').notNull().default(0),
+    budget_reset_at: timestamp('budget_reset_at', { precision: 3 }),
+    budget_ids: text('budget_ids').array().default([]),
+    budget_names: jsonb('budget_names').notNull().default({}),
+    budget_id: text('budget_id'),
+    customer_org_id: text('customer_org_id')
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    alias: text('alias'),
+    default_budget_id: text('default_budget_id'),
+    created_at: timestamp('created_at', { precision: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`)
+      .$defaultFn(utcNow),
+    created_by: text('created_by').notNull(),
+    updated_at: timestamp('updated_at', { precision: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`)
+      .$defaultFn(utcNow)
+      .$onUpdate(utcNow),
+    updated_by: text('updated_by').notNull(),
+  },
+  (table) => [
+    foreignKey({
+      name: 'LiteLLM_CustomerOrganizationTable_budget_id_fkey',
+      columns: [table.budget_id],
+      foreignColumns: [liteLLMBudgetTable.budget_id],
+    })
+      .onDelete('set null')
+      .onUpdate('cascade'),
+    foreignKey({
+      name: 'LiteLLM_CustomerOrganizationTable_default_budget_id_fkey',
+      columns: [table.default_budget_id],
+      foreignColumns: [liteLLMBudgetTable.budget_id],
+    })
+      .onDelete('set null')
+      .onUpdate('cascade'),
+  ],
+)
+
+export const liteLLMCustomerTeamTable = pgTable(
+  'LiteLLM_CustomerTeamTable',
+  {
+    spend: doublePrecision('spend').notNull().default(0),
+    budget_reset_at: timestamp('budget_reset_at', { precision: 3 }),
+    customer_team_id: text('customer_team_id')
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    alias: text('alias'),
+    parent_org_id: text('parent_org_id').notNull(),
+    budget_id: text('budget_id'),
+    created_at: timestamp('created_at', { precision: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`)
+      .$defaultFn(utcNow),
+    created_by: text('created_by').notNull(),
+    updated_at: timestamp('updated_at', { precision: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`)
+      .$defaultFn(utcNow)
+      .$onUpdate(utcNow),
+    updated_by: text('updated_by').notNull(),
+  },
+  (table) => [
+    index('LiteLLM_CustomerTeamTable_parent_org_id_idx').on(table.parent_org_id),
+    foreignKey({
+      name: 'LiteLLM_CustomerTeamTable_parent_org_id_fkey',
+      columns: [table.parent_org_id],
+      foreignColumns: [liteLLMCustomerOrganizationTable.customer_org_id],
+    })
+      .onDelete('restrict')
+      .onUpdate('cascade'),
+    foreignKey({
+      name: 'LiteLLM_CustomerTeamTable_budget_id_fkey',
+      columns: [table.budget_id],
+      foreignColumns: [liteLLMBudgetTable.budget_id],
+    })
+      .onDelete('set null')
+      .onUpdate('cascade'),
+  ],
+)
+
+export const liteLLMCustomerMemberTable = pgTable(
+  'LiteLLM_CustomerMemberTable',
+  {
+    spend: doublePrecision('spend').notNull().default(0),
+    budget_reset_at: timestamp('budget_reset_at', { precision: 3 }),
+    customer_member_id: text('customer_member_id')
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    alias: text('alias'),
+    parent_team_id: text('parent_team_id').notNull(),
+    budget_id: text('budget_id'),
+    budget_template_id: text('budget_template_id'),
+    budget_override_expires_at: timestamp('budget_override_expires_at', { precision: 3 }),
+    created_at: timestamp('created_at', { precision: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`)
+      .$defaultFn(utcNow),
+    created_by: text('created_by').notNull(),
+    updated_at: timestamp('updated_at', { precision: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`)
+      .$defaultFn(utcNow)
+      .$onUpdate(utcNow),
+    updated_by: text('updated_by').notNull(),
+  },
+  (table) => [
+    index('LiteLLM_CustomerMemberTable_parent_team_id_idx').on(table.parent_team_id),
+    index('LiteLLM_CustomerMemberTable_budget_template_id_idx').on(table.budget_template_id),
+    foreignKey({
+      name: 'LiteLLM_CustomerMemberTable_parent_team_id_fkey',
+      columns: [table.parent_team_id],
+      foreignColumns: [liteLLMCustomerTeamTable.customer_team_id],
+    })
+      .onDelete('restrict')
+      .onUpdate('cascade'),
+    foreignKey({
+      name: 'LiteLLM_CustomerMemberTable_budget_id_fkey',
+      columns: [table.budget_id],
+      foreignColumns: [liteLLMBudgetTable.budget_id],
+    })
+      .onDelete('restrict')
+      .onUpdate('cascade'),
+    foreignKey({
+      name: 'LiteLLM_CustomerMemberTable_budget_template_id_fkey',
+      columns: [table.budget_template_id],
+      foreignColumns: [liteLLMBudgetTable.budget_id],
+    })
+      .onDelete('restrict')
+      .onUpdate('cascade'),
+  ],
+)
 
 export const liteLLMCredentialsTable = pgTable(
   'LiteLLM_CredentialsTable',
@@ -1427,6 +1573,7 @@ export const liteLLMDailyUserSpend = pgTable(
     index('LiteLLM_DailyUserSpend_date_idx').on(table.date),
     index('LiteLLM_DailyUserSpend_user_id_date_idx').on(table.user_id, table.date),
     index('LiteLLM_DailyUserSpend_api_key_idx').on(table.api_key),
+    index('LiteLLM_DailyUserSpend_api_key_date_idx').on(table.api_key, table.date),
     index('LiteLLM_DailyUserSpend_model_idx').on(table.model),
     index('LiteLLM_DailyUserSpend_mcp_namespaced_tool_name_idx').on(table.mcp_namespaced_tool_name),
     index('LiteLLM_DailyUserSpend_endpoint_idx').on(table.endpoint),
@@ -1957,6 +2104,32 @@ export const liteLLMCronJob = pgTable('LiteLLM_CronJob', {
   ttl: timestamp('ttl', { precision: 3 }).notNull(),
 })
 
+export const liteLLMScheduledJobRun = pgTable(
+  'LiteLLM_ScheduledJobRun',
+  {
+    id: text('id')
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    job_name: text('job_name').notNull(),
+    lock_group: text('lock_group').notNull(),
+    schedule: text('schedule').notNull(),
+    scheduled_for: timestamp('scheduled_for', { withTimezone: true, precision: 3 }).notNull(),
+    status: scheduledJobRunStatusEnum('status').notNull().default('PENDING'),
+    claimed_by: text('claimed_by'),
+    claimed_at: timestamp('claimed_at', { withTimezone: true, precision: 3 }),
+    lease_expires_at: timestamp('lease_expires_at', { withTimezone: true, precision: 3 }),
+    finished_at: timestamp('finished_at', { withTimezone: true, precision: 3 }),
+    created_at: timestamp('created_at', { withTimezone: true, precision: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`)
+      .$defaultFn(utcNow),
+  },
+  (table) => [
+    index('LiteLLM_ScheduledJobRun_job_name_status_idx').on(table.job_name, table.status),
+    index('LiteLLM_ScheduledJobRun_lock_group_status_idx').on(table.lock_group, table.status),
+  ],
+)
+
 export const liteLLMManagedFileTable = pgTable(
   'LiteLLM_ManagedFileTable',
   {
@@ -2303,6 +2476,12 @@ export const liteLLMDailyModelUsage = pgTable(
       .notNull()
       .default(sql`0`),
     failed_requests: bigint('failed_requests', { mode: 'bigint' })
+      .notNull()
+      .default(sql`0`),
+    total_response_time_ms: bigint('total_response_time_ms', { mode: 'bigint' })
+      .notNull()
+      .default(sql`0`),
+    timed_requests: bigint('timed_requests', { mode: 'bigint' })
       .notNull()
       .default(sql`0`),
     created_at: timestamp('created_at', { precision: 3 })
@@ -2705,6 +2884,7 @@ export const liteLLMAccessGroupTable = pgTable(
     mcp_tool_permissions: jsonb('mcp_tool_permissions'),
     access_agent_ids: text('access_agent_ids').array().default([]),
     access_skill_names: text('access_skill_names').array().default([]),
+    access_vector_store_ids: text('access_vector_store_ids').array().default([]),
     assigned_team_ids: text('assigned_team_ids').array().default([]),
     assigned_key_ids: text('assigned_key_ids').array().default([]),
     created_at: timestamp('created_at', { precision: 3 })
@@ -3534,9 +3714,63 @@ export const liteLLMSubscriptionAccountTable = pgTable(
   ],
 )
 
+export const liteLLMAlert = pgTable(
+  'LiteLLM_Alert',
+  {
+    id: bigserial('id', { mode: 'bigint' }).primaryKey(),
+    detection_key: varchar('detection_key', { length: 64 }).notNull(),
+    type: varchar('type', { length: 32 }).notNull(),
+    resource_type: varchar('resource_type', { length: 16 }).notNull(),
+    resource_id: varchar('resource_id', { length: 1024 }).notNull(),
+    status: varchar('status', { length: 16 }).notNull().default('open'),
+    window_start: timestamp('window_start', { precision: 3 }).notNull(),
+    window_end: timestamp('window_end', { precision: 3 }).notNull(),
+    evidence: jsonb('evidence').notNull(),
+    created_at: timestamp('created_at', { precision: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`)
+      .$defaultFn(utcNow),
+    updated_at: timestamp('updated_at', { precision: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`)
+      .$defaultFn(utcNow)
+      .$onUpdate(utcNow),
+    updated_by: varchar('updated_by', { length: 1024 }),
+  },
+  (table) => [
+    uniqueIndex('LiteLLM_Alert_detection_key_key').on(table.detection_key),
+    index('LiteLLM_Alert_status_id_idx').on(table.status, table.id),
+  ],
+)
+
+export const liteLLMPerformanceAlertState = pgTable('LiteLLM_PerformanceAlertState', {
+  enabled: boolean('enabled').notNull().default(true),
+  alerts_used: integer('alerts_used'),
+  id: integer('id').primaryKey(),
+  owner: varchar('owner', { length: 32 }).notNull(),
+  next_run_at: timestamp('next_run_at', { withTimezone: true, precision: 3 }).notNull(),
+  day: varchar('day', { length: 10 }),
+  scope: varchar('scope', { length: 16 }),
+  resume_after: varchar('resume_after', { length: 1024 }).notNull().default(''),
+  wrapped: boolean('wrapped').notNull().default(false),
+  checked: integer('checked').notNull().default(0),
+  skipped: integer('skipped').notNull().default(0),
+  start_scope: varchar('start_scope', { length: 16 }),
+  start_after: varchar('start_after', { length: 1024 }).notNull().default(''),
+  completed_at: timestamp('completed_at', { precision: 3 }),
+  updated_at: timestamp('updated_at', { precision: 3 })
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`)
+    .$defaultFn(utcNow)
+    .$onUpdate(utcNow),
+})
+
 export const relations = defineRelations(
   {
     liteLLMBudgetTable,
+    liteLLMCustomerOrganizationTable,
+    liteLLMCustomerTeamTable,
+    liteLLMCustomerMemberTable,
     liteLLMCredentialsTable,
     liteLLMProxyModelTable,
     liteLLMAgentsTable,
@@ -3583,6 +3817,7 @@ export const relations = defineRelations(
     liteLLMDailyTagSpend,
     liteLLMProxyWorkerHeartbeat,
     liteLLMCronJob,
+    liteLLMScheduledJobRun,
     liteLLMManagedFileTable,
     liteLLMManagedObjectTable,
     liteLLMManagedFileContentTable,
@@ -3644,9 +3879,22 @@ export const relations = defineRelations(
     liteLLMTelemetryReport,
     liteLLMSpendLogDelivery,
     liteLLMSubscriptionAccountTable,
+    liteLLMAlert,
+    liteLLMPerformanceAlertState,
   },
   (r) => ({
     liteLLMBudgetTable: {
+      customer_organization_defaults: r.many.liteLLMCustomerOrganizationTable({
+        alias: 'CustomerOrganizationDefaultBudget',
+      }),
+      customer_organizations: r.many.liteLLMCustomerOrganizationTable({
+        alias: 'CustomerOrganizationBudget',
+      }),
+      customer_member_templates: r.many.liteLLMCustomerMemberTable({
+        alias: 'CustomerMemberTemplate',
+      }),
+      customer_teams: r.many.liteLLMCustomerTeamTable(),
+      customer_members: r.many.liteLLMCustomerMemberTable({ alias: 'CustomerMemberBudget' }),
       organization: r.many.liteLLMOrganizationTable(),
       projects: r.many.liteLLMProjectTable(),
       keys: r.many.liteLLMVerificationToken(),
@@ -3655,6 +3903,48 @@ export const relations = defineRelations(
       model_access_groups: r.many.liteLLMModelAccessGroupBudgetTable(),
       team_membership: r.many.liteLLMTeamMembership(),
       organization_membership: r.many.liteLLMOrganizationMembership(),
+    },
+    liteLLMCustomerOrganizationTable: {
+      budget: r.one.liteLLMBudgetTable({
+        from: r.liteLLMCustomerOrganizationTable.budget_id,
+        to: r.liteLLMBudgetTable.budget_id,
+        alias: 'CustomerOrganizationBudget',
+      }),
+      default_budget: r.one.liteLLMBudgetTable({
+        from: r.liteLLMCustomerOrganizationTable.default_budget_id,
+        to: r.liteLLMBudgetTable.budget_id,
+        alias: 'CustomerOrganizationDefaultBudget',
+      }),
+      teams: r.many.liteLLMCustomerTeamTable(),
+    },
+    liteLLMCustomerTeamTable: {
+      parent_org: r.one.liteLLMCustomerOrganizationTable({
+        from: r.liteLLMCustomerTeamTable.parent_org_id,
+        to: r.liteLLMCustomerOrganizationTable.customer_org_id,
+        optional: false,
+      }),
+      budget: r.one.liteLLMBudgetTable({
+        from: r.liteLLMCustomerTeamTable.budget_id,
+        to: r.liteLLMBudgetTable.budget_id,
+      }),
+      members: r.many.liteLLMCustomerMemberTable(),
+    },
+    liteLLMCustomerMemberTable: {
+      parent_team: r.one.liteLLMCustomerTeamTable({
+        from: r.liteLLMCustomerMemberTable.parent_team_id,
+        to: r.liteLLMCustomerTeamTable.customer_team_id,
+        optional: false,
+      }),
+      budget: r.one.liteLLMBudgetTable({
+        from: r.liteLLMCustomerMemberTable.budget_id,
+        to: r.liteLLMBudgetTable.budget_id,
+        alias: 'CustomerMemberBudget',
+      }),
+      budget_template: r.one.liteLLMBudgetTable({
+        from: r.liteLLMCustomerMemberTable.budget_template_id,
+        to: r.liteLLMBudgetTable.budget_id,
+        alias: 'CustomerMemberTemplate',
+      }),
     },
     liteLLMAgentsTable: {
       object_permission: r.one.liteLLMObjectPermissionTable({

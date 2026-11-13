@@ -8,6 +8,7 @@ class LiteLLMAccessGroupTable < ApplicationRecord
   attribute :access_mcp_server_ids, default: -> { [] }
   attribute :access_agent_ids, default: -> { [] }
   attribute :access_skill_names, default: -> { [] }
+  attribute :access_vector_store_ids, default: -> { [] }
   attribute :assigned_team_ids, default: -> { [] }
   attribute :assigned_key_ids, default: -> { [] }
 

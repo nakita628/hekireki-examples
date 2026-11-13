@@ -10,7 +10,7 @@ object PrismaSchema {
             "CREATE TYPE \"ApiKeyScope\" AS ENUM ('ORGANIZATION', 'PROJECT', 'USER')",
             "CREATE TYPE \"SystemRole\" AS ENUM ('OWNER', 'ADMIN', 'MEMBER', 'VIEWER', 'NONE', 'LEGACY_PROJECT_API_KEY', 'LEGACY_ORGANIZATION_API_KEY', 'SCORES_INGEST', 'INGEST', 'AI_GATEWAY')",
             "CREATE TYPE \"GatewayIngestionMode\" AS ENUM ('none', 'usage', 'full')",
-            "CREATE TYPE \"GatewayProvider\" AS ENUM ('openai', 'anthropic', 'bedrock', 'openrouter', 'xai', 'vercel')",
+            "CREATE TYPE \"GatewayProvider\" AS ENUM ('openai', 'anthropic', 'bedrock', 'openrouter', 'xai', 'vercel', 'azure', 'google_ai_studio')",
             "CREATE TYPE \"GatewayConnectionStatus\" AS ENUM ('enabled', 'disabled', 'error')",
             "CREATE TYPE \"InAppAgentConversationVisibilityScope\" AS ENUM ('PERSONAL', 'PROJECT')",
             "CREATE TYPE \"Role\" AS ENUM ('OWNER', 'ADMIN', 'MEMBER', 'VIEWER', 'NONE', 'AI_GATEWAY')",

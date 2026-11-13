@@ -34,6 +34,12 @@ class Subscription extends Model
         'cancel_at_period_end',
         'user_id',
         'space_id',
+        'api_addon_item_id',
+        'api_addon_price_id',
+        'api_addon_amount',
+        'api_poll_limit',
+        'api_poll_retained_limit',
+        'api_poll_retained_until',
     ];
 
     protected $attributes = [
@@ -52,6 +58,10 @@ class Subscription extends Model
         'period_start' => 'datetime',
         'period_end' => 'datetime',
         'cancel_at_period_end' => 'boolean',
+        'api_addon_amount' => 'integer',
+        'api_poll_limit' => 'integer',
+        'api_poll_retained_limit' => 'integer',
+        'api_poll_retained_until' => 'datetime',
     ];
 
     public function user(): BelongsTo

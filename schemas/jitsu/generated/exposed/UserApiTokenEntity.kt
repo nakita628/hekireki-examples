@@ -22,6 +22,8 @@ class UserApiTokenEntity(
     var type by UserApiTokenTable.type
     var name by UserApiTokenTable.name
     var expiresAt by UserApiTokenTable.expiresAt
+    var workspaceId by UserApiTokenTable.workspaceId
+    var role by UserApiTokenTable.role
     var oauthClientId by UserApiTokenTable.oauthClientId
     var oauthClient by OAuthClientEntity optionalReferencedOn UserApiTokenTable.oauthClientId
     val accessTokens by OAuthAccessTokenEntity referrersOn OAuthAccessTokenTable.refreshTokenId

@@ -266,6 +266,7 @@ type EmailAccount struct {
 	Categories                          []Category               `gorm:"foreignKey:EmailAccountID;constraint:OnDelete:CASCADE"`
 	ThreadTrackers                      []ThreadTracker          `gorm:"foreignKey:EmailAccountID;constraint:OnDelete:CASCADE"`
 	CleanupJobs                         []CleanupJob             `gorm:"foreignKey:EmailAccountID;constraint:OnDelete:CASCADE"`
+	BulkInboxActionJobs                 []BulkInboxActionJob     `gorm:"foreignKey:EmailAccountID;constraint:OnDelete:CASCADE"`
 	CleanupThreads                      []CleanupThread          `gorm:"foreignKey:EmailAccountID;constraint:OnDelete:CASCADE"`
 	EmailMessages                       []EmailMessage           `gorm:"foreignKey:EmailAccountID;constraint:OnDelete:CASCADE"`
 	EmailTokens                         []EmailToken             `gorm:"foreignKey:EmailAccountID;constraint:OnDelete:CASCADE"`
@@ -2002,6 +2003,73 @@ func (*CleanupThread) BeforeUpdate(tx *gorm.DB) error {
 	return nil
 }
 
+type BulkInboxActionJob struct {
+	ID               string         `gorm:"column:id;primaryKey" json:"id"`
+	CreatedAt        DateTime       `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
+	UpdatedAt        DateTime       `gorm:"column:updatedAt;index:BulkInboxActionJob_chatId_updatedAt_idx;autoUpdateTime:false;not null" json:"updatedAt"`
+	Status           string         `gorm:"column:status;default:'RUNNING';not null" json:"status"`
+	Search           datatypes.JSON `gorm:"column:search;not null" json:"search"`
+	Action           string         `gorm:"column:action;not null" json:"action"`
+	LabelID          *string        `gorm:"column:labelId" json:"labelId"`
+	LabelName        *string        `gorm:"column:labelName" json:"labelName"`
+	Instruction      *string        `gorm:"column:instruction" json:"instruction"`
+	PageToken        *string        `gorm:"column:pageToken" json:"pageToken"`
+	RateLimitedUntil *DateTime      `gorm:"column:rateLimitedUntil" json:"rateLimitedUntil"`
+	LeaseExpiresAt   *DateTime      `gorm:"column:leaseExpiresAt" json:"leaseExpiresAt"`
+	ChunkToken       *string        `gorm:"column:chunkToken" json:"chunkToken"`
+	RecoveryCount    int            `gorm:"column:recoveryCount;default:0;not null" json:"recoveryCount"`
+	ProcessedCount   int            `gorm:"column:processedCount;default:0;not null" json:"processedCount"`
+	MatchedCount     int            `gorm:"column:matchedCount;default:0;not null" json:"matchedCount"`
+	ActedCount       int            `gorm:"column:actedCount;default:0;not null" json:"actedCount"`
+	SkippedCount     int            `gorm:"column:skippedCount;default:0;not null" json:"skippedCount"`
+	FailedCount      int            `gorm:"column:failedCount;default:0;not null" json:"failedCount"`
+	LimitReached     bool           `gorm:"column:limitReached;default:false;not null" json:"limitReached"`
+	Error            *string        `gorm:"column:error" json:"error"`
+	CompletedAt      *DateTime      `gorm:"column:completedAt" json:"completedAt"`
+	ConfirmationKey  string         `gorm:"column:confirmationKey;uniqueIndex:BulkInboxActionJob_emailAccountId_confirmationKey_key;not null" json:"confirmationKey"`
+	ChatID           *string        `gorm:"column:chatId;index:BulkInboxActionJob_chatId_updatedAt_idx" json:"chatId"`
+	EmailAccountID   string         `gorm:"column:emailAccountId;uniqueIndex:BulkInboxActionJob_emailAccountId_confirmationKey_key;not null" json:"emailAccountId"`
+	Chat             *Chat
+	EmailAccount     *EmailAccount
+	HandledThreads   []BulkInboxActionThread `gorm:"foreignKey:JobID;constraint:OnDelete:CASCADE"`
+}
+
+func (BulkInboxActionJob) TableName() string {
+	return "BulkInboxActionJob"
+}
+
+func (m *BulkInboxActionJob) BeforeCreate(tx *gorm.DB) error {
+	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
+	if m.ID == "" {
+		m.ID = cuid.New()
+	}
+	if m.CreatedAt.IsZero() {
+		m.CreatedAt = DateTime{Time: now}
+	}
+	if m.UpdatedAt.IsZero() {
+		m.UpdatedAt = DateTime{Time: now}
+	}
+	return nil
+}
+
+func (*BulkInboxActionJob) BeforeUpdate(tx *gorm.DB) error {
+	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
+	if !tx.Statement.Changed("UpdatedAt") {
+		tx.Statement.SetColumn("UpdatedAt", DateTime{Time: now})
+	}
+	return nil
+}
+
+type BulkInboxActionThread struct {
+	JobID    string              `gorm:"column:jobId;primaryKey" json:"jobId"`
+	ThreadID string              `gorm:"column:threadId;primaryKey" json:"threadId"`
+	Job      *BulkInboxActionJob `gorm:"foreignKey:JobID"`
+}
+
+func (BulkInboxActionThread) TableName() string {
+	return "BulkInboxActionThread"
+}
+
 type Knowledge struct {
 	ID             string   `gorm:"column:id;primaryKey" json:"id"`
 	CreatedAt      DateTime `gorm:"column:createdAt;autoCreateTime:false;not null" json:"createdAt"`
@@ -2314,10 +2382,11 @@ type Chat struct {
 	ActiveStreamStartedAt *DateTime `gorm:"column:activeStreamStartedAt" json:"activeStreamStartedAt"`
 	EmailAccountID        string    `gorm:"column:emailAccountId;index:Chat_emailAccountId_idx;not null" json:"emailAccountId"`
 	EmailAccount          *EmailAccount
-	Messages              []ChatMessage     `gorm:"foreignKey:ChatID;constraint:OnDelete:CASCADE"`
-	Compactions           []ChatCompaction  `gorm:"foreignKey:ChatID;constraint:OnDelete:CASCADE"`
-	Memories              []ChatMemory      `gorm:"foreignKey:ChatID;constraint:OnDelete:SET NULL"`
-	ActionTotals          []ChatActionTotal `gorm:"foreignKey:ChatID;constraint:OnDelete:CASCADE"`
+	Messages              []ChatMessage        `gorm:"foreignKey:ChatID;constraint:OnDelete:CASCADE"`
+	Compactions           []ChatCompaction     `gorm:"foreignKey:ChatID;constraint:OnDelete:CASCADE"`
+	Memories              []ChatMemory         `gorm:"foreignKey:ChatID;constraint:OnDelete:SET NULL"`
+	ActionTotals          []ChatActionTotal    `gorm:"foreignKey:ChatID;constraint:OnDelete:CASCADE"`
+	BulkInboxActionJobs   []BulkInboxActionJob `gorm:"foreignKey:ChatID;constraint:OnDelete:SET NULL"`
 }
 
 func (Chat) TableName() string {

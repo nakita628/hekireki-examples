@@ -172,6 +172,8 @@ pub enum Relation {
     ThreadTrackers,
     #[sea_orm(has_many = "super::cleanup_job::Entity")]
     CleanupJobs,
+    #[sea_orm(has_many = "super::bulk_inbox_action_job::Entity")]
+    BulkInboxActionJobs,
     #[sea_orm(has_many = "super::cleanup_thread::Entity")]
     CleanupThreads,
     #[sea_orm(has_many = "super::email_message::Entity")]
@@ -311,6 +313,12 @@ impl Related<super::thread_tracker::Entity> for Entity {
 impl Related<super::cleanup_job::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::CleanupJobs.def()
+    }
+}
+
+impl Related<super::bulk_inbox_action_job::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::BulkInboxActionJobs.def()
     }
 }
 

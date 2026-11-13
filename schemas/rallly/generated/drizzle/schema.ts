@@ -1,6 +1,7 @@
 import {
   type PgTableExtraConfigValue,
   boolean,
+  customType,
   doublePrecision,
   foreignKey,
   index,
@@ -8,6 +9,7 @@ import {
   jsonb,
   pgEnum,
   pgTable,
+  primaryKey,
   text,
   timestamp,
   unique,
@@ -16,6 +18,12 @@ import {
 } from 'drizzle-orm/pg-core'
 import { defineRelations, sql } from 'drizzle-orm'
 import cuid from 'cuid'
+
+const utcDate = customType<{ data: Date; driverData: string }>({
+  dataType: () => 'date',
+  toDriver: (value) => value.toISOString().slice(0, 10),
+  fromDriver: (value) => new Date(value),
+})
 
 const utcNow = (() => {
   let now: Date | undefined
@@ -29,6 +37,8 @@ const utcNow = (() => {
     return now
   }
 })()
+
+export const apiUsageResourceEnum = pgEnum('api_usage_resource', ['poll'])
 
 export const subscriptionStatusEnum = pgEnum('subscription_status', [
   'incomplete',
@@ -101,6 +111,29 @@ export const timeFormatEnum = pgEnum('time_format', ['hours12', 'hours24'])
 
 export const userRoleEnum = pgEnum('user_role', ['admin', 'user'])
 
+export const apiUsage = pgTable(
+  'api_usage',
+  {
+    spaceId: text('space_id').notNull(),
+    resource: apiUsageResourceEnum('resource').notNull(),
+    period: utcDate('period').notNull(),
+    count: integer('count').notNull().default(0),
+    nearLimitWarnedAt: timestamp('near_limit_warned_at', { precision: 3 }),
+    atLimitWarnedAt: timestamp('at_limit_warned_at', { precision: 3 }),
+    updatedAt: timestamp('updated_at', { precision: 3 }).notNull().$onUpdate(utcNow),
+  },
+  (table) => [
+    primaryKey({ name: 'api_usage_pkey', columns: [table.spaceId, table.resource, table.period] }),
+    foreignKey({
+      name: 'api_usage_space_id_fkey',
+      columns: [table.spaceId],
+      foreignColumns: [spaces.id],
+    })
+      .onDelete('cascade')
+      .onUpdate('cascade'),
+  ],
+)
+
 export const subscriptions = pgTable(
   'subscriptions',
   {
@@ -124,6 +157,12 @@ export const subscriptions = pgTable(
     cancelAtPeriodEnd: boolean('cancel_at_period_end').notNull().default(false),
     userId: text('user_id').notNull(),
     spaceId: text('space_id').notNull(),
+    apiAddonItemId: text('api_addon_item_id'),
+    apiAddonPriceId: text('api_addon_price_id'),
+    apiAddonAmount: integer('api_addon_amount'),
+    apiPollLimit: integer('api_poll_limit'),
+    apiPollRetainedLimit: integer('api_poll_retained_limit'),
+    apiPollRetainedUntil: timestamp('api_poll_retained_until', { precision: 3 }),
   },
   (table) => [
     index('subscriptions_user_id_idx').on(table.userId),
@@ -1105,6 +1144,7 @@ export const spaces = pgTable(
     hideAttribution: boolean('hide_attribution').notNull().default(false),
     shared: boolean('shared').notNull().default(false),
     nonprofitDiscountGrantedAt: timestamp('nonprofit_discount_granted_at', { precision: 3 }),
+    apiPollQuotaOverride: integer('api_poll_quota_override'),
     createdAt: timestamp('created_at', { precision: 3 })
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`)
@@ -1457,6 +1497,7 @@ export const verifications = pgTable(
 
 export const relations = defineRelations(
   {
+    apiUsage,
     subscriptions,
     paymentMethods,
     nonprofitApplications,
@@ -1496,6 +1537,9 @@ export const relations = defineRelations(
     verifications,
   },
   (r) => ({
+    apiUsage: {
+      space: r.one.spaces({ from: r.apiUsage.spaceId, to: r.spaces.id, optional: false }),
+    },
     subscriptions: {
       user: r.one.users({ from: r.subscriptions.userId, to: r.users.id, optional: false }),
       space: r.one.spaces({ from: r.subscriptions.spaceId, to: r.spaces.id, optional: false }),
@@ -1666,6 +1710,7 @@ export const relations = defineRelations(
       apiKeys: r.many.spaceApiKeys(),
       nonprofitApplications: r.many.nonprofitApplications(),
       webhooks: r.many.spaceWebhooks(),
+      apiUsage: r.many.apiUsage(),
     },
     spaceMembers: {
       space: r.one.spaces({ from: r.spaceMembers.spaceId, to: r.spaces.id, optional: false }),

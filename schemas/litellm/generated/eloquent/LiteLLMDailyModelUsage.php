@@ -28,6 +28,8 @@ class LiteLLMDailyModelUsage extends Model
         'request_count',
         'successful_requests',
         'failed_requests',
+        'total_response_time_ms',
+        'timed_requests',
     ];
 
     protected $attributes = [
@@ -37,6 +39,8 @@ class LiteLLMDailyModelUsage extends Model
         'request_count' => 0,
         'successful_requests' => 0,
         'failed_requests' => 0,
+        'total_response_time_ms' => 0,
+        'timed_requests' => 0,
     ];
 
     protected $casts = [
@@ -46,6 +50,8 @@ class LiteLLMDailyModelUsage extends Model
         'request_count' => 'integer',
         'successful_requests' => 'integer',
         'failed_requests' => 'integer',
+        'total_response_time_ms' => 'integer',
+        'timed_requests' => 'integer',
     ];
 
     public function getKey()

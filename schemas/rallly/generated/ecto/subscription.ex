@@ -19,6 +19,12 @@ defmodule Rallly.Subscription do
           period_start: DateTime.t(),
           period_end: DateTime.t(),
           cancel_at_period_end: boolean(),
+          api_addon_item_id: String.t() | nil,
+          api_addon_price_id: String.t() | nil,
+          api_addon_amount: integer() | nil,
+          api_poll_limit: integer() | nil,
+          api_poll_retained_limit: integer() | nil,
+          api_poll_retained_until: DateTime.t() | nil,
           inserted_at: DateTime.t(),
           user: Rallly.User.t() | nil,
           space: Rallly.Space.t() | nil
@@ -39,6 +45,12 @@ defmodule Rallly.Subscription do
     field(:period_start, Rallly.PrismaDateTime)
     field(:period_end, Rallly.PrismaDateTime)
     field(:cancel_at_period_end, :boolean, default: false)
+    field(:api_addon_item_id, :string)
+    field(:api_addon_price_id, :string)
+    field(:api_addon_amount, :integer)
+    field(:api_poll_limit, :integer)
+    field(:api_poll_retained_limit, :integer)
+    field(:api_poll_retained_until, Rallly.PrismaDateTime)
     belongs_to(:user, Rallly.User, foreign_key: :user_id, type: :string)
     belongs_to(:space, Rallly.Space, foreign_key: :space_id, type: :binary_id)
     timestamps(inserted_at_source: :created_at, updated_at: false)
