@@ -42017,30 +42017,6 @@ OFFSET
 -- params: ["1","1","0"]
 ```
 
-**create**: Create a row
-
-```ts
-await prisma.bookingTimeStatus.create({ data: { id: 1, isTeamBooking: true } });
-```
-
-> The query compiler refused it: [object Object]
-
-**update**: Update a row
-
-```ts
-await prisma.bookingTimeStatus.update({ where: { id: 1 }, data: { uid: "example" } });
-```
-
-> The query compiler refused it: [object Object]
-
-**delete**: Delete a row
-
-```ts
-await prisma.bookingTimeStatus.delete({ where: { id: 1 } });
-```
-
-> The query compiler refused it: [object Object]
-
 </details>
 
 <a id="model-BookingTimeStatusDenormalized"></a>
@@ -42189,42 +42165,6 @@ OFFSET
   $3
 -- params: ["1","1","0"]
 ```
-
-**create**: Create a row
-
-```ts
-await prisma.bookingTimeStatusDenormalized.create({
-  data: {
-    id: 1,
-    uid: "example",
-    title: "example",
-    startTime: new Date("2026-01-01T00:00:00.000Z"),
-    endTime: new Date("2026-01-01T00:00:00.000Z"),
-    createdAt: new Date("2026-01-01T00:00:00.000Z"),
-    paid: true,
-    status: "CANCELLED",
-    isTeamBooking: true,
-  },
-});
-```
-
-> The query compiler refused it: [object Object]
-
-**update**: Update a row
-
-```ts
-await prisma.bookingTimeStatusDenormalized.update({ where: { id: 1 }, data: { uid: "example" } });
-```
-
-> The query compiler refused it: [object Object]
-
-**delete**: Delete a row
-
-```ts
-await prisma.bookingTimeStatusDenormalized.delete({ where: { id: 1 } });
-```
-
-> The query compiler refused it: [object Object]
 
 </details>
 

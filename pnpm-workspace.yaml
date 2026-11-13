@@ -9,4 +9,4 @@ allowBuilds:
   '@prisma/engines': true
 
 minimumReleaseAgeExclude:
-  - hekireki@0.47.0
+  - hekireki@0.48.0

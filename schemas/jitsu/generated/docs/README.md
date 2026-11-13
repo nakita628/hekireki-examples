@@ -7949,12 +7949,29 @@ FROM
 **findUnique**: One row by what is unique to it
 
 ```ts
-await prisma.profileBuilderState2.findUnique({
-  where: { profileBuilderId: { profileBuilderId: "example" } },
-});
+await prisma.profileBuilderState2.findUnique({ where: { profileBuilderId: "example" } });
 ```
 
-> The query compiler refused it: [object Object]
+```sql
+SELECT
+  "public"."ProfileBuilderState2"."profileBuilderId",
+  "public"."ProfileBuilderState2"."updatedAt",
+  "public"."ProfileBuilderState2"."fullRebuildInfo",
+  "public"."ProfileBuilderState2"."queuesInfo",
+  "public"."ProfileBuilderState2"."metrics"
+FROM
+  "public"."ProfileBuilderState2"
+WHERE
+  (
+    "public"."ProfileBuilderState2"."profileBuilderId" = $1
+    AND 1 = 1
+  )
+LIMIT
+  $2
+OFFSET
+  $3
+-- params: ["example","1","0"]
+```
 
 **create**: Create a row
 
@@ -7982,22 +7999,50 @@ RETURNING
 
 ```ts
 await prisma.profileBuilderState2.update({
-  where: { profileBuilderId: { profileBuilderId: "example" } },
+  where: { profileBuilderId: "example" },
   data: { updatedAt: new Date("2026-01-01T00:00:00.000Z") },
 });
 ```
 
-> The query compiler refused it: [object Object]
+```sql
+UPDATE "public"."ProfileBuilderState2"
+SET
+  "updatedAt" = $1
+WHERE
+  (
+    "public"."ProfileBuilderState2"."profileBuilderId" = $2
+    AND 1 = 1
+  )
+RETURNING
+  "public"."ProfileBuilderState2"."profileBuilderId",
+  "public"."ProfileBuilderState2"."updatedAt",
+  "public"."ProfileBuilderState2"."fullRebuildInfo",
+  "public"."ProfileBuilderState2"."queuesInfo",
+  "public"."ProfileBuilderState2"."metrics"
+-- params: ["2026-01-01T00:00:00.000Z","example"]
+```
 
 **delete**: Delete a row
 
 ```ts
-await prisma.profileBuilderState2.delete({
-  where: { profileBuilderId: { profileBuilderId: "example" } },
-});
+await prisma.profileBuilderState2.delete({ where: { profileBuilderId: "example" } });
 ```
 
-> The query compiler refused it: [object Object]
+```sql
+DELETE FROM "public"."ProfileBuilderState2"
+WHERE
+  (
+    "public"."ProfileBuilderState2"."profileBuilderId" = $1
+    AND 1 = 1
+  )
+RETURNING
+  "public"."ProfileBuilderState2"."profileBuilderId",
+  "public"."ProfileBuilderState2"."updatedAt",
+  "public"."ProfileBuilderState2"."fullRebuildInfo",
+  "public"."ProfileBuilderState2"."queuesInfo",
+  "public"."ProfileBuilderState2"."metrics"
+-- params: ["example"]
+```
 
 </details>
 
