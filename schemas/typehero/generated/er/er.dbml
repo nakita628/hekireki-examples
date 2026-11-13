@@ -302,6 +302,46 @@ Table ShortURL {
   userId String
 }
 
+Table _RoleToUser {
+  A String [not null]
+  B String [not null]
+
+  indexes {
+    (A, B) [unique]
+    B
+  }
+}
+
+Table _UserToUserLink {
+  A String [not null]
+  B String [not null]
+
+  indexes {
+    (A, B) [unique]
+    B
+  }
+}
+
+Table _TrackToUser {
+  A Int [not null]
+  B String [not null]
+
+  indexes {
+    (A, B) [unique]
+    B
+  }
+}
+
+Table _ChallengeToTag {
+  A Int [not null]
+  B String [not null]
+
+  indexes {
+    (A, B) [unique]
+    B
+  }
+}
+
 Ref Account_userId_fk: Account.userId > User.id [delete: cascade]
 
 Ref Session_userId_fk: Session.userId > User.id [delete: cascade]
@@ -373,3 +413,19 @@ Ref Notification_challengeId_fk: Notification.challengeId > Challenge.id
 Ref Notification_sharedSolutionId_fk: Notification.sharedSolutionId > SharedSolution.id
 
 Ref ShortURL_userId_fk: ShortURL.userId > User.id
+
+Ref _RoleToUser_A_fk: _RoleToUser.A > Role.id [delete: cascade, update: cascade]
+
+Ref _RoleToUser_B_fk: _RoleToUser.B > User.id [delete: cascade, update: cascade]
+
+Ref _UserToUserLink_A_fk: _UserToUserLink.A > User.id [delete: cascade, update: cascade]
+
+Ref _UserToUserLink_B_fk: _UserToUserLink.B > UserLink.id [delete: cascade, update: cascade]
+
+Ref _TrackToUser_A_fk: _TrackToUser.A > Track.id [delete: cascade, update: cascade]
+
+Ref _TrackToUser_B_fk: _TrackToUser.B > User.id [delete: cascade, update: cascade]
+
+Ref _ChallengeToTag_A_fk: _ChallengeToTag.A > Challenge.id [delete: cascade, update: cascade]
+
+Ref _ChallengeToTag_B_fk: _ChallengeToTag.B > Tag.id [delete: cascade, update: cascade]

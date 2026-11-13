@@ -6,6 +6,7 @@ package(default_visibility = ["//visibility:public"])
 js_binary(
     name = "generate",
     data = [
+        "//:node_modules/@prisma/client",
         "//:node_modules/hekireki",
         "//:node_modules/prisma",
     ],

@@ -12,7 +12,7 @@ datasource db {
   provider = "postgresql"
 }
 
-// hekireki: every ORM generator, and the ER diagram as Mermaid, DBML and SVG. Every output is
+// hekireki: every ORM generator, the ER diagram as Mermaid, DBML and SVG, and the schema docs. Every output is
 // under generated/, which the Bazel target //schemas/workoutcool:generate writes and
 // //schemas/workoutcool:generate.test holds the committed copy to.
 
@@ -80,6 +80,11 @@ generator Hekireki-Exposed {
 generator Hekireki-ER {
   provider = "hekireki-er"
   outputs  = ["generated/er/er.md", "generated/er/er.dbml", "generated/er/er.svg"]
+}
+
+generator Hekireki-Docs {
+  provider = "hekireki-docs"
+  output   = "generated/docs"
 }
 
 enum UserRole {

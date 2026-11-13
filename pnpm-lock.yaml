@@ -11,6 +11,9 @@ importers:
       '@paralleldrive/cuid2':
         specifier: 3.3.0
         version: 3.3.0
+      '@prisma/client':
+        specifier: 8.1.0-dev.9
+        version: 8.1.0-dev.9(prisma@8.1.0-dev.9(@types/node@24.10.1)(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(typescript@5.9.3))(typescript@5.9.3)
       '@types/node':
         specifier: 24.10.1
         version: 24.10.1
@@ -21,8 +24,8 @@ importers:
         specifier: 1.0.0-rc.5
         version: 1.0.0-rc.5(@electric-sql/pglite@0.4.3)(effect@4.1.2)(mysql2@3.24.4(@types/node@24.10.1))(postgres@3.4.7)(valibot@1.4.2(typescript@5.9.3))(zod@4.6.7)
       hekireki:
-        specifier: 0.45.0
-        version: 0.45.0(redis@6.3.1)
+        specifier: 0.47.0
+        version: 0.47.0(redis@6.3.1)
       kysely:
         specifier: 0.29.7
         version: 0.29.7
@@ -234,6 +237,21 @@ packages:
   '@paralleldrive/cuid2@3.3.0':
     resolution: {integrity: sha512-OqiFvSOF0dBSesELYY2CAMa4YINvlLpvKOz/rv6NeZEqiyttlHgv98Juwv4Ch+GrEV7IZ8jfI2VcEoYUjXXCjw==}
     hasBin: true
+
+  '@prisma/client-runtime-utils@8.1.0-dev.9':
+    resolution: {integrity: sha512-JRKm44Y+A1uJ9IF2AtupuuMSUEcRwcmoR+pcMFA0QUpfXt84utHExYSPacNIgxufT3VX4yuuLlvTQWefprO8ww==}
+
+  '@prisma/client@8.1.0-dev.9':
+    resolution: {integrity: sha512-0aEHqFHntvxoCA/BiMIV1/VnU9sKz32TRPDZLQdT4eY0mOnnXtvvzDE/zFegRXCYem60if7H4njbGQTbToKuEA==}
+    engines: {node: ^20.19 || ^22.12 || >=24.0}
+    peerDependencies:
+      prisma: '*'
+      typescript: '>=5.4.0'
+    peerDependenciesMeta:
+      prisma:
+        optional: true
+      typescript:
+        optional: true
 
   '@prisma/config@7.9.0-dev.4':
     resolution: {integrity: sha512-/8Oq1I48iCEXjkwsXvwTrVQmH+I7s6FSRvYomm5VEMh7L9ZtNZkwElVek/Eaxjv+iRu2J3upDTrQuLmL/Vq7AQ==}
@@ -947,8 +965,8 @@ packages:
   graphmatch@1.1.1:
     resolution: {integrity: sha512-5ykVn/EXM1hF0XCaWh05VbYvEiOL2lY1kBxZtaYsyvjp7cmWOU1XsAdfQBwClraEofXDT197lFbXOEVMHpvQOg==}
 
-  hekireki@0.45.0:
-    resolution: {integrity: sha512-sT3tw3DTEnSCY8LoLWoqq6p00BT+o5El9OdAfuoASkqjLIP/Eid3pgi3anisqSEIYzr1U9gx0Ags7DGMWqvO7A==}
+  hekireki@0.47.0:
+    resolution: {integrity: sha512-CIBjakHLZhyQLKmYp5+Dkh3DTaNj/LU0JvM/F9Kx2NLUGpCdroday4nHwIsQlv2irwLyR0wpfU2IHP/FOAoanw==}
     hasBin: true
 
   hono@4.13.16:
@@ -1385,6 +1403,15 @@ snapshots:
       '@noble/hashes': 2.4.0
       bignumber.js: 9.3.1
       error-causes: 3.0.2
+
+  '@prisma/client-runtime-utils@8.1.0-dev.9': {}
+
+  '@prisma/client@8.1.0-dev.9(prisma@8.1.0-dev.9(@types/node@24.10.1)(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(typescript@5.9.3))(typescript@5.9.3)':
+    dependencies:
+      '@prisma/client-runtime-utils': 8.1.0-dev.9
+    optionalDependencies:
+      prisma: 8.1.0-dev.9(@types/node@24.10.1)(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(typescript@5.9.3)
+      typescript: 5.9.3
 
   '@prisma/config@7.9.0-dev.4':
     dependencies:
@@ -1963,7 +1990,7 @@ snapshots:
 
   graphmatch@1.1.1: {}
 
-  hekireki@0.45.0(redis@6.3.1):
+  hekireki@0.47.0(redis@6.3.1):
     dependencies:
       '@dagrejs/dagre': 3.1.3
       '@effect/platform-node': 4.1.2(effect@4.1.2)(redis@6.3.1)

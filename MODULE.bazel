@@ -1,8 +1,8 @@
 """hekireki-examples: a Bazel monorepo that runs hekireki over well-known Prisma schemas.
 
 Each package under `schemas/` holds one public schema.prisma (annotated with `///` doc comments)
-and generates every ORM model plus the ER diagram from it; `checks/` compiles what came out with
-the language's own toolchain.
+and generates every ORM model, the ER diagram and the schema docs from it; `checks/` compiles
+what came out with the language's own toolchain.
 """
 
 module(name = "hekireki_examples", version = "0.0.0")

@@ -280,6 +280,26 @@ Table AppMigration {
   createdAt DateTime [default: `now()`, not null]
 }
 
+Table _PinnedLinks {
+  A Int [not null]
+  B Int [not null]
+
+  indexes {
+    (A, B) [unique]
+    B
+  }
+}
+
+Table _LinkToTag {
+  A Int [not null]
+  B Int [not null]
+
+  indexes {
+    (A, B) [unique]
+    B
+  }
+}
+
 Ref Account_userId_fk: Account.userId > User.id [delete: cascade]
 
 Ref User_parentSubscriptionId_fk: User.parentSubscriptionId > Subscription.id
@@ -313,3 +333,11 @@ Ref Highlight_userId_fk: Highlight.userId > User.id [delete: cascade]
 Ref DashboardSection_userId_fk: DashboardSection.userId > User.id [delete: cascade]
 
 Ref DashboardSection_collectionId_fk: DashboardSection.collectionId > Collection.id [delete: cascade]
+
+Ref _PinnedLinks_A_fk: _PinnedLinks.A > Link.id [delete: cascade, update: cascade]
+
+Ref _PinnedLinks_B_fk: _PinnedLinks.B > User.id [delete: cascade, update: cascade]
+
+Ref _LinkToTag_A_fk: _LinkToTag.A > Link.id [delete: cascade, update: cascade]
+
+Ref _LinkToTag_B_fk: _LinkToTag.B > Tag.id [delete: cascade, update: cascade]

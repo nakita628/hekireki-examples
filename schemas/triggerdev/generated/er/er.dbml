@@ -2223,6 +2223,46 @@ Table OrganizationDataStore {
 Multiple organizations can share a single data store row via organizationIds.'''
 }
 
+Table _BackgroundWorkerToBackgroundWorkerFile {
+  A String [not null]
+  B String [not null]
+
+  indexes {
+    (A, B) [unique]
+    B
+  }
+}
+
+Table _BackgroundWorkerToTaskQueue {
+  A String [not null]
+  B String [not null]
+
+  indexes {
+    (A, B) [unique]
+    B
+  }
+}
+
+Table _WaitpointRunConnections {
+  A String [not null]
+  B String [not null]
+
+  indexes {
+    (A, B) [unique]
+    B
+  }
+}
+
+Table _completedWaitpoints {
+  A String [not null]
+  B String [not null]
+
+  indexes {
+    (A, B) [unique]
+    B
+  }
+}
+
 Ref User_mfaSecretReferenceId_fk: User.mfaSecretReferenceId > SecretReference.id
 
 Ref User_invitationCodeId_fk: User.invitationCodeId > InvitationCode.id
@@ -2554,3 +2594,19 @@ Ref TaskIdentifier_runtimeEnvironmentId_fk: TaskIdentifier.runtimeEnvironmentId 
 Ref TaskIdentifier_projectId_fk: TaskIdentifier.projectId > Project.id [delete: cascade, update: cascade]
 
 Ref TaskIdentifier_currentWorkerId_fk: TaskIdentifier.currentWorkerId > BackgroundWorker.id [delete: set null, update: cascade]
+
+Ref _BackgroundWorkerToBackgroundWorkerFile_A_fk: _BackgroundWorkerToBackgroundWorkerFile.A > BackgroundWorker.id [delete: cascade, update: cascade]
+
+Ref _BackgroundWorkerToBackgroundWorkerFile_B_fk: _BackgroundWorkerToBackgroundWorkerFile.B > BackgroundWorkerFile.id [delete: cascade, update: cascade]
+
+Ref _BackgroundWorkerToTaskQueue_A_fk: _BackgroundWorkerToTaskQueue.A > BackgroundWorker.id [delete: cascade, update: cascade]
+
+Ref _BackgroundWorkerToTaskQueue_B_fk: _BackgroundWorkerToTaskQueue.B > TaskQueue.id [delete: cascade, update: cascade]
+
+Ref _WaitpointRunConnections_A_fk: _WaitpointRunConnections.A > TaskRun.id [delete: cascade, update: cascade]
+
+Ref _WaitpointRunConnections_B_fk: _WaitpointRunConnections.B > Waitpoint.id [delete: cascade, update: cascade]
+
+Ref _completedWaitpoints_A_fk: _completedWaitpoints.A > TaskRunExecutionSnapshot.id [delete: cascade, update: cascade]
+
+Ref _completedWaitpoints_B_fk: _completedWaitpoints.B > Waitpoint.id [delete: cascade, update: cascade]

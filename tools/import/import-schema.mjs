@@ -14,8 +14,8 @@
 //     Prisma validates the schema against the union of every generator's `previewFeatures`;
 //   - `url`, `directUrl` and `shadowDatabaseUrl` are dropped from the datasource, so no `.env`
 //     is needed to run `prisma generate`;
-//   - a header names where the file came from, and hekireki's ORM and ER generator blocks are
-//     added after the datasource, except those `skip` in sources.json names (a generator that
+//   - a header names where the file came from, and hekireki's ORM, ER and docs generator blocks
+//     are added after the datasource, except those `skip` in sources.json names (a generator that
 //     refuses the schema, with the reason), which a comment stands in for.
 // Everything else, the `///` comments included, is kept as the project wrote it: a schema as it
 // is in the wild is what hekireki is being checked against.
@@ -132,7 +132,7 @@ async function importSchema(name, source) {
 `
   const skip = source.skip ?? {}
   const generators = `
-// hekireki: every ORM generator, and the ER diagram as Mermaid, DBML and SVG. Every output is
+// hekireki: every ORM generator, the ER diagram as Mermaid, DBML and SVG, and the schema docs. Every output is
 // under generated/, which the Bazel target //schemas/${name}:generate writes and
 // //schemas/${name}:generate.test holds the committed copy to.
 
@@ -211,6 +211,11 @@ ${
 generator Hekireki-ER {
   provider = "hekireki-er"
   outputs  = ["generated/er/er.md", "generated/er/er.dbml", "generated/er/er.svg"]
+}
+
+generator Hekireki-Docs {
+  provider = "hekireki-docs"
+  output   = "generated/docs"
 }
 `
 

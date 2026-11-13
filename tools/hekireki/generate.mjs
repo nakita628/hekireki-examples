@@ -11,7 +11,7 @@
 // place. Both paths are relative to the working directory, which the js_binary launcher sets to
 // BAZEL_BINDIR, where rules_js also copies the schema.
 import { spawnSync } from 'node:child_process'
-import { chmodSync, cpSync, existsSync, mkdirSync, mkdtempSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
+import { chmodSync, cpSync, existsSync, mkdirSync, mkdtempSync, readdirSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import { tmpdir } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
@@ -45,6 +45,14 @@ try {
   }
   const schemaCopy = join(work, 'schema.prisma')
   cpSync(schema, schemaCopy)
+  // hekireki-docs compiles each query with the query compiler of the project's own @prisma/client
+  // (Prisma 7+). The schema is copied here, and the compiler is resolved from that copy, so a
+  // link to this package has to sit where Node looks beside the copy. The link is only that
+  // package: the real node_modules stays out of the temp directory.
+  const clientDir = dirname(require.resolve('@prisma/client/package.json'))
+  const clientLink = join(work, 'node_modules', '@prisma')
+  mkdirSync(clientLink, { recursive: true })
+  symlinkSync(clientDir, join(clientLink, 'client'), 'dir')
 
   const result = spawnSync(process.execPath, [prismaCli, 'generate', '--schema', schemaCopy], {
     cwd: work,
@@ -69,7 +77,9 @@ try {
     mkdirSync(dirname(to), { recursive: true })
     cpSync(produced, to, { recursive: true })
   }
-  const leftovers = readdirSync(work).filter((f) => !['bin', 'home', 'schema.prisma', ...outs.map((o) => o.from)].includes(f))
+  const leftovers = readdirSync(work).filter(
+    (f) => !['bin', 'home', 'node_modules', 'schema.prisma', ...outs.map((o) => o.from)].includes(f),
+  )
   if (leftovers.length > 0) throw new Error(`generators wrote outside the declared outputs: ${leftovers.join(', ')}`)
 } finally {
   rmSync(work, { recursive: true, force: true })

@@ -173,8 +173,50 @@ Table invites {
   editedAt DateTime
 }
 
+Table _rolesTousers {
+  A Int [not null]
+  B Int [not null]
+
+  indexes {
+    (A, B) [unique]
+    B
+  }
+}
+
+Table _albumsTofiles {
+  A Int [not null]
+  B Int [not null]
+
+  indexes {
+    (A, B) [unique]
+    B
+  }
+}
+
+Table _filesTotags {
+  A Int [not null]
+  B Int [not null]
+
+  indexes {
+    (A, B) [unique]
+    B
+  }
+}
+
 Ref files_userId_fk: files.userId > users.id
 
 Ref quarantineFiles_fileId_fk: quarantineFiles.fileId - files.uuid
 
 Ref shortenedLinks_userId_fk: shortenedLinks.userId > users.id
+
+Ref _rolesTousers_A_fk: _rolesTousers.A > roles.id [delete: cascade, update: cascade]
+
+Ref _rolesTousers_B_fk: _rolesTousers.B > users.id [delete: cascade, update: cascade]
+
+Ref _albumsTofiles_A_fk: _albumsTofiles.A > albums.id [delete: cascade, update: cascade]
+
+Ref _albumsTofiles_B_fk: _albumsTofiles.B > files.id [delete: cascade, update: cascade]
+
+Ref _filesTotags_A_fk: _filesTotags.A > files.id [delete: cascade, update: cascade]
+
+Ref _filesTotags_B_fk: _filesTotags.B > tags.id [delete: cascade, update: cascade]

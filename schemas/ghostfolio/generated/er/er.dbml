@@ -335,6 +335,26 @@ Table User {
   updatedAt DateTime [not null]
 }
 
+Table _OrderToTag {
+  A String [not null]
+  B String [not null]
+
+  indexes {
+    (A, B) [unique]
+    B
+  }
+}
+
+Table _UserWatchlist {
+  A String [not null]
+  B String [not null]
+
+  indexes {
+    (A, B) [unique]
+    B
+  }
+}
+
 Ref Access_granteeUserId_fk: Access.granteeUserId > User.id [delete: cascade]
 
 Ref Access_userId_fk: Access.userId > User.id [delete: cascade]
@@ -372,3 +392,11 @@ Ref Tag_userId_fk: Tag.userId > User.id [delete: cascade]
 Ref TagsOnAccounts_(accountId, userId)_fk: TagsOnAccounts.(accountId, userId) > Account.(id, userId) [delete: cascade]
 
 Ref TagsOnAccounts_tagId_fk: TagsOnAccounts.tagId > Tag.id [delete: cascade]
+
+Ref _OrderToTag_A_fk: _OrderToTag.A > Order.id [delete: cascade, update: cascade]
+
+Ref _OrderToTag_B_fk: _OrderToTag.B > Tag.id [delete: cascade, update: cascade]
+
+Ref _UserWatchlist_A_fk: _UserWatchlist.A > SymbolProfile.id [delete: cascade, update: cascade]
+
+Ref _UserWatchlist_B_fk: _UserWatchlist.B > User.id [delete: cascade, update: cascade]

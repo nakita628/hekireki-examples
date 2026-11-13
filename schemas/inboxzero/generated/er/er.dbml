@@ -2224,6 +2224,16 @@ Table LoopsEmailSource {
   eventTime DateTime
 }
 
+Table _CategoryToRule {
+  A String [not null]
+  B String [not null]
+
+  indexes {
+    (A, B) [unique]
+    B
+  }
+}
+
 Ref Account_userId_fk: Account.userId > User.id [delete: cascade]
 
 Ref Session_userId_fk: Session.userId > User.id [delete: cascade]
@@ -2501,3 +2511,7 @@ Ref scimGroupMember_groupId_fk: scimGroupMember.groupId > scimGroup.id [delete: 
 Ref scimGroupMember_scimUserId_fk: scimGroupMember.scimUserId > scimUser.id [delete: cascade]
 
 Ref ScimIdentityLink_userId_fk: ScimIdentityLink.userId > User.id [delete: cascade]
+
+Ref _CategoryToRule_A_fk: _CategoryToRule.A > Category.id [delete: cascade, update: cascade]
+
+Ref _CategoryToRule_B_fk: _CategoryToRule.B > Rule.id [delete: cascade, update: cascade]

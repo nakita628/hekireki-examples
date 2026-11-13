@@ -586,6 +586,16 @@ Table email_unsubscribes {
   }
 }
 
+Table _IntegrationToNotificationRule {
+  A String [not null]
+  B String [not null]
+
+  indexes {
+    (A, B) [unique]
+    B
+  }
+}
+
 Ref conversations_projectId_fk: conversations.projectId > projects.id [delete: cascade]
 
 Ref conversations_organizationId_fk: conversations.organizationId > organizations.id [delete: cascade]
@@ -689,3 +699,7 @@ Ref imports_projectId_fk: imports.projectId > projects.id [delete: cascade]
 Ref insight_events_insightId_fk: insight_events.insightId > project_insights.id [delete: cascade]
 
 Ref gsc_connections_projectId_fk: gsc_connections.projectId - projects.id [delete: cascade]
+
+Ref _IntegrationToNotificationRule_A_fk: _IntegrationToNotificationRule.A > integrations.id [delete: cascade, update: cascade]
+
+Ref _IntegrationToNotificationRule_B_fk: _IntegrationToNotificationRule.B > notification_rules.id [delete: cascade, update: cascade]

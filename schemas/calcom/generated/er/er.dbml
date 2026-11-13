@@ -1920,6 +1920,26 @@ Table BookingTimeStatusDenormalized {
   timeStatus String
 }
 
+Table _user_eventtype {
+  A Int [not null]
+  B Int [not null]
+
+  indexes {
+    (A, B) [unique]
+    B
+  }
+}
+
+Table _PlatformOAuthClientToUser {
+  A String [not null]
+  B Int [not null]
+
+  indexes {
+    (A, B) [unique]
+    B
+  }
+}
+
 Ref Host_userId_fk: Host.userId > users.id [delete: cascade]
 
 Ref Host_eventTypeId_fk: Host.eventTypeId > EventType.id [delete: cascade]
@@ -2269,3 +2289,11 @@ Ref AttributeSyncRule_integrationAttributeSyncId_fk: AttributeSyncRule.integrati
 Ref AttributeSyncFieldMapping_attributeId_fk: AttributeSyncFieldMapping.attributeId > Attribute.id [delete: cascade]
 
 Ref AttributeSyncFieldMapping_integrationAttributeSyncId_fk: AttributeSyncFieldMapping.integrationAttributeSyncId > IntegrationAttributeSync.id [delete: cascade]
+
+Ref _user_eventtype_A_fk: _user_eventtype.A > EventType.id [delete: cascade, update: cascade]
+
+Ref _user_eventtype_B_fk: _user_eventtype.B > users.id [delete: cascade, update: cascade]
+
+Ref _PlatformOAuthClientToUser_A_fk: _PlatformOAuthClientToUser.A > PlatformOAuthClient.id [delete: cascade, update: cascade]
+
+Ref _PlatformOAuthClientToUser_B_fk: _PlatformOAuthClientToUser.B > users.id [delete: cascade, update: cascade]

@@ -12,7 +12,7 @@ datasource db {
   provider = "mysql"
 }
 
-// hekireki: every ORM generator, and the ER diagram as Mermaid, DBML and SVG. Every output is
+// hekireki: every ORM generator, the ER diagram as Mermaid, DBML and SVG, and the schema docs. Every output is
 // under generated/, which the Bazel target //schemas/taxonomy:generate writes and
 // //schemas/taxonomy:generate.test holds the committed copy to.
 
@@ -76,6 +76,11 @@ generator Hekireki-Eloquent {
 generator Hekireki-ER {
   provider = "hekireki-er"
   outputs  = ["generated/er/er.md", "generated/er/er.dbml", "generated/er/er.svg"]
+}
+
+generator Hekireki-Docs {
+  provider = "hekireki-docs"
+  output   = "generated/docs"
 }
 
 model Account {

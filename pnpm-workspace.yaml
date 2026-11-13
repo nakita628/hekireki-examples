@@ -1,11 +1,12 @@
 packages: []
 
-# No dependency runs a lifecycle script: prisma's and @prisma/engines' postinstall only download
-# engine binaries that the generators do not use. rules_js reads this to know which packages get
-# a lifecycle action.
+# prisma's postinstall only downloads a query-engine binary the generators do not run.
+# @prisma/engines' postinstall downloads the native schema engine: hekireki-docs writes MySQL's
+# CREATE TABLE with it (PostgreSQL and SQLite use the wasm engine). rules_js reads allowBuilds
+# to know which packages get a lifecycle action.
 allowBuilds:
   prisma: false
-  '@prisma/engines': false
+  '@prisma/engines': true
 
 minimumReleaseAgeExclude:
-  - hekireki@0.45.0
+  - hekireki@0.47.0
