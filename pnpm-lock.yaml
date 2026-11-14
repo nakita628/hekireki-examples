@@ -24,8 +24,8 @@ importers:
         specifier: 1.0.0-rc.5
         version: 1.0.0-rc.5(@electric-sql/pglite@0.4.3)(effect@4.1.2)(mysql2@3.24.4(@types/node@24.10.1))(postgres@3.4.7)(valibot@1.4.2(typescript@5.9.3))(zod@4.6.7)
       hekireki:
-        specifier: 0.48.0
-        version: 0.48.0(redis@6.3.1)
+        specifier: 0.49.0
+        version: 0.49.0(redis@6.3.1)
       kysely:
         specifier: 0.29.7
         version: 0.29.7
@@ -965,8 +965,8 @@ packages:
   graphmatch@1.1.1:
     resolution: {integrity: sha512-5ykVn/EXM1hF0XCaWh05VbYvEiOL2lY1kBxZtaYsyvjp7cmWOU1XsAdfQBwClraEofXDT197lFbXOEVMHpvQOg==}
 
-  hekireki@0.48.0:
-    resolution: {integrity: sha512-2+We3YoZF3Q6ijEt3In7IjbCZCG91Woihf5vhhshc5deaQ+Lqh+Frefjc5IvMKAgbW3e1YOmiIykfU8K2+snzQ==}
+  hekireki@0.49.0:
+    resolution: {integrity: sha512-LBq/i4cYWKmdj1Do46RxgT8nqDCuFiPUY3TAMA7NzMr6G57DrQWZRXLAj2rqg9in3In7ICjc/9ixvrmq/CBObA==}
     hasBin: true
 
   hono@4.13.16:
@@ -1990,7 +1990,7 @@ snapshots:
 
   graphmatch@1.1.1: {}
 
-  hekireki@0.48.0(redis@6.3.1):
+  hekireki@0.49.0(redis@6.3.1):
     dependencies:
       '@dagrejs/dagre': 3.1.3
       '@effect/platform-node': 4.1.2(effect@4.1.2)(redis@6.3.1)

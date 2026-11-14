@@ -62,6 +62,7 @@ export const gatewayProviderEnum = pgEnum('GatewayProvider', [
   'vercel',
   'azure',
   'google_ai_studio',
+  'vertex',
 ])
 
 export const gatewayConnectionStatusEnum = pgEnum('GatewayConnectionStatus', [
@@ -209,6 +210,10 @@ export const dashboardWidgetChartTypeEnum = pgEnum('DashboardWidgetChartType', [
   'HISTOGRAM',
   'PIVOT_TABLE',
 ])
+
+export const sessionViewModeEnum = pgEnum('SessionViewMode', ['conversational', 'list'])
+
+export const sessionUnmatchedTracesEnum = pgEnum('SessionUnmatchedTraces', ['show', 'hide'])
 
 export const actionTypeEnum = pgEnum('ActionType', [
   'WEBHOOK',
@@ -658,7 +663,11 @@ export const gatewayAiConnections = pgTable(
 
 export const gatewayApiKeyAssociations = pgTable(
   'gateway_api_key_associations',
-  { apiKeyId: text('api_key_id').primaryKey(), metadata: jsonb('metadata').notNull().default({}) },
+  {
+    apiKeyId: text('api_key_id').primaryKey(),
+    metadata: jsonb('metadata').notNull().default({}),
+    allowedModels: jsonb('allowed_models'),
+  },
   (table) => [
     foreignKey({
       name: 'gateway_api_key_associations_api_key_id_fkey',
@@ -2816,6 +2825,7 @@ export const batchActions = pgTable(
     processedCount: integer('processed_count'),
     failedCount: integer('failed_count'),
     log: text('log'),
+    cursor: jsonb('cursor'),
   },
   (table) => [
     index('batch_actions_project_id_user_id_idx').on(table.projectId, table.userId),
@@ -3224,6 +3234,95 @@ export const tableViewPresets = pgTable(
       foreignColumns: [users.id],
     })
       .onDelete('set null')
+      .onUpdate('cascade'),
+  ],
+)
+
+export const sessionViews = pgTable(
+  'session_views',
+  {
+    isPinnedByDefaultForProject: boolean('is_pinned_by_default_for_project')
+      .notNull()
+      .default(false),
+    id: text('id')
+      .primaryKey()
+      .$defaultFn(() => cuid()),
+    projectId: text('project_id').notNull(),
+    name: text('name').notNull(),
+    filters: jsonb('filters').notNull(),
+    viewMode: sessionViewModeEnum('view_mode').notNull(),
+    unmatchedTraces: sessionUnmatchedTracesEnum('unmatched_traces').notNull(),
+    createdBy: text('created_by'),
+    createdAt: timestamp('created_at', { precision: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`)
+      .$defaultFn(utcNow),
+    updatedAt: timestamp('updated_at', { precision: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`)
+      .$defaultFn(utcNow)
+      .$onUpdate(utcNow),
+  },
+  (table) => [
+    uniqueIndex('session_views_project_id_name_key').on(table.projectId, table.name),
+    unique('session_views_project_id_id_key').on(table.projectId, table.id),
+    foreignKey({
+      name: 'session_views_project_id_fkey',
+      columns: [table.projectId],
+      foreignColumns: [projects.id],
+    })
+      .onDelete('cascade')
+      .onUpdate('cascade'),
+    foreignKey({
+      name: 'session_views_created_by_fkey',
+      columns: [table.createdBy],
+      foreignColumns: [users.id],
+    })
+      .onDelete('set null')
+      .onUpdate('cascade'),
+  ],
+)
+
+export const sessionViewPinOverrides = pgTable(
+  'session_view_pin_overrides',
+  {
+    id: text('id')
+      .primaryKey()
+      .$defaultFn(() => cuid()),
+    projectId: text('project_id').notNull(),
+    userId: text('user_id').notNull(),
+    viewId: text('view_id'),
+    isPinned: boolean('is_pinned').notNull().default(true),
+    position: integer('position').notNull(),
+  },
+  (table) => [
+    index('session_view_pin_overrides_user_id_idx').on(table.userId),
+    index('session_view_pin_overrides_project_id_view_id_idx').on(table.projectId, table.viewId),
+    uniqueIndex('session_view_pin_overrides_project_id_user_id_view_id_key').on(
+      table.projectId,
+      table.userId,
+      table.viewId,
+    ),
+    foreignKey({
+      name: 'session_view_pin_overrides_project_id_fkey',
+      columns: [table.projectId],
+      foreignColumns: [projects.id],
+    })
+      .onDelete('cascade')
+      .onUpdate('cascade'),
+    foreignKey({
+      name: 'session_view_pin_overrides_user_id_fkey',
+      columns: [table.userId],
+      foreignColumns: [users.id],
+    })
+      .onDelete('cascade')
+      .onUpdate('cascade'),
+    foreignKey({
+      name: 'session_view_pin_overrides_project_id_view_id_fkey',
+      columns: [table.projectId, table.viewId],
+      foreignColumns: [sessionViews.projectId, sessionViews.id],
+    })
+      .onDelete('cascade')
       .onUpdate('cascade'),
   ],
 )
@@ -3781,6 +3880,8 @@ export const relations = defineRelations(
     dashboards,
     dashboardWidgets,
     tableViewPresets,
+    sessionViews,
+    sessionViewPinOverrides,
     defaultViews,
     actions,
     triggers,
@@ -3810,6 +3911,8 @@ export const relations = defineRelations(
       dashboardUpdated: r.many.dashboards({ alias: 'UpdatedByUser' }),
       tableViewPresetCreated: r.many.tableViewPresets({ alias: 'CreatedByUser' }),
       tableViewPresetUpdated: r.many.tableViewPresets({ alias: 'UpdatedByUser' }),
+      sessionViewsCreated: r.many.sessionViews(),
+      sessionViewPinOverrides: r.many.sessionViewPinOverrides(),
       monitorsCreated: r.many.monitors({ alias: 'CreatedByUser' }),
       monitorsUpdated: r.many.monitors({ alias: 'UpdatedByUser' }),
       topicConfigsCreated: r.many.topicConfigs({ alias: 'CreatedByUser' }),
@@ -3902,6 +4005,8 @@ export const relations = defineRelations(
       Dashboard: r.many.dashboards({ alias: 'DashboardToProject' }),
       DashboardWidget: r.many.dashboardWidgets(),
       TableViewPreset: r.many.tableViewPresets(),
+      sessionViews: r.many.sessionViews(),
+      sessionViewPinOverrides: r.many.sessionViewPinOverrides(),
       actions: r.many.actions(),
       triggers: r.many.triggers(),
       automationExecutions: r.many.automationExecutions(),
@@ -4486,6 +4591,31 @@ export const relations = defineRelations(
         from: r.tableViewPresets.updatedBy,
         to: r.users.id,
         alias: 'UpdatedByUser',
+      }),
+    },
+    sessionViews: {
+      pins: r.many.sessionViewPinOverrides(),
+      project: r.one.projects({
+        from: r.sessionViews.projectId,
+        to: r.projects.id,
+        optional: false,
+      }),
+      createdByUser: r.one.users({ from: r.sessionViews.createdBy, to: r.users.id }),
+    },
+    sessionViewPinOverrides: {
+      project: r.one.projects({
+        from: r.sessionViewPinOverrides.projectId,
+        to: r.projects.id,
+        optional: false,
+      }),
+      user: r.one.users({
+        from: r.sessionViewPinOverrides.userId,
+        to: r.users.id,
+        optional: false,
+      }),
+      view: r.one.sessionViews({
+        from: [r.sessionViewPinOverrides.projectId, r.sessionViewPinOverrides.viewId],
+        to: [r.sessionViews.projectId, r.sessionViews.id],
       }),
     },
     defaultViews: {

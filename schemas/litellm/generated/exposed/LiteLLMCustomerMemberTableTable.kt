@@ -1,6 +1,7 @@
 package litellm.models
 
 import org.jetbrains.exposed.v1.core.ReferenceOption
+import org.jetbrains.exposed.v1.core.TextColumnType
 import org.jetbrains.exposed.v1.core.dao.id.IdTable
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -8,17 +9,17 @@ import java.util.UUID
 
 object LiteLLMCustomerMemberTableTable : IdTable<String>("\"LiteLLM_CustomerMemberTable\"") {
     val spend = double("spend").default(0.0)
-    val budgetResetAt = pgTimestamp("budget_reset_at", 3).nullable()
     override val id = text("customer_member_id").clientDefault { UUID.randomUUID().toString() }.entityId()
     val alias = text("alias").nullable()
-    val parentTeamId =
+    val parentOrgId =
         reference(
-            "parent_team_id",
-            LiteLLMCustomerTeamTableTable,
+            "parent_org_id",
+            LiteLLMCustomerOrganizationTableTable,
             onDelete = ReferenceOption.RESTRICT,
             onUpdate = ReferenceOption.CASCADE,
-            fkName = "\"LiteLLM_CustomerMemberTable_parent_team_id_fkey\"",
+            fkName = "\"LiteLLM_CustomerMemberTable_parent_org_id_fkey\"",
         )
+    val parentTeamIds = array("parent_team_ids", TextColumnType()).nullable().databaseDefault("'{}'") { emptyList() }
     val budgetId =
         optReference(
             "budget_id",
@@ -27,13 +28,13 @@ object LiteLLMCustomerMemberTableTable : IdTable<String>("\"LiteLLM_CustomerMemb
             onUpdate = ReferenceOption.CASCADE,
             fkName = "\"LiteLLM_CustomerMemberTable_budget_id_fkey\"",
         )
-    val budgetTemplateId =
+    val budgetOverrideId =
         optReference(
-            "budget_template_id",
+            "budget_override_id",
             LiteLLMBudgetTableTable,
             onDelete = ReferenceOption.RESTRICT,
             onUpdate = ReferenceOption.CASCADE,
-            fkName = "\"LiteLLM_CustomerMemberTable_budget_template_id_fkey\"",
+            fkName = "\"LiteLLM_CustomerMemberTable_budget_override_id_fkey\"",
         )
     val budgetOverrideExpiresAt = pgTimestamp("budget_override_expires_at", 3).nullable()
     val createdAt = pgTimestamp("created_at", 3).databaseDefault("CURRENT_TIMESTAMP") { Instant.now().truncatedTo(ChronoUnit.MILLIS) }
@@ -43,7 +44,7 @@ object LiteLLMCustomerMemberTableTable : IdTable<String>("\"LiteLLM_CustomerMemb
     override val primaryKey = PrimaryKey(id, name = "\"LiteLLM_CustomerMemberTable_pkey\"")
 
     init {
-        index("\"LiteLLM_CustomerMemberTable_parent_team_id_idx\"", false, parentTeamId)
-        index("\"LiteLLM_CustomerMemberTable_budget_template_id_idx\"", false, budgetTemplateId)
+        index("\"LiteLLM_CustomerMemberTable_parent_org_id_idx\"", false, parentOrgId)
+        index("\"LiteLLM_CustomerMemberTable_spend_idx\"", false, spend)
     }
 }

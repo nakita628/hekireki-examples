@@ -118,6 +118,8 @@ class User(Base):
     dashboard_updated: Mapped[list["Dashboard"]] = relationship(foreign_keys="Dashboard.updated_by", back_populates="updated_by_user")
     table_view_preset_created: Mapped[list["TableViewPreset"]] = relationship(foreign_keys="TableViewPreset.created_by", back_populates="created_by_user")
     table_view_preset_updated: Mapped[list["TableViewPreset"]] = relationship(foreign_keys="TableViewPreset.updated_by", back_populates="updated_by_user")
+    session_views_created: Mapped[list["SessionView"]] = relationship(back_populates="created_by_user")
+    session_view_pin_overrides: Mapped[list["SessionViewPinOverride"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="user")
     monitors_created: Mapped[list["Monitor"]] = relationship(foreign_keys="Monitor.created_by", back_populates="created_by_user")
     monitors_updated: Mapped[list["Monitor"]] = relationship(foreign_keys="Monitor.updated_by", back_populates="updated_by_user")
     topic_configs_created: Mapped[list["TopicConfig"]] = relationship(foreign_keys="TopicConfig.created_by", back_populates="created_by_user")
@@ -240,6 +242,8 @@ class Project(Base):
     dashboard: Mapped[list["Dashboard"]] = relationship(foreign_keys="Dashboard.project_id", cascade="all, delete", passive_deletes=True, back_populates="project")
     dashboard_widget: Mapped[list["DashboardWidget"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="project")
     table_view_preset: Mapped[list["TableViewPreset"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="project")
+    session_views: Mapped[list["SessionView"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="project")
+    session_view_pin_overrides: Mapped[list["SessionViewPinOverride"]] = relationship(cascade="all, delete", passive_deletes=True, overlaps="pins,view", back_populates="project")
     actions: Mapped[list["Action"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="project")
     triggers: Mapped[list["Trigger"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="project")
     automation_executions: Mapped[list["AutomationExecution"]] = relationship(cascade="all, delete", passive_deletes=True, back_populates="project")
@@ -352,7 +356,7 @@ class GatewayAiConnection(Base):
     id: Mapped[str] = mapped_column(primary_key=True)
     organization_id: Mapped[str] = mapped_column(ForeignKey("organizations.id", ondelete="CASCADE", onupdate="CASCADE", name="gateway_ai_connections_organization_id_fkey"))
     name: Mapped[str]
-    provider: Mapped[str] = mapped_column(Enum("openai", "anthropic", "bedrock", "openrouter", "xai", "vercel", "azure", "google_ai_studio", name="GatewayProvider"))
+    provider: Mapped[str] = mapped_column(Enum("openai", "anthropic", "bedrock", "openrouter", "xai", "vercel", "azure", "google_ai_studio", "vertex", name="GatewayProvider"))
     encrypted_credential: Mapped[str] = mapped_column("encrypted_credentials")
     display_secret: Mapped[str] = mapped_column("display_secret_key")
     created_by_id: Mapped[Optional[str]]
@@ -379,6 +383,7 @@ class GatewayApiKeyAssociation(Base):
 
     api_key_id: Mapped[str] = mapped_column(ForeignKey("api_keys.id", ondelete="CASCADE", onupdate="CASCADE", name="gateway_api_key_associations_api_key_id_fkey"), primary_key=True)
     metadata_: Mapped[dict[str, Any]] = mapped_column("metadata", JSONB, default=lambda: {}, server_default=text("'{}'"))
+    allowed_models: Mapped[Optional[dict[str, Any]]] = mapped_column(JSONB(none_as_null=True))
 
     api_key: Mapped["ApiKey"] = relationship(back_populates="gateway_association")
 
@@ -1519,6 +1524,7 @@ class BatchAction(Base):
     processed_count: Mapped[Optional[int]]
     failed_count: Mapped[Optional[int]]
     log: Mapped[Optional[str]]
+    cursor: Mapped[Optional[dict[str, Any]]] = mapped_column(JSONB(none_as_null=True))
 
     __table_args__ = (
         Index("batch_actions_project_id_user_id_idx", "project_id", "user_id"),
@@ -1730,6 +1736,50 @@ class TableViewPreset(Base):
     project: Mapped["Project"] = relationship(back_populates="table_view_preset")
     created_by_user: Mapped[Optional["User"]] = relationship(foreign_keys=[created_by], back_populates="table_view_preset_created")
     updated_by_user: Mapped[Optional["User"]] = relationship(foreign_keys=[updated_by], back_populates="table_view_preset_updated")
+
+class SessionView(Base):
+    __tablename__ = "session_views"
+
+    is_pinned_by_default_for_project: Mapped[bool] = mapped_column(default=False, server_default=text("false"))
+    id: Mapped[str] = mapped_column(primary_key=True)
+    project_id: Mapped[str] = mapped_column(ForeignKey("projects.id", ondelete="CASCADE", onupdate="CASCADE", name="session_views_project_id_fkey"))
+    name: Mapped[str]
+    filters: Mapped[dict[str, Any]] = mapped_column(JSONB)
+    view_mode: Mapped[str] = mapped_column(Enum("conversational", "list", name="SessionViewMode"))
+    unmatched_traces: Mapped[str] = mapped_column(Enum("show", "hide", name="SessionUnmatchedTraces"))
+    created_by: Mapped[Optional[str]] = mapped_column(ForeignKey("users.id", ondelete="SET NULL", onupdate="CASCADE", name="session_views_created_by_fkey"))
+    created_at: Mapped[datetime] = mapped_column(default=utc_now, server_default=text("CURRENT_TIMESTAMP"))
+    updated_at: Mapped[datetime] = mapped_column(default=utc_now, server_default=text("CURRENT_TIMESTAMP"), onupdate=utc_now)
+
+    __table_args__ = (
+        Index("session_views_project_id_name_key", "project_id", "name", unique=True),
+        Index("session_views_project_id_id_key", "project_id", "id", unique=True),
+    )
+
+    project: Mapped["Project"] = relationship(back_populates="session_views")
+    created_by_user: Mapped[Optional["User"]] = relationship(back_populates="session_views_created")
+    pins: Mapped[list["SessionViewPinOverride"]] = relationship(cascade="all, delete", passive_deletes=True, overlaps="project,session_view_pin_overrides", back_populates="view")
+
+class SessionViewPinOverride(Base):
+    __tablename__ = "session_view_pin_overrides"
+
+    id: Mapped[str] = mapped_column(primary_key=True)
+    project_id: Mapped[str] = mapped_column(ForeignKey("projects.id", ondelete="CASCADE", onupdate="CASCADE", name="session_view_pin_overrides_project_id_fkey"))
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE", onupdate="CASCADE", name="session_view_pin_overrides_user_id_fkey"))
+    view_id: Mapped[Optional[str]]
+    is_pinned: Mapped[bool] = mapped_column(default=True, server_default=text("true"))
+    position: Mapped[int]
+
+    __table_args__ = (
+        Index("session_view_pin_overrides_user_id_idx", "user_id"),
+        Index("session_view_pin_overrides_project_id_view_id_idx", "project_id", "view_id"),
+        Index("session_view_pin_overrides_project_id_user_id_view_id_key", "project_id", "user_id", "view_id", unique=True),
+        ForeignKeyConstraint(["project_id", "view_id"], ["session_views.project_id", "session_views.id"], ondelete="CASCADE", onupdate="CASCADE", name="session_view_pin_overrides_project_id_view_id_fkey"),
+    )
+
+    project: Mapped["Project"] = relationship(overlaps="pins,view", back_populates="session_view_pin_overrides")
+    user: Mapped["User"] = relationship(back_populates="session_view_pin_overrides")
+    view: Mapped[Optional["SessionView"]] = relationship(overlaps="project,session_view_pin_overrides", back_populates="pins")
 
 class DefaultView(Base):
     __tablename__ = "default_views"

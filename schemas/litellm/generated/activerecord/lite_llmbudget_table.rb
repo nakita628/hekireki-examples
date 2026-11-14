@@ -10,16 +10,18 @@ class LiteLLMBudgetTable < ApplicationRecord
   validates :updated_by, presence: true
 
   has_many :customer_organization_defaults, class_name: "LiteLLMCustomerOrganizationTable",
-                                            foreign_key: "default_budget_id", inverse_of: :default_budget,
-                                            dependent: :nullify
+                                            foreign_key: "default_budget_template_id",
+                                            inverse_of: :default_budget_template, dependent: :nullify
   has_many :customer_organizations, class_name: "LiteLLMCustomerOrganizationTable", foreign_key: "budget_id",
                                     inverse_of: :budget, dependent: :nullify
-  has_many :customer_member_templates, class_name: "LiteLLMCustomerMemberTable", foreign_key: "budget_template_id",
-                                       inverse_of: :budget_template, dependent: :restrict_with_error
   has_many :customer_teams, class_name: "LiteLLMCustomerTeamTable", foreign_key: "budget_id", inverse_of: :budget,
                             dependent: :nullify
   has_many :customer_members, class_name: "LiteLLMCustomerMemberTable", foreign_key: "budget_id", inverse_of: :budget,
                               dependent: :restrict_with_error
+  has_many :customer_member_overrides, class_name: "LiteLLMCustomerMemberTable", foreign_key: "budget_override_id",
+                                       inverse_of: :budget_override, dependent: :restrict_with_error
+  has_many :customer_team_overrides, class_name: "LiteLLMCustomerTeamTable", foreign_key: "budget_override_id",
+                                     inverse_of: :budget_override, dependent: :restrict_with_error
   has_many :organization, class_name: "LiteLLMOrganizationTable", foreign_key: "budget_id",
                           inverse_of: :litellm_budget_table, dependent: :nullify
   has_many :projects, class_name: "LiteLLMProjectTable", foreign_key: "budget_id", inverse_of: :litellm_budget_table,

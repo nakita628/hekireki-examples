@@ -106,6 +106,16 @@ class User extends \Illuminate\Database\Eloquent\Model
         return $this->hasMany(TableViewPreset::class, 'updated_by');
     }
 
+    public function sessionViewsCreated(): HasMany
+    {
+        return $this->hasMany(SessionView::class, 'created_by');
+    }
+
+    public function sessionViewPinOverrides(): HasMany
+    {
+        return $this->hasMany(SessionViewPinOverride::class, 'user_id');
+    }
+
     public function monitorsCreated(): HasMany
     {
         return $this->hasMany(Monitor::class, 'created_by');

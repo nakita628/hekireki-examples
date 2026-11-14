@@ -1,6 +1,6 @@
 // SuperProductivity: Super Productivity sync server: users, passkeys, sync operations, devices and agent task captures.
 //
-// Imported from https://github.com/johannesjo/super-productivity/blob/124138eedc154814847f6af9e2e2ebd2a8543881/packages/super-sync-server/prisma/schema.prisma
+// Imported from https://github.com/johannesjo/super-productivity/blob/d35dfcede4a57c32aad9229fcfb29f3e360d0127/packages/super-sync-server/prisma/schema.prisma
 // (MIT license) by tools/import/import-schema.mjs, which dropped the original
 // generator blocks and the datasource's connection URLs and added the hekireki generators below.
 // The models, enums and `///` comments are the project's own, as they are at that commit.

@@ -14,7 +14,7 @@ CREATE TYPE "SystemRole" AS ENUM ('OWNER', 'ADMIN', 'MEMBER', 'VIEWER', 'NONE', 
 
 CREATE TYPE "GatewayIngestionMode" AS ENUM ('none', 'usage', 'full');
 
-CREATE TYPE "GatewayProvider" AS ENUM ('openai', 'anthropic', 'bedrock', 'openrouter', 'xai', 'vercel', 'azure', 'google_ai_studio');
+CREATE TYPE "GatewayProvider" AS ENUM ('openai', 'anthropic', 'bedrock', 'openrouter', 'xai', 'vercel', 'azure', 'google_ai_studio', 'vertex');
 
 CREATE TYPE "GatewayConnectionStatus" AS ENUM ('enabled', 'disabled', 'error');
 
@@ -69,6 +69,10 @@ CREATE TYPE "MediaAssociationOrigin" AS ENUM ('UNKNOWN', 'CLIENT_UPLOAD', 'INGES
 CREATE TYPE "DashboardWidgetViews" AS ENUM ('TRACES', 'OBSERVATIONS', 'SCORES_NUMERIC', 'SCORES_CATEGORICAL', 'SCORES_BOOLEAN');
 
 CREATE TYPE "DashboardWidgetChartType" AS ENUM ('LINE_TIME_SERIES', 'AREA_TIME_SERIES', 'BAR_TIME_SERIES', 'HORIZONTAL_BAR', 'VERTICAL_BAR', 'PIE', 'NUMBER', 'HISTOGRAM', 'PIVOT_TABLE');
+
+CREATE TYPE "SessionViewMode" AS ENUM ('conversational', 'list');
+
+CREATE TYPE "SessionUnmatchedTraces" AS ENUM ('show', 'hide');
 
 CREATE TYPE "ActionType" AS ENUM ('WEBHOOK', 'SLACK', 'GITHUB_DISPATCH', 'PAGERDUTY');
 
@@ -248,6 +252,7 @@ CREATE TABLE "gateway_ai_connections" (
 CREATE TABLE "gateway_api_key_associations" (
     "api_key_id" TEXT NOT NULL,
     "metadata" JSONB NOT NULL DEFAULT '{}',
+    "allowed_models" JSONB,
 
     CONSTRAINT "gateway_api_key_associations_pkey" PRIMARY KEY ("api_key_id")
 );
@@ -1046,6 +1051,7 @@ CREATE TABLE "batch_actions" (
     "processed_count" INTEGER,
     "failed_count" INTEGER,
     "log" TEXT,
+    "cursor" JSONB,
 
     CONSTRAINT "batch_actions_pkey" PRIMARY KEY ("id")
 );
@@ -1195,6 +1201,32 @@ CREATE TABLE "table_view_presets" (
     "order_by" JSONB,
 
     CONSTRAINT "table_view_presets_pkey" PRIMARY KEY ("id")
+);
+
+CREATE TABLE "session_views" (
+    "is_pinned_by_default_for_project" BOOLEAN NOT NULL DEFAULT false,
+    "id" TEXT NOT NULL,
+    "project_id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "filters" JSONB NOT NULL,
+    "view_mode" "SessionViewMode" NOT NULL,
+    "unmatched_traces" "SessionUnmatchedTraces" NOT NULL,
+    "created_by" TEXT,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "session_views_pkey" PRIMARY KEY ("id")
+);
+
+CREATE TABLE "session_view_pin_overrides" (
+    "id" TEXT NOT NULL,
+    "project_id" TEXT NOT NULL,
+    "user_id" TEXT NOT NULL,
+    "view_id" TEXT,
+    "is_pinned" BOOLEAN NOT NULL DEFAULT true,
+    "position" INTEGER NOT NULL,
+
+    CONSTRAINT "session_view_pin_overrides_pkey" PRIMARY KEY ("id")
 );
 
 CREATE TABLE "default_views" (
@@ -1677,6 +1709,16 @@ CREATE UNIQUE INDEX "llm_tools_project_id_name_key" ON "llm_tools"("project_id",
 
 CREATE UNIQUE INDEX "table_view_presets_project_id_table_name_name_key" ON "table_view_presets"("project_id", "table_name", "name");
 
+CREATE UNIQUE INDEX "session_views_project_id_name_key" ON "session_views"("project_id", "name");
+
+CREATE UNIQUE INDEX "session_views_project_id_id_key" ON "session_views"("project_id", "id");
+
+CREATE INDEX "session_view_pin_overrides_user_id_idx" ON "session_view_pin_overrides"("user_id");
+
+CREATE INDEX "session_view_pin_overrides_project_id_view_id_idx" ON "session_view_pin_overrides"("project_id", "view_id");
+
+CREATE UNIQUE INDEX "session_view_pin_overrides_project_id_user_id_view_id_key" ON "session_view_pin_overrides"("project_id", "user_id", "view_id");
+
 CREATE INDEX "default_views_project_id_view_name_idx" ON "default_views"("project_id", "view_name");
 
 CREATE INDEX "actions_project_id_idx" ON "actions"("project_id");
@@ -1951,6 +1993,16 @@ ALTER TABLE "table_view_presets" ADD CONSTRAINT "table_view_presets_created_by_f
 
 ALTER TABLE "table_view_presets" ADD CONSTRAINT "table_view_presets_updated_by_fkey" FOREIGN KEY ("updated_by") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
+ALTER TABLE "session_views" ADD CONSTRAINT "session_views_project_id_fkey" FOREIGN KEY ("project_id") REFERENCES "projects"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE "session_views" ADD CONSTRAINT "session_views_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+ALTER TABLE "session_view_pin_overrides" ADD CONSTRAINT "session_view_pin_overrides_project_id_fkey" FOREIGN KEY ("project_id") REFERENCES "projects"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE "session_view_pin_overrides" ADD CONSTRAINT "session_view_pin_overrides_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE "session_view_pin_overrides" ADD CONSTRAINT "session_view_pin_overrides_project_id_view_id_fkey" FOREIGN KEY ("project_id", "view_id") REFERENCES "session_views"("project_id", "id") ON DELETE CASCADE ON UPDATE CASCADE;
+
 ALTER TABLE "default_views" ADD CONSTRAINT "default_views_project_id_fkey" FOREIGN KEY ("project_id") REFERENCES "projects"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE "default_views" ADD CONSTRAINT "default_views_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -2072,6 +2124,8 @@ ALTER TABLE "topic_clustering_runs" ADD CONSTRAINT "topic_clustering_runs_facet_
 | [Dashboard](#model-Dashboard)                                                 | `dashboards`                            |             |
 | [DashboardWidget](#model-DashboardWidget)                                     | `dashboard_widgets`                     |             |
 | [TableViewPreset](#model-TableViewPreset)                                     | `table_view_presets`                    |             |
+| [SessionView](#model-SessionView)                                             | `session_views`                         |             |
+| [SessionViewPinOverride](#model-SessionViewPinOverride)                       | `session_view_pin_overrides`            |             |
 | [DefaultView](#model-DefaultView)                                             | `default_views`                         |             |
 | [Action](#model-Action)                                                       | `actions`                               |             |
 | [Trigger](#model-Trigger)                                                     | `triggers`                              |             |
@@ -2117,6 +2171,8 @@ ALTER TABLE "topic_clustering_runs" ADD CONSTRAINT "topic_clustering_runs_facet_
 | [MediaAssociationOrigin](#enum-MediaAssociationOrigin)                               | `MediaAssociationOrigin`                |             |
 | [DashboardWidgetViews](#enum-DashboardWidgetViews)                                   | `DashboardWidgetViews`                  |             |
 | [DashboardWidgetChartType](#enum-DashboardWidgetChartType)                           | `DashboardWidgetChartType`              |             |
+| [SessionViewMode](#enum-SessionViewMode)                                             | `SessionViewMode`                       |             |
+| [SessionUnmatchedTraces](#enum-SessionUnmatchedTraces)                               | `SessionUnmatchedTraces`                |             |
 | [ActionType](#enum-ActionType)                                                       | `ActionType`                            |             |
 | [ActionExecutionStatus](#enum-ActionExecutionStatus)                                 | `ActionExecutionStatus`                 |             |
 | [MonitorThresholdOperator](#enum-MonitorThresholdOperator)                           | `MonitorThresholdOperator`              |             |
@@ -2728,6 +2784,8 @@ Table `users`.
 - `id` ← [DashboardWidget.updatedBy](#model-DashboardWidget) (one-to-many, on delete SetNull)
 - `id` ← [TableViewPreset.createdBy](#model-TableViewPreset) (one-to-many, on delete SetNull)
 - `id` ← [TableViewPreset.updatedBy](#model-TableViewPreset) (one-to-many, on delete SetNull)
+- `id` ← [SessionView.createdBy](#model-SessionView) (one-to-many, on delete SetNull)
+- `id` ← [SessionViewPinOverride.userId](#model-SessionViewPinOverride) (one-to-many, on delete Cascade)
 - `id` ← [DefaultView.userId](#model-DefaultView) (one-to-many, on delete Cascade)
 - `id` ← [Monitor.createdBy](#model-Monitor) (one-to-many, on delete SetNull)
 - `id` ← [Monitor.updatedBy](#model-Monitor) (one-to-many, on delete SetNull)
@@ -2831,6 +2889,8 @@ await prisma.user.findMany({
     dashboardUpdated: true,
     tableViewPresetCreated: true,
     tableViewPresetUpdated: true,
+    sessionViewsCreated: true,
+    sessionViewPinOverrides: true,
     monitorsCreated: true,
     monitorsUpdated: true,
     topicConfigsCreated: true,
@@ -3131,6 +3191,40 @@ FROM
   "public"."table_view_presets"
 WHERE
   "public"."table_view_presets"."updated_by" IN ($1)
+OFFSET
+  $2
+-- params: ["<id of the rows above>","0"]
+
+SELECT
+  "public"."session_views"."id",
+  "public"."session_views"."is_pinned_by_default_for_project",
+  "public"."session_views"."project_id",
+  "public"."session_views"."name",
+  "public"."session_views"."filters",
+  "public"."session_views"."view_mode"::text,
+  "public"."session_views"."unmatched_traces"::text,
+  "public"."session_views"."created_by",
+  "public"."session_views"."created_at",
+  "public"."session_views"."updated_at"
+FROM
+  "public"."session_views"
+WHERE
+  "public"."session_views"."created_by" IN ($1)
+OFFSET
+  $2
+-- params: ["<id of the rows above>","0"]
+
+SELECT
+  "public"."session_view_pin_overrides"."id",
+  "public"."session_view_pin_overrides"."project_id",
+  "public"."session_view_pin_overrides"."user_id",
+  "public"."session_view_pin_overrides"."view_id",
+  "public"."session_view_pin_overrides"."is_pinned",
+  "public"."session_view_pin_overrides"."position"
+FROM
+  "public"."session_view_pin_overrides"
+WHERE
+  "public"."session_view_pin_overrides"."user_id" IN ($1)
 OFFSET
   $2
 -- params: ["<id of the rows above>","0"]
@@ -4462,6 +4556,8 @@ Table `projects`.
 - `id` ← [Dashboard.projectId](#model-Dashboard) (one-to-many, on delete Cascade)
 - `id` ← [DashboardWidget.projectId](#model-DashboardWidget) (one-to-many, on delete Cascade)
 - `id` ← [TableViewPreset.projectId](#model-TableViewPreset) (one-to-many, on delete Cascade)
+- `id` ← [SessionView.projectId](#model-SessionView) (one-to-many, on delete Cascade)
+- `id` ← [SessionViewPinOverride.projectId](#model-SessionViewPinOverride) (one-to-many, on delete Cascade)
 - `id` ← [DefaultView.projectId](#model-DefaultView) (one-to-many, on delete Cascade)
 - `id` ← [Action.projectId](#model-Action) (one-to-many, on delete Cascade)
 - `id` ← [Trigger.projectId](#model-Trigger) (one-to-many, on delete Cascade)
@@ -4596,6 +4692,8 @@ await prisma.project.findMany({
     Dashboard: true,
     DashboardWidget: true,
     TableViewPreset: true,
+    sessionViews: true,
+    sessionViewPinOverrides: true,
     actions: true,
     triggers: true,
     automationExecutions: true,
@@ -5247,7 +5345,8 @@ SELECT
   "public"."batch_actions"."total_count",
   "public"."batch_actions"."processed_count",
   "public"."batch_actions"."failed_count",
-  "public"."batch_actions"."log"
+  "public"."batch_actions"."log",
+  "public"."batch_actions"."cursor"
 FROM
   "public"."batch_actions"
 WHERE
@@ -5474,6 +5573,40 @@ FROM
   "public"."table_view_presets"
 WHERE
   "public"."table_view_presets"."project_id" IN ($1)
+OFFSET
+  $2
+-- params: ["<id of the rows above>","0"]
+
+SELECT
+  "public"."session_views"."id",
+  "public"."session_views"."is_pinned_by_default_for_project",
+  "public"."session_views"."project_id",
+  "public"."session_views"."name",
+  "public"."session_views"."filters",
+  "public"."session_views"."view_mode"::text,
+  "public"."session_views"."unmatched_traces"::text,
+  "public"."session_views"."created_by",
+  "public"."session_views"."created_at",
+  "public"."session_views"."updated_at"
+FROM
+  "public"."session_views"
+WHERE
+  "public"."session_views"."project_id" IN ($1)
+OFFSET
+  $2
+-- params: ["<id of the rows above>","0"]
+
+SELECT
+  "public"."session_view_pin_overrides"."id",
+  "public"."session_view_pin_overrides"."project_id",
+  "public"."session_view_pin_overrides"."user_id",
+  "public"."session_view_pin_overrides"."view_id",
+  "public"."session_view_pin_overrides"."is_pinned",
+  "public"."session_view_pin_overrides"."position"
+FROM
+  "public"."session_view_pin_overrides"
+WHERE
+  "public"."session_view_pin_overrides"."project_id" IN ($1)
 OFFSET
   $2
 -- params: ["<id of the rows above>","0"]
@@ -6318,7 +6451,8 @@ OFFSET
 
 SELECT
   "public"."gateway_api_key_associations"."api_key_id",
-  "public"."gateway_api_key_associations"."metadata"
+  "public"."gateway_api_key_associations"."metadata",
+  "public"."gateway_api_key_associations"."allowed_models"
 FROM
   "public"."gateway_api_key_associations"
 WHERE
@@ -7565,10 +7699,11 @@ Table `gateway_api_key_associations`.
 
 ![GatewayApiKeyAssociation and the models it relates to](tables/GatewayApiKeyAssociation.svg)
 
-| Field                     | Type               | Constraints                              | Default | Description |
-| ------------------------- | ------------------ | ---------------------------------------- | ------- | ----------- |
-| `apiKeyId` (`api_key_id`) | `String`           | PK NOT NULL → [ApiKey.id](#model-ApiKey) |         |             |
-| `metadata`                | `Json` `@db.JsonB` | NOT NULL                                 | `"{}"`  |             |
+| Field                              | Type               | Constraints                              | Default | Description |
+| ---------------------------------- | ------------------ | ---------------------------------------- | ------- | ----------- |
+| `apiKeyId` (`api_key_id`)          | `String`           | PK NOT NULL → [ApiKey.id](#model-ApiKey) |         |             |
+| `metadata`                         | `Json` `@db.JsonB` | NOT NULL                                 | `"{}"`  |             |
+| `allowedModels` (`allowed_models`) | `Json` `@db.JsonB` | NULL                                     |         |             |
 
 #### References
 
@@ -7580,6 +7715,7 @@ Table `gateway_api_key_associations`.
 CREATE TABLE "gateway_api_key_associations" (
     "api_key_id" TEXT NOT NULL,
     "metadata" JSONB NOT NULL DEFAULT '{}',
+    "allowed_models" JSONB,
 
     CONSTRAINT "gateway_api_key_associations_pkey" PRIMARY KEY ("api_key_id")
 );
@@ -7599,7 +7735,8 @@ await prisma.gatewayApiKeyAssociation.findMany();
 ```sql
 SELECT
   "public"."gateway_api_key_associations"."api_key_id",
-  "public"."gateway_api_key_associations"."metadata"
+  "public"."gateway_api_key_associations"."metadata",
+  "public"."gateway_api_key_associations"."allowed_models"
 FROM
   "public"."gateway_api_key_associations"
 WHERE
@@ -7641,7 +7778,8 @@ await prisma.gatewayApiKeyAssociation.findMany({ include: { apiKey: true } });
 ```sql
 SELECT
   "public"."gateway_api_key_associations"."api_key_id",
-  "public"."gateway_api_key_associations"."metadata"
+  "public"."gateway_api_key_associations"."metadata",
+  "public"."gateway_api_key_associations"."allowed_models"
 FROM
   "public"."gateway_api_key_associations"
 WHERE
@@ -7685,7 +7823,8 @@ await prisma.gatewayApiKeyAssociation.findUnique({ where: { apiKeyId: "example" 
 ```sql
 SELECT
   "public"."gateway_api_key_associations"."api_key_id",
-  "public"."gateway_api_key_associations"."metadata"
+  "public"."gateway_api_key_associations"."metadata",
+  "public"."gateway_api_key_associations"."allowed_models"
 FROM
   "public"."gateway_api_key_associations"
 WHERE
@@ -7713,7 +7852,8 @@ VALUES
   ($1, $2)
 RETURNING
   "public"."gateway_api_key_associations"."api_key_id",
-  "public"."gateway_api_key_associations"."metadata"
+  "public"."gateway_api_key_associations"."metadata",
+  "public"."gateway_api_key_associations"."allowed_models"
 -- params: ["example","{}"]
 ```
 
@@ -7737,7 +7877,8 @@ WHERE
   )
 RETURNING
   "public"."gateway_api_key_associations"."api_key_id",
-  "public"."gateway_api_key_associations"."metadata"
+  "public"."gateway_api_key_associations"."metadata",
+  "public"."gateway_api_key_associations"."allowed_models"
 -- params: ["{}","example"]
 ```
 
@@ -7756,7 +7897,8 @@ WHERE
   )
 RETURNING
   "public"."gateway_api_key_associations"."api_key_id",
-  "public"."gateway_api_key_associations"."metadata"
+  "public"."gateway_api_key_associations"."metadata",
+  "public"."gateway_api_key_associations"."allowed_models"
 -- params: ["example"]
 ```
 
@@ -23909,6 +24051,7 @@ Table `batch_actions`.
 | `processedCount` (`processed_count`) | `Int`      | NULL                                    |                      |             |
 | `failedCount` (`failed_count`)       | `Int`      | NULL                                    |                      |             |
 | `log`                                | `String`   | NULL                                    |                      |             |
+| `cursor`                             | `Json`     | NULL                                    |                      |             |
 
 #### Indexes
 
@@ -23939,6 +24082,7 @@ CREATE TABLE "batch_actions" (
     "processed_count" INTEGER,
     "failed_count" INTEGER,
     "log" TEXT,
+    "cursor" JSONB,
 
     CONSTRAINT "batch_actions_pkey" PRIMARY KEY ("id")
 );
@@ -23977,7 +24121,8 @@ SELECT
   "public"."batch_actions"."total_count",
   "public"."batch_actions"."processed_count",
   "public"."batch_actions"."failed_count",
-  "public"."batch_actions"."log"
+  "public"."batch_actions"."log",
+  "public"."batch_actions"."cursor"
 FROM
   "public"."batch_actions"
 WHERE
@@ -24032,7 +24177,8 @@ SELECT
   "public"."batch_actions"."total_count",
   "public"."batch_actions"."processed_count",
   "public"."batch_actions"."failed_count",
-  "public"."batch_actions"."log"
+  "public"."batch_actions"."log",
+  "public"."batch_actions"."cursor"
 FROM
   "public"."batch_actions"
 WHERE
@@ -24083,7 +24229,8 @@ SELECT
   "public"."batch_actions"."total_count",
   "public"."batch_actions"."processed_count",
   "public"."batch_actions"."failed_count",
-  "public"."batch_actions"."log"
+  "public"."batch_actions"."log",
+  "public"."batch_actions"."cursor"
 FROM
   "public"."batch_actions"
 WHERE
@@ -24143,7 +24290,8 @@ RETURNING
   "public"."batch_actions"."total_count",
   "public"."batch_actions"."processed_count",
   "public"."batch_actions"."failed_count",
-  "public"."batch_actions"."log"
+  "public"."batch_actions"."log",
+  "public"."batch_actions"."cursor"
 -- params: ["<cuid(1)>","<now()>","<now()>","example","example","example","example","example","{}"]
 ```
 
@@ -24181,7 +24329,8 @@ RETURNING
   "public"."batch_actions"."total_count",
   "public"."batch_actions"."processed_count",
   "public"."batch_actions"."failed_count",
-  "public"."batch_actions"."log"
+  "public"."batch_actions"."log",
+  "public"."batch_actions"."cursor"
 -- params: ["2026-01-01T00:00:00.000Z",{"prisma__type":"generatorCall","prisma__value":{"name":"now","args":[],"returnType":{"type":"DateTime"}}},"example"]
 ```
 
@@ -24213,7 +24362,8 @@ RETURNING
   "public"."batch_actions"."total_count",
   "public"."batch_actions"."processed_count",
   "public"."batch_actions"."failed_count",
-  "public"."batch_actions"."log"
+  "public"."batch_actions"."log",
+  "public"."batch_actions"."cursor"
 -- params: ["example"]
 ```
 
@@ -27128,6 +27278,654 @@ RETURNING
   "public"."table_view_presets"."column_visibility",
   "public"."table_view_presets"."search_query",
   "public"."table_view_presets"."order_by"
+-- params: ["example"]
+```
+
+</details>
+
+<a id="model-SessionView"></a>
+
+### SessionView
+
+Table `session_views`.
+
+![SessionView and the models it relates to](tables/SessionView.svg)
+
+| Field                                                              | Type                                                     | Constraints                             | Default              | Description |
+| ------------------------------------------------------------------ | -------------------------------------------------------- | --------------------------------------- | -------------------- | ----------- |
+| `isPinnedByDefaultForProject` (`is_pinned_by_default_for_project`) | `Boolean`                                                | NOT NULL                                | `false`              |             |
+| `id`                                                               | `String`                                                 | PK NOT NULL                             | `cuid(1)`            |             |
+| `projectId` (`project_id`)                                         | `String`                                                 | NOT NULL → [Project.id](#model-Project) |                      |             |
+| `name`                                                             | `String`                                                 | NOT NULL                                |                      |             |
+| `filters`                                                          | `Json`                                                   | NOT NULL                                |                      |             |
+| `viewMode` (`view_mode`)                                           | [`SessionViewMode`](#enum-SessionViewMode)               | NOT NULL                                |                      |             |
+| `unmatchedTraces` (`unmatched_traces`)                             | [`SessionUnmatchedTraces`](#enum-SessionUnmatchedTraces) | NOT NULL                                |                      |             |
+| `createdBy` (`created_by`)                                         | `String`                                                 | NULL → [User.id](#model-User)           |                      |             |
+| `createdAt` (`created_at`)                                         | `DateTime`                                               | NOT NULL                                | `now()`              |             |
+| `updatedAt` (`updated_at`)                                         | `DateTime`                                               | NOT NULL                                | `now()` `@updatedAt` |             |
+
+#### Indexes
+
+- `@@unique([projectId, name])`
+- `@@unique([projectId, id])`
+
+#### References
+
+- `projectId` → [Project.id](#model-Project) (many-to-one, on delete Cascade)
+- `createdBy` → [User.id](#model-User) (many-to-one, on delete SetNull)
+
+#### Referenced by
+
+- `projectId` ← [SessionViewPinOverride.projectId](#model-SessionViewPinOverride) (one-to-many, on delete Cascade)
+
+#### Definition
+
+```sql
+CREATE TABLE "session_views" (
+    "is_pinned_by_default_for_project" BOOLEAN NOT NULL DEFAULT false,
+    "id" TEXT NOT NULL,
+    "project_id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "filters" JSONB NOT NULL,
+    "view_mode" "SessionViewMode" NOT NULL,
+    "unmatched_traces" "SessionUnmatchedTraces" NOT NULL,
+    "created_by" TEXT,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "session_views_pkey" PRIMARY KEY ("id")
+);
+
+CREATE UNIQUE INDEX "session_views_project_id_name_key" ON "session_views"("project_id", "name");
+
+CREATE UNIQUE INDEX "session_views_project_id_id_key" ON "session_views"("project_id", "id");
+
+ALTER TABLE "session_views" ADD CONSTRAINT "session_views_project_id_fkey" FOREIGN KEY ("project_id") REFERENCES "projects"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE "session_views" ADD CONSTRAINT "session_views_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+```
+
+<details>
+<summary>Queries and their SQL</summary>
+
+**findMany**: Every row
+
+```ts
+await prisma.sessionView.findMany();
+```
+
+```sql
+SELECT
+  "public"."session_views"."id",
+  "public"."session_views"."is_pinned_by_default_for_project",
+  "public"."session_views"."project_id",
+  "public"."session_views"."name",
+  "public"."session_views"."filters",
+  "public"."session_views"."view_mode"::text,
+  "public"."session_views"."unmatched_traces"::text,
+  "public"."session_views"."created_by",
+  "public"."session_views"."created_at",
+  "public"."session_views"."updated_at"
+FROM
+  "public"."session_views"
+WHERE
+  1 = 1
+OFFSET
+  $1
+-- params: ["0"]
+```
+
+**count**: How many rows there are
+
+```ts
+await prisma.sessionView.count();
+```
+
+```sql
+SELECT
+  COUNT(*) AS "_count$_all"
+FROM
+  (
+    SELECT
+      "public"."session_views"."id"
+    FROM
+      "public"."session_views"
+    WHERE
+      1 = 1
+    OFFSET
+      $1
+  ) AS "sub"
+-- params: ["0"]
+```
+
+**findMany**: Every row with its relations
+
+```ts
+await prisma.sessionView.findMany({ include: { pins: true, project: true, createdByUser: true } });
+```
+
+```sql
+SELECT
+  "public"."session_views"."id",
+  "public"."session_views"."is_pinned_by_default_for_project",
+  "public"."session_views"."project_id",
+  "public"."session_views"."name",
+  "public"."session_views"."filters",
+  "public"."session_views"."view_mode"::text,
+  "public"."session_views"."unmatched_traces"::text,
+  "public"."session_views"."created_by",
+  "public"."session_views"."created_at",
+  "public"."session_views"."updated_at"
+FROM
+  "public"."session_views"
+WHERE
+  1 = 1
+OFFSET
+  $1
+-- params: ["0"]
+
+SELECT
+  "public"."session_view_pin_overrides"."id",
+  "public"."session_view_pin_overrides"."project_id",
+  "public"."session_view_pin_overrides"."user_id",
+  "public"."session_view_pin_overrides"."view_id",
+  "public"."session_view_pin_overrides"."is_pinned",
+  "public"."session_view_pin_overrides"."position"
+FROM
+  "public"."session_view_pin_overrides"
+WHERE
+  (
+    "public"."session_view_pin_overrides"."project_id" IN ($1)
+    AND "public"."session_view_pin_overrides"."view_id" IN ($2)
+  )
+OFFSET
+  $3
+-- params: ["<projectId of the rows above>","<id of the rows above>","0"]
+
+SELECT
+  "public"."projects"."id",
+  "public"."projects"."org_id",
+  "public"."projects"."created_at",
+  "public"."projects"."updated_at",
+  "public"."projects"."deleted_at",
+  "public"."projects"."name",
+  "public"."projects"."retention_days",
+  "public"."projects"."has_traces",
+  "public"."projects"."metadata",
+  "public"."projects"."home_dashboard_id"
+FROM
+  "public"."projects"
+WHERE
+  "public"."projects"."id" IN ($1)
+OFFSET
+  $2
+-- params: ["<projectId of the rows above>","0"]
+
+SELECT
+  "public"."users"."id",
+  "public"."users"."name",
+  "public"."users"."email",
+  "public"."users"."email_verified",
+  "public"."users"."password",
+  "public"."users"."sessions_expired_at",
+  "public"."users"."image",
+  "public"."users"."admin",
+  "public"."users"."v4_beta_enabled",
+  "public"."users"."support_access",
+  "public"."users"."created_at",
+  "public"."users"."updated_at",
+  "public"."users"."feature_flags"
+FROM
+  "public"."users"
+WHERE
+  "public"."users"."id" IN ($1)
+OFFSET
+  $2
+-- params: ["<createdBy of the rows above>","0"]
+```
+
+**findUnique**: One row by what is unique to it
+
+```ts
+await prisma.sessionView.findUnique({ where: { id: "example" } });
+```
+
+```sql
+SELECT
+  "public"."session_views"."id",
+  "public"."session_views"."is_pinned_by_default_for_project",
+  "public"."session_views"."project_id",
+  "public"."session_views"."name",
+  "public"."session_views"."filters",
+  "public"."session_views"."view_mode"::text,
+  "public"."session_views"."unmatched_traces"::text,
+  "public"."session_views"."created_by",
+  "public"."session_views"."created_at",
+  "public"."session_views"."updated_at"
+FROM
+  "public"."session_views"
+WHERE
+  (
+    "public"."session_views"."id" = $1
+    AND 1 = 1
+  )
+LIMIT
+  $2
+OFFSET
+  $3
+-- params: ["example","1","0"]
+```
+
+**create**: Create a row
+
+```ts
+await prisma.sessionView.create({
+  data: {
+    projectId: "example",
+    name: "example",
+    filters: {},
+    viewMode: "conversational",
+    unmatchedTraces: "show",
+  },
+});
+```
+
+```sql
+INSERT INTO
+  "public"."session_views" (
+    "is_pinned_by_default_for_project",
+    "id",
+    "project_id",
+    "name",
+    "filters",
+    "view_mode",
+    "unmatched_traces",
+    "created_at",
+    "updated_at"
+  )
+VALUES
+  (
+    $1,
+    $2,
+    $3,
+    $4,
+    $5,
+    CAST($6::text AS "public"."SessionViewMode"),
+    CAST($7::text AS "public"."SessionUnmatchedTraces"),
+    $8,
+    $9
+  )
+RETURNING
+  "public"."session_views"."id",
+  "public"."session_views"."is_pinned_by_default_for_project",
+  "public"."session_views"."project_id",
+  "public"."session_views"."name",
+  "public"."session_views"."filters",
+  "public"."session_views"."view_mode"::text,
+  "public"."session_views"."unmatched_traces"::text,
+  "public"."session_views"."created_by",
+  "public"."session_views"."created_at",
+  "public"."session_views"."updated_at"
+-- params: [false,"<cuid(1)>","example","example","{}","conversational","show","<now()>","<now()>"]
+```
+
+**update**: Update a row
+
+```ts
+await prisma.sessionView.update({
+  where: { id: "example" },
+  data: { isPinnedByDefaultForProject: true },
+});
+```
+
+```sql
+UPDATE "public"."session_views"
+SET
+  "is_pinned_by_default_for_project" = $1,
+  "updated_at" = $2
+WHERE
+  (
+    "public"."session_views"."id" = $3
+    AND 1 = 1
+  )
+RETURNING
+  "public"."session_views"."id",
+  "public"."session_views"."is_pinned_by_default_for_project",
+  "public"."session_views"."project_id",
+  "public"."session_views"."name",
+  "public"."session_views"."filters",
+  "public"."session_views"."view_mode"::text,
+  "public"."session_views"."unmatched_traces"::text,
+  "public"."session_views"."created_by",
+  "public"."session_views"."created_at",
+  "public"."session_views"."updated_at"
+-- params: [true,{"prisma__type":"generatorCall","prisma__value":{"name":"now","args":[],"returnType":{"type":"DateTime"}}},"example"]
+```
+
+**delete**: Delete a row
+
+```ts
+await prisma.sessionView.delete({ where: { id: "example" } });
+```
+
+```sql
+DELETE FROM "public"."session_views"
+WHERE
+  (
+    "public"."session_views"."id" = $1
+    AND 1 = 1
+  )
+RETURNING
+  "public"."session_views"."id",
+  "public"."session_views"."is_pinned_by_default_for_project",
+  "public"."session_views"."project_id",
+  "public"."session_views"."name",
+  "public"."session_views"."filters",
+  "public"."session_views"."view_mode"::text,
+  "public"."session_views"."unmatched_traces"::text,
+  "public"."session_views"."created_by",
+  "public"."session_views"."created_at",
+  "public"."session_views"."updated_at"
+-- params: ["example"]
+```
+
+</details>
+
+<a id="model-SessionViewPinOverride"></a>
+
+### SessionViewPinOverride
+
+Table `session_view_pin_overrides`.
+
+![SessionViewPinOverride and the models it relates to](tables/SessionViewPinOverride.svg)
+
+| Field                      | Type      | Constraints                                 | Default   | Description                                 |
+| -------------------------- | --------- | ------------------------------------------- | --------- | ------------------------------------------- |
+| `id`                       | `String`  | PK NOT NULL                                 | `cuid(1)` |                                             |
+| `projectId` (`project_id`) | `String`  | NOT NULL → [Project.id](#model-Project)     |           |                                             |
+| `userId` (`user_id`)       | `String`  | NOT NULL → [User.id](#model-User)           |           |                                             |
+| `viewId` (`view_id`)       | `String`  | NULL → [SessionView.id](#model-SessionView) |           | Null identifies the built-in Messages view. |
+| `isPinned` (`is_pinned`)   | `Boolean` | NOT NULL                                    | `true`    |                                             |
+| `position`                 | `Int`     | NOT NULL                                    |           |                                             |
+
+#### Indexes
+
+- `@@index([userId])`
+- `@@index([projectId, viewId])`
+- `@@unique([projectId, userId, viewId])`
+
+#### References
+
+- `projectId` → [Project.id](#model-Project) (many-to-one, on delete Cascade)
+- `userId` → [User.id](#model-User) (many-to-one, on delete Cascade)
+- `projectId` → [SessionView.projectId](#model-SessionView) (many-to-one, on delete Cascade)
+
+#### Definition
+
+```sql
+CREATE TABLE "session_view_pin_overrides" (
+    "id" TEXT NOT NULL,
+    "project_id" TEXT NOT NULL,
+    "user_id" TEXT NOT NULL,
+    "view_id" TEXT,
+    "is_pinned" BOOLEAN NOT NULL DEFAULT true,
+    "position" INTEGER NOT NULL,
+
+    CONSTRAINT "session_view_pin_overrides_pkey" PRIMARY KEY ("id")
+);
+
+CREATE INDEX "session_view_pin_overrides_user_id_idx" ON "session_view_pin_overrides"("user_id");
+
+CREATE INDEX "session_view_pin_overrides_project_id_view_id_idx" ON "session_view_pin_overrides"("project_id", "view_id");
+
+CREATE UNIQUE INDEX "session_view_pin_overrides_project_id_user_id_view_id_key" ON "session_view_pin_overrides"("project_id", "user_id", "view_id");
+
+ALTER TABLE "session_view_pin_overrides" ADD CONSTRAINT "session_view_pin_overrides_project_id_fkey" FOREIGN KEY ("project_id") REFERENCES "projects"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE "session_view_pin_overrides" ADD CONSTRAINT "session_view_pin_overrides_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE "session_view_pin_overrides" ADD CONSTRAINT "session_view_pin_overrides_project_id_view_id_fkey" FOREIGN KEY ("project_id", "view_id") REFERENCES "session_views"("project_id", "id") ON DELETE CASCADE ON UPDATE CASCADE;
+```
+
+<details>
+<summary>Queries and their SQL</summary>
+
+**findMany**: Every row
+
+```ts
+await prisma.sessionViewPinOverride.findMany();
+```
+
+```sql
+SELECT
+  "public"."session_view_pin_overrides"."id",
+  "public"."session_view_pin_overrides"."project_id",
+  "public"."session_view_pin_overrides"."user_id",
+  "public"."session_view_pin_overrides"."view_id",
+  "public"."session_view_pin_overrides"."is_pinned",
+  "public"."session_view_pin_overrides"."position"
+FROM
+  "public"."session_view_pin_overrides"
+WHERE
+  1 = 1
+OFFSET
+  $1
+-- params: ["0"]
+```
+
+**count**: How many rows there are
+
+```ts
+await prisma.sessionViewPinOverride.count();
+```
+
+```sql
+SELECT
+  COUNT(*) AS "_count$_all"
+FROM
+  (
+    SELECT
+      "public"."session_view_pin_overrides"."id"
+    FROM
+      "public"."session_view_pin_overrides"
+    WHERE
+      1 = 1
+    OFFSET
+      $1
+  ) AS "sub"
+-- params: ["0"]
+```
+
+**findMany**: Every row with its relations
+
+```ts
+await prisma.sessionViewPinOverride.findMany({
+  include: { project: true, user: true, view: true },
+});
+```
+
+```sql
+SELECT
+  "public"."session_view_pin_overrides"."id",
+  "public"."session_view_pin_overrides"."project_id",
+  "public"."session_view_pin_overrides"."user_id",
+  "public"."session_view_pin_overrides"."view_id",
+  "public"."session_view_pin_overrides"."is_pinned",
+  "public"."session_view_pin_overrides"."position"
+FROM
+  "public"."session_view_pin_overrides"
+WHERE
+  1 = 1
+OFFSET
+  $1
+-- params: ["0"]
+
+SELECT
+  "public"."projects"."id",
+  "public"."projects"."org_id",
+  "public"."projects"."created_at",
+  "public"."projects"."updated_at",
+  "public"."projects"."deleted_at",
+  "public"."projects"."name",
+  "public"."projects"."retention_days",
+  "public"."projects"."has_traces",
+  "public"."projects"."metadata",
+  "public"."projects"."home_dashboard_id"
+FROM
+  "public"."projects"
+WHERE
+  "public"."projects"."id" IN ($1)
+OFFSET
+  $2
+-- params: ["<projectId of the rows above>","0"]
+
+SELECT
+  "public"."users"."id",
+  "public"."users"."name",
+  "public"."users"."email",
+  "public"."users"."email_verified",
+  "public"."users"."password",
+  "public"."users"."sessions_expired_at",
+  "public"."users"."image",
+  "public"."users"."admin",
+  "public"."users"."v4_beta_enabled",
+  "public"."users"."support_access",
+  "public"."users"."created_at",
+  "public"."users"."updated_at",
+  "public"."users"."feature_flags"
+FROM
+  "public"."users"
+WHERE
+  "public"."users"."id" IN ($1)
+OFFSET
+  $2
+-- params: ["<userId of the rows above>","0"]
+
+SELECT
+  "public"."session_views"."id",
+  "public"."session_views"."is_pinned_by_default_for_project",
+  "public"."session_views"."project_id",
+  "public"."session_views"."name",
+  "public"."session_views"."filters",
+  "public"."session_views"."view_mode"::text,
+  "public"."session_views"."unmatched_traces"::text,
+  "public"."session_views"."created_by",
+  "public"."session_views"."created_at",
+  "public"."session_views"."updated_at"
+FROM
+  "public"."session_views"
+WHERE
+  (
+    "public"."session_views"."id" IN ($1)
+    AND "public"."session_views"."project_id" IN ($2)
+  )
+OFFSET
+  $3
+-- params: ["<viewId of the rows above>","<projectId of the rows above>","0"]
+```
+
+**findUnique**: One row by what is unique to it
+
+```ts
+await prisma.sessionViewPinOverride.findUnique({ where: { id: "example" } });
+```
+
+```sql
+SELECT
+  "public"."session_view_pin_overrides"."id",
+  "public"."session_view_pin_overrides"."project_id",
+  "public"."session_view_pin_overrides"."user_id",
+  "public"."session_view_pin_overrides"."view_id",
+  "public"."session_view_pin_overrides"."is_pinned",
+  "public"."session_view_pin_overrides"."position"
+FROM
+  "public"."session_view_pin_overrides"
+WHERE
+  (
+    "public"."session_view_pin_overrides"."id" = $1
+    AND 1 = 1
+  )
+LIMIT
+  $2
+OFFSET
+  $3
+-- params: ["example","1","0"]
+```
+
+**create**: Create a row
+
+```ts
+await prisma.sessionViewPinOverride.create({
+  data: { projectId: "example", userId: "example", position: 1 },
+});
+```
+
+```sql
+INSERT INTO
+  "public"."session_view_pin_overrides" (
+    "id",
+    "project_id",
+    "user_id",
+    "is_pinned",
+    "position"
+  )
+VALUES
+  ($1, $2, $3, $4, $5)
+RETURNING
+  "public"."session_view_pin_overrides"."id",
+  "public"."session_view_pin_overrides"."project_id",
+  "public"."session_view_pin_overrides"."user_id",
+  "public"."session_view_pin_overrides"."view_id",
+  "public"."session_view_pin_overrides"."is_pinned",
+  "public"."session_view_pin_overrides"."position"
+-- params: ["<cuid(1)>","example","example",true,"1"]
+```
+
+**update**: Update a row
+
+```ts
+await prisma.sessionViewPinOverride.update({ where: { id: "example" }, data: { isPinned: true } });
+```
+
+```sql
+UPDATE "public"."session_view_pin_overrides"
+SET
+  "is_pinned" = $1
+WHERE
+  (
+    "public"."session_view_pin_overrides"."id" = $2
+    AND 1 = 1
+  )
+RETURNING
+  "public"."session_view_pin_overrides"."id",
+  "public"."session_view_pin_overrides"."project_id",
+  "public"."session_view_pin_overrides"."user_id",
+  "public"."session_view_pin_overrides"."view_id",
+  "public"."session_view_pin_overrides"."is_pinned",
+  "public"."session_view_pin_overrides"."position"
+-- params: [true,"example"]
+```
+
+**delete**: Delete a row
+
+```ts
+await prisma.sessionViewPinOverride.delete({ where: { id: "example" } });
+```
+
+```sql
+DELETE FROM "public"."session_view_pin_overrides"
+WHERE
+  (
+    "public"."session_view_pin_overrides"."id" = $1
+    AND 1 = 1
+  )
+RETURNING
+  "public"."session_view_pin_overrides"."id",
+  "public"."session_view_pin_overrides"."project_id",
+  "public"."session_view_pin_overrides"."user_id",
+  "public"."session_view_pin_overrides"."view_id",
+  "public"."session_view_pin_overrides"."is_pinned",
+  "public"."session_view_pin_overrides"."position"
 -- params: ["example"]
 ```
 
@@ -30739,11 +31537,12 @@ CREATE TYPE "GatewayIngestionMode" AS ENUM ('none', 'usage', 'full');
 - `VERCEL` (`vercel`)
 - `AZURE` (`azure`)
 - `GOOGLE_AI_STUDIO` (`google_ai_studio`)
+- `VERTEX` (`vertex`)
 
 #### Definition
 
 ```sql
-CREATE TYPE "GatewayProvider" AS ENUM ('openai', 'anthropic', 'bedrock', 'openrouter', 'xai', 'vercel', 'azure', 'google_ai_studio');
+CREATE TYPE "GatewayProvider" AS ENUM ('openai', 'anthropic', 'bedrock', 'openrouter', 'xai', 'vercel', 'azure', 'google_ai_studio', 'vertex');
 ```
 
 <a id="enum-GatewayConnectionStatus"></a>
@@ -31139,6 +31938,32 @@ CREATE TYPE "DashboardWidgetViews" AS ENUM ('TRACES', 'OBSERVATIONS', 'SCORES_NU
 
 ```sql
 CREATE TYPE "DashboardWidgetChartType" AS ENUM ('LINE_TIME_SERIES', 'AREA_TIME_SERIES', 'BAR_TIME_SERIES', 'HORIZONTAL_BAR', 'VERTICAL_BAR', 'PIE', 'NUMBER', 'HISTOGRAM', 'PIVOT_TABLE');
+```
+
+<a id="enum-SessionViewMode"></a>
+
+### SessionViewMode
+
+- `conversational`
+- `list`
+
+#### Definition
+
+```sql
+CREATE TYPE "SessionViewMode" AS ENUM ('conversational', 'list');
+```
+
+<a id="enum-SessionUnmatchedTraces"></a>
+
+### SessionUnmatchedTraces
+
+- `show`
+- `hide`
+
+#### Definition
+
+```sql
+CREATE TYPE "SessionUnmatchedTraces" AS ENUM ('show', 'hide');
 ```
 
 <a id="enum-ActionType"></a>

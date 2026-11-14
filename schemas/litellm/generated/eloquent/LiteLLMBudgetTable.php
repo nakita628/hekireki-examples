@@ -20,6 +20,7 @@ class LiteLLMBudgetTable extends Model
     public $incrementing = false;
 
     protected $fillable = [
+        'name',
         'max_budget',
         'soft_budget',
         'max_parallel_requests',
@@ -30,6 +31,8 @@ class LiteLLMBudgetTable extends Model
         'model_tpm_limit',
         'model_rpm_limit',
         'budget_duration',
+        'budget_limits',
+        'cap_policy',
         'budget_reset_at',
         'allowed_models',
         'temp_budget_increase',
@@ -48,6 +51,7 @@ class LiteLLMBudgetTable extends Model
         'model_max_budget' => 'array',
         'model_tpm_limit' => 'array',
         'model_rpm_limit' => 'array',
+        'budget_limits' => 'array',
         'budget_reset_at' => 'datetime',
         'temp_budget_increase' => 'float',
         'temp_budget_expiry' => 'datetime',
@@ -55,17 +59,12 @@ class LiteLLMBudgetTable extends Model
 
     public function customer_organization_defaults(): HasMany
     {
-        return $this->hasMany(LiteLLMCustomerOrganizationTable::class, 'default_budget_id');
+        return $this->hasMany(LiteLLMCustomerOrganizationTable::class, 'default_budget_template_id');
     }
 
     public function customer_organizations(): HasMany
     {
         return $this->hasMany(LiteLLMCustomerOrganizationTable::class, 'budget_id');
-    }
-
-    public function customer_member_templates(): HasMany
-    {
-        return $this->hasMany(LiteLLMCustomerMemberTable::class, 'budget_template_id');
     }
 
     public function customer_teams(): HasMany
@@ -76,6 +75,16 @@ class LiteLLMBudgetTable extends Model
     public function customer_members(): HasMany
     {
         return $this->hasMany(LiteLLMCustomerMemberTable::class, 'budget_id');
+    }
+
+    public function customer_member_overrides(): HasMany
+    {
+        return $this->hasMany(LiteLLMCustomerMemberTable::class, 'budget_override_id');
+    }
+
+    public function customer_team_overrides(): HasMany
+    {
+        return $this->hasMany(LiteLLMCustomerTeamTable::class, 'budget_override_id');
     }
 
     public function organization(): HasMany

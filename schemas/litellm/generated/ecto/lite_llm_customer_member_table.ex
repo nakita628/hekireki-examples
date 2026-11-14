@@ -8,28 +8,30 @@ defmodule LiteLLM.LiteLLMCustomerMemberTable do
   @type t :: %__MODULE__{
           id: Ecto.UUID.t(),
           spend: float(),
-          budget_reset_at: DateTime.t() | nil,
           alias: String.t() | nil,
+          parent_team_ids: [String.t()],
           budget_override_expires_at: DateTime.t() | nil,
           created_by: String.t(),
           updated_by: String.t(),
           inserted_at: DateTime.t(),
           updated_at: DateTime.t(),
-          parent_team: LiteLLM.LiteLLMCustomerTeamTable.t() | nil,
+          parent_org: LiteLLM.LiteLLMCustomerOrganizationTable.t() | nil,
           budget: LiteLLM.LiteLLMBudgetTable.t() | nil,
-          budget_template: LiteLLM.LiteLLMBudgetTable.t() | nil
+          budget_override: LiteLLM.LiteLLMBudgetTable.t() | nil,
+          budget_increase_requests: [LiteLLM.LiteLLMCustomerBudgetIncreaseRequest.t()]
         }
 
   schema "LiteLLM_CustomerMemberTable" do
     field(:spend, :float, default: 0.0)
-    field(:budget_reset_at, LiteLLM.PrismaDateTime)
     field(:alias, :string)
+    field(:parent_team_ids, {:array, :string})
     field(:budget_override_expires_at, LiteLLM.PrismaDateTime)
     field(:created_by, :string)
     field(:updated_by, :string)
-    belongs_to(:parent_team, LiteLLM.LiteLLMCustomerTeamTable, foreign_key: :parent_team_id)
+    belongs_to(:parent_org, LiteLLM.LiteLLMCustomerOrganizationTable, foreign_key: :parent_org_id)
     belongs_to(:budget, LiteLLM.LiteLLMBudgetTable, foreign_key: :budget_id)
-    belongs_to(:budget_template, LiteLLM.LiteLLMBudgetTable, foreign_key: :budget_template_id)
+    belongs_to(:budget_override, LiteLLM.LiteLLMBudgetTable, foreign_key: :budget_override_id)
+    has_many(:budget_increase_requests, LiteLLM.LiteLLMCustomerBudgetIncreaseRequest, foreign_key: :customer_member_id)
     timestamps(inserted_at_source: :created_at)
   end
 end

@@ -115,6 +115,10 @@ pub enum Relation {
     DashboardWidget,
     #[sea_orm(has_many = "super::table_view_preset::Entity")]
     TableViewPreset,
+    #[sea_orm(has_many = "super::session_view::Entity")]
+    SessionViews,
+    #[sea_orm(has_many = "super::session_view_pin_override::Entity")]
+    SessionViewPinOverrides,
     #[sea_orm(has_many = "super::action::Entity")]
     Actions,
     #[sea_orm(has_many = "super::trigger::Entity")]
@@ -384,6 +388,18 @@ impl Related<super::dashboard_widget::Entity> for Entity {
 impl Related<super::table_view_preset::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::TableViewPreset.def()
+    }
+}
+
+impl Related<super::session_view::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::SessionViews.def()
+    }
+}
+
+impl Related<super::session_view_pin_override::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::SessionViewPinOverrides.def()
     }
 }
 

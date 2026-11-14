@@ -250,7 +250,7 @@ type EmailAccount struct {
 	FilingConfirmationSendEmail         *bool          `gorm:"column:filingConfirmationSendEmail;default:true;not null" json:"filingConfirmationSendEmail"`
 	FollowUpAwaitingReplyDays           *float64       `gorm:"column:followUpAwaitingReplyDays" json:"followUpAwaitingReplyDays"`
 	FollowUpNeedsReplyDays              *float64       `gorm:"column:followUpNeedsReplyDays" json:"followUpNeedsReplyDays"`
-	FollowUpAutoDraftEnabled            *bool          `gorm:"column:followUpAutoDraftEnabled;default:true;not null" json:"followUpAutoDraftEnabled"`
+	FollowUpAutoDraftEnabled            bool           `gorm:"column:followUpAutoDraftEnabled;default:false;not null" json:"followUpAutoDraftEnabled"`
 	DigestSendEmail                     *bool          `gorm:"column:digestSendEmail;default:true;not null" json:"digestSendEmail"`
 	LearnedWritingStyle                 *string        `gorm:"column:learnedWritingStyle" json:"learnedWritingStyle"`
 	UserID                              string         `gorm:"column:userId;index:EmailAccount_userId_idx;not null" json:"userId"`

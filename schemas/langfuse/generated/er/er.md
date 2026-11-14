@@ -114,6 +114,11 @@ erDiagram
     projects ||--o{ table_view_presets : "(id) - (projectId)"
     users |o--o{ table_view_presets : "(id) - (createdBy)"
     users |o--o{ table_view_presets : "(id) - (updatedBy)"
+    projects ||--o{ session_views : "(id) - (projectId)"
+    users |o--o{ session_views : "(id) - (createdBy)"
+    projects ||--o{ session_view_pin_overrides : "(id) - (projectId)"
+    users ||--o{ session_view_pin_overrides : "(id) - (userId)"
+    session_views |o--o{ session_view_pin_overrides : "(projectId) - (projectId)"
     projects ||--o{ default_views : "(id) - (projectId)"
     users |o--o{ default_views : "(id) - (userId)"
     projects ||--o{ actions : "(id) - (projectId)"
@@ -267,6 +272,7 @@ erDiagram
     gateway_api_key_associations {
         string apiKeyId PK, FK
         json metadata
+        json allowedModels
     }
     in_app_agent_conversations {
         string id PK
@@ -912,6 +918,7 @@ erDiagram
         int processedCount
         int failedCount
         string log
+        json cursor
     }
     media {
         string id UK
@@ -1033,6 +1040,26 @@ erDiagram
         json columnVisibility
         string searchQuery
         json orderBy
+    }
+    session_views {
+        boolean isPinnedByDefaultForProject
+        string id PK, UK
+        string projectId FK, UK
+        string name UK
+        json filters
+        sessionviewmode viewMode
+        sessionunmatchedtraces unmatchedTraces
+        string createdBy FK
+        datetime createdAt
+        datetime updatedAt
+    }
+    session_view_pin_overrides {
+        string id PK
+        string projectId FK, UK
+        string userId FK, UK
+        string viewId FK, UK "Null identifies the built-in Messages view."
+        boolean isPinned
+        int position
     }
     default_views {
         string id PK

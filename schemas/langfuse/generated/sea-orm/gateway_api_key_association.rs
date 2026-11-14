@@ -8,6 +8,8 @@ pub struct Model {
     pub api_key_id: String,
     #[sea_orm(column_type = "JsonBinary", default_value = "{}")]
     pub metadata: Json,
+    #[sea_orm(column_type = "JsonBinary")]
+    pub allowed_models: Option<Json>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

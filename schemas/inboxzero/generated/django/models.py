@@ -587,7 +587,7 @@ class EmailAccount(models.Model):
     filing_confirmation_send_email = models.BooleanField(db_column="filingConfirmationSendEmail", default=True)
     follow_up_awaiting_reply_days = models.FloatField(null=True, db_column="followUpAwaitingReplyDays")
     follow_up_needs_reply_days = models.FloatField(null=True, db_column="followUpNeedsReplyDays")
-    follow_up_auto_draft_enabled = models.BooleanField(db_column="followUpAutoDraftEnabled", default=True)
+    follow_up_auto_draft_enabled = models.BooleanField(db_column="followUpAutoDraftEnabled", default=False)
     digest_send_email = models.BooleanField(db_column="digestSendEmail", default=True)
     learned_writing_style = models.TextField(null=True, db_column="learnedWritingStyle")
     user = models.ForeignKey("User", on_delete=models.CASCADE, related_name="email_accounts", db_column="userId", db_index=False)

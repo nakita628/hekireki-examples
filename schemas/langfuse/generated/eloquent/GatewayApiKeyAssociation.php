@@ -19,6 +19,7 @@ class GatewayApiKeyAssociation extends \Illuminate\Database\Eloquent\Model
     protected $fillable = [
         'api_key_id',
         'metadata',
+        'allowed_models',
     ];
 
     protected $attributes = [
@@ -27,6 +28,7 @@ class GatewayApiKeyAssociation extends \Illuminate\Database\Eloquent\Model
 
     protected $casts = [
         'metadata' => 'array',
+        'allowed_models' => 'array',
     ];
 
     public function apiKey(): BelongsTo

@@ -73,6 +73,7 @@ class AccountingDeliveryState(models.TextChoices):
 
 class LiteLLMBudgetTable(models.Model):
     budget_id = models.TextField(primary_key=True, default=uuid4_str)
+    name = models.TextField(null=True)
     max_budget = models.FloatField(null=True)
     soft_budget = models.FloatField(null=True)
     max_parallel_requests = models.IntegerField(null=True)
@@ -83,6 +84,8 @@ class LiteLLMBudgetTable(models.Model):
     model_tpm_limit = models.JSONField(null=True)
     model_rpm_limit = models.JSONField(null=True)
     budget_duration = models.TextField(null=True)
+    budget_limits = models.JSONField(null=True)
+    cap_policy = models.TextField(null=True)
     budget_reset_at = UtcDateTimeField(null=True)
     allowed_models = ArrayField(models.TextField(), default=list)
     temp_budget_increase = models.FloatField(null=True)
@@ -99,13 +102,11 @@ class LiteLLMBudgetTable(models.Model):
 
 class LiteLLMCustomerOrganizationTable(models.Model):
     spend = models.FloatField(default=0)
-    budget_reset_at = UtcDateTimeField(null=True)
-    budget_ids = ArrayField(models.TextField(), default=list)
-    budget_names = models.JSONField(default=dict)
+    budget_template_ids = ArrayField(models.TextField(), default=list)
     budget = models.ForeignKey("LiteLLMBudgetTable", on_delete=models.SET_NULL, related_name="customer_organizations", null=True, db_index=False)
     customer_org_id = models.TextField(primary_key=True, default=uuid4_str)
     alias = models.TextField(null=True)
-    default_budget = models.ForeignKey("LiteLLMBudgetTable", on_delete=models.SET_NULL, related_name="customer_organization_defaults", null=True, db_index=False)
+    default_budget_template = models.ForeignKey("LiteLLMBudgetTable", on_delete=models.SET_NULL, related_name="customer_organization_defaults", null=True, db_index=False)
     created_at = UtcDateTimeField(default=timezone.now)
     created_by = models.TextField()
     updated_at = UtcDateTimeField(auto_now=True)
@@ -114,15 +115,19 @@ class LiteLLMCustomerOrganizationTable(models.Model):
 
     class Meta:
         db_table = "LiteLLM_CustomerOrganizationTable"
+        indexes = [
+            models.Index(fields=["spend"]),
+        ]
 
 
 class LiteLLMCustomerTeamTable(models.Model):
     spend = models.FloatField(default=0)
-    budget_reset_at = UtcDateTimeField(null=True)
     customer_team_id = models.TextField(primary_key=True, default=uuid4_str)
     alias = models.TextField(null=True)
     parent_org = models.ForeignKey("LiteLLMCustomerOrganizationTable", on_delete=models.RESTRICT, related_name="teams", db_index=False)
     budget = models.ForeignKey("LiteLLMBudgetTable", on_delete=models.SET_NULL, related_name="customer_teams", null=True, db_index=False)
+    budget_override = models.ForeignKey("LiteLLMBudgetTable", on_delete=models.RESTRICT, related_name="customer_team_overrides", null=True, db_index=False)
+    budget_override_expires_at = UtcDateTimeField(null=True)
     created_at = UtcDateTimeField(default=timezone.now)
     created_by = models.TextField()
     updated_at = UtcDateTimeField(auto_now=True)
@@ -133,17 +138,18 @@ class LiteLLMCustomerTeamTable(models.Model):
         db_table = "LiteLLM_CustomerTeamTable"
         indexes = [
             models.Index(fields=["parent_org"]),
+            models.Index(fields=["spend"]),
         ]
 
 
 class LiteLLMCustomerMemberTable(models.Model):
     spend = models.FloatField(default=0)
-    budget_reset_at = UtcDateTimeField(null=True)
     customer_member_id = models.TextField(primary_key=True, default=uuid4_str)
     alias = models.TextField(null=True)
-    parent_team = models.ForeignKey("LiteLLMCustomerTeamTable", on_delete=models.RESTRICT, related_name="members", db_index=False)
+    parent_org = models.ForeignKey("LiteLLMCustomerOrganizationTable", on_delete=models.RESTRICT, related_name="members", db_index=False)
+    parent_team_ids = ArrayField(models.TextField(), default=list)
     budget = models.ForeignKey("LiteLLMBudgetTable", on_delete=models.RESTRICT, related_name="customer_members", null=True, db_index=False)
-    budget_template = models.ForeignKey("LiteLLMBudgetTable", on_delete=models.RESTRICT, related_name="customer_member_templates", null=True, db_index=False)
+    budget_override = models.ForeignKey("LiteLLMBudgetTable", on_delete=models.RESTRICT, related_name="customer_member_overrides", null=True, db_index=False)
     budget_override_expires_at = UtcDateTimeField(null=True)
     created_at = UtcDateTimeField(default=timezone.now)
     created_by = models.TextField()
@@ -154,8 +160,29 @@ class LiteLLMCustomerMemberTable(models.Model):
     class Meta:
         db_table = "LiteLLM_CustomerMemberTable"
         indexes = [
-            models.Index(fields=["parent_team"]),
-            models.Index(fields=["budget_template"]),
+            models.Index(fields=["parent_org"]),
+            models.Index(fields=["spend"]),
+        ]
+
+
+class LiteLLMCustomerBudgetIncreaseRequest(models.Model):
+    request_id = models.TextField(primary_key=True, default=uuid4_str)
+    customer_member = models.ForeignKey("LiteLLMCustomerMemberTable", on_delete=models.CASCADE, related_name="budget_increase_requests", db_index=False)
+    requested_max_budget = models.FloatField()
+    expires_at = UtcDateTimeField(null=True)
+    reason = models.TextField(null=True)
+    status = models.TextField(default="pending_review")
+    submitted_by = models.TextField()
+    submitted_at = UtcDateTimeField(default=timezone.now)
+    reviewed_by = models.TextField(null=True)
+    reviewed_at = UtcDateTimeField(null=True)
+    review_notes = models.TextField(null=True)
+
+    class Meta:
+        db_table = "LiteLLM_CustomerBudgetIncreaseRequest"
+        indexes = [
+            models.Index(fields=["status"]),
+            models.Index(fields=["customer_member"]),
         ]
 
 
@@ -1146,6 +1173,50 @@ class LiteLLMDailyOrganizationSpend(models.Model):
             models.Index(fields=["model"]),
             models.Index(fields=["mcp_namespaced_tool_name"]),
             models.Index(fields=["endpoint"]),
+        ]
+
+
+class LiteLLMDailyCustomerMemberSpend(models.Model):
+    id = models.TextField(primary_key=True, default=None)
+    date = models.TextField()
+    customer_org_id = models.TextField()
+    customer_team_id = models.TextField(default="")
+    customer_member_id = models.TextField(default="")
+    model = models.TextField(default="")
+    model_group = models.TextField(default="")
+    custom_llm_provider = models.TextField(default="")
+    mcp_namespaced_tool_name = models.TextField(default="")
+    endpoint = models.TextField(default="")
+    api_key = models.TextField(default="")
+    spend = models.FloatField(default=0)
+    prompt_tokens = models.BigIntegerField(default=0)
+    completion_tokens = models.BigIntegerField(default=0)
+    cache_read_input_tokens = models.BigIntegerField(default=0)
+    cache_creation_input_tokens = models.BigIntegerField(default=0)
+    compression_saved_tokens = models.BigIntegerField(default=0)
+    compression_savings_spend = models.FloatField(default=0)
+    prompt_caching_savings_spend = models.FloatField(default=0)
+    gateway_injected_caching_savings_spend = models.FloatField(default=0)
+    autorouter_savings_spend = models.FloatField(default=0)
+    guardrail_spend = models.FloatField(default=0)
+    api_requests = models.BigIntegerField(default=0)
+    successful_requests = models.BigIntegerField(default=0)
+    failed_requests = models.BigIntegerField(default=0)
+    total_response_time_ms = models.BigIntegerField(default=0)
+    timed_requests = models.BigIntegerField(default=0)
+    created_at = UtcDateTimeField(default=timezone.now)
+    updated_at = UtcDateTimeField(auto_now=True)
+    objects = AutoNowQuerySet.as_manager()
+
+    class Meta:
+        db_table = "LiteLLM_DailyCustomerMemberSpend"
+        indexes = [
+            models.Index(fields=["date"]),
+            models.Index(fields=["customer_org_id", "date"]),
+            models.Index(fields=["customer_team_id", "date"]),
+            models.Index(fields=["customer_member_id", "date"]),
+            models.Index(fields=["api_key"]),
+            models.Index(fields=["model"]),
         ]
 
 

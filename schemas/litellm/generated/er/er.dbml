@@ -19,6 +19,7 @@ Enum AccountingDeliveryState {
 
 Table LiteLLM_BudgetTable {
   budget_id String [pk]
+  name String
   max_budget Float
   soft_budget Float
   max_parallel_requests Int
@@ -29,6 +30,8 @@ Table LiteLLM_BudgetTable {
   model_tpm_limit Json
   model_rpm_limit Json
   budget_duration String
+  budget_limits Json
+  cap_policy String
   budget_reset_at DateTime
   allowed_models String[] [not null]
   temp_budget_increase Float
@@ -41,13 +44,11 @@ Table LiteLLM_BudgetTable {
 
 Table LiteLLM_CustomerOrganizationTable {
   spend Float [default: 0, not null]
-  budget_reset_at DateTime
-  budget_ids String[] [not null]
-  budget_names Json [default: '{}', not null]
+  budget_template_ids String[] [not null]
   budget_id String
   customer_org_id String [pk]
   alias String
-  default_budget_id String
+  default_budget_template_id String
   created_at DateTime [default: `now()`, not null]
   created_by String [not null]
   updated_at DateTime [default: `now()`, not null]
@@ -56,11 +57,12 @@ Table LiteLLM_CustomerOrganizationTable {
 
 Table LiteLLM_CustomerTeamTable {
   spend Float [default: 0, not null]
-  budget_reset_at DateTime
   customer_team_id String [pk]
   alias String
   parent_org_id String [not null]
   budget_id String
+  budget_override_id String
+  budget_override_expires_at DateTime
   created_at DateTime [default: `now()`, not null]
   created_by String [not null]
   updated_at DateTime [default: `now()`, not null]
@@ -69,17 +71,31 @@ Table LiteLLM_CustomerTeamTable {
 
 Table LiteLLM_CustomerMemberTable {
   spend Float [default: 0, not null]
-  budget_reset_at DateTime
   customer_member_id String [pk]
   alias String
-  parent_team_id String [not null]
+  parent_org_id String [not null]
+  parent_team_ids String[] [not null]
   budget_id String
-  budget_template_id String
+  budget_override_id String
   budget_override_expires_at DateTime
   created_at DateTime [default: `now()`, not null]
   created_by String [not null]
   updated_at DateTime [default: `now()`, not null]
   updated_by String [not null]
+}
+
+Table LiteLLM_CustomerBudgetIncreaseRequest {
+  request_id String [pk]
+  customer_member_id String [not null]
+  requested_max_budget Float [not null]
+  expires_at DateTime
+  reason String
+  status String [default: 'pending_review', not null]
+  submitted_by String [not null]
+  submitted_at DateTime [default: `now()`, not null]
+  reviewed_by String
+  reviewed_at DateTime
+  review_notes String
 }
 
 Table LiteLLM_CredentialsTable {
@@ -865,6 +881,38 @@ Table LiteLLM_DailyOrganizationSpend {
   indexes {
     (organization_id, date, api_key, model, custom_llm_provider, mcp_namespaced_tool_name, endpoint) [unique]
   }
+}
+
+Table LiteLLM_DailyCustomerMemberSpend {
+  id String [pk]
+  date String [not null]
+  customer_org_id String [not null]
+  customer_team_id String [default: '', not null]
+  customer_member_id String [default: '', not null]
+  model String [default: '', not null]
+  model_group String [default: '', not null]
+  custom_llm_provider String [default: '', not null]
+  mcp_namespaced_tool_name String [default: '', not null]
+  endpoint String [default: '', not null]
+  api_key String [default: '', not null]
+  spend Float [default: 0, not null]
+  prompt_tokens BigInt [default: 0, not null]
+  completion_tokens BigInt [default: 0, not null]
+  cache_read_input_tokens BigInt [default: 0, not null]
+  cache_creation_input_tokens BigInt [default: 0, not null]
+  compression_saved_tokens BigInt [default: 0, not null]
+  compression_savings_spend Float [default: 0, not null]
+  prompt_caching_savings_spend Float [default: 0, not null]
+  gateway_injected_caching_savings_spend Float [default: 0, not null]
+  autorouter_savings_spend Float [default: 0, not null]
+  guardrail_spend Float [default: 0, not null]
+  api_requests BigInt [default: 0, not null]
+  successful_requests BigInt [default: 0, not null]
+  failed_requests BigInt [default: 0, not null]
+  total_response_time_ms BigInt [default: 0, not null]
+  timed_requests BigInt [default: 0, not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
 }
 
 Table LiteLLM_DailyEndUserSpend {
@@ -1936,17 +1984,21 @@ Table LiteLLM_PerformanceAlertState {
 
 Ref LiteLLM_CustomerOrganizationTable_budget_id_fk: LiteLLM_CustomerOrganizationTable.budget_id > LiteLLM_BudgetTable.budget_id
 
-Ref LiteLLM_CustomerOrganizationTable_default_budget_id_fk: LiteLLM_CustomerOrganizationTable.default_budget_id > LiteLLM_BudgetTable.budget_id
+Ref LiteLLM_CustomerOrganizationTable_default_budget_template_id_fk: LiteLLM_CustomerOrganizationTable.default_budget_template_id > LiteLLM_BudgetTable.budget_id
 
 Ref LiteLLM_CustomerTeamTable_parent_org_id_fk: LiteLLM_CustomerTeamTable.parent_org_id > LiteLLM_CustomerOrganizationTable.customer_org_id
 
 Ref LiteLLM_CustomerTeamTable_budget_id_fk: LiteLLM_CustomerTeamTable.budget_id > LiteLLM_BudgetTable.budget_id
 
-Ref LiteLLM_CustomerMemberTable_parent_team_id_fk: LiteLLM_CustomerMemberTable.parent_team_id > LiteLLM_CustomerTeamTable.customer_team_id
+Ref LiteLLM_CustomerTeamTable_budget_override_id_fk: LiteLLM_CustomerTeamTable.budget_override_id > LiteLLM_BudgetTable.budget_id [delete: restrict]
+
+Ref LiteLLM_CustomerMemberTable_parent_org_id_fk: LiteLLM_CustomerMemberTable.parent_org_id > LiteLLM_CustomerOrganizationTable.customer_org_id
 
 Ref LiteLLM_CustomerMemberTable_budget_id_fk: LiteLLM_CustomerMemberTable.budget_id > LiteLLM_BudgetTable.budget_id [delete: restrict]
 
-Ref LiteLLM_CustomerMemberTable_budget_template_id_fk: LiteLLM_CustomerMemberTable.budget_template_id > LiteLLM_BudgetTable.budget_id [delete: restrict]
+Ref LiteLLM_CustomerMemberTable_budget_override_id_fk: LiteLLM_CustomerMemberTable.budget_override_id > LiteLLM_BudgetTable.budget_id [delete: restrict]
+
+Ref LiteLLM_CustomerBudgetIncreaseRequest_customer_member_id_fk: LiteLLM_CustomerBudgetIncreaseRequest.customer_member_id > LiteLLM_CustomerMemberTable.customer_member_id [delete: cascade]
 
 Ref LiteLLM_AgentsTable_object_permission_id_fk: LiteLLM_AgentsTable.object_permission_id > LiteLLM_ObjectPermissionTable.object_permission_id
 

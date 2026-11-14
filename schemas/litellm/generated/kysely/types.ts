@@ -15,6 +15,7 @@ export type AccountingDeliveryState = 'pending' | 'applied' | 'parked'
 
 export interface LiteLLM_BudgetTable {
   budget_id: string
+  name: string | null
   max_budget: number | null
   soft_budget: number | null
   max_parallel_requests: number | null
@@ -25,6 +26,8 @@ export interface LiteLLM_BudgetTable {
   model_tpm_limit: unknown
   model_rpm_limit: unknown
   budget_duration: string | null
+  budget_limits: unknown
+  cap_policy: string | null
   budget_reset_at: Timestamp | null
   allowed_models: Generated<string[]>
   temp_budget_increase: number | null
@@ -37,13 +40,11 @@ export interface LiteLLM_BudgetTable {
 
 export interface LiteLLM_CustomerOrganizationTable {
   spend: Generated<number>
-  budget_reset_at: Timestamp | null
-  budget_ids: Generated<string[]>
-  budget_names: Generated<unknown>
+  budget_template_ids: Generated<string[]>
   budget_id: string | null
   customer_org_id: string
   alias: string | null
-  default_budget_id: string | null
+  default_budget_template_id: string | null
   created_at: Generated<Timestamp>
   created_by: string
   updated_at: Generated<Timestamp>
@@ -52,11 +53,12 @@ export interface LiteLLM_CustomerOrganizationTable {
 
 export interface LiteLLM_CustomerTeamTable {
   spend: Generated<number>
-  budget_reset_at: Timestamp | null
   customer_team_id: string
   alias: string | null
   parent_org_id: string
   budget_id: string | null
+  budget_override_id: string | null
+  budget_override_expires_at: Timestamp | null
   created_at: Generated<Timestamp>
   created_by: string
   updated_at: Generated<Timestamp>
@@ -65,17 +67,31 @@ export interface LiteLLM_CustomerTeamTable {
 
 export interface LiteLLM_CustomerMemberTable {
   spend: Generated<number>
-  budget_reset_at: Timestamp | null
   customer_member_id: string
   alias: string | null
-  parent_team_id: string
+  parent_org_id: string
+  parent_team_ids: Generated<string[]>
   budget_id: string | null
-  budget_template_id: string | null
+  budget_override_id: string | null
   budget_override_expires_at: Timestamp | null
   created_at: Generated<Timestamp>
   created_by: string
   updated_at: Generated<Timestamp>
   updated_by: string
+}
+
+export interface LiteLLM_CustomerBudgetIncreaseRequest {
+  request_id: string
+  customer_member_id: string
+  requested_max_budget: number
+  expires_at: Timestamp | null
+  reason: string | null
+  status: Generated<string>
+  submitted_by: string
+  submitted_at: Generated<Timestamp>
+  reviewed_by: string | null
+  reviewed_at: Timestamp | null
+  review_notes: string | null
 }
 
 export interface LiteLLM_CredentialsTable {
@@ -800,6 +816,38 @@ export interface LiteLLM_DailyOrganizationSpend {
   autorouter_savings_spend: Generated<number>
   guardrail_spend: Generated<number>
   spend: Generated<number>
+  api_requests: Generated<bigint>
+  successful_requests: Generated<bigint>
+  failed_requests: Generated<bigint>
+  total_response_time_ms: Generated<bigint>
+  timed_requests: Generated<bigint>
+  created_at: Generated<Timestamp>
+  updated_at: Timestamp
+}
+
+export interface LiteLLM_DailyCustomerMemberSpend {
+  id: string
+  date: string
+  customer_org_id: string
+  customer_team_id: Generated<string>
+  customer_member_id: Generated<string>
+  model: Generated<string>
+  model_group: Generated<string>
+  custom_llm_provider: Generated<string>
+  mcp_namespaced_tool_name: Generated<string>
+  endpoint: Generated<string>
+  api_key: Generated<string>
+  spend: Generated<number>
+  prompt_tokens: Generated<bigint>
+  completion_tokens: Generated<bigint>
+  cache_read_input_tokens: Generated<bigint>
+  cache_creation_input_tokens: Generated<bigint>
+  compression_saved_tokens: Generated<bigint>
+  compression_savings_spend: Generated<number>
+  prompt_caching_savings_spend: Generated<number>
+  gateway_injected_caching_savings_spend: Generated<number>
+  autorouter_savings_spend: Generated<number>
+  guardrail_spend: Generated<number>
   api_requests: Generated<bigint>
   successful_requests: Generated<bigint>
   failed_requests: Generated<bigint>
@@ -1769,6 +1817,7 @@ export interface DB {
   LiteLLM_CustomerOrganizationTable: LiteLLM_CustomerOrganizationTable
   LiteLLM_CustomerTeamTable: LiteLLM_CustomerTeamTable
   LiteLLM_CustomerMemberTable: LiteLLM_CustomerMemberTable
+  LiteLLM_CustomerBudgetIncreaseRequest: LiteLLM_CustomerBudgetIncreaseRequest
   LiteLLM_CredentialsTable: LiteLLM_CredentialsTable
   LiteLLM_ProxyModelTable: LiteLLM_ProxyModelTable
   LiteLLM_AgentsTable: LiteLLM_AgentsTable
@@ -1809,6 +1858,7 @@ export interface DB {
   LiteLLM_DailyUserSpend: LiteLLM_DailyUserSpend
   LiteLLM_DailyGlobalSpend: LiteLLM_DailyGlobalSpend
   LiteLLM_DailyOrganizationSpend: LiteLLM_DailyOrganizationSpend
+  LiteLLM_DailyCustomerMemberSpend: LiteLLM_DailyCustomerMemberSpend
   LiteLLM_DailyEndUserSpend: LiteLLM_DailyEndUserSpend
   LiteLLM_DailyAgentSpend: LiteLLM_DailyAgentSpend
   LiteLLM_DailyTeamSpend: LiteLLM_DailyTeamSpend

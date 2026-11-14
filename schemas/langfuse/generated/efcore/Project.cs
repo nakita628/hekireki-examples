@@ -109,6 +109,10 @@ public partial class Project
 
     public virtual ICollection<TableViewPreset> TableViewPreset { get; set; } = new List<TableViewPreset>();
 
+    public virtual ICollection<SessionView> SessionViews { get; set; } = new List<SessionView>();
+
+    public virtual ICollection<SessionViewPinOverride> SessionViewPinOverrides { get; set; } = new List<SessionViewPinOverride>();
+
     public virtual ICollection<Action> Actions { get; set; } = new List<Action>();
 
     public virtual ICollection<Trigger> Triggers { get; set; } = new List<Trigger>();

@@ -59,6 +59,10 @@ public partial class User
 
     public virtual ICollection<TableViewPreset> TableViewPresetUpdated { get; set; } = new List<TableViewPreset>();
 
+    public virtual ICollection<SessionView> SessionViewsCreated { get; set; } = new List<SessionView>();
+
+    public virtual ICollection<SessionViewPinOverride> SessionViewPinOverrides { get; set; } = new List<SessionViewPinOverride>();
+
     public virtual ICollection<Monitor> MonitorsCreated { get; set; } = new List<Monitor>();
 
     public virtual ICollection<Monitor> MonitorsUpdated { get; set; } = new List<Monitor>();

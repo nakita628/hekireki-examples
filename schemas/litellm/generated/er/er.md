@@ -1,12 +1,14 @@
 ```mermaid
 erDiagram
     LiteLLM_BudgetTable |o--o{ LiteLLM_CustomerOrganizationTable : "(budget_id) - (budget_id)"
-    LiteLLM_BudgetTable |o--o{ LiteLLM_CustomerOrganizationTable : "(budget_id) - (default_budget_id)"
+    LiteLLM_BudgetTable |o--o{ LiteLLM_CustomerOrganizationTable : "(budget_id) - (default_budget_template_id)"
     LiteLLM_CustomerOrganizationTable ||--o{ LiteLLM_CustomerTeamTable : "(customer_org_id) - (parent_org_id)"
     LiteLLM_BudgetTable |o--o{ LiteLLM_CustomerTeamTable : "(budget_id) - (budget_id)"
-    LiteLLM_CustomerTeamTable ||--o{ LiteLLM_CustomerMemberTable : "(customer_team_id) - (parent_team_id)"
+    LiteLLM_BudgetTable |o--o{ LiteLLM_CustomerTeamTable : "(budget_id) - (budget_override_id)"
+    LiteLLM_CustomerOrganizationTable ||--o{ LiteLLM_CustomerMemberTable : "(customer_org_id) - (parent_org_id)"
     LiteLLM_BudgetTable |o--o{ LiteLLM_CustomerMemberTable : "(budget_id) - (budget_id)"
-    LiteLLM_BudgetTable |o--o{ LiteLLM_CustomerMemberTable : "(budget_id) - (budget_template_id)"
+    LiteLLM_BudgetTable |o--o{ LiteLLM_CustomerMemberTable : "(budget_id) - (budget_override_id)"
+    LiteLLM_CustomerMemberTable ||--o{ LiteLLM_CustomerBudgetIncreaseRequest : "(customer_member_id) - (customer_member_id)"
     LiteLLM_ObjectPermissionTable |o--o{ LiteLLM_AgentsTable : "(object_permission_id) - (object_permission_id)"
     LiteLLM_AgentsTable ||--o| LiteLLM_AgentIdentity : "(agent_id) - (agent_id)"
     LiteLLM_AgentsTable |o--o{ LiteLLM_RetiredAgentIdentity : "(agent_id) - (agent_id)"
@@ -45,6 +47,7 @@ erDiagram
     LiteLLM_Lens ||--o{ LiteLLM_LensReview : "(id) - (lens_id)"
     LiteLLM_BudgetTable {
         string budget_id PK
+        string name
         float max_budget
         float soft_budget
         int max_parallel_requests
@@ -55,6 +58,8 @@ erDiagram
         json model_tpm_limit
         json model_rpm_limit
         string budget_duration
+        json budget_limits
+        string cap_policy
         datetime budget_reset_at
         string[] allowed_models
         float temp_budget_increase
@@ -66,13 +71,11 @@ erDiagram
     }
     LiteLLM_CustomerOrganizationTable {
         float spend
-        datetime budget_reset_at
-        string[] budget_ids
-        json budget_names
+        string[] budget_template_ids
         string budget_id FK
         string customer_org_id PK
         string alias
-        string default_budget_id FK
+        string default_budget_template_id FK
         datetime created_at
         string created_by
         datetime updated_at
@@ -80,11 +83,12 @@ erDiagram
     }
     LiteLLM_CustomerTeamTable {
         float spend
-        datetime budget_reset_at
         string customer_team_id PK
         string alias
         string parent_org_id FK
         string budget_id FK
+        string budget_override_id FK
+        datetime budget_override_expires_at
         datetime created_at
         string created_by
         datetime updated_at
@@ -92,17 +96,30 @@ erDiagram
     }
     LiteLLM_CustomerMemberTable {
         float spend
-        datetime budget_reset_at
         string customer_member_id PK
         string alias
-        string parent_team_id FK
+        string parent_org_id FK
+        string[] parent_team_ids
         string budget_id FK
-        string budget_template_id FK
+        string budget_override_id FK
         datetime budget_override_expires_at
         datetime created_at
         string created_by
         datetime updated_at
         string updated_by
+    }
+    LiteLLM_CustomerBudgetIncreaseRequest {
+        string request_id PK
+        string customer_member_id FK
+        float requested_max_budget
+        datetime expires_at
+        string reason
+        string status
+        string submitted_by
+        datetime submitted_at
+        string reviewed_by
+        datetime reviewed_at
+        string review_notes
     }
     LiteLLM_CredentialsTable {
         string credential_id PK
@@ -787,6 +804,37 @@ erDiagram
         float autorouter_savings_spend
         float guardrail_spend
         float spend
+        bigint api_requests
+        bigint successful_requests
+        bigint failed_requests
+        bigint total_response_time_ms
+        bigint timed_requests
+        datetime created_at
+        datetime updated_at
+    }
+    LiteLLM_DailyCustomerMemberSpend {
+        string id PK
+        string date
+        string customer_org_id
+        string customer_team_id
+        string customer_member_id
+        string model
+        string model_group
+        string custom_llm_provider
+        string mcp_namespaced_tool_name
+        string endpoint
+        string api_key
+        float spend
+        bigint prompt_tokens
+        bigint completion_tokens
+        bigint cache_read_input_tokens
+        bigint cache_creation_input_tokens
+        bigint compression_saved_tokens
+        float compression_savings_spend
+        float prompt_caching_savings_spend
+        float gateway_injected_caching_savings_spend
+        float autorouter_savings_spend
+        float guardrail_spend
         bigint api_requests
         bigint successful_requests
         bigint failed_requests

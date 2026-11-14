@@ -8,6 +8,7 @@ use serde::{Deserialize, Serialize};
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub budget_id: String,
+    pub name: Option<String>,
     pub max_budget: Option<f64>,
     pub soft_budget: Option<f64>,
     pub max_parallel_requests: Option<i32>,
@@ -18,6 +19,8 @@ pub struct Model {
     pub model_tpm_limit: Option<Json>,
     pub model_rpm_limit: Option<Json>,
     pub budget_duration: Option<String>,
+    pub budget_limits: Option<Json>,
+    pub cap_policy: Option<String>,
     pub budget_reset_at: Option<DateTime>,
     pub allowed_models: Vec<String>,
     pub temp_budget_increase: Option<f64>,
@@ -33,7 +36,7 @@ pub enum Relation {
     #[sea_orm(
         has_many = "super::lite_llm_customer_organization_table::Entity",
         from = "Column::BudgetId",
-        to = "super::lite_llm_customer_organization_table::Column::DefaultBudgetId"
+        to = "super::lite_llm_customer_organization_table::Column::DefaultBudgetTemplateId"
     )]
     CustomerOrganizationDefaults,
     #[sea_orm(
@@ -43,12 +46,10 @@ pub enum Relation {
     )]
     CustomerOrganizations,
     #[sea_orm(
-        has_many = "super::lite_llm_customer_member_table::Entity",
+        has_many = "super::lite_llm_customer_team_table::Entity",
         from = "Column::BudgetId",
-        to = "super::lite_llm_customer_member_table::Column::BudgetTemplateId"
+        to = "super::lite_llm_customer_team_table::Column::BudgetId"
     )]
-    CustomerMemberTemplates,
-    #[sea_orm(has_many = "super::lite_llm_customer_team_table::Entity")]
     CustomerTeams,
     #[sea_orm(
         has_many = "super::lite_llm_customer_member_table::Entity",
@@ -56,6 +57,18 @@ pub enum Relation {
         to = "super::lite_llm_customer_member_table::Column::BudgetId"
     )]
     CustomerMembers,
+    #[sea_orm(
+        has_many = "super::lite_llm_customer_member_table::Entity",
+        from = "Column::BudgetId",
+        to = "super::lite_llm_customer_member_table::Column::BudgetOverrideId"
+    )]
+    CustomerMemberOverrides,
+    #[sea_orm(
+        has_many = "super::lite_llm_customer_team_table::Entity",
+        from = "Column::BudgetId",
+        to = "super::lite_llm_customer_team_table::Column::BudgetOverrideId"
+    )]
+    CustomerTeamOverrides,
     #[sea_orm(has_many = "super::lite_llm_organization_table::Entity")]
     Organization,
     #[sea_orm(has_many = "super::lite_llm_project_table::Entity")]
@@ -80,15 +93,15 @@ impl Related<super::lite_llm_customer_organization_table::Entity> for Entity {
     }
 }
 
-impl Related<super::lite_llm_customer_member_table::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::CustomerMemberTemplates.def()
-    }
-}
-
 impl Related<super::lite_llm_customer_team_table::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::CustomerTeams.def()
+    }
+}
+
+impl Related<super::lite_llm_customer_member_table::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::CustomerMembers.def()
     }
 }
 

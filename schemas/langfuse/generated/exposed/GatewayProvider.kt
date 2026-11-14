@@ -11,4 +11,5 @@ enum class GatewayProvider(
     VERCEL("vercel"),
     AZURE("azure"),
     GOOGLE_AI_STUDIO("google_ai_studio"),
+    VERTEX("vertex"),
 }

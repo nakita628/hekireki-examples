@@ -46,9 +46,9 @@ public partial class Subscription
 
     public int? ApiAddonAmount { get; set; }
 
-    public int? ApiPollLimit { get; set; }
+    public string? ApiAddonTier { get; set; }
 
-    public int? ApiPollRetainedLimit { get; set; }
+    public string? ApiPollRetainedTier { get; set; }
 
     public DateTime? ApiPollRetainedUntil { get; set; }
 

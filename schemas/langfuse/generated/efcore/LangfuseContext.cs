@@ -166,6 +166,10 @@ public partial class LangfuseContext : DbContext
 
     public virtual DbSet<TableViewPreset> TableViewPresets { get; set; }
 
+    public virtual DbSet<SessionView> SessionViews { get; set; }
+
+    public virtual DbSet<SessionViewPinOverride> SessionViewPinOverrides { get; set; }
+
     public virtual DbSet<DefaultView> DefaultViews { get; set; }
 
     public virtual DbSet<Action> Actions { get; set; }
@@ -221,6 +225,8 @@ public partial class LangfuseContext : DbContext
         npgsql.MapEnum<MediaAssociationOrigin>("MediaAssociationOrigin");
         npgsql.MapEnum<DashboardWidgetViews>("DashboardWidgetViews");
         npgsql.MapEnum<DashboardWidgetChartType>("DashboardWidgetChartType");
+        npgsql.MapEnum<SessionViewMode>("SessionViewMode");
+        npgsql.MapEnum<SessionUnmatchedTraces>("SessionUnmatchedTraces");
         npgsql.MapEnum<ActionType>("ActionType");
         npgsql.MapEnum<ActionExecutionStatus>("ActionExecutionStatus");
         npgsql.MapEnum<MonitorThresholdOperator>("MonitorThresholdOperator");
@@ -263,6 +269,8 @@ public partial class LangfuseContext : DbContext
         dataSource.MapEnum<MediaAssociationOrigin>("MediaAssociationOrigin");
         dataSource.MapEnum<DashboardWidgetViews>("DashboardWidgetViews");
         dataSource.MapEnum<DashboardWidgetChartType>("DashboardWidgetChartType");
+        dataSource.MapEnum<SessionViewMode>("SessionViewMode");
+        dataSource.MapEnum<SessionUnmatchedTraces>("SessionUnmatchedTraces");
         dataSource.MapEnum<ActionType>("ActionType");
         dataSource.MapEnum<ActionExecutionStatus>("ActionExecutionStatus");
         dataSource.MapEnum<MonitorThresholdOperator>("MonitorThresholdOperator");
@@ -313,6 +321,8 @@ public partial class LangfuseContext : DbContext
         modelBuilder.HasPostgresEnum<MediaAssociationOrigin>(name: "MediaAssociationOrigin");
         modelBuilder.HasPostgresEnum<DashboardWidgetViews>(name: "DashboardWidgetViews");
         modelBuilder.HasPostgresEnum<DashboardWidgetChartType>(name: "DashboardWidgetChartType");
+        modelBuilder.HasPostgresEnum<SessionViewMode>(name: "SessionViewMode");
+        modelBuilder.HasPostgresEnum<SessionUnmatchedTraces>(name: "SessionUnmatchedTraces");
         modelBuilder.HasPostgresEnum<ActionType>(name: "ActionType");
         modelBuilder.HasPostgresEnum<ActionExecutionStatus>(name: "ActionExecutionStatus");
         modelBuilder.HasPostgresEnum<MonitorThresholdOperator>(name: "MonitorThresholdOperator");
@@ -819,6 +829,9 @@ public partial class LangfuseContext : DbContext
                 .HasDefaultValue("{}")
                 .HasColumnType("jsonb")
                 .HasColumnName("metadata");
+            entity.Property(e => e.AllowedModels)
+                .HasColumnType("jsonb")
+                .HasColumnName("allowed_models");
 
             entity.HasOne(d => d.ApiKey).WithOne(p => p.GatewayAssociation)
                 .HasForeignKey<GatewayApiKeyAssociation>(d => d.ApiKeyId)
@@ -3321,6 +3334,9 @@ public partial class LangfuseContext : DbContext
             entity.Property(e => e.ProcessedCount).HasColumnName("processed_count");
             entity.Property(e => e.FailedCount).HasColumnName("failed_count");
             entity.Property(e => e.Log).HasColumnName("log");
+            entity.Property(e => e.Cursor)
+                .HasColumnType("jsonb")
+                .HasColumnName("cursor");
 
             entity.HasOne(d => d.Project).WithMany(p => p.BatchAction)
                 .HasForeignKey(d => d.ProjectId)
@@ -3759,6 +3775,96 @@ public partial class LangfuseContext : DbContext
                 .HasForeignKey(d => d.UpdatedBy)
                 .OnDelete(DeleteBehavior.SetNull)
                 .HasConstraintName("table_view_presets_updated_by_fkey");
+        });
+
+        modelBuilder.Entity<SessionView>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("session_views_pkey");
+
+            entity.ToTable("session_views");
+
+            entity.HasIndex(e => new { e.ProjectId, e.Name }, "session_views_project_id_name_key").IsUnique();
+
+            entity.HasAlternateKey(e => new { e.ProjectId, e.Id }).HasName("session_views_project_id_id_key");
+
+            entity.Property(e => e.IsPinnedByDefaultForProject)
+                .ValueGeneratedNever()
+                .HasDefaultValue(false)
+                .HasColumnName("is_pinned_by_default_for_project");
+            entity.Property(e => e.Id)
+                .HasValueGenerator<CuidGenerator>()
+                .HasColumnName("id");
+            entity.Property(e => e.ProjectId).HasColumnName("project_id");
+            entity.Property(e => e.Name).HasColumnName("name");
+            entity.Property(e => e.Filters)
+                .HasColumnType("jsonb")
+                .HasColumnName("filters");
+            entity.Property(e => e.ViewMode).HasColumnName("view_mode");
+            entity.Property(e => e.UnmatchedTraces).HasColumnName("unmatched_traces");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+            entity.Property(e => e.CreatedAt)
+                .HasValueGenerator<UtcNowGenerator>()
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("created_at");
+            entity.Property(e => e.UpdatedAt)
+                .HasValueGenerator<UtcNowGenerator>()
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("updated_at");
+
+            entity.HasOne(d => d.Project).WithMany(p => p.SessionViews)
+                .HasForeignKey(d => d.ProjectId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("session_views_project_id_fkey");
+
+            entity.HasOne(d => d.CreatedByUser).WithMany(p => p.SessionViewsCreated)
+                .HasForeignKey(d => d.CreatedBy)
+                .OnDelete(DeleteBehavior.SetNull)
+                .HasConstraintName("session_views_created_by_fkey");
+        });
+
+        modelBuilder.Entity<SessionViewPinOverride>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("session_view_pin_overrides_pkey");
+
+            entity.ToTable("session_view_pin_overrides");
+
+            entity.HasIndex(e => e.UserId, "session_view_pin_overrides_user_id_idx");
+
+            entity.HasIndex(e => new { e.ProjectId, e.ViewId }, "session_view_pin_overrides_project_id_view_id_idx");
+
+            entity.HasIndex(e => new { e.ProjectId, e.UserId, e.ViewId }, "session_view_pin_overrides_project_id_user_id_view_id_key").IsUnique();
+
+            entity.Property(e => e.Id)
+                .HasValueGenerator<CuidGenerator>()
+                .HasColumnName("id");
+            entity.Property(e => e.ProjectId).HasColumnName("project_id");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.ViewId).HasColumnName("view_id");
+            entity.Property(e => e.IsPinned)
+                .ValueGeneratedNever()
+                .HasDefaultValue(true)
+                .HasColumnName("is_pinned");
+            entity.Property(e => e.Position).HasColumnName("position");
+
+            entity.HasOne(d => d.Project).WithMany(p => p.SessionViewPinOverrides)
+                .HasForeignKey(d => d.ProjectId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("session_view_pin_overrides_project_id_fkey");
+
+            entity.HasOne(d => d.User).WithMany(p => p.SessionViewPinOverrides)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("session_view_pin_overrides_user_id_fkey");
+
+            entity.HasOne(d => d.View).WithMany(p => p.Pins)
+                .HasPrincipalKey(p => new { p.ProjectId, p.Id })
+                .HasForeignKey(d => new { d.ProjectId, d.ViewId })
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("session_view_pin_overrides_project_id_view_id_fkey");
         });
 
         modelBuilder.Entity<DefaultView>(entity =>
@@ -4836,6 +4942,15 @@ public partial class LangfuseContext : DbContext
         }
 
         foreach (var entry in ChangeTracker.Entries<TableViewPreset>())
+        {
+            if ((entry.State == EntityState.Added && entry.Entity.UpdatedAt == default)
+                || (entry.State == EntityState.Modified && !entry.Property(e => e.UpdatedAt).IsModified))
+            {
+                entry.Entity.UpdatedAt = now;
+            }
+        }
+
+        foreach (var entry in ChangeTracker.Entries<SessionView>())
         {
             if ((entry.State == EntityState.Added && entry.Entity.UpdatedAt == default)
                 || (entry.State == EntityState.Modified && !entry.Property(e => e.UpdatedAt).IsModified))

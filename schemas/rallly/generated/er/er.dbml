@@ -156,8 +156,8 @@ Table subscriptions {
   api_addon_item_id String
   api_addon_price_id String
   api_addon_amount Int
-  api_poll_limit Int
-  api_poll_retained_limit Int
+  api_addon_tier String
+  api_poll_retained_tier String
   api_poll_retained_until DateTime
 }
 

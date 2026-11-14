@@ -29,4 +29,7 @@ public enum GatewayProvider
 
     [PgName("google_ai_studio")]
     GoogleAiStudio,
+
+    [PgName("vertex")]
+    Vertex,
 }

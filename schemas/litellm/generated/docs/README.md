@@ -16,6 +16,7 @@ CREATE TYPE "AccountingDeliveryState" AS ENUM ('pending', 'applied', 'parked');
 
 CREATE TABLE "LiteLLM_BudgetTable" (
     "budget_id" TEXT NOT NULL,
+    "name" TEXT,
     "max_budget" DOUBLE PRECISION,
     "soft_budget" DOUBLE PRECISION,
     "max_parallel_requests" INTEGER,
@@ -26,6 +27,8 @@ CREATE TABLE "LiteLLM_BudgetTable" (
     "model_tpm_limit" JSONB,
     "model_rpm_limit" JSONB,
     "budget_duration" TEXT,
+    "budget_limits" JSONB,
+    "cap_policy" TEXT,
     "budget_reset_at" TIMESTAMP(3),
     "allowed_models" TEXT[] DEFAULT ARRAY[]::TEXT[],
     "temp_budget_increase" DOUBLE PRECISION,
@@ -40,13 +43,11 @@ CREATE TABLE "LiteLLM_BudgetTable" (
 
 CREATE TABLE "LiteLLM_CustomerOrganizationTable" (
     "spend" DOUBLE PRECISION NOT NULL DEFAULT 0.0,
-    "budget_reset_at" TIMESTAMP(3),
-    "budget_ids" TEXT[] DEFAULT ARRAY[]::TEXT[],
-    "budget_names" JSONB NOT NULL DEFAULT '{}',
+    "budget_template_ids" TEXT[] DEFAULT ARRAY[]::TEXT[],
     "budget_id" TEXT,
     "customer_org_id" TEXT NOT NULL,
     "alias" TEXT,
-    "default_budget_id" TEXT,
+    "default_budget_template_id" TEXT,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "created_by" TEXT NOT NULL,
     "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -57,11 +58,12 @@ CREATE TABLE "LiteLLM_CustomerOrganizationTable" (
 
 CREATE TABLE "LiteLLM_CustomerTeamTable" (
     "spend" DOUBLE PRECISION NOT NULL DEFAULT 0.0,
-    "budget_reset_at" TIMESTAMP(3),
     "customer_team_id" TEXT NOT NULL,
     "alias" TEXT,
     "parent_org_id" TEXT NOT NULL,
     "budget_id" TEXT,
+    "budget_override_id" TEXT,
+    "budget_override_expires_at" TIMESTAMP(3),
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "created_by" TEXT NOT NULL,
     "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -72,12 +74,12 @@ CREATE TABLE "LiteLLM_CustomerTeamTable" (
 
 CREATE TABLE "LiteLLM_CustomerMemberTable" (
     "spend" DOUBLE PRECISION NOT NULL DEFAULT 0.0,
-    "budget_reset_at" TIMESTAMP(3),
     "customer_member_id" TEXT NOT NULL,
     "alias" TEXT,
-    "parent_team_id" TEXT NOT NULL,
+    "parent_org_id" TEXT NOT NULL,
+    "parent_team_ids" TEXT[] DEFAULT ARRAY[]::TEXT[],
     "budget_id" TEXT,
-    "budget_template_id" TEXT,
+    "budget_override_id" TEXT,
     "budget_override_expires_at" TIMESTAMP(3),
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "created_by" TEXT NOT NULL,
@@ -85,6 +87,22 @@ CREATE TABLE "LiteLLM_CustomerMemberTable" (
     "updated_by" TEXT NOT NULL,
 
     CONSTRAINT "LiteLLM_CustomerMemberTable_pkey" PRIMARY KEY ("customer_member_id")
+);
+
+CREATE TABLE "LiteLLM_CustomerBudgetIncreaseRequest" (
+    "request_id" TEXT NOT NULL,
+    "customer_member_id" TEXT NOT NULL,
+    "requested_max_budget" DOUBLE PRECISION NOT NULL,
+    "expires_at" TIMESTAMP(3),
+    "reason" TEXT,
+    "status" TEXT NOT NULL DEFAULT 'pending_review',
+    "submitted_by" TEXT NOT NULL,
+    "submitted_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "reviewed_by" TEXT,
+    "reviewed_at" TIMESTAMP(3),
+    "review_notes" TEXT,
+
+    CONSTRAINT "LiteLLM_CustomerBudgetIncreaseRequest_pkey" PRIMARY KEY ("request_id")
 );
 
 CREATE TABLE "LiteLLM_CredentialsTable" (
@@ -896,6 +914,40 @@ CREATE TABLE "LiteLLM_DailyOrganizationSpend" (
     "updated_at" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "LiteLLM_DailyOrganizationSpend_pkey" PRIMARY KEY ("id")
+);
+
+CREATE TABLE "LiteLLM_DailyCustomerMemberSpend" (
+    "id" TEXT NOT NULL,
+    "date" TEXT NOT NULL,
+    "customer_org_id" TEXT NOT NULL,
+    "customer_team_id" TEXT NOT NULL DEFAULT '',
+    "customer_member_id" TEXT NOT NULL DEFAULT '',
+    "model" TEXT NOT NULL DEFAULT '',
+    "model_group" TEXT NOT NULL DEFAULT '',
+    "custom_llm_provider" TEXT NOT NULL DEFAULT '',
+    "mcp_namespaced_tool_name" TEXT NOT NULL DEFAULT '',
+    "endpoint" TEXT NOT NULL DEFAULT '',
+    "api_key" TEXT NOT NULL DEFAULT '',
+    "spend" DOUBLE PRECISION NOT NULL DEFAULT 0.0,
+    "prompt_tokens" BIGINT NOT NULL DEFAULT 0,
+    "completion_tokens" BIGINT NOT NULL DEFAULT 0,
+    "cache_read_input_tokens" BIGINT NOT NULL DEFAULT 0,
+    "cache_creation_input_tokens" BIGINT NOT NULL DEFAULT 0,
+    "compression_saved_tokens" BIGINT NOT NULL DEFAULT 0,
+    "compression_savings_spend" DOUBLE PRECISION NOT NULL DEFAULT 0.0,
+    "prompt_caching_savings_spend" DOUBLE PRECISION NOT NULL DEFAULT 0.0,
+    "gateway_injected_caching_savings_spend" DOUBLE PRECISION NOT NULL DEFAULT 0.0,
+    "autorouter_savings_spend" DOUBLE PRECISION NOT NULL DEFAULT 0.0,
+    "guardrail_spend" DOUBLE PRECISION NOT NULL DEFAULT 0.0,
+    "api_requests" BIGINT NOT NULL DEFAULT 0,
+    "successful_requests" BIGINT NOT NULL DEFAULT 0,
+    "failed_requests" BIGINT NOT NULL DEFAULT 0,
+    "total_response_time_ms" BIGINT NOT NULL DEFAULT 0,
+    "timed_requests" BIGINT NOT NULL DEFAULT 0,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "LiteLLM_DailyCustomerMemberSpend_pkey" PRIMARY KEY ("id")
 );
 
 CREATE TABLE "LiteLLM_DailyEndUserSpend" (
@@ -1993,11 +2045,19 @@ CREATE TABLE "LiteLLM_PerformanceAlertState" (
     CONSTRAINT "LiteLLM_PerformanceAlertState_pkey" PRIMARY KEY ("id")
 );
 
+CREATE INDEX "LiteLLM_CustomerOrganizationTable_spend_idx" ON "LiteLLM_CustomerOrganizationTable"("spend");
+
 CREATE INDEX "LiteLLM_CustomerTeamTable_parent_org_id_idx" ON "LiteLLM_CustomerTeamTable"("parent_org_id");
 
-CREATE INDEX "LiteLLM_CustomerMemberTable_parent_team_id_idx" ON "LiteLLM_CustomerMemberTable"("parent_team_id");
+CREATE INDEX "LiteLLM_CustomerTeamTable_spend_idx" ON "LiteLLM_CustomerTeamTable"("spend");
 
-CREATE INDEX "LiteLLM_CustomerMemberTable_budget_template_id_idx" ON "LiteLLM_CustomerMemberTable"("budget_template_id");
+CREATE INDEX "LiteLLM_CustomerMemberTable_parent_org_id_idx" ON "LiteLLM_CustomerMemberTable"("parent_org_id");
+
+CREATE INDEX "LiteLLM_CustomerMemberTable_spend_idx" ON "LiteLLM_CustomerMemberTable"("spend");
+
+CREATE INDEX "LiteLLM_CustomerBudgetIncreaseRequest_status_idx" ON "LiteLLM_CustomerBudgetIncreaseRequest"("status");
+
+CREATE INDEX "LiteLLM_CustomerBudgetIncreaseRequest_customer_member_id_idx" ON "LiteLLM_CustomerBudgetIncreaseRequest"("customer_member_id");
 
 CREATE UNIQUE INDEX "LiteLLM_CredentialsTable_credential_name_key" ON "LiteLLM_CredentialsTable"("credential_name");
 
@@ -2126,6 +2186,18 @@ CREATE INDEX "LiteLLM_DailyOrganizationSpend_mcp_namespaced_tool_name_idx" ON "L
 CREATE INDEX "LiteLLM_DailyOrganizationSpend_endpoint_idx" ON "LiteLLM_DailyOrganizationSpend"("endpoint");
 
 CREATE UNIQUE INDEX "LiteLLM_DailyOrganizationSpend_organization_id_date_api_key_key" ON "LiteLLM_DailyOrganizationSpend"("organization_id", "date", "api_key", "model", "custom_llm_provider", "mcp_namespaced_tool_name", "endpoint");
+
+CREATE INDEX "LiteLLM_DailyCustomerMemberSpend_date_idx" ON "LiteLLM_DailyCustomerMemberSpend"("date");
+
+CREATE INDEX "LiteLLM_DailyCustomerMemberSpend_customer_org_id_date_idx" ON "LiteLLM_DailyCustomerMemberSpend"("customer_org_id", "date");
+
+CREATE INDEX "LiteLLM_DailyCustomerMemberSpend_customer_team_id_date_idx" ON "LiteLLM_DailyCustomerMemberSpend"("customer_team_id", "date");
+
+CREATE INDEX "LiteLLM_DailyCustomerMemberSpend_customer_member_id_date_idx" ON "LiteLLM_DailyCustomerMemberSpend"("customer_member_id", "date");
+
+CREATE INDEX "LiteLLM_DailyCustomerMemberSpend_api_key_idx" ON "LiteLLM_DailyCustomerMemberSpend"("api_key");
+
+CREATE INDEX "LiteLLM_DailyCustomerMemberSpend_model_idx" ON "LiteLLM_DailyCustomerMemberSpend"("model");
 
 CREATE INDEX "LiteLLM_DailyEndUserSpend_date_idx" ON "LiteLLM_DailyEndUserSpend"("date");
 
@@ -2373,17 +2445,21 @@ CREATE INDEX "LiteLLM_Alert_status_id_idx" ON "LiteLLM_Alert"("status", "id");
 
 ALTER TABLE "LiteLLM_CustomerOrganizationTable" ADD CONSTRAINT "LiteLLM_CustomerOrganizationTable_budget_id_fkey" FOREIGN KEY ("budget_id") REFERENCES "LiteLLM_BudgetTable"("budget_id") ON DELETE SET NULL ON UPDATE CASCADE;
 
-ALTER TABLE "LiteLLM_CustomerOrganizationTable" ADD CONSTRAINT "LiteLLM_CustomerOrganizationTable_default_budget_id_fkey" FOREIGN KEY ("default_budget_id") REFERENCES "LiteLLM_BudgetTable"("budget_id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "LiteLLM_CustomerOrganizationTable" ADD CONSTRAINT "LiteLLM_CustomerOrganizationTable_default_budget_template__fkey" FOREIGN KEY ("default_budget_template_id") REFERENCES "LiteLLM_BudgetTable"("budget_id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 ALTER TABLE "LiteLLM_CustomerTeamTable" ADD CONSTRAINT "LiteLLM_CustomerTeamTable_parent_org_id_fkey" FOREIGN KEY ("parent_org_id") REFERENCES "LiteLLM_CustomerOrganizationTable"("customer_org_id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 ALTER TABLE "LiteLLM_CustomerTeamTable" ADD CONSTRAINT "LiteLLM_CustomerTeamTable_budget_id_fkey" FOREIGN KEY ("budget_id") REFERENCES "LiteLLM_BudgetTable"("budget_id") ON DELETE SET NULL ON UPDATE CASCADE;
 
-ALTER TABLE "LiteLLM_CustomerMemberTable" ADD CONSTRAINT "LiteLLM_CustomerMemberTable_parent_team_id_fkey" FOREIGN KEY ("parent_team_id") REFERENCES "LiteLLM_CustomerTeamTable"("customer_team_id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "LiteLLM_CustomerTeamTable" ADD CONSTRAINT "LiteLLM_CustomerTeamTable_budget_override_id_fkey" FOREIGN KEY ("budget_override_id") REFERENCES "LiteLLM_BudgetTable"("budget_id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+ALTER TABLE "LiteLLM_CustomerMemberTable" ADD CONSTRAINT "LiteLLM_CustomerMemberTable_parent_org_id_fkey" FOREIGN KEY ("parent_org_id") REFERENCES "LiteLLM_CustomerOrganizationTable"("customer_org_id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 ALTER TABLE "LiteLLM_CustomerMemberTable" ADD CONSTRAINT "LiteLLM_CustomerMemberTable_budget_id_fkey" FOREIGN KEY ("budget_id") REFERENCES "LiteLLM_BudgetTable"("budget_id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
-ALTER TABLE "LiteLLM_CustomerMemberTable" ADD CONSTRAINT "LiteLLM_CustomerMemberTable_budget_template_id_fkey" FOREIGN KEY ("budget_template_id") REFERENCES "LiteLLM_BudgetTable"("budget_id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "LiteLLM_CustomerMemberTable" ADD CONSTRAINT "LiteLLM_CustomerMemberTable_budget_override_id_fkey" FOREIGN KEY ("budget_override_id") REFERENCES "LiteLLM_BudgetTable"("budget_id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+ALTER TABLE "LiteLLM_CustomerBudgetIncreaseRequest" ADD CONSTRAINT "LiteLLM_CustomerBudgetIncreaseRequest_customer_member_id_fkey" FOREIGN KEY ("customer_member_id") REFERENCES "LiteLLM_CustomerMemberTable"("customer_member_id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE "LiteLLM_AgentsTable" ADD CONSTRAINT "LiteLLM_AgentsTable_object_permission_id_fkey" FOREIGN KEY ("object_permission_id") REFERENCES "LiteLLM_ObjectPermissionTable"("object_permission_id") ON DELETE SET NULL ON UPDATE CASCADE;
 
@@ -2468,6 +2544,7 @@ ALTER TABLE "LiteLLM_LensReview" ADD CONSTRAINT "LiteLLM_LensReview_lens_id_fkey
 | [LiteLLM_CustomerOrganizationTable](#model-LiteLLM_CustomerOrganizationTable)             | `LiteLLM_CustomerOrganizationTable`       |             |
 | [LiteLLM_CustomerTeamTable](#model-LiteLLM_CustomerTeamTable)                             | `LiteLLM_CustomerTeamTable`               |             |
 | [LiteLLM_CustomerMemberTable](#model-LiteLLM_CustomerMemberTable)                         | `LiteLLM_CustomerMemberTable`             |             |
+| [LiteLLM_CustomerBudgetIncreaseRequest](#model-LiteLLM_CustomerBudgetIncreaseRequest)     | `LiteLLM_CustomerBudgetIncreaseRequest`   |             |
 | [LiteLLM_CredentialsTable](#model-LiteLLM_CredentialsTable)                               | `LiteLLM_CredentialsTable`                |             |
 | [LiteLLM_ProxyModelTable](#model-LiteLLM_ProxyModelTable)                                 | `LiteLLM_ProxyModelTable`                 |             |
 | [LiteLLM_AgentsTable](#model-LiteLLM_AgentsTable)                                         | `LiteLLM_AgentsTable`                     |             |
@@ -2508,6 +2585,7 @@ ALTER TABLE "LiteLLM_LensReview" ADD CONSTRAINT "LiteLLM_LensReview_lens_id_fkey
 | [LiteLLM_DailyUserSpend](#model-LiteLLM_DailyUserSpend)                                   | `LiteLLM_DailyUserSpend`                  |             |
 | [LiteLLM_DailyGlobalSpend](#model-LiteLLM_DailyGlobalSpend)                               | `LiteLLM_DailyGlobalSpend`                |             |
 | [LiteLLM_DailyOrganizationSpend](#model-LiteLLM_DailyOrganizationSpend)                   | `LiteLLM_DailyOrganizationSpend`          |             |
+| [LiteLLM_DailyCustomerMemberSpend](#model-LiteLLM_DailyCustomerMemberSpend)               | `LiteLLM_DailyCustomerMemberSpend`        |             |
 | [LiteLLM_DailyEndUserSpend](#model-LiteLLM_DailyEndUserSpend)                             | `LiteLLM_DailyEndUserSpend`               |             |
 | [LiteLLM_DailyAgentSpend](#model-LiteLLM_DailyAgentSpend)                                 | `LiteLLM_DailyAgentSpend`                 |             |
 | [LiteLLM_DailyTeamSpend](#model-LiteLLM_DailyTeamSpend)                                   | `LiteLLM_DailyTeamSpend`                  |             |
@@ -2596,6 +2674,7 @@ ALTER TABLE "LiteLLM_LensReview" ADD CONSTRAINT "LiteLLM_LensReview_lens_id_fkey
 | Field                       | Type       | Constraints | Default              | Description |
 | --------------------------- | ---------- | ----------- | -------------------- | ----------- |
 | `budget_id`                 | `String`   | PK NOT NULL | `uuid(4)`            |             |
+| `name`                      | `String`   | NULL        |                      |             |
 | `max_budget`                | `Float`    | NULL        |                      |             |
 | `soft_budget`               | `Float`    | NULL        |                      |             |
 | `max_parallel_requests`     | `Int`      | NULL        |                      |             |
@@ -2606,6 +2685,8 @@ ALTER TABLE "LiteLLM_LensReview" ADD CONSTRAINT "LiteLLM_LensReview_lens_id_fkey
 | `model_tpm_limit`           | `Json`     | NULL        |                      |             |
 | `model_rpm_limit`           | `Json`     | NULL        |                      |             |
 | `budget_duration`           | `String`   | NULL        |                      |             |
+| `budget_limits`             | `Json`     | NULL        |                      |             |
+| `cap_policy`                | `String`   | NULL        |                      |             |
 | `budget_reset_at`           | `DateTime` | NULL        |                      |             |
 | `allowed_models`            | `String[]` | NOT NULL    | `[]`                 |             |
 | `temp_budget_increase`      | `Float`    | NULL        |                      |             |
@@ -2618,10 +2699,11 @@ ALTER TABLE "LiteLLM_LensReview" ADD CONSTRAINT "LiteLLM_LensReview_lens_id_fkey
 #### Referenced by
 
 - `budget_id` ← [LiteLLM_CustomerOrganizationTable.budget_id](#model-LiteLLM_CustomerOrganizationTable) (one-to-many)
-- `budget_id` ← [LiteLLM_CustomerOrganizationTable.default_budget_id](#model-LiteLLM_CustomerOrganizationTable) (one-to-many)
+- `budget_id` ← [LiteLLM_CustomerOrganizationTable.default_budget_template_id](#model-LiteLLM_CustomerOrganizationTable) (one-to-many)
 - `budget_id` ← [LiteLLM_CustomerTeamTable.budget_id](#model-LiteLLM_CustomerTeamTable) (one-to-many)
+- `budget_id` ← [LiteLLM_CustomerTeamTable.budget_override_id](#model-LiteLLM_CustomerTeamTable) (one-to-many, on delete Restrict)
 - `budget_id` ← [LiteLLM_CustomerMemberTable.budget_id](#model-LiteLLM_CustomerMemberTable) (one-to-many, on delete Restrict)
-- `budget_id` ← [LiteLLM_CustomerMemberTable.budget_template_id](#model-LiteLLM_CustomerMemberTable) (one-to-many, on delete Restrict)
+- `budget_id` ← [LiteLLM_CustomerMemberTable.budget_override_id](#model-LiteLLM_CustomerMemberTable) (one-to-many, on delete Restrict)
 - `budget_id` ← [LiteLLM_OrganizationTable.budget_id](#model-LiteLLM_OrganizationTable) (one-to-many)
 - `budget_id` ← [LiteLLM_ProjectTable.budget_id](#model-LiteLLM_ProjectTable) (one-to-many)
 - `budget_id` ← [LiteLLM_VerificationToken.budget_id](#model-LiteLLM_VerificationToken) (one-to-many)
@@ -2636,6 +2718,7 @@ ALTER TABLE "LiteLLM_LensReview" ADD CONSTRAINT "LiteLLM_LensReview_lens_id_fkey
 ```sql
 CREATE TABLE "LiteLLM_BudgetTable" (
     "budget_id" TEXT NOT NULL,
+    "name" TEXT,
     "max_budget" DOUBLE PRECISION,
     "soft_budget" DOUBLE PRECISION,
     "max_parallel_requests" INTEGER,
@@ -2646,6 +2729,8 @@ CREATE TABLE "LiteLLM_BudgetTable" (
     "model_tpm_limit" JSONB,
     "model_rpm_limit" JSONB,
     "budget_duration" TEXT,
+    "budget_limits" JSONB,
+    "cap_policy" TEXT,
     "budget_reset_at" TIMESTAMP(3),
     "allowed_models" TEXT[] DEFAULT ARRAY[]::TEXT[],
     "temp_budget_increase" DOUBLE PRECISION,
@@ -2671,6 +2756,7 @@ await prisma.liteLLM_BudgetTable.findMany();
 ```sql
 SELECT
   "public"."LiteLLM_BudgetTable"."budget_id",
+  "public"."LiteLLM_BudgetTable"."name",
   "public"."LiteLLM_BudgetTable"."max_budget",
   "public"."LiteLLM_BudgetTable"."soft_budget",
   "public"."LiteLLM_BudgetTable"."max_parallel_requests",
@@ -2681,6 +2767,8 @@ SELECT
   "public"."LiteLLM_BudgetTable"."model_tpm_limit",
   "public"."LiteLLM_BudgetTable"."model_rpm_limit",
   "public"."LiteLLM_BudgetTable"."budget_duration",
+  "public"."LiteLLM_BudgetTable"."budget_limits",
+  "public"."LiteLLM_BudgetTable"."cap_policy",
   "public"."LiteLLM_BudgetTable"."budget_reset_at",
   "public"."LiteLLM_BudgetTable"."allowed_models",
   "public"."LiteLLM_BudgetTable"."temp_budget_increase",
@@ -2728,9 +2816,10 @@ await prisma.liteLLM_BudgetTable.findMany({
   include: {
     customer_organization_defaults: true,
     customer_organizations: true,
-    customer_member_templates: true,
     customer_teams: true,
     customer_members: true,
+    customer_member_overrides: true,
+    customer_team_overrides: true,
     organization: true,
     projects: true,
     keys: true,
@@ -2746,6 +2835,7 @@ await prisma.liteLLM_BudgetTable.findMany({
 ```sql
 SELECT
   "public"."LiteLLM_BudgetTable"."budget_id",
+  "public"."LiteLLM_BudgetTable"."name",
   "public"."LiteLLM_BudgetTable"."max_budget",
   "public"."LiteLLM_BudgetTable"."soft_budget",
   "public"."LiteLLM_BudgetTable"."max_parallel_requests",
@@ -2756,6 +2846,8 @@ SELECT
   "public"."LiteLLM_BudgetTable"."model_tpm_limit",
   "public"."LiteLLM_BudgetTable"."model_rpm_limit",
   "public"."LiteLLM_BudgetTable"."budget_duration",
+  "public"."LiteLLM_BudgetTable"."budget_limits",
+  "public"."LiteLLM_BudgetTable"."cap_policy",
   "public"."LiteLLM_BudgetTable"."budget_reset_at",
   "public"."LiteLLM_BudgetTable"."allowed_models",
   "public"."LiteLLM_BudgetTable"."temp_budget_increase",
@@ -2775,12 +2867,10 @@ OFFSET
 SELECT
   "public"."LiteLLM_CustomerOrganizationTable"."customer_org_id",
   "public"."LiteLLM_CustomerOrganizationTable"."spend",
-  "public"."LiteLLM_CustomerOrganizationTable"."budget_reset_at",
-  "public"."LiteLLM_CustomerOrganizationTable"."budget_ids",
-  "public"."LiteLLM_CustomerOrganizationTable"."budget_names",
+  "public"."LiteLLM_CustomerOrganizationTable"."budget_template_ids",
   "public"."LiteLLM_CustomerOrganizationTable"."budget_id",
   "public"."LiteLLM_CustomerOrganizationTable"."alias",
-  "public"."LiteLLM_CustomerOrganizationTable"."default_budget_id",
+  "public"."LiteLLM_CustomerOrganizationTable"."default_budget_template_id",
   "public"."LiteLLM_CustomerOrganizationTable"."created_at",
   "public"."LiteLLM_CustomerOrganizationTable"."created_by",
   "public"."LiteLLM_CustomerOrganizationTable"."updated_at",
@@ -2788,7 +2878,7 @@ SELECT
 FROM
   "public"."LiteLLM_CustomerOrganizationTable"
 WHERE
-  "public"."LiteLLM_CustomerOrganizationTable"."default_budget_id" IN ($1)
+  "public"."LiteLLM_CustomerOrganizationTable"."default_budget_template_id" IN ($1)
 OFFSET
   $2
 -- params: ["<budget_id of the rows above>","0"]
@@ -2796,12 +2886,10 @@ OFFSET
 SELECT
   "public"."LiteLLM_CustomerOrganizationTable"."customer_org_id",
   "public"."LiteLLM_CustomerOrganizationTable"."spend",
-  "public"."LiteLLM_CustomerOrganizationTable"."budget_reset_at",
-  "public"."LiteLLM_CustomerOrganizationTable"."budget_ids",
-  "public"."LiteLLM_CustomerOrganizationTable"."budget_names",
+  "public"."LiteLLM_CustomerOrganizationTable"."budget_template_ids",
   "public"."LiteLLM_CustomerOrganizationTable"."budget_id",
   "public"."LiteLLM_CustomerOrganizationTable"."alias",
-  "public"."LiteLLM_CustomerOrganizationTable"."default_budget_id",
+  "public"."LiteLLM_CustomerOrganizationTable"."default_budget_template_id",
   "public"."LiteLLM_CustomerOrganizationTable"."created_at",
   "public"."LiteLLM_CustomerOrganizationTable"."created_by",
   "public"."LiteLLM_CustomerOrganizationTable"."updated_at",
@@ -2815,33 +2903,13 @@ OFFSET
 -- params: ["<budget_id of the rows above>","0"]
 
 SELECT
-  "public"."LiteLLM_CustomerMemberTable"."customer_member_id",
-  "public"."LiteLLM_CustomerMemberTable"."spend",
-  "public"."LiteLLM_CustomerMemberTable"."budget_reset_at",
-  "public"."LiteLLM_CustomerMemberTable"."alias",
-  "public"."LiteLLM_CustomerMemberTable"."parent_team_id",
-  "public"."LiteLLM_CustomerMemberTable"."budget_id",
-  "public"."LiteLLM_CustomerMemberTable"."budget_template_id",
-  "public"."LiteLLM_CustomerMemberTable"."budget_override_expires_at",
-  "public"."LiteLLM_CustomerMemberTable"."created_at",
-  "public"."LiteLLM_CustomerMemberTable"."created_by",
-  "public"."LiteLLM_CustomerMemberTable"."updated_at",
-  "public"."LiteLLM_CustomerMemberTable"."updated_by"
-FROM
-  "public"."LiteLLM_CustomerMemberTable"
-WHERE
-  "public"."LiteLLM_CustomerMemberTable"."budget_template_id" IN ($1)
-OFFSET
-  $2
--- params: ["<budget_id of the rows above>","0"]
-
-SELECT
   "public"."LiteLLM_CustomerTeamTable"."customer_team_id",
   "public"."LiteLLM_CustomerTeamTable"."spend",
-  "public"."LiteLLM_CustomerTeamTable"."budget_reset_at",
   "public"."LiteLLM_CustomerTeamTable"."alias",
   "public"."LiteLLM_CustomerTeamTable"."parent_org_id",
   "public"."LiteLLM_CustomerTeamTable"."budget_id",
+  "public"."LiteLLM_CustomerTeamTable"."budget_override_id",
+  "public"."LiteLLM_CustomerTeamTable"."budget_override_expires_at",
   "public"."LiteLLM_CustomerTeamTable"."created_at",
   "public"."LiteLLM_CustomerTeamTable"."created_by",
   "public"."LiteLLM_CustomerTeamTable"."updated_at",
@@ -2857,11 +2925,11 @@ OFFSET
 SELECT
   "public"."LiteLLM_CustomerMemberTable"."customer_member_id",
   "public"."LiteLLM_CustomerMemberTable"."spend",
-  "public"."LiteLLM_CustomerMemberTable"."budget_reset_at",
   "public"."LiteLLM_CustomerMemberTable"."alias",
-  "public"."LiteLLM_CustomerMemberTable"."parent_team_id",
+  "public"."LiteLLM_CustomerMemberTable"."parent_org_id",
+  "public"."LiteLLM_CustomerMemberTable"."parent_team_ids",
   "public"."LiteLLM_CustomerMemberTable"."budget_id",
-  "public"."LiteLLM_CustomerMemberTable"."budget_template_id",
+  "public"."LiteLLM_CustomerMemberTable"."budget_override_id",
   "public"."LiteLLM_CustomerMemberTable"."budget_override_expires_at",
   "public"."LiteLLM_CustomerMemberTable"."created_at",
   "public"."LiteLLM_CustomerMemberTable"."created_by",
@@ -2871,6 +2939,47 @@ FROM
   "public"."LiteLLM_CustomerMemberTable"
 WHERE
   "public"."LiteLLM_CustomerMemberTable"."budget_id" IN ($1)
+OFFSET
+  $2
+-- params: ["<budget_id of the rows above>","0"]
+
+SELECT
+  "public"."LiteLLM_CustomerMemberTable"."customer_member_id",
+  "public"."LiteLLM_CustomerMemberTable"."spend",
+  "public"."LiteLLM_CustomerMemberTable"."alias",
+  "public"."LiteLLM_CustomerMemberTable"."parent_org_id",
+  "public"."LiteLLM_CustomerMemberTable"."parent_team_ids",
+  "public"."LiteLLM_CustomerMemberTable"."budget_id",
+  "public"."LiteLLM_CustomerMemberTable"."budget_override_id",
+  "public"."LiteLLM_CustomerMemberTable"."budget_override_expires_at",
+  "public"."LiteLLM_CustomerMemberTable"."created_at",
+  "public"."LiteLLM_CustomerMemberTable"."created_by",
+  "public"."LiteLLM_CustomerMemberTable"."updated_at",
+  "public"."LiteLLM_CustomerMemberTable"."updated_by"
+FROM
+  "public"."LiteLLM_CustomerMemberTable"
+WHERE
+  "public"."LiteLLM_CustomerMemberTable"."budget_override_id" IN ($1)
+OFFSET
+  $2
+-- params: ["<budget_id of the rows above>","0"]
+
+SELECT
+  "public"."LiteLLM_CustomerTeamTable"."customer_team_id",
+  "public"."LiteLLM_CustomerTeamTable"."spend",
+  "public"."LiteLLM_CustomerTeamTable"."alias",
+  "public"."LiteLLM_CustomerTeamTable"."parent_org_id",
+  "public"."LiteLLM_CustomerTeamTable"."budget_id",
+  "public"."LiteLLM_CustomerTeamTable"."budget_override_id",
+  "public"."LiteLLM_CustomerTeamTable"."budget_override_expires_at",
+  "public"."LiteLLM_CustomerTeamTable"."created_at",
+  "public"."LiteLLM_CustomerTeamTable"."created_by",
+  "public"."LiteLLM_CustomerTeamTable"."updated_at",
+  "public"."LiteLLM_CustomerTeamTable"."updated_by"
+FROM
+  "public"."LiteLLM_CustomerTeamTable"
+WHERE
+  "public"."LiteLLM_CustomerTeamTable"."budget_override_id" IN ($1)
 OFFSET
   $2
 -- params: ["<budget_id of the rows above>","0"]
@@ -3071,6 +3180,7 @@ await prisma.liteLLM_BudgetTable.findUnique({ where: { budget_id: "example" } })
 ```sql
 SELECT
   "public"."LiteLLM_BudgetTable"."budget_id",
+  "public"."LiteLLM_BudgetTable"."name",
   "public"."LiteLLM_BudgetTable"."max_budget",
   "public"."LiteLLM_BudgetTable"."soft_budget",
   "public"."LiteLLM_BudgetTable"."max_parallel_requests",
@@ -3081,6 +3191,8 @@ SELECT
   "public"."LiteLLM_BudgetTable"."model_tpm_limit",
   "public"."LiteLLM_BudgetTable"."model_rpm_limit",
   "public"."LiteLLM_BudgetTable"."budget_duration",
+  "public"."LiteLLM_BudgetTable"."budget_limits",
+  "public"."LiteLLM_BudgetTable"."cap_policy",
   "public"."LiteLLM_BudgetTable"."budget_reset_at",
   "public"."LiteLLM_BudgetTable"."allowed_models",
   "public"."LiteLLM_BudgetTable"."temp_budget_increase",
@@ -3123,6 +3235,7 @@ VALUES
   ($1, $2, $3, $4, $5, $6)
 RETURNING
   "public"."LiteLLM_BudgetTable"."budget_id",
+  "public"."LiteLLM_BudgetTable"."name",
   "public"."LiteLLM_BudgetTable"."max_budget",
   "public"."LiteLLM_BudgetTable"."soft_budget",
   "public"."LiteLLM_BudgetTable"."max_parallel_requests",
@@ -3133,6 +3246,8 @@ RETURNING
   "public"."LiteLLM_BudgetTable"."model_tpm_limit",
   "public"."LiteLLM_BudgetTable"."model_rpm_limit",
   "public"."LiteLLM_BudgetTable"."budget_duration",
+  "public"."LiteLLM_BudgetTable"."budget_limits",
+  "public"."LiteLLM_BudgetTable"."cap_policy",
   "public"."LiteLLM_BudgetTable"."budget_reset_at",
   "public"."LiteLLM_BudgetTable"."allowed_models",
   "public"."LiteLLM_BudgetTable"."temp_budget_increase",
@@ -3149,14 +3264,14 @@ RETURNING
 ```ts
 await prisma.liteLLM_BudgetTable.update({
   where: { budget_id: "example" },
-  data: { max_budget: 1.5 },
+  data: { name: "example" },
 });
 ```
 
 ```sql
 UPDATE "public"."LiteLLM_BudgetTable"
 SET
-  "max_budget" = $1,
+  "name" = $1,
   "updated_at" = $2
 WHERE
   (
@@ -3165,6 +3280,7 @@ WHERE
   )
 RETURNING
   "public"."LiteLLM_BudgetTable"."budget_id",
+  "public"."LiteLLM_BudgetTable"."name",
   "public"."LiteLLM_BudgetTable"."max_budget",
   "public"."LiteLLM_BudgetTable"."soft_budget",
   "public"."LiteLLM_BudgetTable"."max_parallel_requests",
@@ -3175,6 +3291,8 @@ RETURNING
   "public"."LiteLLM_BudgetTable"."model_tpm_limit",
   "public"."LiteLLM_BudgetTable"."model_rpm_limit",
   "public"."LiteLLM_BudgetTable"."budget_duration",
+  "public"."LiteLLM_BudgetTable"."budget_limits",
+  "public"."LiteLLM_BudgetTable"."cap_policy",
   "public"."LiteLLM_BudgetTable"."budget_reset_at",
   "public"."LiteLLM_BudgetTable"."allowed_models",
   "public"."LiteLLM_BudgetTable"."temp_budget_increase",
@@ -3183,7 +3301,7 @@ RETURNING
   "public"."LiteLLM_BudgetTable"."created_by",
   "public"."LiteLLM_BudgetTable"."updated_at",
   "public"."LiteLLM_BudgetTable"."updated_by"
--- params: ["1.5",{"prisma__type":"generatorCall","prisma__value":{"name":"now","args":[],"returnType":{"type":"DateTime"}}},"example"]
+-- params: ["example",{"prisma__type":"generatorCall","prisma__value":{"name":"now","args":[],"returnType":{"type":"DateTime"}}},"example"]
 ```
 
 **delete**: Delete a row
@@ -3201,6 +3319,7 @@ WHERE
   )
 RETURNING
   "public"."LiteLLM_BudgetTable"."budget_id",
+  "public"."LiteLLM_BudgetTable"."name",
   "public"."LiteLLM_BudgetTable"."max_budget",
   "public"."LiteLLM_BudgetTable"."soft_budget",
   "public"."LiteLLM_BudgetTable"."max_parallel_requests",
@@ -3211,6 +3330,8 @@ RETURNING
   "public"."LiteLLM_BudgetTable"."model_tpm_limit",
   "public"."LiteLLM_BudgetTable"."model_rpm_limit",
   "public"."LiteLLM_BudgetTable"."budget_duration",
+  "public"."LiteLLM_BudgetTable"."budget_limits",
+  "public"."LiteLLM_BudgetTable"."cap_policy",
   "public"."LiteLLM_BudgetTable"."budget_reset_at",
   "public"."LiteLLM_BudgetTable"."allowed_models",
   "public"."LiteLLM_BudgetTable"."temp_budget_increase",
@@ -3230,42 +3351,43 @@ RETURNING
 
 ![LiteLLM_CustomerOrganizationTable and the models it relates to](tables/LiteLLM_CustomerOrganizationTable.svg)
 
-| Field               | Type       | Constraints                                                        | Default              | Description |
-| ------------------- | ---------- | ------------------------------------------------------------------ | -------------------- | ----------- |
-| `spend`             | `Float`    | NOT NULL                                                           | `0`                  |             |
-| `budget_reset_at`   | `DateTime` | NULL                                                               |                      |             |
-| `budget_ids`        | `String[]` | NOT NULL                                                           | `[]`                 |             |
-| `budget_names`      | `Json`     | NOT NULL                                                           | `"{}"`               |             |
-| `budget_id`         | `String`   | NULL → [LiteLLM_BudgetTable.budget_id](#model-LiteLLM_BudgetTable) |                      |             |
-| `customer_org_id`   | `String`   | PK NOT NULL                                                        | `uuid(4)`            |             |
-| `alias`             | `String`   | NULL                                                               |                      |             |
-| `default_budget_id` | `String`   | NULL → [LiteLLM_BudgetTable.budget_id](#model-LiteLLM_BudgetTable) |                      |             |
-| `created_at`        | `DateTime` | NOT NULL                                                           | `now()`              |             |
-| `created_by`        | `String`   | NOT NULL                                                           |                      |             |
-| `updated_at`        | `DateTime` | NOT NULL                                                           | `now()` `@updatedAt` |             |
-| `updated_by`        | `String`   | NOT NULL                                                           |                      |             |
+| Field                        | Type       | Constraints                                                        | Default              | Description |
+| ---------------------------- | ---------- | ------------------------------------------------------------------ | -------------------- | ----------- |
+| `spend`                      | `Float`    | NOT NULL                                                           | `0`                  |             |
+| `budget_template_ids`        | `String[]` | NOT NULL                                                           | `[]`                 |             |
+| `budget_id`                  | `String`   | NULL → [LiteLLM_BudgetTable.budget_id](#model-LiteLLM_BudgetTable) |                      |             |
+| `customer_org_id`            | `String`   | PK NOT NULL                                                        | `uuid(4)`            |             |
+| `alias`                      | `String`   | NULL                                                               |                      |             |
+| `default_budget_template_id` | `String`   | NULL → [LiteLLM_BudgetTable.budget_id](#model-LiteLLM_BudgetTable) |                      |             |
+| `created_at`                 | `DateTime` | NOT NULL                                                           | `now()`              |             |
+| `created_by`                 | `String`   | NOT NULL                                                           |                      |             |
+| `updated_at`                 | `DateTime` | NOT NULL                                                           | `now()` `@updatedAt` |             |
+| `updated_by`                 | `String`   | NOT NULL                                                           |                      |             |
+
+#### Indexes
+
+- `@@index([spend])`
 
 #### References
 
 - `budget_id` → [LiteLLM_BudgetTable.budget_id](#model-LiteLLM_BudgetTable) (many-to-one)
-- `default_budget_id` → [LiteLLM_BudgetTable.budget_id](#model-LiteLLM_BudgetTable) (many-to-one)
+- `default_budget_template_id` → [LiteLLM_BudgetTable.budget_id](#model-LiteLLM_BudgetTable) (many-to-one)
 
 #### Referenced by
 
 - `customer_org_id` ← [LiteLLM_CustomerTeamTable.parent_org_id](#model-LiteLLM_CustomerTeamTable) (one-to-many)
+- `customer_org_id` ← [LiteLLM_CustomerMemberTable.parent_org_id](#model-LiteLLM_CustomerMemberTable) (one-to-many)
 
 #### Definition
 
 ```sql
 CREATE TABLE "LiteLLM_CustomerOrganizationTable" (
     "spend" DOUBLE PRECISION NOT NULL DEFAULT 0.0,
-    "budget_reset_at" TIMESTAMP(3),
-    "budget_ids" TEXT[] DEFAULT ARRAY[]::TEXT[],
-    "budget_names" JSONB NOT NULL DEFAULT '{}',
+    "budget_template_ids" TEXT[] DEFAULT ARRAY[]::TEXT[],
     "budget_id" TEXT,
     "customer_org_id" TEXT NOT NULL,
     "alias" TEXT,
-    "default_budget_id" TEXT,
+    "default_budget_template_id" TEXT,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "created_by" TEXT NOT NULL,
     "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -3274,9 +3396,11 @@ CREATE TABLE "LiteLLM_CustomerOrganizationTable" (
     CONSTRAINT "LiteLLM_CustomerOrganizationTable_pkey" PRIMARY KEY ("customer_org_id")
 );
 
+CREATE INDEX "LiteLLM_CustomerOrganizationTable_spend_idx" ON "LiteLLM_CustomerOrganizationTable"("spend");
+
 ALTER TABLE "LiteLLM_CustomerOrganizationTable" ADD CONSTRAINT "LiteLLM_CustomerOrganizationTable_budget_id_fkey" FOREIGN KEY ("budget_id") REFERENCES "LiteLLM_BudgetTable"("budget_id") ON DELETE SET NULL ON UPDATE CASCADE;
 
-ALTER TABLE "LiteLLM_CustomerOrganizationTable" ADD CONSTRAINT "LiteLLM_CustomerOrganizationTable_default_budget_id_fkey" FOREIGN KEY ("default_budget_id") REFERENCES "LiteLLM_BudgetTable"("budget_id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "LiteLLM_CustomerOrganizationTable" ADD CONSTRAINT "LiteLLM_CustomerOrganizationTable_default_budget_template__fkey" FOREIGN KEY ("default_budget_template_id") REFERENCES "LiteLLM_BudgetTable"("budget_id") ON DELETE SET NULL ON UPDATE CASCADE;
 ```
 
 <details>
@@ -3292,12 +3416,10 @@ await prisma.liteLLM_CustomerOrganizationTable.findMany();
 SELECT
   "public"."LiteLLM_CustomerOrganizationTable"."customer_org_id",
   "public"."LiteLLM_CustomerOrganizationTable"."spend",
-  "public"."LiteLLM_CustomerOrganizationTable"."budget_reset_at",
-  "public"."LiteLLM_CustomerOrganizationTable"."budget_ids",
-  "public"."LiteLLM_CustomerOrganizationTable"."budget_names",
+  "public"."LiteLLM_CustomerOrganizationTable"."budget_template_ids",
   "public"."LiteLLM_CustomerOrganizationTable"."budget_id",
   "public"."LiteLLM_CustomerOrganizationTable"."alias",
-  "public"."LiteLLM_CustomerOrganizationTable"."default_budget_id",
+  "public"."LiteLLM_CustomerOrganizationTable"."default_budget_template_id",
   "public"."LiteLLM_CustomerOrganizationTable"."created_at",
   "public"."LiteLLM_CustomerOrganizationTable"."created_by",
   "public"."LiteLLM_CustomerOrganizationTable"."updated_at",
@@ -3338,7 +3460,7 @@ FROM
 
 ```ts
 await prisma.liteLLM_CustomerOrganizationTable.findMany({
-  include: { budget: true, default_budget: true, teams: true },
+  include: { budget: true, default_budget_template: true, teams: true, members: true },
 });
 ```
 
@@ -3346,12 +3468,10 @@ await prisma.liteLLM_CustomerOrganizationTable.findMany({
 SELECT
   "public"."LiteLLM_CustomerOrganizationTable"."customer_org_id",
   "public"."LiteLLM_CustomerOrganizationTable"."spend",
-  "public"."LiteLLM_CustomerOrganizationTable"."budget_reset_at",
-  "public"."LiteLLM_CustomerOrganizationTable"."budget_ids",
-  "public"."LiteLLM_CustomerOrganizationTable"."budget_names",
+  "public"."LiteLLM_CustomerOrganizationTable"."budget_template_ids",
   "public"."LiteLLM_CustomerOrganizationTable"."budget_id",
   "public"."LiteLLM_CustomerOrganizationTable"."alias",
-  "public"."LiteLLM_CustomerOrganizationTable"."default_budget_id",
+  "public"."LiteLLM_CustomerOrganizationTable"."default_budget_template_id",
   "public"."LiteLLM_CustomerOrganizationTable"."created_at",
   "public"."LiteLLM_CustomerOrganizationTable"."created_by",
   "public"."LiteLLM_CustomerOrganizationTable"."updated_at",
@@ -3366,6 +3486,7 @@ OFFSET
 
 SELECT
   "public"."LiteLLM_BudgetTable"."budget_id",
+  "public"."LiteLLM_BudgetTable"."name",
   "public"."LiteLLM_BudgetTable"."max_budget",
   "public"."LiteLLM_BudgetTable"."soft_budget",
   "public"."LiteLLM_BudgetTable"."max_parallel_requests",
@@ -3376,6 +3497,8 @@ SELECT
   "public"."LiteLLM_BudgetTable"."model_tpm_limit",
   "public"."LiteLLM_BudgetTable"."model_rpm_limit",
   "public"."LiteLLM_BudgetTable"."budget_duration",
+  "public"."LiteLLM_BudgetTable"."budget_limits",
+  "public"."LiteLLM_BudgetTable"."cap_policy",
   "public"."LiteLLM_BudgetTable"."budget_reset_at",
   "public"."LiteLLM_BudgetTable"."allowed_models",
   "public"."LiteLLM_BudgetTable"."temp_budget_increase",
@@ -3394,6 +3517,7 @@ OFFSET
 
 SELECT
   "public"."LiteLLM_BudgetTable"."budget_id",
+  "public"."LiteLLM_BudgetTable"."name",
   "public"."LiteLLM_BudgetTable"."max_budget",
   "public"."LiteLLM_BudgetTable"."soft_budget",
   "public"."LiteLLM_BudgetTable"."max_parallel_requests",
@@ -3404,6 +3528,8 @@ SELECT
   "public"."LiteLLM_BudgetTable"."model_tpm_limit",
   "public"."LiteLLM_BudgetTable"."model_rpm_limit",
   "public"."LiteLLM_BudgetTable"."budget_duration",
+  "public"."LiteLLM_BudgetTable"."budget_limits",
+  "public"."LiteLLM_BudgetTable"."cap_policy",
   "public"."LiteLLM_BudgetTable"."budget_reset_at",
   "public"."LiteLLM_BudgetTable"."allowed_models",
   "public"."LiteLLM_BudgetTable"."temp_budget_increase",
@@ -3418,15 +3544,16 @@ WHERE
   "public"."LiteLLM_BudgetTable"."budget_id" IN ($1)
 OFFSET
   $2
--- params: ["<default_budget_id of the rows above>","0"]
+-- params: ["<default_budget_template_id of the rows above>","0"]
 
 SELECT
   "public"."LiteLLM_CustomerTeamTable"."customer_team_id",
   "public"."LiteLLM_CustomerTeamTable"."spend",
-  "public"."LiteLLM_CustomerTeamTable"."budget_reset_at",
   "public"."LiteLLM_CustomerTeamTable"."alias",
   "public"."LiteLLM_CustomerTeamTable"."parent_org_id",
   "public"."LiteLLM_CustomerTeamTable"."budget_id",
+  "public"."LiteLLM_CustomerTeamTable"."budget_override_id",
+  "public"."LiteLLM_CustomerTeamTable"."budget_override_expires_at",
   "public"."LiteLLM_CustomerTeamTable"."created_at",
   "public"."LiteLLM_CustomerTeamTable"."created_by",
   "public"."LiteLLM_CustomerTeamTable"."updated_at",
@@ -3435,6 +3562,27 @@ FROM
   "public"."LiteLLM_CustomerTeamTable"
 WHERE
   "public"."LiteLLM_CustomerTeamTable"."parent_org_id" IN ($1)
+OFFSET
+  $2
+-- params: ["<customer_org_id of the rows above>","0"]
+
+SELECT
+  "public"."LiteLLM_CustomerMemberTable"."customer_member_id",
+  "public"."LiteLLM_CustomerMemberTable"."spend",
+  "public"."LiteLLM_CustomerMemberTable"."alias",
+  "public"."LiteLLM_CustomerMemberTable"."parent_org_id",
+  "public"."LiteLLM_CustomerMemberTable"."parent_team_ids",
+  "public"."LiteLLM_CustomerMemberTable"."budget_id",
+  "public"."LiteLLM_CustomerMemberTable"."budget_override_id",
+  "public"."LiteLLM_CustomerMemberTable"."budget_override_expires_at",
+  "public"."LiteLLM_CustomerMemberTable"."created_at",
+  "public"."LiteLLM_CustomerMemberTable"."created_by",
+  "public"."LiteLLM_CustomerMemberTable"."updated_at",
+  "public"."LiteLLM_CustomerMemberTable"."updated_by"
+FROM
+  "public"."LiteLLM_CustomerMemberTable"
+WHERE
+  "public"."LiteLLM_CustomerMemberTable"."parent_org_id" IN ($1)
 OFFSET
   $2
 -- params: ["<customer_org_id of the rows above>","0"]
@@ -3452,12 +3600,10 @@ await prisma.liteLLM_CustomerOrganizationTable.findUnique({
 SELECT
   "public"."LiteLLM_CustomerOrganizationTable"."customer_org_id",
   "public"."LiteLLM_CustomerOrganizationTable"."spend",
-  "public"."LiteLLM_CustomerOrganizationTable"."budget_reset_at",
-  "public"."LiteLLM_CustomerOrganizationTable"."budget_ids",
-  "public"."LiteLLM_CustomerOrganizationTable"."budget_names",
+  "public"."LiteLLM_CustomerOrganizationTable"."budget_template_ids",
   "public"."LiteLLM_CustomerOrganizationTable"."budget_id",
   "public"."LiteLLM_CustomerOrganizationTable"."alias",
-  "public"."LiteLLM_CustomerOrganizationTable"."default_budget_id",
+  "public"."LiteLLM_CustomerOrganizationTable"."default_budget_template_id",
   "public"."LiteLLM_CustomerOrganizationTable"."created_at",
   "public"."LiteLLM_CustomerOrganizationTable"."created_by",
   "public"."LiteLLM_CustomerOrganizationTable"."updated_at",
@@ -3488,8 +3634,7 @@ await prisma.liteLLM_CustomerOrganizationTable.create({
 INSERT INTO
   "public"."LiteLLM_CustomerOrganizationTable" (
     "spend",
-    "budget_ids",
-    "budget_names",
+    "budget_template_ids",
     "customer_org_id",
     "created_at",
     "created_by",
@@ -3497,21 +3642,19 @@ INSERT INTO
     "updated_by"
   )
 VALUES
-  ($1, $2, $3, $4, $5, $6, $7, $8)
+  ($1, $2, $3, $4, $5, $6, $7)
 RETURNING
   "public"."LiteLLM_CustomerOrganizationTable"."customer_org_id",
   "public"."LiteLLM_CustomerOrganizationTable"."spend",
-  "public"."LiteLLM_CustomerOrganizationTable"."budget_reset_at",
-  "public"."LiteLLM_CustomerOrganizationTable"."budget_ids",
-  "public"."LiteLLM_CustomerOrganizationTable"."budget_names",
+  "public"."LiteLLM_CustomerOrganizationTable"."budget_template_ids",
   "public"."LiteLLM_CustomerOrganizationTable"."budget_id",
   "public"."LiteLLM_CustomerOrganizationTable"."alias",
-  "public"."LiteLLM_CustomerOrganizationTable"."default_budget_id",
+  "public"."LiteLLM_CustomerOrganizationTable"."default_budget_template_id",
   "public"."LiteLLM_CustomerOrganizationTable"."created_at",
   "public"."LiteLLM_CustomerOrganizationTable"."created_by",
   "public"."LiteLLM_CustomerOrganizationTable"."updated_at",
   "public"."LiteLLM_CustomerOrganizationTable"."updated_by"
--- params: ["0.0",[],"{}","<uuid(4)>","<now()>","example","<now()>","example"]
+-- params: ["0.0",[],"<uuid(4)>","<now()>","example","<now()>","example"]
 ```
 
 **update**: Update a row
@@ -3536,12 +3679,10 @@ WHERE
 RETURNING
   "public"."LiteLLM_CustomerOrganizationTable"."customer_org_id",
   "public"."LiteLLM_CustomerOrganizationTable"."spend",
-  "public"."LiteLLM_CustomerOrganizationTable"."budget_reset_at",
-  "public"."LiteLLM_CustomerOrganizationTable"."budget_ids",
-  "public"."LiteLLM_CustomerOrganizationTable"."budget_names",
+  "public"."LiteLLM_CustomerOrganizationTable"."budget_template_ids",
   "public"."LiteLLM_CustomerOrganizationTable"."budget_id",
   "public"."LiteLLM_CustomerOrganizationTable"."alias",
-  "public"."LiteLLM_CustomerOrganizationTable"."default_budget_id",
+  "public"."LiteLLM_CustomerOrganizationTable"."default_budget_template_id",
   "public"."LiteLLM_CustomerOrganizationTable"."created_at",
   "public"."LiteLLM_CustomerOrganizationTable"."created_by",
   "public"."LiteLLM_CustomerOrganizationTable"."updated_at",
@@ -3565,12 +3706,10 @@ WHERE
 RETURNING
   "public"."LiteLLM_CustomerOrganizationTable"."customer_org_id",
   "public"."LiteLLM_CustomerOrganizationTable"."spend",
-  "public"."LiteLLM_CustomerOrganizationTable"."budget_reset_at",
-  "public"."LiteLLM_CustomerOrganizationTable"."budget_ids",
-  "public"."LiteLLM_CustomerOrganizationTable"."budget_names",
+  "public"."LiteLLM_CustomerOrganizationTable"."budget_template_ids",
   "public"."LiteLLM_CustomerOrganizationTable"."budget_id",
   "public"."LiteLLM_CustomerOrganizationTable"."alias",
-  "public"."LiteLLM_CustomerOrganizationTable"."default_budget_id",
+  "public"."LiteLLM_CustomerOrganizationTable"."default_budget_template_id",
   "public"."LiteLLM_CustomerOrganizationTable"."created_at",
   "public"."LiteLLM_CustomerOrganizationTable"."created_by",
   "public"."LiteLLM_CustomerOrganizationTable"."updated_at",
@@ -3586,42 +3725,42 @@ RETURNING
 
 ![LiteLLM_CustomerTeamTable and the models it relates to](tables/LiteLLM_CustomerTeamTable.svg)
 
-| Field              | Type       | Constraints                                                                                              | Default              | Description |
-| ------------------ | ---------- | -------------------------------------------------------------------------------------------------------- | -------------------- | ----------- |
-| `spend`            | `Float`    | NOT NULL                                                                                                 | `0`                  |             |
-| `budget_reset_at`  | `DateTime` | NULL                                                                                                     |                      |             |
-| `customer_team_id` | `String`   | PK NOT NULL                                                                                              | `uuid(4)`            |             |
-| `alias`            | `String`   | NULL                                                                                                     |                      |             |
-| `parent_org_id`    | `String`   | NOT NULL → [LiteLLM_CustomerOrganizationTable.customer_org_id](#model-LiteLLM_CustomerOrganizationTable) |                      |             |
-| `budget_id`        | `String`   | NULL → [LiteLLM_BudgetTable.budget_id](#model-LiteLLM_BudgetTable)                                       |                      |             |
-| `created_at`       | `DateTime` | NOT NULL                                                                                                 | `now()`              |             |
-| `created_by`       | `String`   | NOT NULL                                                                                                 |                      |             |
-| `updated_at`       | `DateTime` | NOT NULL                                                                                                 | `now()` `@updatedAt` |             |
-| `updated_by`       | `String`   | NOT NULL                                                                                                 |                      |             |
+| Field                        | Type       | Constraints                                                                                              | Default              | Description |
+| ---------------------------- | ---------- | -------------------------------------------------------------------------------------------------------- | -------------------- | ----------- |
+| `spend`                      | `Float`    | NOT NULL                                                                                                 | `0`                  |             |
+| `customer_team_id`           | `String`   | PK NOT NULL                                                                                              | `uuid(4)`            |             |
+| `alias`                      | `String`   | NULL                                                                                                     |                      |             |
+| `parent_org_id`              | `String`   | NOT NULL → [LiteLLM_CustomerOrganizationTable.customer_org_id](#model-LiteLLM_CustomerOrganizationTable) |                      |             |
+| `budget_id`                  | `String`   | NULL → [LiteLLM_BudgetTable.budget_id](#model-LiteLLM_BudgetTable)                                       |                      |             |
+| `budget_override_id`         | `String`   | NULL → [LiteLLM_BudgetTable.budget_id](#model-LiteLLM_BudgetTable)                                       |                      |             |
+| `budget_override_expires_at` | `DateTime` | NULL                                                                                                     |                      |             |
+| `created_at`                 | `DateTime` | NOT NULL                                                                                                 | `now()`              |             |
+| `created_by`                 | `String`   | NOT NULL                                                                                                 |                      |             |
+| `updated_at`                 | `DateTime` | NOT NULL                                                                                                 | `now()` `@updatedAt` |             |
+| `updated_by`                 | `String`   | NOT NULL                                                                                                 |                      |             |
 
 #### Indexes
 
 - `@@index([parent_org_id])`
+- `@@index([spend])`
 
 #### References
 
 - `parent_org_id` → [LiteLLM_CustomerOrganizationTable.customer_org_id](#model-LiteLLM_CustomerOrganizationTable) (many-to-one)
 - `budget_id` → [LiteLLM_BudgetTable.budget_id](#model-LiteLLM_BudgetTable) (many-to-one)
-
-#### Referenced by
-
-- `customer_team_id` ← [LiteLLM_CustomerMemberTable.parent_team_id](#model-LiteLLM_CustomerMemberTable) (one-to-many)
+- `budget_override_id` → [LiteLLM_BudgetTable.budget_id](#model-LiteLLM_BudgetTable) (many-to-one, on delete Restrict)
 
 #### Definition
 
 ```sql
 CREATE TABLE "LiteLLM_CustomerTeamTable" (
     "spend" DOUBLE PRECISION NOT NULL DEFAULT 0.0,
-    "budget_reset_at" TIMESTAMP(3),
     "customer_team_id" TEXT NOT NULL,
     "alias" TEXT,
     "parent_org_id" TEXT NOT NULL,
     "budget_id" TEXT,
+    "budget_override_id" TEXT,
+    "budget_override_expires_at" TIMESTAMP(3),
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "created_by" TEXT NOT NULL,
     "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -3632,9 +3771,13 @@ CREATE TABLE "LiteLLM_CustomerTeamTable" (
 
 CREATE INDEX "LiteLLM_CustomerTeamTable_parent_org_id_idx" ON "LiteLLM_CustomerTeamTable"("parent_org_id");
 
+CREATE INDEX "LiteLLM_CustomerTeamTable_spend_idx" ON "LiteLLM_CustomerTeamTable"("spend");
+
 ALTER TABLE "LiteLLM_CustomerTeamTable" ADD CONSTRAINT "LiteLLM_CustomerTeamTable_parent_org_id_fkey" FOREIGN KEY ("parent_org_id") REFERENCES "LiteLLM_CustomerOrganizationTable"("customer_org_id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 ALTER TABLE "LiteLLM_CustomerTeamTable" ADD CONSTRAINT "LiteLLM_CustomerTeamTable_budget_id_fkey" FOREIGN KEY ("budget_id") REFERENCES "LiteLLM_BudgetTable"("budget_id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+ALTER TABLE "LiteLLM_CustomerTeamTable" ADD CONSTRAINT "LiteLLM_CustomerTeamTable_budget_override_id_fkey" FOREIGN KEY ("budget_override_id") REFERENCES "LiteLLM_BudgetTable"("budget_id") ON DELETE RESTRICT ON UPDATE CASCADE;
 ```
 
 <details>
@@ -3650,10 +3793,11 @@ await prisma.liteLLM_CustomerTeamTable.findMany();
 SELECT
   "public"."LiteLLM_CustomerTeamTable"."customer_team_id",
   "public"."LiteLLM_CustomerTeamTable"."spend",
-  "public"."LiteLLM_CustomerTeamTable"."budget_reset_at",
   "public"."LiteLLM_CustomerTeamTable"."alias",
   "public"."LiteLLM_CustomerTeamTable"."parent_org_id",
   "public"."LiteLLM_CustomerTeamTable"."budget_id",
+  "public"."LiteLLM_CustomerTeamTable"."budget_override_id",
+  "public"."LiteLLM_CustomerTeamTable"."budget_override_expires_at",
   "public"."LiteLLM_CustomerTeamTable"."created_at",
   "public"."LiteLLM_CustomerTeamTable"."created_by",
   "public"."LiteLLM_CustomerTeamTable"."updated_at",
@@ -3694,7 +3838,7 @@ FROM
 
 ```ts
 await prisma.liteLLM_CustomerTeamTable.findMany({
-  include: { parent_org: true, budget: true, members: true },
+  include: { parent_org: true, budget: true, budget_override: true },
 });
 ```
 
@@ -3702,10 +3846,11 @@ await prisma.liteLLM_CustomerTeamTable.findMany({
 SELECT
   "public"."LiteLLM_CustomerTeamTable"."customer_team_id",
   "public"."LiteLLM_CustomerTeamTable"."spend",
-  "public"."LiteLLM_CustomerTeamTable"."budget_reset_at",
   "public"."LiteLLM_CustomerTeamTable"."alias",
   "public"."LiteLLM_CustomerTeamTable"."parent_org_id",
   "public"."LiteLLM_CustomerTeamTable"."budget_id",
+  "public"."LiteLLM_CustomerTeamTable"."budget_override_id",
+  "public"."LiteLLM_CustomerTeamTable"."budget_override_expires_at",
   "public"."LiteLLM_CustomerTeamTable"."created_at",
   "public"."LiteLLM_CustomerTeamTable"."created_by",
   "public"."LiteLLM_CustomerTeamTable"."updated_at",
@@ -3721,12 +3866,10 @@ OFFSET
 SELECT
   "public"."LiteLLM_CustomerOrganizationTable"."customer_org_id",
   "public"."LiteLLM_CustomerOrganizationTable"."spend",
-  "public"."LiteLLM_CustomerOrganizationTable"."budget_reset_at",
-  "public"."LiteLLM_CustomerOrganizationTable"."budget_ids",
-  "public"."LiteLLM_CustomerOrganizationTable"."budget_names",
+  "public"."LiteLLM_CustomerOrganizationTable"."budget_template_ids",
   "public"."LiteLLM_CustomerOrganizationTable"."budget_id",
   "public"."LiteLLM_CustomerOrganizationTable"."alias",
-  "public"."LiteLLM_CustomerOrganizationTable"."default_budget_id",
+  "public"."LiteLLM_CustomerOrganizationTable"."default_budget_template_id",
   "public"."LiteLLM_CustomerOrganizationTable"."created_at",
   "public"."LiteLLM_CustomerOrganizationTable"."created_by",
   "public"."LiteLLM_CustomerOrganizationTable"."updated_at",
@@ -3741,6 +3884,7 @@ OFFSET
 
 SELECT
   "public"."LiteLLM_BudgetTable"."budget_id",
+  "public"."LiteLLM_BudgetTable"."name",
   "public"."LiteLLM_BudgetTable"."max_budget",
   "public"."LiteLLM_BudgetTable"."soft_budget",
   "public"."LiteLLM_BudgetTable"."max_parallel_requests",
@@ -3751,6 +3895,8 @@ SELECT
   "public"."LiteLLM_BudgetTable"."model_tpm_limit",
   "public"."LiteLLM_BudgetTable"."model_rpm_limit",
   "public"."LiteLLM_BudgetTable"."budget_duration",
+  "public"."LiteLLM_BudgetTable"."budget_limits",
+  "public"."LiteLLM_BudgetTable"."cap_policy",
   "public"."LiteLLM_BudgetTable"."budget_reset_at",
   "public"."LiteLLM_BudgetTable"."allowed_models",
   "public"."LiteLLM_BudgetTable"."temp_budget_increase",
@@ -3768,25 +3914,35 @@ OFFSET
 -- params: ["<budget_id of the rows above>","0"]
 
 SELECT
-  "public"."LiteLLM_CustomerMemberTable"."customer_member_id",
-  "public"."LiteLLM_CustomerMemberTable"."spend",
-  "public"."LiteLLM_CustomerMemberTable"."budget_reset_at",
-  "public"."LiteLLM_CustomerMemberTable"."alias",
-  "public"."LiteLLM_CustomerMemberTable"."parent_team_id",
-  "public"."LiteLLM_CustomerMemberTable"."budget_id",
-  "public"."LiteLLM_CustomerMemberTable"."budget_template_id",
-  "public"."LiteLLM_CustomerMemberTable"."budget_override_expires_at",
-  "public"."LiteLLM_CustomerMemberTable"."created_at",
-  "public"."LiteLLM_CustomerMemberTable"."created_by",
-  "public"."LiteLLM_CustomerMemberTable"."updated_at",
-  "public"."LiteLLM_CustomerMemberTable"."updated_by"
+  "public"."LiteLLM_BudgetTable"."budget_id",
+  "public"."LiteLLM_BudgetTable"."name",
+  "public"."LiteLLM_BudgetTable"."max_budget",
+  "public"."LiteLLM_BudgetTable"."soft_budget",
+  "public"."LiteLLM_BudgetTable"."max_parallel_requests",
+  "public"."LiteLLM_BudgetTable"."tpm_limit",
+  "public"."LiteLLM_BudgetTable"."rpm_limit",
+  "public"."LiteLLM_BudgetTable"."tpd_limit",
+  "public"."LiteLLM_BudgetTable"."model_max_budget",
+  "public"."LiteLLM_BudgetTable"."model_tpm_limit",
+  "public"."LiteLLM_BudgetTable"."model_rpm_limit",
+  "public"."LiteLLM_BudgetTable"."budget_duration",
+  "public"."LiteLLM_BudgetTable"."budget_limits",
+  "public"."LiteLLM_BudgetTable"."cap_policy",
+  "public"."LiteLLM_BudgetTable"."budget_reset_at",
+  "public"."LiteLLM_BudgetTable"."allowed_models",
+  "public"."LiteLLM_BudgetTable"."temp_budget_increase",
+  "public"."LiteLLM_BudgetTable"."temp_budget_expiry",
+  "public"."LiteLLM_BudgetTable"."created_at",
+  "public"."LiteLLM_BudgetTable"."created_by",
+  "public"."LiteLLM_BudgetTable"."updated_at",
+  "public"."LiteLLM_BudgetTable"."updated_by"
 FROM
-  "public"."LiteLLM_CustomerMemberTable"
+  "public"."LiteLLM_BudgetTable"
 WHERE
-  "public"."LiteLLM_CustomerMemberTable"."parent_team_id" IN ($1)
+  "public"."LiteLLM_BudgetTable"."budget_id" IN ($1)
 OFFSET
   $2
--- params: ["<customer_team_id of the rows above>","0"]
+-- params: ["<budget_override_id of the rows above>","0"]
 ```
 
 **findUnique**: One row by what is unique to it
@@ -3799,10 +3955,11 @@ await prisma.liteLLM_CustomerTeamTable.findUnique({ where: { customer_team_id: "
 SELECT
   "public"."LiteLLM_CustomerTeamTable"."customer_team_id",
   "public"."LiteLLM_CustomerTeamTable"."spend",
-  "public"."LiteLLM_CustomerTeamTable"."budget_reset_at",
   "public"."LiteLLM_CustomerTeamTable"."alias",
   "public"."LiteLLM_CustomerTeamTable"."parent_org_id",
   "public"."LiteLLM_CustomerTeamTable"."budget_id",
+  "public"."LiteLLM_CustomerTeamTable"."budget_override_id",
+  "public"."LiteLLM_CustomerTeamTable"."budget_override_expires_at",
   "public"."LiteLLM_CustomerTeamTable"."created_at",
   "public"."LiteLLM_CustomerTeamTable"."created_by",
   "public"."LiteLLM_CustomerTeamTable"."updated_at",
@@ -3845,10 +4002,11 @@ VALUES
 RETURNING
   "public"."LiteLLM_CustomerTeamTable"."customer_team_id",
   "public"."LiteLLM_CustomerTeamTable"."spend",
-  "public"."LiteLLM_CustomerTeamTable"."budget_reset_at",
   "public"."LiteLLM_CustomerTeamTable"."alias",
   "public"."LiteLLM_CustomerTeamTable"."parent_org_id",
   "public"."LiteLLM_CustomerTeamTable"."budget_id",
+  "public"."LiteLLM_CustomerTeamTable"."budget_override_id",
+  "public"."LiteLLM_CustomerTeamTable"."budget_override_expires_at",
   "public"."LiteLLM_CustomerTeamTable"."created_at",
   "public"."LiteLLM_CustomerTeamTable"."created_by",
   "public"."LiteLLM_CustomerTeamTable"."updated_at",
@@ -3878,10 +4036,11 @@ WHERE
 RETURNING
   "public"."LiteLLM_CustomerTeamTable"."customer_team_id",
   "public"."LiteLLM_CustomerTeamTable"."spend",
-  "public"."LiteLLM_CustomerTeamTable"."budget_reset_at",
   "public"."LiteLLM_CustomerTeamTable"."alias",
   "public"."LiteLLM_CustomerTeamTable"."parent_org_id",
   "public"."LiteLLM_CustomerTeamTable"."budget_id",
+  "public"."LiteLLM_CustomerTeamTable"."budget_override_id",
+  "public"."LiteLLM_CustomerTeamTable"."budget_override_expires_at",
   "public"."LiteLLM_CustomerTeamTable"."created_at",
   "public"."LiteLLM_CustomerTeamTable"."created_by",
   "public"."LiteLLM_CustomerTeamTable"."updated_at",
@@ -3905,10 +4064,11 @@ WHERE
 RETURNING
   "public"."LiteLLM_CustomerTeamTable"."customer_team_id",
   "public"."LiteLLM_CustomerTeamTable"."spend",
-  "public"."LiteLLM_CustomerTeamTable"."budget_reset_at",
   "public"."LiteLLM_CustomerTeamTable"."alias",
   "public"."LiteLLM_CustomerTeamTable"."parent_org_id",
   "public"."LiteLLM_CustomerTeamTable"."budget_id",
+  "public"."LiteLLM_CustomerTeamTable"."budget_override_id",
+  "public"."LiteLLM_CustomerTeamTable"."budget_override_expires_at",
   "public"."LiteLLM_CustomerTeamTable"."created_at",
   "public"."LiteLLM_CustomerTeamTable"."created_by",
   "public"."LiteLLM_CustomerTeamTable"."updated_at",
@@ -3924,43 +4084,47 @@ RETURNING
 
 ![LiteLLM_CustomerMemberTable and the models it relates to](tables/LiteLLM_CustomerMemberTable.svg)
 
-| Field                        | Type       | Constraints                                                                               | Default              | Description |
-| ---------------------------- | ---------- | ----------------------------------------------------------------------------------------- | -------------------- | ----------- |
-| `spend`                      | `Float`    | NOT NULL                                                                                  | `0`                  |             |
-| `budget_reset_at`            | `DateTime` | NULL                                                                                      |                      |             |
-| `customer_member_id`         | `String`   | PK NOT NULL                                                                               | `uuid(4)`            |             |
-| `alias`                      | `String`   | NULL                                                                                      |                      |             |
-| `parent_team_id`             | `String`   | NOT NULL → [LiteLLM_CustomerTeamTable.customer_team_id](#model-LiteLLM_CustomerTeamTable) |                      |             |
-| `budget_id`                  | `String`   | NULL → [LiteLLM_BudgetTable.budget_id](#model-LiteLLM_BudgetTable)                        |                      |             |
-| `budget_template_id`         | `String`   | NULL → [LiteLLM_BudgetTable.budget_id](#model-LiteLLM_BudgetTable)                        |                      |             |
-| `budget_override_expires_at` | `DateTime` | NULL                                                                                      |                      |             |
-| `created_at`                 | `DateTime` | NOT NULL                                                                                  | `now()`              |             |
-| `created_by`                 | `String`   | NOT NULL                                                                                  |                      |             |
-| `updated_at`                 | `DateTime` | NOT NULL                                                                                  | `now()` `@updatedAt` |             |
-| `updated_by`                 | `String`   | NOT NULL                                                                                  |                      |             |
+| Field                        | Type       | Constraints                                                                                              | Default              | Description |
+| ---------------------------- | ---------- | -------------------------------------------------------------------------------------------------------- | -------------------- | ----------- |
+| `spend`                      | `Float`    | NOT NULL                                                                                                 | `0`                  |             |
+| `customer_member_id`         | `String`   | PK NOT NULL                                                                                              | `uuid(4)`            |             |
+| `alias`                      | `String`   | NULL                                                                                                     |                      |             |
+| `parent_org_id`              | `String`   | NOT NULL → [LiteLLM_CustomerOrganizationTable.customer_org_id](#model-LiteLLM_CustomerOrganizationTable) |                      |             |
+| `parent_team_ids`            | `String[]` | NOT NULL                                                                                                 | `[]`                 |             |
+| `budget_id`                  | `String`   | NULL → [LiteLLM_BudgetTable.budget_id](#model-LiteLLM_BudgetTable)                                       |                      |             |
+| `budget_override_id`         | `String`   | NULL → [LiteLLM_BudgetTable.budget_id](#model-LiteLLM_BudgetTable)                                       |                      |             |
+| `budget_override_expires_at` | `DateTime` | NULL                                                                                                     |                      |             |
+| `created_at`                 | `DateTime` | NOT NULL                                                                                                 | `now()`              |             |
+| `created_by`                 | `String`   | NOT NULL                                                                                                 |                      |             |
+| `updated_at`                 | `DateTime` | NOT NULL                                                                                                 | `now()` `@updatedAt` |             |
+| `updated_by`                 | `String`   | NOT NULL                                                                                                 |                      |             |
 
 #### Indexes
 
-- `@@index([parent_team_id])`
-- `@@index([budget_template_id])`
+- `@@index([parent_org_id])`
+- `@@index([spend])`
 
 #### References
 
-- `parent_team_id` → [LiteLLM_CustomerTeamTable.customer_team_id](#model-LiteLLM_CustomerTeamTable) (many-to-one)
+- `parent_org_id` → [LiteLLM_CustomerOrganizationTable.customer_org_id](#model-LiteLLM_CustomerOrganizationTable) (many-to-one)
 - `budget_id` → [LiteLLM_BudgetTable.budget_id](#model-LiteLLM_BudgetTable) (many-to-one, on delete Restrict)
-- `budget_template_id` → [LiteLLM_BudgetTable.budget_id](#model-LiteLLM_BudgetTable) (many-to-one, on delete Restrict)
+- `budget_override_id` → [LiteLLM_BudgetTable.budget_id](#model-LiteLLM_BudgetTable) (many-to-one, on delete Restrict)
+
+#### Referenced by
+
+- `customer_member_id` ← [LiteLLM_CustomerBudgetIncreaseRequest.customer_member_id](#model-LiteLLM_CustomerBudgetIncreaseRequest) (one-to-many, on delete Cascade)
 
 #### Definition
 
 ```sql
 CREATE TABLE "LiteLLM_CustomerMemberTable" (
     "spend" DOUBLE PRECISION NOT NULL DEFAULT 0.0,
-    "budget_reset_at" TIMESTAMP(3),
     "customer_member_id" TEXT NOT NULL,
     "alias" TEXT,
-    "parent_team_id" TEXT NOT NULL,
+    "parent_org_id" TEXT NOT NULL,
+    "parent_team_ids" TEXT[] DEFAULT ARRAY[]::TEXT[],
     "budget_id" TEXT,
-    "budget_template_id" TEXT,
+    "budget_override_id" TEXT,
     "budget_override_expires_at" TIMESTAMP(3),
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "created_by" TEXT NOT NULL,
@@ -3970,15 +4134,15 @@ CREATE TABLE "LiteLLM_CustomerMemberTable" (
     CONSTRAINT "LiteLLM_CustomerMemberTable_pkey" PRIMARY KEY ("customer_member_id")
 );
 
-CREATE INDEX "LiteLLM_CustomerMemberTable_parent_team_id_idx" ON "LiteLLM_CustomerMemberTable"("parent_team_id");
+CREATE INDEX "LiteLLM_CustomerMemberTable_parent_org_id_idx" ON "LiteLLM_CustomerMemberTable"("parent_org_id");
 
-CREATE INDEX "LiteLLM_CustomerMemberTable_budget_template_id_idx" ON "LiteLLM_CustomerMemberTable"("budget_template_id");
+CREATE INDEX "LiteLLM_CustomerMemberTable_spend_idx" ON "LiteLLM_CustomerMemberTable"("spend");
 
-ALTER TABLE "LiteLLM_CustomerMemberTable" ADD CONSTRAINT "LiteLLM_CustomerMemberTable_parent_team_id_fkey" FOREIGN KEY ("parent_team_id") REFERENCES "LiteLLM_CustomerTeamTable"("customer_team_id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "LiteLLM_CustomerMemberTable" ADD CONSTRAINT "LiteLLM_CustomerMemberTable_parent_org_id_fkey" FOREIGN KEY ("parent_org_id") REFERENCES "LiteLLM_CustomerOrganizationTable"("customer_org_id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 ALTER TABLE "LiteLLM_CustomerMemberTable" ADD CONSTRAINT "LiteLLM_CustomerMemberTable_budget_id_fkey" FOREIGN KEY ("budget_id") REFERENCES "LiteLLM_BudgetTable"("budget_id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
-ALTER TABLE "LiteLLM_CustomerMemberTable" ADD CONSTRAINT "LiteLLM_CustomerMemberTable_budget_template_id_fkey" FOREIGN KEY ("budget_template_id") REFERENCES "LiteLLM_BudgetTable"("budget_id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "LiteLLM_CustomerMemberTable" ADD CONSTRAINT "LiteLLM_CustomerMemberTable_budget_override_id_fkey" FOREIGN KEY ("budget_override_id") REFERENCES "LiteLLM_BudgetTable"("budget_id") ON DELETE RESTRICT ON UPDATE CASCADE;
 ```
 
 <details>
@@ -3994,11 +4158,11 @@ await prisma.liteLLM_CustomerMemberTable.findMany();
 SELECT
   "public"."LiteLLM_CustomerMemberTable"."customer_member_id",
   "public"."LiteLLM_CustomerMemberTable"."spend",
-  "public"."LiteLLM_CustomerMemberTable"."budget_reset_at",
   "public"."LiteLLM_CustomerMemberTable"."alias",
-  "public"."LiteLLM_CustomerMemberTable"."parent_team_id",
+  "public"."LiteLLM_CustomerMemberTable"."parent_org_id",
+  "public"."LiteLLM_CustomerMemberTable"."parent_team_ids",
   "public"."LiteLLM_CustomerMemberTable"."budget_id",
-  "public"."LiteLLM_CustomerMemberTable"."budget_template_id",
+  "public"."LiteLLM_CustomerMemberTable"."budget_override_id",
   "public"."LiteLLM_CustomerMemberTable"."budget_override_expires_at",
   "public"."LiteLLM_CustomerMemberTable"."created_at",
   "public"."LiteLLM_CustomerMemberTable"."created_by",
@@ -4040,7 +4204,12 @@ FROM
 
 ```ts
 await prisma.liteLLM_CustomerMemberTable.findMany({
-  include: { parent_team: true, budget: true, budget_template: true },
+  include: {
+    parent_org: true,
+    budget: true,
+    budget_override: true,
+    budget_increase_requests: true,
+  },
 });
 ```
 
@@ -4048,11 +4217,11 @@ await prisma.liteLLM_CustomerMemberTable.findMany({
 SELECT
   "public"."LiteLLM_CustomerMemberTable"."customer_member_id",
   "public"."LiteLLM_CustomerMemberTable"."spend",
-  "public"."LiteLLM_CustomerMemberTable"."budget_reset_at",
   "public"."LiteLLM_CustomerMemberTable"."alias",
-  "public"."LiteLLM_CustomerMemberTable"."parent_team_id",
+  "public"."LiteLLM_CustomerMemberTable"."parent_org_id",
+  "public"."LiteLLM_CustomerMemberTable"."parent_team_ids",
   "public"."LiteLLM_CustomerMemberTable"."budget_id",
-  "public"."LiteLLM_CustomerMemberTable"."budget_template_id",
+  "public"."LiteLLM_CustomerMemberTable"."budget_override_id",
   "public"."LiteLLM_CustomerMemberTable"."budget_override_expires_at",
   "public"."LiteLLM_CustomerMemberTable"."created_at",
   "public"."LiteLLM_CustomerMemberTable"."created_by",
@@ -4067,26 +4236,27 @@ OFFSET
 -- params: ["0"]
 
 SELECT
-  "public"."LiteLLM_CustomerTeamTable"."customer_team_id",
-  "public"."LiteLLM_CustomerTeamTable"."spend",
-  "public"."LiteLLM_CustomerTeamTable"."budget_reset_at",
-  "public"."LiteLLM_CustomerTeamTable"."alias",
-  "public"."LiteLLM_CustomerTeamTable"."parent_org_id",
-  "public"."LiteLLM_CustomerTeamTable"."budget_id",
-  "public"."LiteLLM_CustomerTeamTable"."created_at",
-  "public"."LiteLLM_CustomerTeamTable"."created_by",
-  "public"."LiteLLM_CustomerTeamTable"."updated_at",
-  "public"."LiteLLM_CustomerTeamTable"."updated_by"
+  "public"."LiteLLM_CustomerOrganizationTable"."customer_org_id",
+  "public"."LiteLLM_CustomerOrganizationTable"."spend",
+  "public"."LiteLLM_CustomerOrganizationTable"."budget_template_ids",
+  "public"."LiteLLM_CustomerOrganizationTable"."budget_id",
+  "public"."LiteLLM_CustomerOrganizationTable"."alias",
+  "public"."LiteLLM_CustomerOrganizationTable"."default_budget_template_id",
+  "public"."LiteLLM_CustomerOrganizationTable"."created_at",
+  "public"."LiteLLM_CustomerOrganizationTable"."created_by",
+  "public"."LiteLLM_CustomerOrganizationTable"."updated_at",
+  "public"."LiteLLM_CustomerOrganizationTable"."updated_by"
 FROM
-  "public"."LiteLLM_CustomerTeamTable"
+  "public"."LiteLLM_CustomerOrganizationTable"
 WHERE
-  "public"."LiteLLM_CustomerTeamTable"."customer_team_id" IN ($1)
+  "public"."LiteLLM_CustomerOrganizationTable"."customer_org_id" IN ($1)
 OFFSET
   $2
--- params: ["<parent_team_id of the rows above>","0"]
+-- params: ["<parent_org_id of the rows above>","0"]
 
 SELECT
   "public"."LiteLLM_BudgetTable"."budget_id",
+  "public"."LiteLLM_BudgetTable"."name",
   "public"."LiteLLM_BudgetTable"."max_budget",
   "public"."LiteLLM_BudgetTable"."soft_budget",
   "public"."LiteLLM_BudgetTable"."max_parallel_requests",
@@ -4097,6 +4267,8 @@ SELECT
   "public"."LiteLLM_BudgetTable"."model_tpm_limit",
   "public"."LiteLLM_BudgetTable"."model_rpm_limit",
   "public"."LiteLLM_BudgetTable"."budget_duration",
+  "public"."LiteLLM_BudgetTable"."budget_limits",
+  "public"."LiteLLM_BudgetTable"."cap_policy",
   "public"."LiteLLM_BudgetTable"."budget_reset_at",
   "public"."LiteLLM_BudgetTable"."allowed_models",
   "public"."LiteLLM_BudgetTable"."temp_budget_increase",
@@ -4115,6 +4287,7 @@ OFFSET
 
 SELECT
   "public"."LiteLLM_BudgetTable"."budget_id",
+  "public"."LiteLLM_BudgetTable"."name",
   "public"."LiteLLM_BudgetTable"."max_budget",
   "public"."LiteLLM_BudgetTable"."soft_budget",
   "public"."LiteLLM_BudgetTable"."max_parallel_requests",
@@ -4125,6 +4298,8 @@ SELECT
   "public"."LiteLLM_BudgetTable"."model_tpm_limit",
   "public"."LiteLLM_BudgetTable"."model_rpm_limit",
   "public"."LiteLLM_BudgetTable"."budget_duration",
+  "public"."LiteLLM_BudgetTable"."budget_limits",
+  "public"."LiteLLM_BudgetTable"."cap_policy",
   "public"."LiteLLM_BudgetTable"."budget_reset_at",
   "public"."LiteLLM_BudgetTable"."allowed_models",
   "public"."LiteLLM_BudgetTable"."temp_budget_increase",
@@ -4139,7 +4314,27 @@ WHERE
   "public"."LiteLLM_BudgetTable"."budget_id" IN ($1)
 OFFSET
   $2
--- params: ["<budget_template_id of the rows above>","0"]
+-- params: ["<budget_override_id of the rows above>","0"]
+
+SELECT
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."request_id",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."customer_member_id",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."requested_max_budget",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."expires_at",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."reason",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."status",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."submitted_by",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."submitted_at",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."reviewed_by",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."reviewed_at",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."review_notes"
+FROM
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"
+WHERE
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."customer_member_id" IN ($1)
+OFFSET
+  $2
+-- params: ["<customer_member_id of the rows above>","0"]
 ```
 
 **findUnique**: One row by what is unique to it
@@ -4152,11 +4347,11 @@ await prisma.liteLLM_CustomerMemberTable.findUnique({ where: { customer_member_i
 SELECT
   "public"."LiteLLM_CustomerMemberTable"."customer_member_id",
   "public"."LiteLLM_CustomerMemberTable"."spend",
-  "public"."LiteLLM_CustomerMemberTable"."budget_reset_at",
   "public"."LiteLLM_CustomerMemberTable"."alias",
-  "public"."LiteLLM_CustomerMemberTable"."parent_team_id",
+  "public"."LiteLLM_CustomerMemberTable"."parent_org_id",
+  "public"."LiteLLM_CustomerMemberTable"."parent_team_ids",
   "public"."LiteLLM_CustomerMemberTable"."budget_id",
-  "public"."LiteLLM_CustomerMemberTable"."budget_template_id",
+  "public"."LiteLLM_CustomerMemberTable"."budget_override_id",
   "public"."LiteLLM_CustomerMemberTable"."budget_override_expires_at",
   "public"."LiteLLM_CustomerMemberTable"."created_at",
   "public"."LiteLLM_CustomerMemberTable"."created_by",
@@ -4180,7 +4375,7 @@ OFFSET
 
 ```ts
 await prisma.liteLLM_CustomerMemberTable.create({
-  data: { parent_team_id: "example", created_by: "example", updated_by: "example" },
+  data: { parent_org_id: "example", created_by: "example", updated_by: "example" },
 });
 ```
 
@@ -4189,28 +4384,29 @@ INSERT INTO
   "public"."LiteLLM_CustomerMemberTable" (
     "spend",
     "customer_member_id",
-    "parent_team_id",
+    "parent_org_id",
+    "parent_team_ids",
     "created_at",
     "created_by",
     "updated_at",
     "updated_by"
   )
 VALUES
-  ($1, $2, $3, $4, $5, $6, $7)
+  ($1, $2, $3, $4, $5, $6, $7, $8)
 RETURNING
   "public"."LiteLLM_CustomerMemberTable"."customer_member_id",
   "public"."LiteLLM_CustomerMemberTable"."spend",
-  "public"."LiteLLM_CustomerMemberTable"."budget_reset_at",
   "public"."LiteLLM_CustomerMemberTable"."alias",
-  "public"."LiteLLM_CustomerMemberTable"."parent_team_id",
+  "public"."LiteLLM_CustomerMemberTable"."parent_org_id",
+  "public"."LiteLLM_CustomerMemberTable"."parent_team_ids",
   "public"."LiteLLM_CustomerMemberTable"."budget_id",
-  "public"."LiteLLM_CustomerMemberTable"."budget_template_id",
+  "public"."LiteLLM_CustomerMemberTable"."budget_override_id",
   "public"."LiteLLM_CustomerMemberTable"."budget_override_expires_at",
   "public"."LiteLLM_CustomerMemberTable"."created_at",
   "public"."LiteLLM_CustomerMemberTable"."created_by",
   "public"."LiteLLM_CustomerMemberTable"."updated_at",
   "public"."LiteLLM_CustomerMemberTable"."updated_by"
--- params: ["0.0","<uuid(4)>","example","<now()>","example","<now()>","example"]
+-- params: ["0.0","<uuid(4)>","example",[],"<now()>","example","<now()>","example"]
 ```
 
 **update**: Update a row
@@ -4235,11 +4431,11 @@ WHERE
 RETURNING
   "public"."LiteLLM_CustomerMemberTable"."customer_member_id",
   "public"."LiteLLM_CustomerMemberTable"."spend",
-  "public"."LiteLLM_CustomerMemberTable"."budget_reset_at",
   "public"."LiteLLM_CustomerMemberTable"."alias",
-  "public"."LiteLLM_CustomerMemberTable"."parent_team_id",
+  "public"."LiteLLM_CustomerMemberTable"."parent_org_id",
+  "public"."LiteLLM_CustomerMemberTable"."parent_team_ids",
   "public"."LiteLLM_CustomerMemberTable"."budget_id",
-  "public"."LiteLLM_CustomerMemberTable"."budget_template_id",
+  "public"."LiteLLM_CustomerMemberTable"."budget_override_id",
   "public"."LiteLLM_CustomerMemberTable"."budget_override_expires_at",
   "public"."LiteLLM_CustomerMemberTable"."created_at",
   "public"."LiteLLM_CustomerMemberTable"."created_by",
@@ -4264,16 +4460,305 @@ WHERE
 RETURNING
   "public"."LiteLLM_CustomerMemberTable"."customer_member_id",
   "public"."LiteLLM_CustomerMemberTable"."spend",
-  "public"."LiteLLM_CustomerMemberTable"."budget_reset_at",
   "public"."LiteLLM_CustomerMemberTable"."alias",
-  "public"."LiteLLM_CustomerMemberTable"."parent_team_id",
+  "public"."LiteLLM_CustomerMemberTable"."parent_org_id",
+  "public"."LiteLLM_CustomerMemberTable"."parent_team_ids",
   "public"."LiteLLM_CustomerMemberTable"."budget_id",
-  "public"."LiteLLM_CustomerMemberTable"."budget_template_id",
+  "public"."LiteLLM_CustomerMemberTable"."budget_override_id",
   "public"."LiteLLM_CustomerMemberTable"."budget_override_expires_at",
   "public"."LiteLLM_CustomerMemberTable"."created_at",
   "public"."LiteLLM_CustomerMemberTable"."created_by",
   "public"."LiteLLM_CustomerMemberTable"."updated_at",
   "public"."LiteLLM_CustomerMemberTable"."updated_by"
+-- params: ["example"]
+```
+
+</details>
+
+<a id="model-LiteLLM_CustomerBudgetIncreaseRequest"></a>
+
+### LiteLLM_CustomerBudgetIncreaseRequest
+
+![LiteLLM_CustomerBudgetIncreaseRequest and the models it relates to](tables/LiteLLM_CustomerBudgetIncreaseRequest.svg)
+
+| Field                  | Type       | Constraints                                                                                     | Default            | Description |
+| ---------------------- | ---------- | ----------------------------------------------------------------------------------------------- | ------------------ | ----------- |
+| `request_id`           | `String`   | PK NOT NULL                                                                                     | `uuid(4)`          |             |
+| `customer_member_id`   | `String`   | NOT NULL → [LiteLLM_CustomerMemberTable.customer_member_id](#model-LiteLLM_CustomerMemberTable) |                    |             |
+| `requested_max_budget` | `Float`    | NOT NULL                                                                                        |                    |             |
+| `expires_at`           | `DateTime` | NULL                                                                                            |                    |             |
+| `reason`               | `String`   | NULL                                                                                            |                    |             |
+| `status`               | `String`   | NOT NULL                                                                                        | `"pending_review"` |             |
+| `submitted_by`         | `String`   | NOT NULL                                                                                        |                    |             |
+| `submitted_at`         | `DateTime` | NOT NULL                                                                                        | `now()`            |             |
+| `reviewed_by`          | `String`   | NULL                                                                                            |                    |             |
+| `reviewed_at`          | `DateTime` | NULL                                                                                            |                    |             |
+| `review_notes`         | `String`   | NULL                                                                                            |                    |             |
+
+#### Indexes
+
+- `@@index([status])`
+- `@@index([customer_member_id])`
+
+#### References
+
+- `customer_member_id` → [LiteLLM_CustomerMemberTable.customer_member_id](#model-LiteLLM_CustomerMemberTable) (many-to-one, on delete Cascade)
+
+#### Definition
+
+```sql
+CREATE TABLE "LiteLLM_CustomerBudgetIncreaseRequest" (
+    "request_id" TEXT NOT NULL,
+    "customer_member_id" TEXT NOT NULL,
+    "requested_max_budget" DOUBLE PRECISION NOT NULL,
+    "expires_at" TIMESTAMP(3),
+    "reason" TEXT,
+    "status" TEXT NOT NULL DEFAULT 'pending_review',
+    "submitted_by" TEXT NOT NULL,
+    "submitted_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "reviewed_by" TEXT,
+    "reviewed_at" TIMESTAMP(3),
+    "review_notes" TEXT,
+
+    CONSTRAINT "LiteLLM_CustomerBudgetIncreaseRequest_pkey" PRIMARY KEY ("request_id")
+);
+
+CREATE INDEX "LiteLLM_CustomerBudgetIncreaseRequest_status_idx" ON "LiteLLM_CustomerBudgetIncreaseRequest"("status");
+
+CREATE INDEX "LiteLLM_CustomerBudgetIncreaseRequest_customer_member_id_idx" ON "LiteLLM_CustomerBudgetIncreaseRequest"("customer_member_id");
+
+ALTER TABLE "LiteLLM_CustomerBudgetIncreaseRequest" ADD CONSTRAINT "LiteLLM_CustomerBudgetIncreaseRequest_customer_member_id_fkey" FOREIGN KEY ("customer_member_id") REFERENCES "LiteLLM_CustomerMemberTable"("customer_member_id") ON DELETE CASCADE ON UPDATE CASCADE;
+```
+
+<details>
+<summary>Queries and their SQL</summary>
+
+**findMany**: Every row
+
+```ts
+await prisma.liteLLM_CustomerBudgetIncreaseRequest.findMany();
+```
+
+```sql
+SELECT
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."request_id",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."customer_member_id",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."requested_max_budget",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."expires_at",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."reason",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."status",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."submitted_by",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."submitted_at",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."reviewed_by",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."reviewed_at",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."review_notes"
+FROM
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"
+WHERE
+  1 = 1
+OFFSET
+  $1
+-- params: ["0"]
+```
+
+**count**: How many rows there are
+
+```ts
+await prisma.liteLLM_CustomerBudgetIncreaseRequest.count();
+```
+
+```sql
+SELECT
+  COUNT(*) AS "_count$_all"
+FROM
+  (
+    SELECT
+      "public"."LiteLLM_CustomerBudgetIncreaseRequest"."request_id"
+    FROM
+      "public"."LiteLLM_CustomerBudgetIncreaseRequest"
+    WHERE
+      1 = 1
+    OFFSET
+      $1
+  ) AS "sub"
+-- params: ["0"]
+```
+
+**findMany**: Every row with its relations
+
+```ts
+await prisma.liteLLM_CustomerBudgetIncreaseRequest.findMany({ include: { customer_member: true } });
+```
+
+```sql
+SELECT
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."request_id",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."customer_member_id",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."requested_max_budget",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."expires_at",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."reason",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."status",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."submitted_by",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."submitted_at",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."reviewed_by",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."reviewed_at",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."review_notes"
+FROM
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"
+WHERE
+  1 = 1
+OFFSET
+  $1
+-- params: ["0"]
+
+SELECT
+  "public"."LiteLLM_CustomerMemberTable"."customer_member_id",
+  "public"."LiteLLM_CustomerMemberTable"."spend",
+  "public"."LiteLLM_CustomerMemberTable"."alias",
+  "public"."LiteLLM_CustomerMemberTable"."parent_org_id",
+  "public"."LiteLLM_CustomerMemberTable"."parent_team_ids",
+  "public"."LiteLLM_CustomerMemberTable"."budget_id",
+  "public"."LiteLLM_CustomerMemberTable"."budget_override_id",
+  "public"."LiteLLM_CustomerMemberTable"."budget_override_expires_at",
+  "public"."LiteLLM_CustomerMemberTable"."created_at",
+  "public"."LiteLLM_CustomerMemberTable"."created_by",
+  "public"."LiteLLM_CustomerMemberTable"."updated_at",
+  "public"."LiteLLM_CustomerMemberTable"."updated_by"
+FROM
+  "public"."LiteLLM_CustomerMemberTable"
+WHERE
+  "public"."LiteLLM_CustomerMemberTable"."customer_member_id" IN ($1)
+OFFSET
+  $2
+-- params: ["<customer_member_id of the rows above>","0"]
+```
+
+**findUnique**: One row by what is unique to it
+
+```ts
+await prisma.liteLLM_CustomerBudgetIncreaseRequest.findUnique({ where: { request_id: "example" } });
+```
+
+```sql
+SELECT
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."request_id",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."customer_member_id",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."requested_max_budget",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."expires_at",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."reason",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."status",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."submitted_by",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."submitted_at",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."reviewed_by",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."reviewed_at",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."review_notes"
+FROM
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"
+WHERE
+  (
+    "public"."LiteLLM_CustomerBudgetIncreaseRequest"."request_id" = $1
+    AND 1 = 1
+  )
+LIMIT
+  $2
+OFFSET
+  $3
+-- params: ["example","1","0"]
+```
+
+**create**: Create a row
+
+```ts
+await prisma.liteLLM_CustomerBudgetIncreaseRequest.create({
+  data: { customer_member_id: "example", requested_max_budget: 1.5, submitted_by: "example" },
+});
+```
+
+```sql
+INSERT INTO
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest" (
+    "request_id",
+    "customer_member_id",
+    "requested_max_budget",
+    "status",
+    "submitted_by",
+    "submitted_at"
+  )
+VALUES
+  ($1, $2, $3, $4, $5, $6)
+RETURNING
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."request_id",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."customer_member_id",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."requested_max_budget",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."expires_at",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."reason",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."status",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."submitted_by",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."submitted_at",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."reviewed_by",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."reviewed_at",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."review_notes"
+-- params: ["<uuid(4)>","example","1.5","pending_review","example","<now()>"]
+```
+
+**update**: Update a row
+
+```ts
+await prisma.liteLLM_CustomerBudgetIncreaseRequest.update({
+  where: { request_id: "example" },
+  data: { requested_max_budget: 1.5 },
+});
+```
+
+```sql
+UPDATE "public"."LiteLLM_CustomerBudgetIncreaseRequest"
+SET
+  "requested_max_budget" = $1
+WHERE
+  (
+    "public"."LiteLLM_CustomerBudgetIncreaseRequest"."request_id" = $2
+    AND 1 = 1
+  )
+RETURNING
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."request_id",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."customer_member_id",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."requested_max_budget",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."expires_at",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."reason",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."status",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."submitted_by",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."submitted_at",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."reviewed_by",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."reviewed_at",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."review_notes"
+-- params: ["1.5","example"]
+```
+
+**delete**: Delete a row
+
+```ts
+await prisma.liteLLM_CustomerBudgetIncreaseRequest.delete({ where: { request_id: "example" } });
+```
+
+```sql
+DELETE FROM "public"."LiteLLM_CustomerBudgetIncreaseRequest"
+WHERE
+  (
+    "public"."LiteLLM_CustomerBudgetIncreaseRequest"."request_id" = $1
+    AND 1 = 1
+  )
+RETURNING
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."request_id",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."customer_member_id",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."requested_max_budget",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."expires_at",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."reason",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."status",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."submitted_by",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."submitted_at",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."reviewed_by",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."reviewed_at",
+  "public"."LiteLLM_CustomerBudgetIncreaseRequest"."review_notes"
 -- params: ["example"]
 ```
 
@@ -6300,6 +6785,7 @@ OFFSET
 
 SELECT
   "public"."LiteLLM_BudgetTable"."budget_id",
+  "public"."LiteLLM_BudgetTable"."name",
   "public"."LiteLLM_BudgetTable"."max_budget",
   "public"."LiteLLM_BudgetTable"."soft_budget",
   "public"."LiteLLM_BudgetTable"."max_parallel_requests",
@@ -6310,6 +6796,8 @@ SELECT
   "public"."LiteLLM_BudgetTable"."model_tpm_limit",
   "public"."LiteLLM_BudgetTable"."model_rpm_limit",
   "public"."LiteLLM_BudgetTable"."budget_duration",
+  "public"."LiteLLM_BudgetTable"."budget_limits",
+  "public"."LiteLLM_BudgetTable"."cap_policy",
   "public"."LiteLLM_BudgetTable"."budget_reset_at",
   "public"."LiteLLM_BudgetTable"."allowed_models",
   "public"."LiteLLM_BudgetTable"."temp_budget_increase",
@@ -7672,6 +8160,7 @@ OFFSET
 
 SELECT
   "public"."LiteLLM_BudgetTable"."budget_id",
+  "public"."LiteLLM_BudgetTable"."name",
   "public"."LiteLLM_BudgetTable"."max_budget",
   "public"."LiteLLM_BudgetTable"."soft_budget",
   "public"."LiteLLM_BudgetTable"."max_parallel_requests",
@@ -7682,6 +8171,8 @@ SELECT
   "public"."LiteLLM_BudgetTable"."model_tpm_limit",
   "public"."LiteLLM_BudgetTable"."model_rpm_limit",
   "public"."LiteLLM_BudgetTable"."budget_duration",
+  "public"."LiteLLM_BudgetTable"."budget_limits",
+  "public"."LiteLLM_BudgetTable"."cap_policy",
   "public"."LiteLLM_BudgetTable"."budget_reset_at",
   "public"."LiteLLM_BudgetTable"."allowed_models",
   "public"."LiteLLM_BudgetTable"."temp_budget_increase",
@@ -11484,6 +11975,7 @@ OFFSET
 
 SELECT
   "public"."LiteLLM_BudgetTable"."budget_id",
+  "public"."LiteLLM_BudgetTable"."name",
   "public"."LiteLLM_BudgetTable"."max_budget",
   "public"."LiteLLM_BudgetTable"."soft_budget",
   "public"."LiteLLM_BudgetTable"."max_parallel_requests",
@@ -11494,6 +11986,8 @@ SELECT
   "public"."LiteLLM_BudgetTable"."model_tpm_limit",
   "public"."LiteLLM_BudgetTable"."model_rpm_limit",
   "public"."LiteLLM_BudgetTable"."budget_duration",
+  "public"."LiteLLM_BudgetTable"."budget_limits",
+  "public"."LiteLLM_BudgetTable"."cap_policy",
   "public"."LiteLLM_BudgetTable"."budget_reset_at",
   "public"."LiteLLM_BudgetTable"."allowed_models",
   "public"."LiteLLM_BudgetTable"."temp_budget_increase",
@@ -13136,6 +13630,7 @@ OFFSET
 
 SELECT
   "public"."LiteLLM_BudgetTable"."budget_id",
+  "public"."LiteLLM_BudgetTable"."name",
   "public"."LiteLLM_BudgetTable"."max_budget",
   "public"."LiteLLM_BudgetTable"."soft_budget",
   "public"."LiteLLM_BudgetTable"."max_parallel_requests",
@@ -13146,6 +13641,8 @@ SELECT
   "public"."LiteLLM_BudgetTable"."model_tpm_limit",
   "public"."LiteLLM_BudgetTable"."model_rpm_limit",
   "public"."LiteLLM_BudgetTable"."budget_duration",
+  "public"."LiteLLM_BudgetTable"."budget_limits",
+  "public"."LiteLLM_BudgetTable"."cap_policy",
   "public"."LiteLLM_BudgetTable"."budget_reset_at",
   "public"."LiteLLM_BudgetTable"."allowed_models",
   "public"."LiteLLM_BudgetTable"."temp_budget_increase",
@@ -13414,6 +13911,7 @@ OFFSET
 
 SELECT
   "public"."LiteLLM_BudgetTable"."budget_id",
+  "public"."LiteLLM_BudgetTable"."name",
   "public"."LiteLLM_BudgetTable"."max_budget",
   "public"."LiteLLM_BudgetTable"."soft_budget",
   "public"."LiteLLM_BudgetTable"."max_parallel_requests",
@@ -13424,6 +13922,8 @@ SELECT
   "public"."LiteLLM_BudgetTable"."model_tpm_limit",
   "public"."LiteLLM_BudgetTable"."model_rpm_limit",
   "public"."LiteLLM_BudgetTable"."budget_duration",
+  "public"."LiteLLM_BudgetTable"."budget_limits",
+  "public"."LiteLLM_BudgetTable"."cap_policy",
   "public"."LiteLLM_BudgetTable"."budget_reset_at",
   "public"."LiteLLM_BudgetTable"."allowed_models",
   "public"."LiteLLM_BudgetTable"."temp_budget_increase",
@@ -13678,6 +14178,7 @@ OFFSET
 
 SELECT
   "public"."LiteLLM_BudgetTable"."budget_id",
+  "public"."LiteLLM_BudgetTable"."name",
   "public"."LiteLLM_BudgetTable"."max_budget",
   "public"."LiteLLM_BudgetTable"."soft_budget",
   "public"."LiteLLM_BudgetTable"."max_parallel_requests",
@@ -13688,6 +14189,8 @@ SELECT
   "public"."LiteLLM_BudgetTable"."model_tpm_limit",
   "public"."LiteLLM_BudgetTable"."model_rpm_limit",
   "public"."LiteLLM_BudgetTable"."budget_duration",
+  "public"."LiteLLM_BudgetTable"."budget_limits",
+  "public"."LiteLLM_BudgetTable"."cap_policy",
   "public"."LiteLLM_BudgetTable"."budget_reset_at",
   "public"."LiteLLM_BudgetTable"."allowed_models",
   "public"."LiteLLM_BudgetTable"."temp_budget_increase",
@@ -15225,6 +15728,7 @@ OFFSET
 
 SELECT
   "public"."LiteLLM_BudgetTable"."budget_id",
+  "public"."LiteLLM_BudgetTable"."name",
   "public"."LiteLLM_BudgetTable"."max_budget",
   "public"."LiteLLM_BudgetTable"."soft_budget",
   "public"."LiteLLM_BudgetTable"."max_parallel_requests",
@@ -15235,6 +15739,8 @@ SELECT
   "public"."LiteLLM_BudgetTable"."model_tpm_limit",
   "public"."LiteLLM_BudgetTable"."model_rpm_limit",
   "public"."LiteLLM_BudgetTable"."budget_duration",
+  "public"."LiteLLM_BudgetTable"."budget_limits",
+  "public"."LiteLLM_BudgetTable"."cap_policy",
   "public"."LiteLLM_BudgetTable"."budget_reset_at",
   "public"."LiteLLM_BudgetTable"."allowed_models",
   "public"."LiteLLM_BudgetTable"."temp_budget_increase",
@@ -15549,6 +16055,7 @@ OFFSET
 
 SELECT
   "public"."LiteLLM_BudgetTable"."budget_id",
+  "public"."LiteLLM_BudgetTable"."name",
   "public"."LiteLLM_BudgetTable"."max_budget",
   "public"."LiteLLM_BudgetTable"."soft_budget",
   "public"."LiteLLM_BudgetTable"."max_parallel_requests",
@@ -15559,6 +16066,8 @@ SELECT
   "public"."LiteLLM_BudgetTable"."model_tpm_limit",
   "public"."LiteLLM_BudgetTable"."model_rpm_limit",
   "public"."LiteLLM_BudgetTable"."budget_duration",
+  "public"."LiteLLM_BudgetTable"."budget_limits",
+  "public"."LiteLLM_BudgetTable"."cap_policy",
   "public"."LiteLLM_BudgetTable"."budget_reset_at",
   "public"."LiteLLM_BudgetTable"."allowed_models",
   "public"."LiteLLM_BudgetTable"."temp_budget_increase",
@@ -17440,6 +17949,430 @@ RETURNING
   "public"."LiteLLM_DailyOrganizationSpend"."timed_requests",
   "public"."LiteLLM_DailyOrganizationSpend"."created_at",
   "public"."LiteLLM_DailyOrganizationSpend"."updated_at"
+-- params: ["example"]
+```
+
+</details>
+
+<a id="model-LiteLLM_DailyCustomerMemberSpend"></a>
+
+### LiteLLM_DailyCustomerMemberSpend
+
+| Field                                    | Type       | Constraints | Default      | Description |
+| ---------------------------------------- | ---------- | ----------- | ------------ | ----------- |
+| `id`                                     | `String`   | PK NOT NULL |              |             |
+| `date`                                   | `String`   | NOT NULL    |              |             |
+| `customer_org_id`                        | `String`   | NOT NULL    |              |             |
+| `customer_team_id`                       | `String`   | NOT NULL    | `""`         |             |
+| `customer_member_id`                     | `String`   | NOT NULL    | `""`         |             |
+| `model`                                  | `String`   | NOT NULL    | `""`         |             |
+| `model_group`                            | `String`   | NOT NULL    | `""`         |             |
+| `custom_llm_provider`                    | `String`   | NOT NULL    | `""`         |             |
+| `mcp_namespaced_tool_name`               | `String`   | NOT NULL    | `""`         |             |
+| `endpoint`                               | `String`   | NOT NULL    | `""`         |             |
+| `api_key`                                | `String`   | NOT NULL    | `""`         |             |
+| `spend`                                  | `Float`    | NOT NULL    | `0`          |             |
+| `prompt_tokens`                          | `BigInt`   | NOT NULL    | `"0"`        |             |
+| `completion_tokens`                      | `BigInt`   | NOT NULL    | `"0"`        |             |
+| `cache_read_input_tokens`                | `BigInt`   | NOT NULL    | `"0"`        |             |
+| `cache_creation_input_tokens`            | `BigInt`   | NOT NULL    | `"0"`        |             |
+| `compression_saved_tokens`               | `BigInt`   | NOT NULL    | `"0"`        |             |
+| `compression_savings_spend`              | `Float`    | NOT NULL    | `0`          |             |
+| `prompt_caching_savings_spend`           | `Float`    | NOT NULL    | `0`          |             |
+| `gateway_injected_caching_savings_spend` | `Float`    | NOT NULL    | `0`          |             |
+| `autorouter_savings_spend`               | `Float`    | NOT NULL    | `0`          |             |
+| `guardrail_spend`                        | `Float`    | NOT NULL    | `0`          |             |
+| `api_requests`                           | `BigInt`   | NOT NULL    | `"0"`        |             |
+| `successful_requests`                    | `BigInt`   | NOT NULL    | `"0"`        |             |
+| `failed_requests`                        | `BigInt`   | NOT NULL    | `"0"`        |             |
+| `total_response_time_ms`                 | `BigInt`   | NOT NULL    | `"0"`        |             |
+| `timed_requests`                         | `BigInt`   | NOT NULL    | `"0"`        |             |
+| `created_at`                             | `DateTime` | NOT NULL    | `now()`      |             |
+| `updated_at`                             | `DateTime` | NOT NULL    | `@updatedAt` |             |
+
+#### Indexes
+
+- `@@index([date])`
+- `@@index([customer_org_id, date])`
+- `@@index([customer_team_id, date])`
+- `@@index([customer_member_id, date])`
+- `@@index([api_key])`
+- `@@index([model])`
+
+#### Definition
+
+```sql
+CREATE TABLE "LiteLLM_DailyCustomerMemberSpend" (
+    "id" TEXT NOT NULL,
+    "date" TEXT NOT NULL,
+    "customer_org_id" TEXT NOT NULL,
+    "customer_team_id" TEXT NOT NULL DEFAULT '',
+    "customer_member_id" TEXT NOT NULL DEFAULT '',
+    "model" TEXT NOT NULL DEFAULT '',
+    "model_group" TEXT NOT NULL DEFAULT '',
+    "custom_llm_provider" TEXT NOT NULL DEFAULT '',
+    "mcp_namespaced_tool_name" TEXT NOT NULL DEFAULT '',
+    "endpoint" TEXT NOT NULL DEFAULT '',
+    "api_key" TEXT NOT NULL DEFAULT '',
+    "spend" DOUBLE PRECISION NOT NULL DEFAULT 0.0,
+    "prompt_tokens" BIGINT NOT NULL DEFAULT 0,
+    "completion_tokens" BIGINT NOT NULL DEFAULT 0,
+    "cache_read_input_tokens" BIGINT NOT NULL DEFAULT 0,
+    "cache_creation_input_tokens" BIGINT NOT NULL DEFAULT 0,
+    "compression_saved_tokens" BIGINT NOT NULL DEFAULT 0,
+    "compression_savings_spend" DOUBLE PRECISION NOT NULL DEFAULT 0.0,
+    "prompt_caching_savings_spend" DOUBLE PRECISION NOT NULL DEFAULT 0.0,
+    "gateway_injected_caching_savings_spend" DOUBLE PRECISION NOT NULL DEFAULT 0.0,
+    "autorouter_savings_spend" DOUBLE PRECISION NOT NULL DEFAULT 0.0,
+    "guardrail_spend" DOUBLE PRECISION NOT NULL DEFAULT 0.0,
+    "api_requests" BIGINT NOT NULL DEFAULT 0,
+    "successful_requests" BIGINT NOT NULL DEFAULT 0,
+    "failed_requests" BIGINT NOT NULL DEFAULT 0,
+    "total_response_time_ms" BIGINT NOT NULL DEFAULT 0,
+    "timed_requests" BIGINT NOT NULL DEFAULT 0,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "LiteLLM_DailyCustomerMemberSpend_pkey" PRIMARY KEY ("id")
+);
+
+CREATE INDEX "LiteLLM_DailyCustomerMemberSpend_date_idx" ON "LiteLLM_DailyCustomerMemberSpend"("date");
+
+CREATE INDEX "LiteLLM_DailyCustomerMemberSpend_customer_org_id_date_idx" ON "LiteLLM_DailyCustomerMemberSpend"("customer_org_id", "date");
+
+CREATE INDEX "LiteLLM_DailyCustomerMemberSpend_customer_team_id_date_idx" ON "LiteLLM_DailyCustomerMemberSpend"("customer_team_id", "date");
+
+CREATE INDEX "LiteLLM_DailyCustomerMemberSpend_customer_member_id_date_idx" ON "LiteLLM_DailyCustomerMemberSpend"("customer_member_id", "date");
+
+CREATE INDEX "LiteLLM_DailyCustomerMemberSpend_api_key_idx" ON "LiteLLM_DailyCustomerMemberSpend"("api_key");
+
+CREATE INDEX "LiteLLM_DailyCustomerMemberSpend_model_idx" ON "LiteLLM_DailyCustomerMemberSpend"("model");
+```
+
+<details>
+<summary>Queries and their SQL</summary>
+
+**findMany**: Every row
+
+```ts
+await prisma.liteLLM_DailyCustomerMemberSpend.findMany();
+```
+
+```sql
+SELECT
+  "public"."LiteLLM_DailyCustomerMemberSpend"."id",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."date",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."customer_org_id",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."customer_team_id",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."customer_member_id",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."model",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."model_group",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."custom_llm_provider",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."mcp_namespaced_tool_name",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."endpoint",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."api_key",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."spend",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."prompt_tokens",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."completion_tokens",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."cache_read_input_tokens",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."cache_creation_input_tokens",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."compression_saved_tokens",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."compression_savings_spend",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."prompt_caching_savings_spend",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."gateway_injected_caching_savings_spend",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."autorouter_savings_spend",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."guardrail_spend",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."api_requests",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."successful_requests",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."failed_requests",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."total_response_time_ms",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."timed_requests",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."created_at",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."updated_at"
+FROM
+  "public"."LiteLLM_DailyCustomerMemberSpend"
+WHERE
+  1 = 1
+OFFSET
+  $1
+-- params: ["0"]
+```
+
+**count**: How many rows there are
+
+```ts
+await prisma.liteLLM_DailyCustomerMemberSpend.count();
+```
+
+```sql
+SELECT
+  COUNT(*) AS "_count$_all"
+FROM
+  (
+    SELECT
+      "public"."LiteLLM_DailyCustomerMemberSpend"."id"
+    FROM
+      "public"."LiteLLM_DailyCustomerMemberSpend"
+    WHERE
+      1 = 1
+    OFFSET
+      $1
+  ) AS "sub"
+-- params: ["0"]
+```
+
+**findUnique**: One row by what is unique to it
+
+```ts
+await prisma.liteLLM_DailyCustomerMemberSpend.findUnique({ where: { id: "example" } });
+```
+
+```sql
+SELECT
+  "public"."LiteLLM_DailyCustomerMemberSpend"."id",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."date",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."customer_org_id",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."customer_team_id",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."customer_member_id",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."model",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."model_group",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."custom_llm_provider",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."mcp_namespaced_tool_name",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."endpoint",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."api_key",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."spend",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."prompt_tokens",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."completion_tokens",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."cache_read_input_tokens",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."cache_creation_input_tokens",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."compression_saved_tokens",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."compression_savings_spend",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."prompt_caching_savings_spend",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."gateway_injected_caching_savings_spend",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."autorouter_savings_spend",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."guardrail_spend",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."api_requests",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."successful_requests",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."failed_requests",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."total_response_time_ms",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."timed_requests",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."created_at",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."updated_at"
+FROM
+  "public"."LiteLLM_DailyCustomerMemberSpend"
+WHERE
+  (
+    "public"."LiteLLM_DailyCustomerMemberSpend"."id" = $1
+    AND 1 = 1
+  )
+LIMIT
+  $2
+OFFSET
+  $3
+-- params: ["example","1","0"]
+```
+
+**create**: Create a row
+
+```ts
+await prisma.liteLLM_DailyCustomerMemberSpend.create({
+  data: { id: "example", date: "example", customer_org_id: "example" },
+});
+```
+
+```sql
+INSERT INTO
+  "public"."LiteLLM_DailyCustomerMemberSpend" (
+    "id",
+    "date",
+    "customer_org_id",
+    "customer_team_id",
+    "customer_member_id",
+    "model",
+    "model_group",
+    "custom_llm_provider",
+    "mcp_namespaced_tool_name",
+    "endpoint",
+    "api_key",
+    "spend",
+    "prompt_tokens",
+    "completion_tokens",
+    "cache_read_input_tokens",
+    "cache_creation_input_tokens",
+    "compression_saved_tokens",
+    "compression_savings_spend",
+    "prompt_caching_savings_spend",
+    "gateway_injected_caching_savings_spend",
+    "autorouter_savings_spend",
+    "guardrail_spend",
+    "api_requests",
+    "successful_requests",
+    "failed_requests",
+    "total_response_time_ms",
+    "timed_requests",
+    "created_at",
+    "updated_at"
+  )
+VALUES
+  (
+    $1,
+    $2,
+    $3,
+    $4,
+    $5,
+    $6,
+    $7,
+    $8,
+    $9,
+    $10,
+    $11,
+    $12,
+    $13,
+    $14,
+    $15,
+    $16,
+    $17,
+    $18,
+    $19,
+    $20,
+    $21,
+    $22,
+    $23,
+    $24,
+    $25,
+    $26,
+    $27,
+    $28,
+    $29
+  )
+RETURNING
+  "public"."LiteLLM_DailyCustomerMemberSpend"."id",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."date",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."customer_org_id",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."customer_team_id",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."customer_member_id",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."model",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."model_group",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."custom_llm_provider",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."mcp_namespaced_tool_name",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."endpoint",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."api_key",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."spend",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."prompt_tokens",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."completion_tokens",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."cache_read_input_tokens",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."cache_creation_input_tokens",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."compression_saved_tokens",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."compression_savings_spend",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."prompt_caching_savings_spend",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."gateway_injected_caching_savings_spend",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."autorouter_savings_spend",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."guardrail_spend",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."api_requests",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."successful_requests",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."failed_requests",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."total_response_time_ms",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."timed_requests",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."created_at",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."updated_at"
+-- params: ["example","example","example","","","","","","","","","0.0","0","0","0","0","0","0.0","0.0","0.0","0.0","0.0","0","0","0","0","0","<now()>","<now()>"]
+```
+
+**update**: Update a row
+
+```ts
+await prisma.liteLLM_DailyCustomerMemberSpend.update({
+  where: { id: "example" },
+  data: { date: "example" },
+});
+```
+
+```sql
+UPDATE "public"."LiteLLM_DailyCustomerMemberSpend"
+SET
+  "date" = $1,
+  "updated_at" = $2
+WHERE
+  (
+    "public"."LiteLLM_DailyCustomerMemberSpend"."id" = $3
+    AND 1 = 1
+  )
+RETURNING
+  "public"."LiteLLM_DailyCustomerMemberSpend"."id",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."date",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."customer_org_id",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."customer_team_id",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."customer_member_id",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."model",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."model_group",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."custom_llm_provider",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."mcp_namespaced_tool_name",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."endpoint",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."api_key",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."spend",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."prompt_tokens",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."completion_tokens",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."cache_read_input_tokens",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."cache_creation_input_tokens",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."compression_saved_tokens",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."compression_savings_spend",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."prompt_caching_savings_spend",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."gateway_injected_caching_savings_spend",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."autorouter_savings_spend",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."guardrail_spend",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."api_requests",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."successful_requests",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."failed_requests",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."total_response_time_ms",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."timed_requests",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."created_at",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."updated_at"
+-- params: ["example",{"prisma__type":"generatorCall","prisma__value":{"name":"now","args":[],"returnType":{"type":"DateTime"}}},"example"]
+```
+
+**delete**: Delete a row
+
+```ts
+await prisma.liteLLM_DailyCustomerMemberSpend.delete({ where: { id: "example" } });
+```
+
+```sql
+DELETE FROM "public"."LiteLLM_DailyCustomerMemberSpend"
+WHERE
+  (
+    "public"."LiteLLM_DailyCustomerMemberSpend"."id" = $1
+    AND 1 = 1
+  )
+RETURNING
+  "public"."LiteLLM_DailyCustomerMemberSpend"."id",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."date",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."customer_org_id",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."customer_team_id",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."customer_member_id",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."model",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."model_group",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."custom_llm_provider",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."mcp_namespaced_tool_name",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."endpoint",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."api_key",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."spend",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."prompt_tokens",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."completion_tokens",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."cache_read_input_tokens",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."cache_creation_input_tokens",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."compression_saved_tokens",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."compression_savings_spend",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."prompt_caching_savings_spend",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."gateway_injected_caching_savings_spend",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."autorouter_savings_spend",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."guardrail_spend",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."api_requests",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."successful_requests",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."failed_requests",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."total_response_time_ms",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."timed_requests",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."created_at",
+  "public"."LiteLLM_DailyCustomerMemberSpend"."updated_at"
 -- params: ["example"]
 ```
 

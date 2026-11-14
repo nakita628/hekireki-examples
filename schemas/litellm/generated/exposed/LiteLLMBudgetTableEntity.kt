@@ -13,11 +13,13 @@ class LiteLLMBudgetTableEntity(
     companion object : EntityClass<String, LiteLLMBudgetTableEntity>(LiteLLMBudgetTableTable)
 
     val customerOrganizationDefaults by LiteLLMCustomerOrganizationTableEntity optionalReferrersOn
-        LiteLLMCustomerOrganizationTableTable.defaultBudgetId
+        LiteLLMCustomerOrganizationTableTable.defaultBudgetTemplateId
     val customerOrganizations by LiteLLMCustomerOrganizationTableEntity optionalReferrersOn LiteLLMCustomerOrganizationTableTable.budgetId
-    val customerMemberTemplates by LiteLLMCustomerMemberTableEntity optionalReferrersOn LiteLLMCustomerMemberTableTable.budgetTemplateId
     val customerTeams by LiteLLMCustomerTeamTableEntity optionalReferrersOn LiteLLMCustomerTeamTableTable.budgetId
     val customerMembers by LiteLLMCustomerMemberTableEntity optionalReferrersOn LiteLLMCustomerMemberTableTable.budgetId
+    val customerMemberOverrides by LiteLLMCustomerMemberTableEntity optionalReferrersOn LiteLLMCustomerMemberTableTable.budgetOverrideId
+    val customerTeamOverrides by LiteLLMCustomerTeamTableEntity optionalReferrersOn LiteLLMCustomerTeamTableTable.budgetOverrideId
+    var name by LiteLLMBudgetTableTable.name
     var maxBudget by LiteLLMBudgetTableTable.maxBudget
     var softBudget by LiteLLMBudgetTableTable.softBudget
     var maxParallelRequests by LiteLLMBudgetTableTable.maxParallelRequests
@@ -28,6 +30,8 @@ class LiteLLMBudgetTableEntity(
     var modelTpmLimit by LiteLLMBudgetTableTable.modelTpmLimit
     var modelRpmLimit by LiteLLMBudgetTableTable.modelRpmLimit
     var budgetDuration by LiteLLMBudgetTableTable.budgetDuration
+    var budgetLimits by LiteLLMBudgetTableTable.budgetLimits
+    var capPolicy by LiteLLMBudgetTableTable.capPolicy
     var budgetResetAt by LiteLLMBudgetTableTable.budgetResetAt
     var allowedModels by LiteLLMBudgetTableTable.allowedModels
     var tempBudgetIncrease by LiteLLMBudgetTableTable.tempBudgetIncrease

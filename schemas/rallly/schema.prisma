@@ -1,6 +1,6 @@
 // Rallly: Rallly scheduling polls: users, spaces, polls, options, participants and votes.
 //
-// Imported from https://github.com/lukevella/rallly/tree/5e1cb41682ae749bb111d5a95a1a0f4fb56d137f/packages/database/prisma/
+// Imported from https://github.com/lukevella/rallly/tree/a7f829b4d9d1e458e87f11b841951e9a67b821f8/packages/database/prisma/
 // (AGPL-3.0 license) by tools/import/import-schema.mjs, which dropped the original
 // generator blocks and the datasource's connection URLs and added the hekireki generators below.
 // The project keeps its schema in 15 files (prismaSchemaFolder), joined here in name order.
@@ -53,11 +53,11 @@ model Subscription {
   apiAddonItemId       String?              @map("api_addon_item_id")
   apiAddonPriceId      String?              @map("api_addon_price_id")
   apiAddonAmount       Int?                 @map("api_addon_amount")
-  // Monthly API poll limit granted by the add-on.
-  apiPollLimit         Int?                 @map("api_poll_limit")
-  // A lapsed add-on's limit, kept until retainedUntil so usage already
+  // Add-on tier name (ApiPollTier). The app maps it to a poll limit.
+  apiAddonTier         String?              @map("api_addon_tier")
+  // A lapsed add-on's tier, kept until retainedUntil so usage already
   // accrued in the period is not suddenly over the limit.
-  apiPollRetainedLimit Int?                 @map("api_poll_retained_limit")
+  apiPollRetainedTier  String?              @map("api_poll_retained_tier")
   apiPollRetainedUntil DateTime?            @map("api_poll_retained_until")
 
   user  User  @relation("UserToSubscription", fields: [userId], references: [id], onDelete: Cascade)

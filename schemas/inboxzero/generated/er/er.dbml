@@ -526,7 +526,7 @@ Null until first turned on, which is when default bundles are chosen.''']
   filingConfirmationSendEmail Boolean [default: true, not null]
   followUpAwaitingReplyDays Float
   followUpNeedsReplyDays Float
-  followUpAutoDraftEnabled Boolean [default: true, not null]
+  followUpAutoDraftEnabled Boolean [default: false, not null]
   digestSendEmail Boolean [default: true, not null]
   learnedWritingStyle String
   userId String [not null]

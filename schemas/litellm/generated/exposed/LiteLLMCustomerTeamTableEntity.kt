@@ -13,13 +13,14 @@ class LiteLLMCustomerTeamTableEntity(
     companion object : EntityClass<String, LiteLLMCustomerTeamTableEntity>(LiteLLMCustomerTeamTableTable)
 
     var spend by LiteLLMCustomerTeamTableTable.spend
-    var budgetResetAt by LiteLLMCustomerTeamTableTable.budgetResetAt
     var alias by LiteLLMCustomerTeamTableTable.alias
     var parentOrgId by LiteLLMCustomerTeamTableTable.parentOrgId
     var parentOrg by LiteLLMCustomerOrganizationTableEntity referencedOn LiteLLMCustomerTeamTableTable.parentOrgId
     var budgetId by LiteLLMCustomerTeamTableTable.budgetId
     var budget by LiteLLMBudgetTableEntity optionalReferencedOn LiteLLMCustomerTeamTableTable.budgetId
-    val members by LiteLLMCustomerMemberTableEntity referrersOn LiteLLMCustomerMemberTableTable.parentTeamId
+    var budgetOverrideId by LiteLLMCustomerTeamTableTable.budgetOverrideId
+    var budgetOverride by LiteLLMBudgetTableEntity optionalReferencedOn LiteLLMCustomerTeamTableTable.budgetOverrideId
+    var budgetOverrideExpiresAt by LiteLLMCustomerTeamTableTable.budgetOverrideExpiresAt
     var createdAt by LiteLLMCustomerTeamTableTable.createdAt
     var createdBy by LiteLLMCustomerTeamTableTable.createdBy
     var updatedAt by LiteLLMCustomerTeamTableTable.updatedAt

@@ -30,6 +30,8 @@ public partial class LiteLLMContext : DbContext
 
     public virtual DbSet<LiteLLMCustomerMemberTable> LiteLLMCustomerMemberTables { get; set; }
 
+    public virtual DbSet<LiteLLMCustomerBudgetIncreaseRequest> LiteLLMCustomerBudgetIncreaseRequests { get; set; }
+
     public virtual DbSet<LiteLLMCredentialsTable> LiteLLMCredentialsTables { get; set; }
 
     public virtual DbSet<LiteLLMProxyModelTable> LiteLLMProxyModelTables { get; set; }
@@ -109,6 +111,8 @@ public partial class LiteLLMContext : DbContext
     public virtual DbSet<LiteLLMDailyGlobalSpend> LiteLLMDailyGlobalSpends { get; set; }
 
     public virtual DbSet<LiteLLMDailyOrganizationSpend> LiteLLMDailyOrganizationSpends { get; set; }
+
+    public virtual DbSet<LiteLLMDailyCustomerMemberSpend> LiteLLMDailyCustomerMemberSpends { get; set; }
 
     public virtual DbSet<LiteLLMDailyEndUserSpend> LiteLLMDailyEndUserSpends { get; set; }
 
@@ -287,6 +291,7 @@ public partial class LiteLLMContext : DbContext
             entity.Property(e => e.BudgetId)
                 .HasValueGenerator<UuidV4StringGenerator>()
                 .HasColumnName("budget_id");
+            entity.Property(e => e.Name).HasColumnName("name");
             entity.Property(e => e.MaxBudget).HasColumnName("max_budget");
             entity.Property(e => e.SoftBudget).HasColumnName("soft_budget");
             entity.Property(e => e.MaxParallelRequests).HasColumnName("max_parallel_requests");
@@ -303,6 +308,10 @@ public partial class LiteLLMContext : DbContext
                 .HasColumnType("jsonb")
                 .HasColumnName("model_rpm_limit");
             entity.Property(e => e.BudgetDuration).HasColumnName("budget_duration");
+            entity.Property(e => e.BudgetLimits)
+                .HasColumnType("jsonb")
+                .HasColumnName("budget_limits");
+            entity.Property(e => e.CapPolicy).HasColumnName("cap_policy");
             entity.Property(e => e.BudgetResetAt)
                 .HasConversion<UtcClockConverter>()
                 .HasColumnType("timestamp(3) without time zone")
@@ -338,29 +347,22 @@ public partial class LiteLLMContext : DbContext
 
             entity.ToTable("LiteLLM_CustomerOrganizationTable");
 
+            entity.HasIndex(e => e.Spend, "LiteLLM_CustomerOrganizationTable_spend_idx");
+
             entity.Property(e => e.Spend)
                 .ValueGeneratedNever()
                 .HasDefaultValue(0.0)
                 .HasColumnName("spend");
-            entity.Property(e => e.BudgetResetAt)
-                .HasConversion<UtcClockConverter>()
-                .HasColumnType("timestamp(3) without time zone")
-                .HasColumnName("budget_reset_at");
-            entity.Property(e => e.BudgetIds)
+            entity.Property(e => e.BudgetTemplateIds)
                 .ValueGeneratedNever()
                 .HasDefaultValue(new List<string>())
-                .HasColumnName("budget_ids");
-            entity.Property(e => e.BudgetNames)
-                .ValueGeneratedNever()
-                .HasDefaultValue("{}")
-                .HasColumnType("jsonb")
-                .HasColumnName("budget_names");
+                .HasColumnName("budget_template_ids");
             entity.Property(e => e.BudgetId).HasColumnName("budget_id");
             entity.Property(e => e.CustomerOrgId)
                 .HasValueGenerator<UuidV4StringGenerator>()
                 .HasColumnName("customer_org_id");
             entity.Property(e => e.Alias).HasColumnName("alias");
-            entity.Property(e => e.DefaultBudgetId).HasColumnName("default_budget_id");
+            entity.Property(e => e.DefaultBudgetTemplateId).HasColumnName("default_budget_template_id");
             entity.Property(e => e.CreatedAt)
                 .HasValueGenerator<UtcNowGenerator>()
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
@@ -381,10 +383,10 @@ public partial class LiteLLMContext : DbContext
                 .OnDelete(DeleteBehavior.SetNull)
                 .HasConstraintName("LiteLLM_CustomerOrganizationTable_budget_id_fkey");
 
-            entity.HasOne(d => d.DefaultBudget).WithMany(p => p.CustomerOrganizationDefaults)
-                .HasForeignKey(d => d.DefaultBudgetId)
+            entity.HasOne(d => d.DefaultBudgetTemplate).WithMany(p => p.CustomerOrganizationDefaults)
+                .HasForeignKey(d => d.DefaultBudgetTemplateId)
                 .OnDelete(DeleteBehavior.SetNull)
-                .HasConstraintName("LiteLLM_CustomerOrganizationTable_default_budget_id_fkey");
+                .HasConstraintName("LiteLLM_CustomerOrganizationTable_default_budget_template__fkey");
         });
 
         modelBuilder.Entity<LiteLLMCustomerTeamTable>(entity =>
@@ -395,20 +397,23 @@ public partial class LiteLLMContext : DbContext
 
             entity.HasIndex(e => e.ParentOrgId, "LiteLLM_CustomerTeamTable_parent_org_id_idx");
 
+            entity.HasIndex(e => e.Spend, "LiteLLM_CustomerTeamTable_spend_idx");
+
             entity.Property(e => e.Spend)
                 .ValueGeneratedNever()
                 .HasDefaultValue(0.0)
                 .HasColumnName("spend");
-            entity.Property(e => e.BudgetResetAt)
-                .HasConversion<UtcClockConverter>()
-                .HasColumnType("timestamp(3) without time zone")
-                .HasColumnName("budget_reset_at");
             entity.Property(e => e.CustomerTeamId)
                 .HasValueGenerator<UuidV4StringGenerator>()
                 .HasColumnName("customer_team_id");
             entity.Property(e => e.Alias).HasColumnName("alias");
             entity.Property(e => e.ParentOrgId).HasColumnName("parent_org_id");
             entity.Property(e => e.BudgetId).HasColumnName("budget_id");
+            entity.Property(e => e.BudgetOverrideId).HasColumnName("budget_override_id");
+            entity.Property(e => e.BudgetOverrideExpiresAt)
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("budget_override_expires_at");
             entity.Property(e => e.CreatedAt)
                 .HasValueGenerator<UtcNowGenerator>()
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
@@ -433,6 +438,11 @@ public partial class LiteLLMContext : DbContext
                 .HasForeignKey(d => d.BudgetId)
                 .OnDelete(DeleteBehavior.SetNull)
                 .HasConstraintName("LiteLLM_CustomerTeamTable_budget_id_fkey");
+
+            entity.HasOne(d => d.BudgetOverride).WithMany(p => p.CustomerTeamOverrides)
+                .HasForeignKey(d => d.BudgetOverrideId)
+                .OnDelete(DeleteBehavior.ClientNoAction)
+                .HasConstraintName("LiteLLM_CustomerTeamTable_budget_override_id_fkey");
         });
 
         modelBuilder.Entity<LiteLLMCustomerMemberTable>(entity =>
@@ -441,25 +451,25 @@ public partial class LiteLLMContext : DbContext
 
             entity.ToTable("LiteLLM_CustomerMemberTable");
 
-            entity.HasIndex(e => e.ParentTeamId, "LiteLLM_CustomerMemberTable_parent_team_id_idx");
+            entity.HasIndex(e => e.ParentOrgId, "LiteLLM_CustomerMemberTable_parent_org_id_idx");
 
-            entity.HasIndex(e => e.BudgetTemplateId, "LiteLLM_CustomerMemberTable_budget_template_id_idx");
+            entity.HasIndex(e => e.Spend, "LiteLLM_CustomerMemberTable_spend_idx");
 
             entity.Property(e => e.Spend)
                 .ValueGeneratedNever()
                 .HasDefaultValue(0.0)
                 .HasColumnName("spend");
-            entity.Property(e => e.BudgetResetAt)
-                .HasConversion<UtcClockConverter>()
-                .HasColumnType("timestamp(3) without time zone")
-                .HasColumnName("budget_reset_at");
             entity.Property(e => e.CustomerMemberId)
                 .HasValueGenerator<UuidV4StringGenerator>()
                 .HasColumnName("customer_member_id");
             entity.Property(e => e.Alias).HasColumnName("alias");
-            entity.Property(e => e.ParentTeamId).HasColumnName("parent_team_id");
+            entity.Property(e => e.ParentOrgId).HasColumnName("parent_org_id");
+            entity.Property(e => e.ParentTeamIds)
+                .ValueGeneratedNever()
+                .HasDefaultValue(new List<string>())
+                .HasColumnName("parent_team_ids");
             entity.Property(e => e.BudgetId).HasColumnName("budget_id");
-            entity.Property(e => e.BudgetTemplateId).HasColumnName("budget_template_id");
+            entity.Property(e => e.BudgetOverrideId).HasColumnName("budget_override_id");
             entity.Property(e => e.BudgetOverrideExpiresAt)
                 .HasConversion<UtcClockConverter>()
                 .HasColumnType("timestamp(3) without time zone")
@@ -479,20 +489,64 @@ public partial class LiteLLMContext : DbContext
                 .HasColumnName("updated_at");
             entity.Property(e => e.UpdatedBy).HasColumnName("updated_by");
 
-            entity.HasOne(d => d.ParentTeam).WithMany(p => p.Members)
-                .HasForeignKey(d => d.ParentTeamId)
+            entity.HasOne(d => d.ParentOrg).WithMany(p => p.Members)
+                .HasForeignKey(d => d.ParentOrgId)
                 .OnDelete(DeleteBehavior.Restrict)
-                .HasConstraintName("LiteLLM_CustomerMemberTable_parent_team_id_fkey");
+                .HasConstraintName("LiteLLM_CustomerMemberTable_parent_org_id_fkey");
 
             entity.HasOne(d => d.Budget).WithMany(p => p.CustomerMembers)
                 .HasForeignKey(d => d.BudgetId)
                 .OnDelete(DeleteBehavior.ClientNoAction)
                 .HasConstraintName("LiteLLM_CustomerMemberTable_budget_id_fkey");
 
-            entity.HasOne(d => d.BudgetTemplate).WithMany(p => p.CustomerMemberTemplates)
-                .HasForeignKey(d => d.BudgetTemplateId)
+            entity.HasOne(d => d.BudgetOverride).WithMany(p => p.CustomerMemberOverrides)
+                .HasForeignKey(d => d.BudgetOverrideId)
                 .OnDelete(DeleteBehavior.ClientNoAction)
-                .HasConstraintName("LiteLLM_CustomerMemberTable_budget_template_id_fkey");
+                .HasConstraintName("LiteLLM_CustomerMemberTable_budget_override_id_fkey");
+        });
+
+        modelBuilder.Entity<LiteLLMCustomerBudgetIncreaseRequest>(entity =>
+        {
+            entity.HasKey(e => e.RequestId).HasName("LiteLLM_CustomerBudgetIncreaseRequest_pkey");
+
+            entity.ToTable("LiteLLM_CustomerBudgetIncreaseRequest");
+
+            entity.HasIndex(e => e.Status, "LiteLLM_CustomerBudgetIncreaseRequest_status_idx");
+
+            entity.HasIndex(e => e.CustomerMemberId, "LiteLLM_CustomerBudgetIncreaseRequest_customer_member_id_idx");
+
+            entity.Property(e => e.RequestId)
+                .HasValueGenerator<UuidV4StringGenerator>()
+                .HasColumnName("request_id");
+            entity.Property(e => e.CustomerMemberId).HasColumnName("customer_member_id");
+            entity.Property(e => e.RequestedMaxBudget).HasColumnName("requested_max_budget");
+            entity.Property(e => e.ExpiresAt)
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("expires_at");
+            entity.Property(e => e.Reason).HasColumnName("reason");
+            entity.Property(e => e.Status)
+                .ValueGeneratedNever()
+                .HasDefaultValue("pending_review")
+                .HasColumnName("status");
+            entity.Property(e => e.SubmittedBy).HasColumnName("submitted_by");
+            entity.Property(e => e.SubmittedAt)
+                .HasValueGenerator<UtcNowGenerator>()
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("submitted_at");
+            entity.Property(e => e.ReviewedBy).HasColumnName("reviewed_by");
+            entity.Property(e => e.ReviewedAt)
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("reviewed_at");
+            entity.Property(e => e.ReviewNotes).HasColumnName("review_notes");
+
+            entity.HasOne(d => d.CustomerMember).WithMany(p => p.BudgetIncreaseRequests)
+                .HasForeignKey(d => d.CustomerMemberId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("LiteLLM_CustomerBudgetIncreaseRequest_customer_member_id_fkey");
         });
 
         modelBuilder.Entity<LiteLLMCredentialsTable>(entity =>
@@ -2811,6 +2865,135 @@ public partial class LiteLLMContext : DbContext
                 .ValueGeneratedNever()
                 .HasDefaultValue(0.0)
                 .HasColumnName("spend");
+            entity.Property(e => e.ApiRequests)
+                .ValueGeneratedNever()
+                .HasDefaultValue(0L)
+                .HasColumnName("api_requests");
+            entity.Property(e => e.SuccessfulRequests)
+                .ValueGeneratedNever()
+                .HasDefaultValue(0L)
+                .HasColumnName("successful_requests");
+            entity.Property(e => e.FailedRequests)
+                .ValueGeneratedNever()
+                .HasDefaultValue(0L)
+                .HasColumnName("failed_requests");
+            entity.Property(e => e.TotalResponseTimeMs)
+                .ValueGeneratedNever()
+                .HasDefaultValue(0L)
+                .HasColumnName("total_response_time_ms");
+            entity.Property(e => e.TimedRequests)
+                .ValueGeneratedNever()
+                .HasDefaultValue(0L)
+                .HasColumnName("timed_requests");
+            entity.Property(e => e.CreatedAt)
+                .HasValueGenerator<UtcNowGenerator>()
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("created_at");
+            entity.Property(e => e.UpdatedAt)
+                .HasConversion<UtcClockConverter>()
+                .HasColumnType("timestamp(3) without time zone")
+                .HasColumnName("updated_at");
+        });
+
+        modelBuilder.Entity<LiteLLMDailyCustomerMemberSpend>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("LiteLLM_DailyCustomerMemberSpend_pkey");
+
+            entity.ToTable("LiteLLM_DailyCustomerMemberSpend");
+
+            entity.HasIndex(e => e.Date, "LiteLLM_DailyCustomerMemberSpend_date_idx");
+
+            entity.HasIndex(e => new { e.CustomerOrgId, e.Date }, "LiteLLM_DailyCustomerMemberSpend_customer_org_id_date_idx");
+
+            entity.HasIndex(e => new { e.CustomerTeamId, e.Date }, "LiteLLM_DailyCustomerMemberSpend_customer_team_id_date_idx");
+
+            entity.HasIndex(e => new { e.CustomerMemberId, e.Date }, "LiteLLM_DailyCustomerMemberSpend_customer_member_id_date_idx");
+
+            entity.HasIndex(e => e.ApiKey, "LiteLLM_DailyCustomerMemberSpend_api_key_idx");
+
+            entity.HasIndex(e => e.Model, "LiteLLM_DailyCustomerMemberSpend_model_idx");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Date).HasColumnName("date");
+            entity.Property(e => e.CustomerOrgId).HasColumnName("customer_org_id");
+            entity.Property(e => e.CustomerTeamId)
+                .ValueGeneratedNever()
+                .HasDefaultValue("")
+                .HasColumnName("customer_team_id");
+            entity.Property(e => e.CustomerMemberId)
+                .ValueGeneratedNever()
+                .HasDefaultValue("")
+                .HasColumnName("customer_member_id");
+            entity.Property(e => e.Model)
+                .ValueGeneratedNever()
+                .HasDefaultValue("")
+                .HasColumnName("model");
+            entity.Property(e => e.ModelGroup)
+                .ValueGeneratedNever()
+                .HasDefaultValue("")
+                .HasColumnName("model_group");
+            entity.Property(e => e.CustomLlmProvider)
+                .ValueGeneratedNever()
+                .HasDefaultValue("")
+                .HasColumnName("custom_llm_provider");
+            entity.Property(e => e.McpNamespacedToolName)
+                .ValueGeneratedNever()
+                .HasDefaultValue("")
+                .HasColumnName("mcp_namespaced_tool_name");
+            entity.Property(e => e.Endpoint)
+                .ValueGeneratedNever()
+                .HasDefaultValue("")
+                .HasColumnName("endpoint");
+            entity.Property(e => e.ApiKey)
+                .ValueGeneratedNever()
+                .HasDefaultValue("")
+                .HasColumnName("api_key");
+            entity.Property(e => e.Spend)
+                .ValueGeneratedNever()
+                .HasDefaultValue(0.0)
+                .HasColumnName("spend");
+            entity.Property(e => e.PromptTokens)
+                .ValueGeneratedNever()
+                .HasDefaultValue(0L)
+                .HasColumnName("prompt_tokens");
+            entity.Property(e => e.CompletionTokens)
+                .ValueGeneratedNever()
+                .HasDefaultValue(0L)
+                .HasColumnName("completion_tokens");
+            entity.Property(e => e.CacheReadInputTokens)
+                .ValueGeneratedNever()
+                .HasDefaultValue(0L)
+                .HasColumnName("cache_read_input_tokens");
+            entity.Property(e => e.CacheCreationInputTokens)
+                .ValueGeneratedNever()
+                .HasDefaultValue(0L)
+                .HasColumnName("cache_creation_input_tokens");
+            entity.Property(e => e.CompressionSavedTokens)
+                .ValueGeneratedNever()
+                .HasDefaultValue(0L)
+                .HasColumnName("compression_saved_tokens");
+            entity.Property(e => e.CompressionSavingsSpend)
+                .ValueGeneratedNever()
+                .HasDefaultValue(0.0)
+                .HasColumnName("compression_savings_spend");
+            entity.Property(e => e.PromptCachingSavingsSpend)
+                .ValueGeneratedNever()
+                .HasDefaultValue(0.0)
+                .HasColumnName("prompt_caching_savings_spend");
+            entity.Property(e => e.GatewayInjectedCachingSavingsSpend)
+                .ValueGeneratedNever()
+                .HasDefaultValue(0.0)
+                .HasColumnName("gateway_injected_caching_savings_spend");
+            entity.Property(e => e.AutorouterSavingsSpend)
+                .ValueGeneratedNever()
+                .HasDefaultValue(0.0)
+                .HasColumnName("autorouter_savings_spend");
+            entity.Property(e => e.GuardrailSpend)
+                .ValueGeneratedNever()
+                .HasDefaultValue(0.0)
+                .HasColumnName("guardrail_spend");
             entity.Property(e => e.ApiRequests)
                 .ValueGeneratedNever()
                 .HasDefaultValue(0L)
@@ -6105,6 +6288,15 @@ public partial class LiteLLMContext : DbContext
         }
 
         foreach (var entry in ChangeTracker.Entries<LiteLLMDailyOrganizationSpend>())
+        {
+            if ((entry.State == EntityState.Added && entry.Entity.UpdatedAt == default)
+                || (entry.State == EntityState.Modified && !entry.Property(e => e.UpdatedAt).IsModified))
+            {
+                entry.Entity.UpdatedAt = now;
+            }
+        }
+
+        foreach (var entry in ChangeTracker.Entries<LiteLLMDailyCustomerMemberSpend>())
         {
             if ((entry.State == EntityState.Added && entry.Entity.UpdatedAt == default)
                 || (entry.State == EntityState.Modified && !entry.Property(e => e.UpdatedAt).IsModified))

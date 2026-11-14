@@ -22,25 +22,20 @@ class LiteLLMCustomerOrganizationTable extends Model
 
     protected $fillable = [
         'spend',
-        'budget_reset_at',
-        'budget_ids',
-        'budget_names',
+        'budget_template_ids',
         'budget_id',
         'alias',
-        'default_budget_id',
+        'default_budget_template_id',
         'created_by',
         'updated_by',
     ];
 
     protected $attributes = [
         'spend' => 0.0,
-        'budget_names' => '{}',
     ];
 
     protected $casts = [
         'spend' => 'float',
-        'budget_reset_at' => 'datetime',
-        'budget_names' => 'array',
     ];
 
     public function budget(): BelongsTo
@@ -48,13 +43,18 @@ class LiteLLMCustomerOrganizationTable extends Model
         return $this->belongsTo(LiteLLMBudgetTable::class, 'budget_id');
     }
 
-    public function default_budget(): BelongsTo
+    public function default_budget_template(): BelongsTo
     {
-        return $this->belongsTo(LiteLLMBudgetTable::class, 'default_budget_id');
+        return $this->belongsTo(LiteLLMBudgetTable::class, 'default_budget_template_id');
     }
 
     public function teams(): HasMany
     {
         return $this->hasMany(LiteLLMCustomerTeamTable::class, 'parent_org_id');
+    }
+
+    public function members(): HasMany
+    {
+        return $this->hasMany(LiteLLMCustomerMemberTable::class, 'parent_org_id');
     }
 }

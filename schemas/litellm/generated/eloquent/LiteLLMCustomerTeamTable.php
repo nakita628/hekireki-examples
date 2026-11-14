@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class LiteLLMCustomerTeamTable extends Model
 {
@@ -22,10 +21,11 @@ class LiteLLMCustomerTeamTable extends Model
 
     protected $fillable = [
         'spend',
-        'budget_reset_at',
         'alias',
         'parent_org_id',
         'budget_id',
+        'budget_override_id',
+        'budget_override_expires_at',
         'created_by',
         'updated_by',
     ];
@@ -36,7 +36,7 @@ class LiteLLMCustomerTeamTable extends Model
 
     protected $casts = [
         'spend' => 'float',
-        'budget_reset_at' => 'datetime',
+        'budget_override_expires_at' => 'datetime',
     ];
 
     public function parent_org(): BelongsTo
@@ -49,8 +49,8 @@ class LiteLLMCustomerTeamTable extends Model
         return $this->belongsTo(LiteLLMBudgetTable::class, 'budget_id');
     }
 
-    public function members(): HasMany
+    public function budget_override(): BelongsTo
     {
-        return $this->hasMany(LiteLLMCustomerMemberTable::class, 'parent_team_id');
+        return $this->belongsTo(LiteLLMBudgetTable::class, 'budget_override_id');
     }
 }

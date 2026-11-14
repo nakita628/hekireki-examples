@@ -8,13 +8,13 @@ use serde::{Deserialize, Serialize};
 pub struct Model {
     #[sea_orm(default_value = 0)]
     pub spend: f64,
-    pub budget_reset_at: Option<DateTime>,
     #[sea_orm(primary_key, auto_increment = false)]
     pub customer_member_id: String,
     pub alias: Option<String>,
-    pub parent_team_id: String,
+    pub parent_org_id: String,
+    pub parent_team_ids: Vec<String>,
     pub budget_id: Option<String>,
-    pub budget_template_id: Option<String>,
+    pub budget_override_id: Option<String>,
     pub budget_override_expires_at: Option<DateTime>,
     pub created_at: DateTime,
     pub created_by: String,
@@ -25,11 +25,11 @@ pub struct Model {
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
     #[sea_orm(
-        belongs_to = "super::lite_llm_customer_team_table::Entity",
-        from = "Column::ParentTeamId",
-        to = "super::lite_llm_customer_team_table::Column::CustomerTeamId"
+        belongs_to = "super::lite_llm_customer_organization_table::Entity",
+        from = "Column::ParentOrgId",
+        to = "super::lite_llm_customer_organization_table::Column::CustomerOrgId"
     )]
-    ParentTeam,
+    ParentOrg,
     #[sea_orm(
         belongs_to = "super::lite_llm_budget_table::Entity",
         from = "Column::BudgetId",
@@ -39,22 +39,30 @@ pub enum Relation {
     Budget,
     #[sea_orm(
         belongs_to = "super::lite_llm_budget_table::Entity",
-        from = "Column::BudgetTemplateId",
+        from = "Column::BudgetOverrideId",
         to = "super::lite_llm_budget_table::Column::BudgetId",
         on_delete = "Restrict"
     )]
-    BudgetTemplate,
+    BudgetOverride,
+    #[sea_orm(has_many = "super::lite_llm_customer_budget_increase_request::Entity")]
+    BudgetIncreaseRequests,
 }
 
-impl Related<super::lite_llm_customer_team_table::Entity> for Entity {
+impl Related<super::lite_llm_customer_organization_table::Entity> for Entity {
     fn to() -> RelationDef {
-        Relation::ParentTeam.def()
+        Relation::ParentOrg.def()
     }
 }
 
 impl Related<super::lite_llm_budget_table::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Budget.def()
+    }
+}
+
+impl Related<super::lite_llm_customer_budget_increase_request::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::BudgetIncreaseRequests.def()
     }
 }
 

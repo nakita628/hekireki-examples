@@ -64,6 +64,8 @@ pub use super::prompt_protected_labels::Entity as PromptProtectedLabels;
 pub use super::role_assignment::Entity as RoleAssignment;
 pub use super::score_config::Entity as ScoreConfig;
 pub use super::session::Entity as Session;
+pub use super::session_view::Entity as SessionView;
+pub use super::session_view_pin_override::Entity as SessionViewPinOverride;
 pub use super::skill::Entity as Skill;
 pub use super::skill_blob::Entity as SkillBlob;
 pub use super::skill_file::Entity as SkillFile;

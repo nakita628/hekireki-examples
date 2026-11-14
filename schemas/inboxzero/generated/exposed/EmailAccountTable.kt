@@ -75,7 +75,7 @@ object EmailAccountTable : IdTable<String>("\"EmailAccount\"") {
     val filingConfirmationSendEmail = bool("filingConfirmationSendEmail").default(true)
     val followUpAwaitingReplyDays = double("followUpAwaitingReplyDays").nullable()
     val followUpNeedsReplyDays = double("followUpNeedsReplyDays").nullable()
-    val followUpAutoDraftEnabled = bool("followUpAutoDraftEnabled").default(true)
+    val followUpAutoDraftEnabled = bool("followUpAutoDraftEnabled").default(false)
     val digestSendEmail = bool("digestSendEmail").default(true)
     val learnedWritingStyle = text("learnedWritingStyle").nullable()
     val userId =

@@ -8,12 +8,13 @@ use serde::{Deserialize, Serialize};
 pub struct Model {
     #[sea_orm(default_value = 0)]
     pub spend: f64,
-    pub budget_reset_at: Option<DateTime>,
     #[sea_orm(primary_key, auto_increment = false)]
     pub customer_team_id: String,
     pub alias: Option<String>,
     pub parent_org_id: String,
     pub budget_id: Option<String>,
+    pub budget_override_id: Option<String>,
+    pub budget_override_expires_at: Option<DateTime>,
     pub created_at: DateTime,
     pub created_by: String,
     pub updated_at: DateTime,
@@ -34,8 +35,13 @@ pub enum Relation {
         to = "super::lite_llm_budget_table::Column::BudgetId"
     )]
     Budget,
-    #[sea_orm(has_many = "super::lite_llm_customer_member_table::Entity")]
-    Members,
+    #[sea_orm(
+        belongs_to = "super::lite_llm_budget_table::Entity",
+        from = "Column::BudgetOverrideId",
+        to = "super::lite_llm_budget_table::Column::BudgetId",
+        on_delete = "Restrict"
+    )]
+    BudgetOverride,
 }
 
 impl Related<super::lite_llm_customer_organization_table::Entity> for Entity {
@@ -47,12 +53,6 @@ impl Related<super::lite_llm_customer_organization_table::Entity> for Entity {
 impl Related<super::lite_llm_budget_table::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Budget.def()
-    }
-}
-
-impl Related<super::lite_llm_customer_member_table::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Members.def()
     }
 }
 

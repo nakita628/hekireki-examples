@@ -64,8 +64,8 @@ type Subscription struct {
 	APIAddonItemID       *string   `gorm:"column:api_addon_item_id" json:"api_addon_item_id"`
 	APIAddonPriceID      *string   `gorm:"column:api_addon_price_id" json:"api_addon_price_id"`
 	APIAddonAmount       *int      `gorm:"column:api_addon_amount" json:"api_addon_amount"`
-	APIPollLimit         *int      `gorm:"column:api_poll_limit" json:"api_poll_limit"`
-	APIPollRetainedLimit *int      `gorm:"column:api_poll_retained_limit" json:"api_poll_retained_limit"`
+	APIAddonTier         *string   `gorm:"column:api_addon_tier" json:"api_addon_tier"`
+	APIPollRetainedTier  *string   `gorm:"column:api_poll_retained_tier" json:"api_poll_retained_tier"`
 	APIPollRetainedUntil *DateTime `gorm:"column:api_poll_retained_until" json:"api_poll_retained_until"`
 	User                 *User
 	Space                *Space

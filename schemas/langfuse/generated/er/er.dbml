@@ -32,6 +32,7 @@ Enum GatewayProvider {
   vercel
   azure
   google_ai_studio
+  vertex
 }
 
 Enum GatewayConnectionStatus {
@@ -203,6 +204,16 @@ Enum DashboardWidgetChartType {
   NUMBER
   HISTOGRAM
   PIVOT_TABLE
+}
+
+Enum SessionViewMode {
+  conversational
+  list
+}
+
+Enum SessionUnmatchedTraces {
+  show
+  hide
 }
 
 Enum ActionType {
@@ -417,6 +428,7 @@ Table gateway_ai_connections {
 Table gateway_api_key_associations {
   api_key_id String [pk]
   metadata Json [default: '{}', not null]
+  allowed_models Json
 }
 
 Table in_app_agent_conversations {
@@ -1233,6 +1245,7 @@ Table batch_actions {
   processed_count Int
   failed_count Int
   log String
+  cursor Json
 }
 
 Table media {
@@ -1396,6 +1409,37 @@ Table table_view_presets {
 
   indexes {
     (project_id, table_name, name) [unique]
+  }
+}
+
+Table session_views {
+  is_pinned_by_default_for_project Boolean [default: false, not null]
+  id String [pk]
+  project_id String [not null]
+  name String [not null]
+  filters Json [not null]
+  view_mode SessionViewMode [not null]
+  unmatched_traces SessionUnmatchedTraces [not null]
+  created_by String
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+
+  indexes {
+    (project_id, name) [unique]
+    (project_id, id) [unique]
+  }
+}
+
+Table session_view_pin_overrides {
+  id String [pk]
+  project_id String [not null]
+  user_id String [not null]
+  view_id String [note: 'Null identifies the built-in Messages view.']
+  is_pinned Boolean [default: true, not null]
+  position Int [not null]
+
+  indexes {
+    (project_id, user_id, view_id) [unique]
   }
 }
 
@@ -1772,6 +1816,16 @@ Ref table_view_presets_project_id_fk: table_view_presets.project_id > projects.i
 Ref table_view_presets_created_by_fk: table_view_presets.created_by > users.id [delete: set null]
 
 Ref table_view_presets_updated_by_fk: table_view_presets.updated_by > users.id [delete: set null]
+
+Ref session_views_project_id_fk: session_views.project_id > projects.id [delete: cascade]
+
+Ref session_views_created_by_fk: session_views.created_by > users.id [delete: set null]
+
+Ref session_view_pin_overrides_project_id_fk: session_view_pin_overrides.project_id > projects.id [delete: cascade]
+
+Ref session_view_pin_overrides_user_id_fk: session_view_pin_overrides.user_id > users.id [delete: cascade]
+
+Ref session_view_pin_overrides_(project_id, view_id)_fk: session_view_pin_overrides.(project_id, view_id) > session_views.(project_id, id) [delete: cascade]
 
 Ref default_views_project_id_fk: default_views.project_id > projects.id [delete: cascade]
 

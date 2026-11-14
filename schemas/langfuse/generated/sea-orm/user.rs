@@ -85,6 +85,10 @@ pub enum Relation {
         to = "super::table_view_preset::Column::UpdatedBy"
     )]
     TableViewPresetUpdated,
+    #[sea_orm(has_many = "super::session_view::Entity")]
+    SessionViewsCreated,
+    #[sea_orm(has_many = "super::session_view_pin_override::Entity")]
+    SessionViewPinOverrides,
     #[sea_orm(
         has_many = "super::monitor::Entity",
         from = "Column::Id",
@@ -208,6 +212,18 @@ impl Related<super::dashboard::Entity> for Entity {
 impl Related<super::table_view_preset::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::TableViewPresetCreated.def()
+    }
+}
+
+impl Related<super::session_view::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::SessionViewsCreated.def()
+    }
+}
+
+impl Related<super::session_view_pin_override::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::SessionViewPinOverrides.def()
     }
 }
 

@@ -30,6 +30,9 @@ class User < ApplicationRecord
                                        inverse_of: :created_by_user, dependent: :nullify
   has_many :table_view_preset_updated, class_name: "TableViewPreset", foreign_key: "updated_by",
                                        inverse_of: :updated_by_user, dependent: :nullify
+  has_many :session_views_created, class_name: "SessionView", foreign_key: "created_by", inverse_of: :created_by_user,
+                                   dependent: :nullify
+  has_many :session_view_pin_overrides, dependent: :destroy
   has_many :monitors_created, class_name: "MonitorRecord", foreign_key: "created_by", inverse_of: :created_by_user,
                               dependent: :nullify
   has_many :monitors_updated, class_name: "MonitorRecord", foreign_key: "updated_by", inverse_of: :updated_by_user,

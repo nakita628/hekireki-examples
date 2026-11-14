@@ -13,15 +13,14 @@ class LiteLLMCustomerOrganizationTableEntity(
     companion object : EntityClass<String, LiteLLMCustomerOrganizationTableEntity>(LiteLLMCustomerOrganizationTableTable)
 
     var spend by LiteLLMCustomerOrganizationTableTable.spend
-    var budgetResetAt by LiteLLMCustomerOrganizationTableTable.budgetResetAt
-    var budgetIds by LiteLLMCustomerOrganizationTableTable.budgetIds
-    var budgetNames by LiteLLMCustomerOrganizationTableTable.budgetNames
+    var budgetTemplateIds by LiteLLMCustomerOrganizationTableTable.budgetTemplateIds
     var budgetId by LiteLLMCustomerOrganizationTableTable.budgetId
     var budget by LiteLLMBudgetTableEntity optionalReferencedOn LiteLLMCustomerOrganizationTableTable.budgetId
     var alias by LiteLLMCustomerOrganizationTableTable.alias
-    var defaultBudgetId by LiteLLMCustomerOrganizationTableTable.defaultBudgetId
-    var defaultBudget by LiteLLMBudgetTableEntity optionalReferencedOn LiteLLMCustomerOrganizationTableTable.defaultBudgetId
+    var defaultBudgetTemplateId by LiteLLMCustomerOrganizationTableTable.defaultBudgetTemplateId
+    var defaultBudgetTemplate by LiteLLMBudgetTableEntity optionalReferencedOn LiteLLMCustomerOrganizationTableTable.defaultBudgetTemplateId
     val teams by LiteLLMCustomerTeamTableEntity referrersOn LiteLLMCustomerTeamTableTable.parentOrgId
+    val members by LiteLLMCustomerMemberTableEntity referrersOn LiteLLMCustomerMemberTableTable.parentOrgId
     var createdAt by LiteLLMCustomerOrganizationTableTable.createdAt
     var createdBy by LiteLLMCustomerOrganizationTableTable.createdBy
     var updatedAt by LiteLLMCustomerOrganizationTableTable.updatedAt

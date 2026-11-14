@@ -89,6 +89,8 @@ type User struct {
 	DashboardUpdated          []Dashboard                 `gorm:"foreignKey:UpdatedBy;constraint:OnDelete:SET NULL"`
 	TableViewPresetCreated    []TableViewPreset           `gorm:"foreignKey:CreatedBy;constraint:OnDelete:SET NULL"`
 	TableViewPresetUpdated    []TableViewPreset           `gorm:"foreignKey:UpdatedBy;constraint:OnDelete:SET NULL"`
+	SessionViewsCreated       []SessionView               `gorm:"foreignKey:CreatedBy;constraint:OnDelete:SET NULL"`
+	SessionViewPinOverrides   []SessionViewPinOverride    `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
 	MonitorsCreated           []Monitor                   `gorm:"foreignKey:CreatedBy;constraint:OnDelete:SET NULL"`
 	MonitorsUpdated           []Monitor                   `gorm:"foreignKey:UpdatedBy;constraint:OnDelete:SET NULL"`
 	TopicConfigsCreated       []TopicConfig               `gorm:"foreignKey:CreatedBy;constraint:OnDelete:SET NULL"`
@@ -254,6 +256,8 @@ type Project struct {
 	Dashboard                         []Dashboard                         `gorm:"foreignKey:ProjectID;constraint:OnDelete:CASCADE"`
 	DashboardWidget                   []DashboardWidget                   `gorm:"foreignKey:ProjectID;constraint:OnDelete:CASCADE"`
 	TableViewPreset                   []TableViewPreset                   `gorm:"foreignKey:ProjectID;constraint:OnDelete:CASCADE"`
+	SessionViews                      []SessionView                       `gorm:"foreignKey:ProjectID;constraint:OnDelete:CASCADE"`
+	SessionViewPinOverrides           []SessionViewPinOverride            `gorm:"foreignKey:ProjectID;constraint:OnDelete:CASCADE"`
 	Actions                           []Action                            `gorm:"foreignKey:ProjectID;constraint:OnDelete:CASCADE"`
 	Triggers                          []Trigger                           `gorm:"foreignKey:ProjectID;constraint:OnDelete:CASCADE"`
 	AutomationExecutions              []AutomationExecution               `gorm:"foreignKey:ProjectID;constraint:OnDelete:CASCADE"`
@@ -469,9 +473,10 @@ func (*GatewayAiConnection) BeforeUpdate(tx *gorm.DB) error {
 }
 
 type GatewayAPIKeyAssociation struct {
-	APIKeyID string         `gorm:"column:api_key_id;primaryKey" json:"api_key_id"`
-	Metadata datatypes.JSON `gorm:"column:metadata;type:jsonb;default:'{}';not null" json:"metadata"`
-	APIKey   *APIKey
+	APIKeyID      string         `gorm:"column:api_key_id;primaryKey" json:"api_key_id"`
+	Metadata      datatypes.JSON `gorm:"column:metadata;type:jsonb;default:'{}';not null" json:"metadata"`
+	AllowedModels datatypes.JSON `gorm:"column:allowed_models;type:jsonb" json:"allowed_models"`
+	APIKey        *APIKey
 }
 
 func (GatewayAPIKeyAssociation) TableName() string {
@@ -2429,6 +2434,7 @@ type BatchAction struct {
 	ProcessedCount *int           `gorm:"column:processed_count" json:"processed_count"`
 	FailedCount    *int           `gorm:"column:failed_count" json:"failed_count"`
 	Log            *string        `gorm:"column:log" json:"log"`
+	Cursor         datatypes.JSON `gorm:"column:cursor" json:"cursor"`
 	Project        *Project
 }
 
@@ -2852,6 +2858,71 @@ func (*TableViewPreset) BeforeUpdate(tx *gorm.DB) error {
 	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
 	if !tx.Statement.Changed("UpdatedAt") {
 		tx.Statement.SetColumn("UpdatedAt", DateTime{Time: now})
+	}
+	return nil
+}
+
+type SessionView struct {
+	IsPinnedByDefaultForProject bool           `gorm:"column:is_pinned_by_default_for_project;default:false;not null" json:"is_pinned_by_default_for_project"`
+	ID                          string         `gorm:"column:id;primaryKey;uniqueIndex:session_views_project_id_id_key" json:"id"`
+	ProjectID                   string         `gorm:"column:project_id;uniqueIndex:session_views_project_id_name_key;uniqueIndex:session_views_project_id_id_key;not null" json:"project_id"`
+	Name                        string         `gorm:"column:name;uniqueIndex:session_views_project_id_name_key;not null" json:"name"`
+	Filters                     datatypes.JSON `gorm:"column:filters;not null" json:"filters"`
+	ViewMode                    string         `gorm:"column:view_mode;not null" json:"view_mode"`
+	UnmatchedTraces             string         `gorm:"column:unmatched_traces;not null" json:"unmatched_traces"`
+	CreatedBy                   *string        `gorm:"column:created_by" json:"created_by"`
+	CreatedAt                   DateTime       `gorm:"column:created_at;autoCreateTime:false;not null" json:"created_at"`
+	UpdatedAt                   DateTime       `gorm:"column:updated_at;autoUpdateTime:false;not null" json:"updated_at"`
+	Project                     *Project
+	CreatedByUser               *User                    `gorm:"foreignKey:CreatedBy"`
+	Pins                        []SessionViewPinOverride `gorm:"foreignKey:ProjectID,ViewID;references:ProjectID,ID;constraint:OnDelete:CASCADE"`
+}
+
+func (SessionView) TableName() string {
+	return "session_views"
+}
+
+func (m *SessionView) BeforeCreate(tx *gorm.DB) error {
+	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
+	if m.ID == "" {
+		m.ID = cuid.New()
+	}
+	if m.CreatedAt.IsZero() {
+		m.CreatedAt = DateTime{Time: now}
+	}
+	if m.UpdatedAt.IsZero() {
+		m.UpdatedAt = DateTime{Time: now}
+	}
+	return nil
+}
+
+func (*SessionView) BeforeUpdate(tx *gorm.DB) error {
+	now := tx.NowFunc().UTC().Truncate(time.Millisecond)
+	if !tx.Statement.Changed("UpdatedAt") {
+		tx.Statement.SetColumn("UpdatedAt", DateTime{Time: now})
+	}
+	return nil
+}
+
+type SessionViewPinOverride struct {
+	ID        string  `gorm:"column:id;primaryKey" json:"id"`
+	ProjectID string  `gorm:"column:project_id;uniqueIndex:session_view_pin_overrides_project_id_user_id_view_id_key;index:session_view_pin_overrides_project_id_view_id_idx;not null" json:"project_id"`
+	UserID    string  `gorm:"column:user_id;uniqueIndex:session_view_pin_overrides_project_id_user_id_view_id_key;index:session_view_pin_overrides_user_id_idx;not null" json:"user_id"`
+	ViewID    *string `gorm:"column:view_id;uniqueIndex:session_view_pin_overrides_project_id_user_id_view_id_key;index:session_view_pin_overrides_project_id_view_id_idx" json:"view_id"`
+	IsPinned  *bool   `gorm:"column:is_pinned;default:true;not null" json:"is_pinned"`
+	Position  int     `gorm:"column:position;not null" json:"position"`
+	Project   *Project
+	User      *User
+	View      *SessionView `gorm:"foreignKey:ProjectID,ViewID;references:ProjectID,ID"`
+}
+
+func (SessionViewPinOverride) TableName() string {
+	return "session_view_pin_overrides"
+}
+
+func (m *SessionViewPinOverride) BeforeCreate(_ *gorm.DB) error {
+	if m.ID == "" {
+		m.ID = cuid.New()
 	}
 	return nil
 }

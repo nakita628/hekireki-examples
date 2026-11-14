@@ -9,11 +9,7 @@ public partial class LiteLLMCustomerOrganizationTable
 {
     public double Spend { get; set; } = 0.0;
 
-    public DateTime? BudgetResetAt { get; set; }
-
-    public List<string>? BudgetIds { get; set; } = new List<string>();
-
-    public string BudgetNames { get; set; } = "{}";
+    public List<string>? BudgetTemplateIds { get; set; } = new List<string>();
 
     public string? BudgetId { get; set; }
 
@@ -23,11 +19,13 @@ public partial class LiteLLMCustomerOrganizationTable
 
     public string? Alias { get; set; }
 
-    public string? DefaultBudgetId { get; set; }
+    public string? DefaultBudgetTemplateId { get; set; }
 
-    public virtual LiteLLMBudgetTable? DefaultBudget { get; set; }
+    public virtual LiteLLMBudgetTable? DefaultBudgetTemplate { get; set; }
 
     public virtual ICollection<LiteLLMCustomerTeamTable> Teams { get; set; } = new List<LiteLLMCustomerTeamTable>();
+
+    public virtual ICollection<LiteLLMCustomerMemberTable> Members { get; set; } = new List<LiteLLMCustomerMemberTable>();
 
     public DateTime CreatedAt { get; set; }
 

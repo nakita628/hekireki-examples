@@ -253,6 +253,16 @@ class Project extends \Illuminate\Database\Eloquent\Model
         return $this->hasMany(TableViewPreset::class, 'project_id');
     }
 
+    public function sessionViews(): HasMany
+    {
+        return $this->hasMany(SessionView::class, 'project_id');
+    }
+
+    public function sessionViewPinOverrides(): HasMany
+    {
+        return $this->hasMany(SessionViewPinOverride::class, 'project_id');
+    }
+
     public function actions(): HasMany
     {
         return $this->hasMany(Action::class, 'project_id');

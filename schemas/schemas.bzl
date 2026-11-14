@@ -33,12 +33,14 @@ SCHEMAS = {
     "litellm": "postgresql",
     "blinko": "postgresql",
     "superproductivity": "postgresql",
+    "langwatch": "postgresql",
 }
 
 # The generators left out of a schema (`skip` in sources.json): the generator refuses it.
 SKIPPED = {
     "formbricks": ["eloquent"],
     "inboxzero": ["eloquent"],
+    "langwatch": ["eloquent"],
 }
 
 POSTGRESQL_SCHEMAS = [name for name, provider in SCHEMAS.items() if provider == "postgresql"]

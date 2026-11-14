@@ -93,6 +93,7 @@ class GatewayProvider(models.TextChoices):
     VERCEL = "vercel"
     AZURE = "azure"
     GOOGLE_AI_STUDIO = "google_ai_studio"
+    VERTEX = "vertex"
 
 
 class GatewayConnectionStatus(models.TextChoices):
@@ -264,6 +265,16 @@ class DashboardWidgetChartType(models.TextChoices):
     NUMBER = "NUMBER"
     HISTOGRAM = "HISTOGRAM"
     PIVOT_TABLE = "PIVOT_TABLE"
+
+
+class SessionViewMode(models.TextChoices):
+    conversational = "conversational"
+    list = "list"
+
+
+class SessionUnmatchedTraces(models.TextChoices):
+    show = "show"
+    hide = "hide"
 
 
 class ActionType(models.TextChoices):
@@ -532,6 +543,7 @@ class GatewayAiConnection(models.Model):
 class GatewayApiKeyAssociation(models.Model):
     api_key = models.OneToOneField("ApiKey", on_delete=models.CASCADE, related_name="gateway_association", primary_key=True)
     metadata = models.JSONField(default=dict)
+    allowed_models = models.JSONField(null=True)
 
     class Meta:
         db_table = "gateway_api_key_associations"
@@ -1640,6 +1652,7 @@ class BatchAction(models.Model):
     processed_count = models.IntegerField(null=True)
     failed_count = models.IntegerField(null=True)
     log = models.TextField(null=True)
+    cursor = models.JSONField(null=True)
     objects = AutoNowQuerySet.as_manager()
 
     class Meta:
@@ -1862,6 +1875,46 @@ class TableViewPreset(models.Model):
         db_table = "table_view_presets"
         constraints = [
             models.UniqueConstraint(fields=["project", "table_name", "name"], name="table_view_presets_project_id_table_name_name_key"),
+        ]
+
+
+class SessionView(models.Model):
+    is_pinned_by_default_for_project = models.BooleanField(default=False)
+    id = models.TextField(primary_key=True, default=None)
+    project = models.ForeignKey("Project", on_delete=models.CASCADE, related_name="session_views", db_index=False)
+    name = models.TextField()
+    filters = models.JSONField()
+    view_mode = models.TextField(choices=SessionViewMode.choices)
+    unmatched_traces = models.TextField(choices=SessionUnmatchedTraces.choices)
+    created_by_user = models.ForeignKey("User", on_delete=models.SET_NULL, related_name="session_views_created", db_column="created_by", null=True, db_index=False)
+    created_at = UtcDateTimeField(default=timezone.now)
+    updated_at = UtcDateTimeField(auto_now=True)
+    objects = AutoNowQuerySet.as_manager()
+
+    class Meta:
+        db_table = "session_views"
+        constraints = [
+            models.UniqueConstraint(fields=["project", "name"], name="session_views_project_id_name_key"),
+            models.UniqueConstraint(fields=["project", "id"], name="session_views_project_id_id_key"),
+        ]
+
+
+class SessionViewPinOverride(models.Model):
+    id = models.TextField(primary_key=True, default=None)
+    project = models.ForeignKey("Project", on_delete=models.CASCADE, related_name="session_view_pin_overrides", db_index=False)
+    user = models.ForeignKey("User", on_delete=models.CASCADE, related_name="session_view_pin_overrides", db_index=False)
+    view_id = models.TextField(null=True)
+    is_pinned = models.BooleanField(default=True)
+    position = models.IntegerField()
+
+    class Meta:
+        db_table = "session_view_pin_overrides"
+        constraints = [
+            models.UniqueConstraint(fields=["project", "user", "view_id"], name="session_view_pin_overrides_project_id_user_id_view_id_key"),
+        ]
+        indexes = [
+            models.Index(fields=["user"]),
+            models.Index(fields=["project", "view_id"]),
         ]
 
 

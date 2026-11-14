@@ -1,15 +1,12 @@
 #nullable enable
 
 using System;
-using System.Collections.Generic;
 
 namespace LiteLLM.Models;
 
 public partial class LiteLLMCustomerTeamTable
 {
     public double Spend { get; set; } = 0.0;
-
-    public DateTime? BudgetResetAt { get; set; }
 
     public string CustomerTeamId { get; set; } = null!;
 
@@ -23,7 +20,11 @@ public partial class LiteLLMCustomerTeamTable
 
     public virtual LiteLLMBudgetTable? Budget { get; set; }
 
-    public virtual ICollection<LiteLLMCustomerMemberTable> Members { get; set; } = new List<LiteLLMCustomerMemberTable>();
+    public string? BudgetOverrideId { get; set; }
+
+    public virtual LiteLLMBudgetTable? BudgetOverride { get; set; }
+
+    public DateTime? BudgetOverrideExpiresAt { get; set; }
 
     public DateTime CreatedAt { get; set; }
 

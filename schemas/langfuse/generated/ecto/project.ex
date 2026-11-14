@@ -56,6 +56,8 @@ defmodule Langfuse.Project do
           dashboard: [Langfuse.Dashboard.t()],
           dashboard_widget: [Langfuse.DashboardWidget.t()],
           table_view_preset: [Langfuse.TableViewPreset.t()],
+          session_views: [Langfuse.SessionView.t()],
+          session_view_pin_overrides: [Langfuse.SessionViewPinOverride.t()],
           actions: [Langfuse.Action.t()],
           triggers: [Langfuse.Trigger.t()],
           automation_executions: [Langfuse.AutomationExecution.t()],
@@ -125,6 +127,8 @@ defmodule Langfuse.Project do
     has_many(:dashboard, Langfuse.Dashboard, foreign_key: :project_id, references: :id)
     has_many(:dashboard_widget, Langfuse.DashboardWidget, foreign_key: :project_id, references: :id)
     has_many(:table_view_preset, Langfuse.TableViewPreset, foreign_key: :project_id, references: :id)
+    has_many(:session_views, Langfuse.SessionView, foreign_key: :project_id, references: :id)
+    has_many(:session_view_pin_overrides, Langfuse.SessionViewPinOverride, foreign_key: :project_id, references: :id)
     has_many(:actions, Langfuse.Action, foreign_key: :project_id, references: :id)
     has_many(:triggers, Langfuse.Trigger, foreign_key: :project_id, references: :id)
     has_many(:automation_executions, Langfuse.AutomationExecution, foreign_key: :project_id, references: :id)

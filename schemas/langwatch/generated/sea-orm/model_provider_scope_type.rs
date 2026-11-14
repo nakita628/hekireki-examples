@@ -1,0 +1,17 @@
+use sea_orm::entity::prelude::*;
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
+#[sea_orm(
+    rs_type = "String",
+    db_type = "Enum",
+    enum_name = "ModelProviderScopeType"
+)]
+pub enum ModelProviderScopeType {
+    #[sea_orm(string_value = "ORGANIZATION")]
+    Organization,
+    #[sea_orm(string_value = "TEAM")]
+    Team,
+    #[sea_orm(string_value = "PROJECT")]
+    Project,
+}

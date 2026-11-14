@@ -11,13 +11,17 @@ public partial class LiteLLMBudgetTable
 
     public virtual ICollection<LiteLLMCustomerOrganizationTable> CustomerOrganizations { get; set; } = new List<LiteLLMCustomerOrganizationTable>();
 
-    public virtual ICollection<LiteLLMCustomerMemberTable> CustomerMemberTemplates { get; set; } = new List<LiteLLMCustomerMemberTable>();
-
     public virtual ICollection<LiteLLMCustomerTeamTable> CustomerTeams { get; set; } = new List<LiteLLMCustomerTeamTable>();
 
     public virtual ICollection<LiteLLMCustomerMemberTable> CustomerMembers { get; set; } = new List<LiteLLMCustomerMemberTable>();
 
+    public virtual ICollection<LiteLLMCustomerMemberTable> CustomerMemberOverrides { get; set; } = new List<LiteLLMCustomerMemberTable>();
+
+    public virtual ICollection<LiteLLMCustomerTeamTable> CustomerTeamOverrides { get; set; } = new List<LiteLLMCustomerTeamTable>();
+
     public string BudgetId { get; set; } = null!;
+
+    public string? Name { get; set; }
 
     public double? MaxBudget { get; set; }
 
@@ -38,6 +42,10 @@ public partial class LiteLLMBudgetTable
     public string? ModelRpmLimit { get; set; }
 
     public string? BudgetDuration { get; set; }
+
+    public string? BudgetLimits { get; set; }
+
+    public string? CapPolicy { get; set; }
 
     public DateTime? BudgetResetAt { get; set; }
 

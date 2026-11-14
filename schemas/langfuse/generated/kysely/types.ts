@@ -32,6 +32,7 @@ export type GatewayProvider =
   | 'vercel'
   | 'azure'
   | 'google_ai_studio'
+  | 'vertex'
 
 export type GatewayConnectionStatus = 'enabled' | 'disabled' | 'error'
 
@@ -119,6 +120,10 @@ export type DashboardWidgetChartType =
   | 'NUMBER'
   | 'HISTOGRAM'
   | 'PIVOT_TABLE'
+
+export type SessionViewMode = 'conversational' | 'list'
+
+export type SessionUnmatchedTraces = 'show' | 'hide'
 
 export type ActionType = 'WEBHOOK' | 'SLACK' | 'GITHUB_DISPATCH' | 'PAGERDUTY'
 
@@ -280,6 +285,7 @@ export interface GatewayAiConnection {
 export interface GatewayApiKeyAssociation {
   api_key_id: string
   metadata: Generated<unknown>
+  allowed_models: unknown
 }
 
 export interface InAppAgentConversation {
@@ -976,6 +982,7 @@ export interface BatchAction {
   processed_count: number | null
   failed_count: number | null
   log: string | null
+  cursor: unknown
 }
 
 export interface Media {
@@ -1107,6 +1114,28 @@ export interface TableViewPreset {
   column_visibility: unknown
   search_query: string | null
   order_by: unknown
+}
+
+export interface SessionView {
+  is_pinned_by_default_for_project: Generated<boolean>
+  id: string
+  project_id: string
+  name: string
+  filters: unknown
+  view_mode: SessionViewMode
+  unmatched_traces: SessionUnmatchedTraces
+  created_by: string | null
+  created_at: Generated<Timestamp>
+  updated_at: Generated<Timestamp>
+}
+
+export interface SessionViewPinOverride {
+  id: string
+  project_id: string
+  user_id: string
+  view_id: string | null
+  is_pinned: Generated<boolean>
+  position: number
 }
 
 export interface DefaultView {
@@ -1328,6 +1357,8 @@ export interface DB {
   dashboards: Dashboard
   dashboard_widgets: DashboardWidget
   table_view_presets: TableViewPreset
+  session_views: SessionView
+  session_view_pin_overrides: SessionViewPinOverride
   default_views: DefaultView
   actions: Action
   triggers: Trigger

@@ -174,7 +174,7 @@ defmodule InboxZero.EmailAccount do
     field(:filing_confirmation_send_email, :boolean, default: true, source: :filingConfirmationSendEmail)
     field(:follow_up_awaiting_reply_days, :float, source: :followUpAwaitingReplyDays)
     field(:follow_up_needs_reply_days, :float, source: :followUpNeedsReplyDays)
-    field(:follow_up_auto_draft_enabled, :boolean, default: true, source: :followUpAutoDraftEnabled)
+    field(:follow_up_auto_draft_enabled, :boolean, default: false, source: :followUpAutoDraftEnabled)
     field(:digest_send_email, :boolean, default: true, source: :digestSendEmail)
     field(:learned_writing_style, :string, source: :learnedWritingStyle)
     field(:user_id, :string, source: :userId)

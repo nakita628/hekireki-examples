@@ -20,4 +20,6 @@ pub enum GatewayProvider {
     Azure,
     #[sea_orm(string_value = "google_ai_studio")]
     GoogleAiStudio,
+    #[sea_orm(string_value = "vertex")]
+    Vertex,
 }

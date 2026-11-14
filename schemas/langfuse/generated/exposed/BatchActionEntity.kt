@@ -27,6 +27,7 @@ class BatchActionEntity(
     var processedCount by BatchActionTable.processedCount
     var failedCount by BatchActionTable.failedCount
     var log by BatchActionTable.log
+    var cursor by BatchActionTable.cursor
 
     override fun flush(batch: EntityBatchUpdate?): Boolean {
         if (writeValues.isNotEmpty()) {

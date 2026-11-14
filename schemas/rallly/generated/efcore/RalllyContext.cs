@@ -258,8 +258,8 @@ public partial class RalllyContext : DbContext
             entity.Property(e => e.ApiAddonItemId).HasColumnName("api_addon_item_id");
             entity.Property(e => e.ApiAddonPriceId).HasColumnName("api_addon_price_id");
             entity.Property(e => e.ApiAddonAmount).HasColumnName("api_addon_amount");
-            entity.Property(e => e.ApiPollLimit).HasColumnName("api_poll_limit");
-            entity.Property(e => e.ApiPollRetainedLimit).HasColumnName("api_poll_retained_limit");
+            entity.Property(e => e.ApiAddonTier).HasColumnName("api_addon_tier");
+            entity.Property(e => e.ApiPollRetainedTier).HasColumnName("api_poll_retained_tier");
             entity.Property(e => e.ApiPollRetainedUntil)
                 .HasConversion<UtcClockConverter>()
                 .HasColumnType("timestamp(3) without time zone")

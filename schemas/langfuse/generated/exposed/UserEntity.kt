@@ -37,6 +37,8 @@ class UserEntity(
     val dashboardUpdated by DashboardEntity optionalReferrersOn DashboardTable.updatedBy
     val tableViewPresetCreated by TableViewPresetEntity optionalReferrersOn TableViewPresetTable.createdBy
     val tableViewPresetUpdated by TableViewPresetEntity optionalReferrersOn TableViewPresetTable.updatedBy
+    val sessionViewsCreated by SessionViewEntity optionalReferrersOn SessionViewTable.createdBy
+    val sessionViewPinOverrides by SessionViewPinOverrideEntity referrersOn SessionViewPinOverrideTable.userId
     val monitorsCreated by MonitorEntity optionalReferrersOn MonitorTable.createdBy
     val monitorsUpdated by MonitorEntity optionalReferrersOn MonitorTable.updatedBy
     val topicConfigsCreated by TopicConfigEntity optionalReferrersOn TopicConfigTable.createdBy

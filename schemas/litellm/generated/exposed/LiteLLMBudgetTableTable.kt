@@ -9,6 +9,7 @@ import java.util.UUID
 
 object LiteLLMBudgetTableTable : IdTable<String>("\"LiteLLM_BudgetTable\"") {
     override val id = text("budget_id").clientDefault { UUID.randomUUID().toString() }.entityId()
+    val name = text("name").nullable()
     val maxBudget = double("max_budget").nullable()
     val softBudget = double("soft_budget").nullable()
     val maxParallelRequests = integer("max_parallel_requests").nullable()
@@ -19,6 +20,8 @@ object LiteLLMBudgetTableTable : IdTable<String>("\"LiteLLM_BudgetTable\"") {
     val modelTpmLimit = jsonb<String>("model_tpm_limit", { it }, { it }).nullable()
     val modelRpmLimit = jsonb<String>("model_rpm_limit", { it }, { it }).nullable()
     val budgetDuration = text("budget_duration").nullable()
+    val budgetLimits = jsonb<String>("budget_limits", { it }, { it }).nullable()
+    val capPolicy = text("cap_policy").nullable()
     val budgetResetAt = pgTimestamp("budget_reset_at", 3).nullable()
     val allowedModels = array("allowed_models", TextColumnType()).nullable().databaseDefault("'{}'") { emptyList() }
     val tempBudgetIncrease = double("temp_budget_increase").nullable()

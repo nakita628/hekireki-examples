@@ -816,7 +816,7 @@ public partial class InboxZeroContext : DbContext
             entity.Property(e => e.FollowUpNeedsReplyDays).HasColumnName("followUpNeedsReplyDays");
             entity.Property(e => e.FollowUpAutoDraftEnabled)
                 .ValueGeneratedNever()
-                .HasDefaultValue(true)
+                .HasDefaultValue(false)
                 .HasColumnName("followUpAutoDraftEnabled");
             entity.Property(e => e.DigestSendEmail)
                 .ValueGeneratedNever()

@@ -64,6 +64,8 @@ class ProjectEntity(
     val dashboard by DashboardEntity optionalReferrersOn DashboardTable.projectId
     val dashboardWidget by DashboardWidgetEntity optionalReferrersOn DashboardWidgetTable.projectId
     val tableViewPreset by TableViewPresetEntity referrersOn TableViewPresetTable.projectId
+    val sessionViews by SessionViewEntity referrersOn SessionViewTable.projectId
+    val sessionViewPinOverrides by SessionViewPinOverrideEntity referrersOn SessionViewPinOverrideTable.projectId
     val actions by ActionEntity referrersOn ActionTable.projectId
     val triggers by TriggerEntity referrersOn TriggerTable.projectId
     val automationExecutions by AutomationExecutionEntity referrersOn AutomationExecutionTable.projectId

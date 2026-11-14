@@ -31,6 +31,8 @@ defmodule Langfuse.User do
           dashboard_updated: [Langfuse.Dashboard.t()],
           table_view_preset_created: [Langfuse.TableViewPreset.t()],
           table_view_preset_updated: [Langfuse.TableViewPreset.t()],
+          session_views_created: [Langfuse.SessionView.t()],
+          session_view_pin_overrides: [Langfuse.SessionViewPinOverride.t()],
           monitors_created: [Langfuse.Monitor.t()],
           monitors_updated: [Langfuse.Monitor.t()],
           topic_configs_created: [Langfuse.TopicConfig.t()],
@@ -77,6 +79,8 @@ defmodule Langfuse.User do
     has_many(:dashboard_updated, Langfuse.Dashboard, foreign_key: :updated_by, references: :id)
     has_many(:table_view_preset_created, Langfuse.TableViewPreset, foreign_key: :created_by, references: :id)
     has_many(:table_view_preset_updated, Langfuse.TableViewPreset, foreign_key: :updated_by, references: :id)
+    has_many(:session_views_created, Langfuse.SessionView, foreign_key: :created_by, references: :id)
+    has_many(:session_view_pin_overrides, Langfuse.SessionViewPinOverride, foreign_key: :user_id, references: :id)
     has_many(:monitors_created, Langfuse.Monitor, foreign_key: :created_by, references: :id)
     has_many(:monitors_updated, Langfuse.Monitor, foreign_key: :updated_by, references: :id)
     has_many(:topic_configs_created, Langfuse.TopicConfig, foreign_key: :created_by, references: :id)

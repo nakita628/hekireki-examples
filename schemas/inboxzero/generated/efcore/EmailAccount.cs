@@ -123,7 +123,7 @@ public partial class EmailAccount
 
     public double? FollowUpNeedsReplyDays { get; set; }
 
-    public bool FollowUpAutoDraftEnabled { get; set; } = true;
+    public bool FollowUpAutoDraftEnabled { get; set; } = false;
 
     public bool DigestSendEmail { get; set; } = true;
 

@@ -83,8 +83,8 @@ CREATE TABLE "subscriptions" (
     "api_addon_item_id" TEXT,
     "api_addon_price_id" TEXT,
     "api_addon_amount" INTEGER,
-    "api_poll_limit" INTEGER,
-    "api_poll_retained_limit" INTEGER,
+    "api_addon_tier" TEXT,
+    "api_poll_retained_tier" TEXT,
     "api_poll_retained_until" TIMESTAMP(3),
 
     CONSTRAINT "subscriptions_pkey" PRIMARY KEY ("id")
@@ -1317,8 +1317,8 @@ Table `subscriptions`.
 | `apiAddonItemId` (`api_addon_item_id`)             | `String`                                             | NULL                                |         |             |
 | `apiAddonPriceId` (`api_addon_price_id`)           | `String`                                             | NULL                                |         |             |
 | `apiAddonAmount` (`api_addon_amount`)              | `Int`                                                | NULL                                |         |             |
-| `apiPollLimit` (`api_poll_limit`)                  | `Int`                                                | NULL                                |         |             |
-| `apiPollRetainedLimit` (`api_poll_retained_limit`) | `Int`                                                | NULL                                |         |             |
+| `apiAddonTier` (`api_addon_tier`)                  | `String`                                             | NULL                                |         |             |
+| `apiPollRetainedTier` (`api_poll_retained_tier`)   | `String`                                             | NULL                                |         |             |
 | `apiPollRetainedUntil` (`api_poll_retained_until`) | `DateTime`                                           | NULL                                |         |             |
 
 #### Indexes
@@ -1355,8 +1355,8 @@ CREATE TABLE "subscriptions" (
     "api_addon_item_id" TEXT,
     "api_addon_price_id" TEXT,
     "api_addon_amount" INTEGER,
-    "api_poll_limit" INTEGER,
-    "api_poll_retained_limit" INTEGER,
+    "api_addon_tier" TEXT,
+    "api_poll_retained_tier" TEXT,
     "api_poll_retained_until" TIMESTAMP(3),
 
     CONSTRAINT "subscriptions_pkey" PRIMARY KEY ("id")
@@ -1402,8 +1402,8 @@ SELECT
   "public"."subscriptions"."api_addon_item_id",
   "public"."subscriptions"."api_addon_price_id",
   "public"."subscriptions"."api_addon_amount",
-  "public"."subscriptions"."api_poll_limit",
-  "public"."subscriptions"."api_poll_retained_limit",
+  "public"."subscriptions"."api_addon_tier",
+  "public"."subscriptions"."api_poll_retained_tier",
   "public"."subscriptions"."api_poll_retained_until"
 FROM
   "public"."subscriptions"
@@ -1465,8 +1465,8 @@ SELECT
   "public"."subscriptions"."api_addon_item_id",
   "public"."subscriptions"."api_addon_price_id",
   "public"."subscriptions"."api_addon_amount",
-  "public"."subscriptions"."api_poll_limit",
-  "public"."subscriptions"."api_poll_retained_limit",
+  "public"."subscriptions"."api_addon_tier",
+  "public"."subscriptions"."api_poll_retained_tier",
   "public"."subscriptions"."api_poll_retained_until"
 FROM
   "public"."subscriptions"
@@ -1562,8 +1562,8 @@ SELECT
   "public"."subscriptions"."api_addon_item_id",
   "public"."subscriptions"."api_addon_price_id",
   "public"."subscriptions"."api_addon_amount",
-  "public"."subscriptions"."api_poll_limit",
-  "public"."subscriptions"."api_poll_retained_limit",
+  "public"."subscriptions"."api_addon_tier",
+  "public"."subscriptions"."api_poll_retained_tier",
   "public"."subscriptions"."api_poll_retained_until"
 FROM
   "public"."subscriptions"
@@ -1658,8 +1658,8 @@ RETURNING
   "public"."subscriptions"."api_addon_item_id",
   "public"."subscriptions"."api_addon_price_id",
   "public"."subscriptions"."api_addon_amount",
-  "public"."subscriptions"."api_poll_limit",
-  "public"."subscriptions"."api_poll_retained_limit",
+  "public"."subscriptions"."api_addon_tier",
+  "public"."subscriptions"."api_poll_retained_tier",
   "public"."subscriptions"."api_poll_retained_until"
 -- params: ["example","example","1","example","1","incomplete",true,"example","month","<now()>","2026-01-01T00:00:00.000Z","2026-01-01T00:00:00.000Z",false,"example","example"]
 ```
@@ -1700,8 +1700,8 @@ RETURNING
   "public"."subscriptions"."api_addon_item_id",
   "public"."subscriptions"."api_addon_price_id",
   "public"."subscriptions"."api_addon_amount",
-  "public"."subscriptions"."api_poll_limit",
-  "public"."subscriptions"."api_poll_retained_limit",
+  "public"."subscriptions"."api_addon_tier",
+  "public"."subscriptions"."api_poll_retained_tier",
   "public"."subscriptions"."api_poll_retained_until"
 -- params: ["example","example"]
 ```
@@ -1740,8 +1740,8 @@ RETURNING
   "public"."subscriptions"."api_addon_item_id",
   "public"."subscriptions"."api_addon_price_id",
   "public"."subscriptions"."api_addon_amount",
-  "public"."subscriptions"."api_poll_limit",
-  "public"."subscriptions"."api_poll_retained_limit",
+  "public"."subscriptions"."api_addon_tier",
+  "public"."subscriptions"."api_poll_retained_tier",
   "public"."subscriptions"."api_poll_retained_until"
 -- params: ["example"]
 ```
@@ -10538,8 +10538,8 @@ SELECT
   "public"."subscriptions"."api_addon_item_id",
   "public"."subscriptions"."api_addon_price_id",
   "public"."subscriptions"."api_addon_amount",
-  "public"."subscriptions"."api_poll_limit",
-  "public"."subscriptions"."api_poll_retained_limit",
+  "public"."subscriptions"."api_addon_tier",
+  "public"."subscriptions"."api_poll_retained_tier",
   "public"."subscriptions"."api_poll_retained_until"
 FROM
   "public"."subscriptions"
@@ -13131,8 +13131,8 @@ SELECT
   "public"."subscriptions"."api_addon_item_id",
   "public"."subscriptions"."api_addon_price_id",
   "public"."subscriptions"."api_addon_amount",
-  "public"."subscriptions"."api_poll_limit",
-  "public"."subscriptions"."api_poll_retained_limit",
+  "public"."subscriptions"."api_addon_tier",
+  "public"."subscriptions"."api_poll_retained_tier",
   "public"."subscriptions"."api_poll_retained_until"
 FROM
   "public"."subscriptions"

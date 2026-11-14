@@ -84,8 +84,8 @@ erDiagram
         string apiAddonItemId
         string apiAddonPriceId
         int apiAddonAmount
-        int apiPollLimit
-        int apiPollRetainedLimit
+        string apiAddonTier
+        string apiPollRetainedTier
         datetime apiPollRetainedUntil
     }
     payment_methods {

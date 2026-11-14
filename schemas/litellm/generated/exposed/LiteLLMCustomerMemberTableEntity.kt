@@ -13,15 +13,17 @@ class LiteLLMCustomerMemberTableEntity(
     companion object : EntityClass<String, LiteLLMCustomerMemberTableEntity>(LiteLLMCustomerMemberTableTable)
 
     var spend by LiteLLMCustomerMemberTableTable.spend
-    var budgetResetAt by LiteLLMCustomerMemberTableTable.budgetResetAt
     var alias by LiteLLMCustomerMemberTableTable.alias
-    var parentTeamId by LiteLLMCustomerMemberTableTable.parentTeamId
-    var parentTeam by LiteLLMCustomerTeamTableEntity referencedOn LiteLLMCustomerMemberTableTable.parentTeamId
+    var parentOrgId by LiteLLMCustomerMemberTableTable.parentOrgId
+    var parentOrg by LiteLLMCustomerOrganizationTableEntity referencedOn LiteLLMCustomerMemberTableTable.parentOrgId
+    var parentTeamIds by LiteLLMCustomerMemberTableTable.parentTeamIds
     var budgetId by LiteLLMCustomerMemberTableTable.budgetId
     var budget by LiteLLMBudgetTableEntity optionalReferencedOn LiteLLMCustomerMemberTableTable.budgetId
-    var budgetTemplateId by LiteLLMCustomerMemberTableTable.budgetTemplateId
-    var budgetTemplate by LiteLLMBudgetTableEntity optionalReferencedOn LiteLLMCustomerMemberTableTable.budgetTemplateId
+    var budgetOverrideId by LiteLLMCustomerMemberTableTable.budgetOverrideId
+    var budgetOverride by LiteLLMBudgetTableEntity optionalReferencedOn LiteLLMCustomerMemberTableTable.budgetOverrideId
     var budgetOverrideExpiresAt by LiteLLMCustomerMemberTableTable.budgetOverrideExpiresAt
+    val budgetIncreaseRequests by LiteLLMCustomerBudgetIncreaseRequestEntity referrersOn
+        LiteLLMCustomerBudgetIncreaseRequestTable.customerMemberId
     var createdAt by LiteLLMCustomerMemberTableTable.createdAt
     var createdBy by LiteLLMCustomerMemberTableTable.createdBy
     var updatedAt by LiteLLMCustomerMemberTableTable.updatedAt

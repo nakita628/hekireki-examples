@@ -207,8 +207,8 @@ class Subscription(models.Model):
     api_addon_item_id = models.TextField(null=True)
     api_addon_price_id = models.TextField(null=True)
     api_addon_amount = models.IntegerField(null=True)
-    api_poll_limit = models.IntegerField(null=True)
-    api_poll_retained_limit = models.IntegerField(null=True)
+    api_addon_tier = models.TextField(null=True)
+    api_poll_retained_tier = models.TextField(null=True)
     api_poll_retained_until = UtcDateTimeField(null=True)
 
     class Meta:

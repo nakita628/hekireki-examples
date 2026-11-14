@@ -23,7 +23,7 @@ class EmailAccount < ApplicationRecord
   attribute :meetingRecorderFollowUpDraftEnabled, default: true
   attribute :filingEnabled, default: false
   attribute :filingConfirmationSendEmail, default: true
-  attribute :followUpAutoDraftEnabled, default: true
+  attribute :followUpAutoDraftEnabled, default: false
   attribute :digestSendEmail, default: true
   alias_attribute :created_at, :createdAt
   alias_attribute :updated_at, :updatedAt

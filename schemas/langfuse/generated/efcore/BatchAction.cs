@@ -37,4 +37,6 @@ public partial class BatchAction
     public int? FailedCount { get; set; }
 
     public string? Log { get; set; }
+
+    public string? Cursor { get; set; }
 }

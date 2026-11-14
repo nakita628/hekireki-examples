@@ -1,6 +1,7 @@
 #nullable enable
 
 using System;
+using System.Collections.Generic;
 
 namespace LiteLLM.Models;
 
@@ -8,25 +9,27 @@ public partial class LiteLLMCustomerMemberTable
 {
     public double Spend { get; set; } = 0.0;
 
-    public DateTime? BudgetResetAt { get; set; }
-
     public string CustomerMemberId { get; set; } = null!;
 
     public string? Alias { get; set; }
 
-    public string ParentTeamId { get; set; } = null!;
+    public string ParentOrgId { get; set; } = null!;
 
-    public virtual LiteLLMCustomerTeamTable ParentTeam { get; set; } = null!;
+    public virtual LiteLLMCustomerOrganizationTable ParentOrg { get; set; } = null!;
+
+    public List<string>? ParentTeamIds { get; set; } = new List<string>();
 
     public string? BudgetId { get; set; }
 
     public virtual LiteLLMBudgetTable? Budget { get; set; }
 
-    public string? BudgetTemplateId { get; set; }
+    public string? BudgetOverrideId { get; set; }
 
-    public virtual LiteLLMBudgetTable? BudgetTemplate { get; set; }
+    public virtual LiteLLMBudgetTable? BudgetOverride { get; set; }
 
     public DateTime? BudgetOverrideExpiresAt { get; set; }
+
+    public virtual ICollection<LiteLLMCustomerBudgetIncreaseRequest> BudgetIncreaseRequests { get; set; } = new List<LiteLLMCustomerBudgetIncreaseRequest>();
 
     public DateTime CreatedAt { get; set; }
 

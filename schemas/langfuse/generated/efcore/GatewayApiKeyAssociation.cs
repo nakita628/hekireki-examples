@@ -9,4 +9,6 @@ public partial class GatewayApiKeyAssociation
     public virtual ApiKey ApiKey { get; set; } = null!;
 
     public string Metadata { get; set; } = "{}";
+
+    public string? AllowedModels { get; set; }
 }

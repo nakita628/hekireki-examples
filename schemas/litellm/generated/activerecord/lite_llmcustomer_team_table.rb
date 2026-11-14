@@ -11,6 +11,5 @@ class LiteLLMCustomerTeamTable < ApplicationRecord
 
   belongs_to :parent_org, class_name: "LiteLLMCustomerOrganizationTable", inverse_of: :teams
   belongs_to :budget, class_name: "LiteLLMBudgetTable", optional: true, inverse_of: :customer_teams
-  has_many :members, class_name: "LiteLLMCustomerMemberTable", foreign_key: "parent_team_id", inverse_of: :parent_team,
-                     dependent: :restrict_with_error
+  belongs_to :budget_override, class_name: "LiteLLMBudgetTable", optional: true, inverse_of: :customer_team_overrides
 end

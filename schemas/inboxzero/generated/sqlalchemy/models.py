@@ -215,7 +215,7 @@ class EmailAccount(Base):
     filing_confirmation_send_email: Mapped[bool] = mapped_column("filingConfirmationSendEmail", default=True, server_default=text("true"))
     follow_up_awaiting_reply_days: Mapped[Optional[float]] = mapped_column("followUpAwaitingReplyDays")
     follow_up_needs_reply_days: Mapped[Optional[float]] = mapped_column("followUpNeedsReplyDays")
-    follow_up_auto_draft_enabled: Mapped[bool] = mapped_column("followUpAutoDraftEnabled", default=True, server_default=text("true"))
+    follow_up_auto_draft_enabled: Mapped[bool] = mapped_column("followUpAutoDraftEnabled", default=False, server_default=text("false"))
     digest_send_email: Mapped[bool] = mapped_column("digestSendEmail", default=True, server_default=text("true"))
     learned_writing_style: Mapped[Optional[str]] = mapped_column("learnedWritingStyle")
     user_id: Mapped[str] = mapped_column("userId", ForeignKey("User.id", ondelete="CASCADE", onupdate="CASCADE", name="EmailAccount_userId_fkey"))

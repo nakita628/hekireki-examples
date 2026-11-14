@@ -49,6 +49,8 @@ class Project < ApplicationRecord
   has_many :dashboard, dependent: :destroy
   has_many :dashboard_widget, dependent: :destroy
   has_many :table_view_preset, dependent: :destroy
+  has_many :session_views, dependent: :destroy
+  has_many :session_view_pin_overrides, dependent: :destroy
   has_many :actions, dependent: :destroy
   has_many :triggers, dependent: :destroy
   has_many :automation_executions, dependent: :destroy

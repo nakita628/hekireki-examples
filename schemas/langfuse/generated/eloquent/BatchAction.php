@@ -28,6 +28,7 @@ class BatchAction extends \Illuminate\Database\Eloquent\Model
         'processed_count',
         'failed_count',
         'log',
+        'cursor',
     ];
 
     protected $casts = [
@@ -37,6 +38,7 @@ class BatchAction extends \Illuminate\Database\Eloquent\Model
         'total_count' => 'integer',
         'processed_count' => 'integer',
         'failed_count' => 'integer',
+        'cursor' => 'array',
     ];
 
     public function project(): BelongsTo

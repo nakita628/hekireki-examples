@@ -1,6 +1,6 @@
 // Postiz: Postiz social media scheduling: organizations, integrations, posts, comments and media.
 //
-// Imported from https://github.com/gitroomhq/postiz-app/blob/b31d29fa4132a08aa82f728227df2938ccab7972/libraries/nestjs-libraries/src/database/prisma/schema.prisma
+// Imported from https://github.com/gitroomhq/postiz-app/blob/132859f32d854830ce44b509da87409c3ec10a77/libraries/nestjs-libraries/src/database/prisma/schema.prisma
 // (AGPL-3.0 license) by tools/import/import-schema.mjs, which dropped the original
 // generator blocks and the datasource's connection URLs and added the hekireki generators below.
 // The models, enums and `///` comments are the project's own, as they are at that commit.

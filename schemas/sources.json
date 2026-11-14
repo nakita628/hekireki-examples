@@ -26,7 +26,7 @@
   "langfuse": {
     "repo": "langfuse/langfuse",
     "path": "packages/shared/prisma/schema.prisma",
-    "commit": "6decf5af5f374c01b56cfc41b60794c8735028bb",
+    "commit": "48a31810e1c6e6a4a589b1eacc5eecc7960c9b87",
     "license": "MIT",
     "app": "Langfuse",
     "description": "Langfuse LLM observability: organizations, projects, traces, prompts, datasets and evaluations."
@@ -34,7 +34,7 @@
   "calcom": {
     "repo": "calcom/cal.com",
     "path": "packages/prisma/schema.prisma",
-    "commit": "ef7954d16ab50882ca2f263c551537115b8a8bb1",
+    "commit": "ae027bb70e694e2d2c44569f398d6cbcee0389b1",
     "license": "MIT",
     "app": "Calcom",
     "description": "Cal.com scheduling: users, teams, event types, bookings, availability and integrations."
@@ -50,7 +50,7 @@
   "ghostfolio": {
     "repo": "ghostfolio/ghostfolio",
     "path": "prisma/schema.prisma",
-    "commit": "4be43599808e686698e17c5e8711a53f868771cd",
+    "commit": "f58465aea78dd0c386cf9bcde5a22fbcf508911a",
     "license": "AGPL-3.0",
     "app": "Ghostfolio",
     "description": "Ghostfolio wealth management: users, accounts, orders, symbol profiles and market data."
@@ -82,7 +82,7 @@
   "rallly": {
     "repo": "lukevella/rallly",
     "path": "packages/database/prisma/",
-    "commit": "5e1cb41682ae749bb111d5a95a1a0f4fb56d137f",
+    "commit": "a7f829b4d9d1e458e87f11b841951e9a67b821f8",
     "license": "AGPL-3.0",
     "app": "Rallly",
     "description": "Rallly scheduling polls: users, spaces, polls, options, participants and votes."
@@ -90,7 +90,7 @@
   "documenso": {
     "repo": "documenso/documenso",
     "path": "packages/prisma/schema.prisma",
-    "commit": "2d68c47da2b37c4c142b855b3e2135169ad3b4b3",
+    "commit": "1e2333d534e151578ffb05394428e2a7efea5f50",
     "license": "AGPL-3.0",
     "app": "Documenso",
     "description": "Documenso document signing: users, teams, documents, recipients, fields and signatures."
@@ -98,7 +98,7 @@
   "teable": {
     "repo": "teableio/teable",
     "path": "packages/db-main-prisma/prisma/postgres/schema.prisma",
-    "commit": "33ffe918e526231263a63baa90b769a47c5e185d",
+    "commit": "b8425f5a60d056205adc456b9e8011ff7d622a29",
     "license": "MIT",
     "app": "Teable",
     "description": "Teable no-code database: spaces, bases, tables, fields, views and records."
@@ -106,7 +106,7 @@
   "postiz": {
     "repo": "gitroomhq/postiz-app",
     "path": "libraries/nestjs-libraries/src/database/prisma/schema.prisma",
-    "commit": "b31d29fa4132a08aa82f728227df2938ccab7972",
+    "commit": "132859f32d854830ce44b509da87409c3ec10a77",
     "license": "AGPL-3.0",
     "app": "Postiz",
     "description": "Postiz social media scheduling: organizations, integrations, posts, comments and media."
@@ -122,7 +122,7 @@
   "formbricks": {
     "repo": "formbricks/formbricks",
     "path": "packages/database/schema/",
-    "commit": "31264bb7c6d747b31cd94cce8064b706d420a58a",
+    "commit": "6fa661f909cd415a33710fdefb5af78097fd0672",
     "license": "AGPL-3.0",
     "app": "Formbricks",
     "description": "Formbricks surveys: organizations, environments, surveys, responses and contacts.",
@@ -141,7 +141,7 @@
   "anythingllm": {
     "repo": "Mintplex-Labs/anything-llm",
     "path": "server/prisma/schema.prisma",
-    "commit": "e8434c07c3d385411aec28e8f9758dfd073565ec",
+    "commit": "4d09fa5f730698d39f1d783e47316744b260a700",
     "license": "MIT",
     "app": "AnythingLLM",
     "description": "AnythingLLM local AI workspace: users, workspaces, documents, chats, embeddings and agents, on SQLite."
@@ -149,7 +149,7 @@
   "inboxzero": {
     "repo": "elie222/inbox-zero",
     "path": "apps/web/prisma/schema.prisma",
-    "commit": "723733a68436889398a624b08f7f98c446c00b0b",
+    "commit": "93fd893e96fb72bb3f3364ab447b5412691e5514",
     "license": "AGPL-3.0-with-additional-terms",
     "app": "InboxZero",
     "description": "Inbox Zero email assistant: users, email accounts, threads, rules, drafts and digests.",
@@ -168,7 +168,7 @@
   "chibisafe": {
     "repo": "chibisafe/chibisafe",
     "path": "packages/backend/src/prisma/schema.prisma",
-    "commit": "a857345c3d9cf1b5182eccce79564e353d4ea793",
+    "commit": "ce46719e8fc8518bce87852527676abb2746d8b2",
     "license": "MIT",
     "app": "Chibisafe",
     "description": "Chibisafe file uploader: users, files, albums, tags, snippets and short links, on SQLite."
@@ -192,7 +192,7 @@
   "plunk": {
     "repo": "useplunk/plunk",
     "path": "packages/db/prisma/schema.prisma",
-    "commit": "b7eafdef4f7569ad6bbe7617a9a8dee756fba8c4",
+    "commit": "09ef9486fb43c47240e7598a7eb1c287e14617d7",
     "license": "AGPL-3.0",
     "app": "Plunk",
     "description": "Plunk email platform: projects, contacts, templates, campaigns, workflows and emails."
@@ -200,7 +200,7 @@
   "jitsu": {
     "repo": "jitsucom/jitsu",
     "path": "webapps/console/prisma/schema.prisma",
-    "commit": "fb20aa95e172f46b4638a3e543f68dd433a075be",
+    "commit": "6c0d189a55c9e6c7b47d024d046e091ff1636565",
     "license": "MIT",
     "app": "Jitsu",
     "description": "Jitsu event collection: workspaces, connections, sources, destinations and syncs."
@@ -216,7 +216,7 @@
   "litellm": {
     "repo": "BerriAI/litellm",
     "path": "litellm/schema.prisma",
-    "commit": "a7052ea8a80296ca3db064e438904f562f176933",
+    "commit": "2df4f9a78ffd8e4bd523494dc666b62a2b8528cc",
     "license": "MIT",
     "app": "LiteLLM",
     "description": "LiteLLM AI gateway: virtual keys, teams, budgets, spend logs and model deployments."
@@ -232,9 +232,20 @@
   "superproductivity": {
     "repo": "johannesjo/super-productivity",
     "path": "packages/super-sync-server/prisma/schema.prisma",
-    "commit": "124138eedc154814847f6af9e2e2ebd2a8543881",
+    "commit": "d35dfcede4a57c32aad9229fcfb29f3e360d0127",
     "license": "MIT",
     "app": "SuperProductivity",
     "description": "Super Productivity sync server: users, passkeys, sync operations, devices and agent task captures."
+  },
+  "langwatch": {
+    "repo": "langwatch/langwatch",
+    "path": "packages/prisma-client/prisma/schema.prisma",
+    "commit": "ec55340e533f02670594b1dc3a308e629b56d32b",
+    "license": "Apache-2.0",
+    "app": "LangWatch",
+    "description": "LangWatch LLM observability: organizations, projects, traces, prompts, datasets, evaluations and annotations.",
+    "skip": {
+      "eloquent": "a relation field named `config` (LlmPromptConfigVersion.config) collides with the column configData @map(\"config\"), which hekireki-eloquent refuses"
+    }
   }
 }

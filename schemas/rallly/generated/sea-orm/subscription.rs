@@ -31,8 +31,8 @@ pub struct Model {
     pub api_addon_item_id: Option<String>,
     pub api_addon_price_id: Option<String>,
     pub api_addon_amount: Option<i32>,
-    pub api_poll_limit: Option<i32>,
-    pub api_poll_retained_limit: Option<i32>,
+    pub api_addon_tier: Option<String>,
+    pub api_poll_retained_tier: Option<String>,
     pub api_poll_retained_until: Option<DateTime>,
 }
 

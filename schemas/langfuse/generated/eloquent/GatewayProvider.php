@@ -12,4 +12,5 @@ enum GatewayProvider: string
     case VERCEL = 'vercel';
     case AZURE = 'azure';
     case GOOGLE_AI_STUDIO = 'google_ai_studio';
+    case VERTEX = 'vertex';
 }

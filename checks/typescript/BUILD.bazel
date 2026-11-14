@@ -12,6 +12,7 @@ lang_checks(
         "//:node_modules/@types/node",
         "//:node_modules/cuid",
         "//:node_modules/drizzle-orm",
+        "//:node_modules/nanoid",
         "//:node_modules/kysely",
         "//:node_modules/typescript",
         "//:node_modules/uuid",

@@ -30,6 +30,7 @@ object BatchActionTable : IdTable<String>("batch_actions") {
     val processedCount = integer("processed_count").nullable()
     val failedCount = integer("failed_count").nullable()
     val log = text("log").nullable()
+    val cursor = jsonb<String>("cursor", { it }, { it }).nullable()
     override val primaryKey = PrimaryKey(id, name = "batch_actions_pkey")
 
     init {

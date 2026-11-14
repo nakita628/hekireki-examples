@@ -11,4 +11,5 @@ class GatewayApiKeyAssociationEntity(
 
     val apiKey by ApiKeyEntity referencedOn GatewayApiKeyAssociationTable.id
     var metadata by GatewayApiKeyAssociationTable.metadata
+    var allowedModels by GatewayApiKeyAssociationTable.allowedModels
 }

@@ -160,8 +160,8 @@ export const subscriptions = pgTable(
     apiAddonItemId: text('api_addon_item_id'),
     apiAddonPriceId: text('api_addon_price_id'),
     apiAddonAmount: integer('api_addon_amount'),
-    apiPollLimit: integer('api_poll_limit'),
-    apiPollRetainedLimit: integer('api_poll_retained_limit'),
+    apiAddonTier: text('api_addon_tier'),
+    apiPollRetainedTier: text('api_poll_retained_tier'),
     apiPollRetainedUntil: timestamp('api_poll_retained_until', { precision: 3 }),
   },
   (table) => [

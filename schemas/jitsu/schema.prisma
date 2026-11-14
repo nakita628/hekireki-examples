@@ -1,6 +1,6 @@
 // Jitsu: Jitsu event collection: workspaces, connections, sources, destinations and syncs.
 //
-// Imported from https://github.com/jitsucom/jitsu/blob/fb20aa95e172f46b4638a3e543f68dd433a075be/webapps/console/prisma/schema.prisma
+// Imported from https://github.com/jitsucom/jitsu/blob/6c0d189a55c9e6c7b47d024d046e091ff1636565/webapps/console/prisma/schema.prisma
 // (MIT license) by tools/import/import-schema.mjs, which dropped the original
 // generator blocks and the datasource's connection URLs and added the hekireki generators below.
 // The models, enums and `///` comments are the project's own, as they are at that commit.

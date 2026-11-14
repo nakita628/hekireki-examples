@@ -28,8 +28,8 @@ class SubscriptionEntity(
     var apiAddonItemId by SubscriptionTable.apiAddonItemId
     var apiAddonPriceId by SubscriptionTable.apiAddonPriceId
     var apiAddonAmount by SubscriptionTable.apiAddonAmount
-    var apiPollLimit by SubscriptionTable.apiPollLimit
-    var apiPollRetainedLimit by SubscriptionTable.apiPollRetainedLimit
+    var apiAddonTier by SubscriptionTable.apiAddonTier
+    var apiPollRetainedTier by SubscriptionTable.apiPollRetainedTier
     var apiPollRetainedUntil by SubscriptionTable.apiPollRetainedUntil
     var user by UserEntity referencedOn SubscriptionTable.userId
     var space by SpaceEntity referencedOn SubscriptionTable.spaceId

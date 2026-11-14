@@ -22,6 +22,7 @@ pub struct Model {
     pub processed_count: Option<i32>,
     pub failed_count: Option<i32>,
     pub log: Option<String>,
+    pub cursor: Option<Json>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

@@ -1,6 +1,6 @@
 // Calcom: Cal.com scheduling: users, teams, event types, bookings, availability and integrations.
 //
-// Imported from https://github.com/calcom/cal.com/blob/ef7954d16ab50882ca2f263c551537115b8a8bb1/packages/prisma/schema.prisma
+// Imported from https://github.com/calcom/cal.com/blob/ae027bb70e694e2d2c44569f398d6cbcee0389b1/packages/prisma/schema.prisma
 // (MIT license) by tools/import/import-schema.mjs, which dropped the original
 // generator blocks and the datasource's connection URLs and added the hekireki generators below.
 // The models, enums and `///` comments are the project's own, as they are at that commit.

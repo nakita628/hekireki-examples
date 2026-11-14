@@ -570,7 +570,7 @@ export const emailAccount = pgTable(
     filingConfirmationSendEmail: boolean('filingConfirmationSendEmail').notNull().default(true),
     followUpAwaitingReplyDays: doublePrecision('followUpAwaitingReplyDays'),
     followUpNeedsReplyDays: doublePrecision('followUpNeedsReplyDays'),
-    followUpAutoDraftEnabled: boolean('followUpAutoDraftEnabled').notNull().default(true),
+    followUpAutoDraftEnabled: boolean('followUpAutoDraftEnabled').notNull().default(false),
     digestSendEmail: boolean('digestSendEmail').notNull().default(true),
     learnedWritingStyle: text('learnedWritingStyle'),
     userId: text('userId').notNull(),

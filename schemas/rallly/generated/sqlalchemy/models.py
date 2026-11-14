@@ -64,8 +64,8 @@ class Subscription(Base):
     api_addon_item_id: Mapped[Optional[str]]
     api_addon_price_id: Mapped[Optional[str]]
     api_addon_amount: Mapped[Optional[int]]
-    api_poll_limit: Mapped[Optional[int]]
-    api_poll_retained_limit: Mapped[Optional[int]]
+    api_addon_tier: Mapped[Optional[str]]
+    api_poll_retained_tier: Mapped[Optional[str]]
     api_poll_retained_until: Mapped[Optional[datetime]]
 
     __table_args__ = (

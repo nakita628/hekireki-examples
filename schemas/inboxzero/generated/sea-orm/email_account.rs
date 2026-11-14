@@ -125,7 +125,7 @@ pub struct Model {
     pub follow_up_awaiting_reply_days: Option<f64>,
     #[sea_orm(column_name = "followUpNeedsReplyDays")]
     pub follow_up_needs_reply_days: Option<f64>,
-    #[sea_orm(column_name = "followUpAutoDraftEnabled", default_value = true)]
+    #[sea_orm(column_name = "followUpAutoDraftEnabled", default_value = false)]
     pub follow_up_auto_draft_enabled: bool,
     #[sea_orm(column_name = "digestSendEmail", default_value = true)]
     pub digest_send_email: bool,

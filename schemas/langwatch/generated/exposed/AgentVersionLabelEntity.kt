@@ -1,0 +1,32 @@
+package langwatch.models
+
+import org.jetbrains.exposed.v1.core.dao.id.EntityID
+import org.jetbrains.exposed.v1.dao.Entity
+import org.jetbrains.exposed.v1.dao.EntityBatchUpdate
+import org.jetbrains.exposed.v1.dao.EntityClass
+import java.time.Instant
+import java.time.temporal.ChronoUnit
+
+class AgentVersionLabelEntity(
+    id: EntityID<String>,
+) : Entity<String>(id) {
+    companion object : EntityClass<String, AgentVersionLabelEntity>(AgentVersionLabelTable)
+
+    var projectId by AgentVersionLabelTable.projectId
+    var agentId by AgentVersionLabelTable.agentId
+    var label by AgentVersionLabelTable.label
+    var versionId by AgentVersionLabelTable.versionId
+    var createdById by AgentVersionLabelTable.createdById
+    var updatedById by AgentVersionLabelTable.updatedById
+    var createdAt by AgentVersionLabelTable.createdAt
+    var updatedAt by AgentVersionLabelTable.updatedAt
+
+    override fun flush(batch: EntityBatchUpdate?): Boolean {
+        if (writeValues.isNotEmpty()) {
+            if (!isWritten(AgentVersionLabelTable.updatedAt)) {
+                updatedAt = Instant.now().truncatedTo(ChronoUnit.MILLIS)
+            }
+        }
+        return super.flush(batch)
+    }
+}

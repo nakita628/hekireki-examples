@@ -250,7 +250,7 @@ CREATE TABLE "EmailAccount" (
     "filingConfirmationSendEmail" BOOLEAN NOT NULL DEFAULT true,
     "followUpAwaitingReplyDays" DOUBLE PRECISION,
     "followUpNeedsReplyDays" DOUBLE PRECISION,
-    "followUpAutoDraftEnabled" BOOLEAN NOT NULL DEFAULT true,
+    "followUpAutoDraftEnabled" BOOLEAN NOT NULL DEFAULT false,
     "digestSendEmail" BOOLEAN NOT NULL DEFAULT true,
     "learnedWritingStyle" TEXT,
     "userId" TEXT NOT NULL,
@@ -4896,7 +4896,7 @@ RETURNING
 | `filingConfirmationSendEmail`         | `Boolean`                                            | NOT NULL                                       | `true`       |                                                                                                                                             |
 | `followUpAwaitingReplyDays`           | `Float`                                              | NULL                                           |              |                                                                                                                                             |
 | `followUpNeedsReplyDays`              | `Float`                                              | NULL                                           |              |                                                                                                                                             |
-| `followUpAutoDraftEnabled`            | `Boolean`                                            | NOT NULL                                       | `true`       |                                                                                                                                             |
+| `followUpAutoDraftEnabled`            | `Boolean`                                            | NOT NULL                                       | `false`      |                                                                                                                                             |
 | `digestSendEmail`                     | `Boolean`                                            | NOT NULL                                       | `true`       |                                                                                                                                             |
 | `learnedWritingStyle`                 | `String`                                             | NULL                                           |              |                                                                                                                                             |
 | `userId`                              | `String`                                             | NOT NULL → [User.id](#model-User)              |              |                                                                                                                                             |
@@ -5027,7 +5027,7 @@ CREATE TABLE "EmailAccount" (
     "filingConfirmationSendEmail" BOOLEAN NOT NULL DEFAULT true,
     "followUpAwaitingReplyDays" DOUBLE PRECISION,
     "followUpNeedsReplyDays" DOUBLE PRECISION,
-    "followUpAutoDraftEnabled" BOOLEAN NOT NULL DEFAULT true,
+    "followUpAutoDraftEnabled" BOOLEAN NOT NULL DEFAULT false,
     "digestSendEmail" BOOLEAN NOT NULL DEFAULT true,
     "learnedWritingStyle" TEXT,
     "userId" TEXT NOT NULL,
@@ -6555,7 +6555,7 @@ RETURNING
   "public"."EmailAccount"."learnedWritingStyle",
   "public"."EmailAccount"."userId",
   "public"."EmailAccount"."accountId"
--- params: ["<cuid(1)>","example","<now()>","<now()>",false,true,true,[],"WEEKLY","WEEKLY",false,false,false,"ALL_EMAILS","14",false,"0","LIST",false,"PENDING",true,false,"240",true,false,"ALL",true,true,false,true,true,true,"example","example"]
+-- params: ["<cuid(1)>","example","<now()>","<now()>",false,true,true,[],"WEEKLY","WEEKLY",false,false,false,"ALL_EMAILS","14",false,"0","LIST",false,"PENDING",true,false,"240",true,false,"ALL",true,true,false,true,false,true,"example","example"]
 ```
 
 **update**: Update a row

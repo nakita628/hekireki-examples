@@ -86,8 +86,8 @@ export interface Subscription {
   api_addon_item_id: string | null
   api_addon_price_id: string | null
   api_addon_amount: number | null
-  api_poll_limit: number | null
-  api_poll_retained_limit: number | null
+  api_addon_tier: string | null
+  api_poll_retained_tier: string | null
   api_poll_retained_until: Timestamp | null
 }
 

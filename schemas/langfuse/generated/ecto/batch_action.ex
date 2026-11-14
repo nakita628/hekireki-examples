@@ -17,6 +17,7 @@ defmodule Langfuse.BatchAction do
           processed_count: integer() | nil,
           failed_count: integer() | nil,
           log: String.t() | nil,
+          cursor: map() | nil,
           inserted_at: DateTime.t(),
           updated_at: DateTime.t(),
           project: Langfuse.Project.t() | nil
@@ -35,6 +36,7 @@ defmodule Langfuse.BatchAction do
     field(:processed_count, :integer)
     field(:failed_count, :integer)
     field(:log, :string)
+    field(:cursor, :map)
     belongs_to(:project, Langfuse.Project, foreign_key: :project_id, type: :string)
     timestamps(inserted_at_source: :created_at)
   end

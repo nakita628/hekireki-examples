@@ -14,5 +14,6 @@ object GatewayApiKeyAssociationTable : IdTable<String>("gateway_api_key_associat
                 fkName = "gateway_api_key_associations_api_key_id_fkey",
             ).entityId()
     val metadata = jsonb<String>("metadata", { it }, { it }).default("{}")
+    val allowedModels = jsonb<String>("allowed_models", { it }, { it }).nullable()
     override val primaryKey = PrimaryKey(id, name = "gateway_api_key_associations_pkey")
 }
